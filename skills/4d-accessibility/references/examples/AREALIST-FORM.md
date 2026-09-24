@@ -14,7 +14,7 @@ Run the same installer with the grid option:
 python3 install_host_methods.py --project-dir /path/to/MyApplication/Project --area-list
 ```
 
-This installs `AXB_ALPNode`, `AXB_ALPRows`, `AXB_ALPRowsSelect`, and `AXB_ALPSelect` along with the ordinary helpers and their declarations. Keep any `--metrics` and `--compiler-method` options used for your first install. AreaList must be installed in the host. These adapters stay in the host because a compiled component cannot dereference an interpreted host's array pointers.
+This installs `AXB_ALPNode`, `AXB_ALPRows`, `AXB_ALPRowsSelect`, and `AXB_ALPSelect` along with the ordinary helpers and their declarations. Keep the `--compiler-method` option used for your first install. AreaList must be installed in the host. These adapters stay in the host because a compiled component cannot dereference an interpreted host's array pointers.
 
 ## Describe the actual bindings
 
@@ -43,7 +43,9 @@ Every `source` and `keySource` must match the array name returned by `ALP_Column
 
 ## Connect the form
 
-This example supplies `describe`, which replaces automatic control discovery. Its grid-only description leaves the form's other controls out of the bridge tree. Include required buttons and fields with `AXB_Controls` and route their actions in `InvoiceAX_Apply`, as shown below, until grid providers compose with discovery.
+This legacy explicit provider requires a private UI data object for `Form`, as described in the integration skill. An entity or 4D shared object used directly as root data needs bridge ownership work first.
+
+This example supplies `describe`, which replaces automatic control discovery. Its grid-only description leaves the form's other controls out of the bridge tree. Include required buttons and fields with `AXB_Controls` and route their actions in `InvoiceAX_Apply`, as shown below. For new integrations, the full grid adapter already composes with automatic discovery through `options.grids`.
 
 Keep your existing initialization, loading indicator, timer, and grid callbacks. Initialize `Form.gridReady:=False` and `Form.loadedInvoiceID:=""` before loading. Before **every** array rebuild, set `gridReady` to false. After the area and arrays finish loading successfully, set `loadedInvoiceID:=String(Form.invoiceID)`, then `gridReady:=True`. Start once after the first successful load:
 
@@ -53,7 +55,7 @@ $bridge:=AXB_Form("start"; New object(\
  "label"; "Invoice inquiry"; \
  "describe"; Formula(InvoiceAX_Describe); \
  "apply"; Formula(InvoiceAX_Apply($1))))
-If (Not($bridge.ok=True))
+If (Not($bridge.ok=True) & ($bridge.error#"dependencyUnavailable"))
  Form.axbError:=$bridge.error
 End if
 ```

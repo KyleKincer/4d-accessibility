@@ -42,7 +42,7 @@ Case of
    "label"; "Greeting"; \
    "describe"; Formula(GreetingAX_Describe); \
    "apply"; Formula(Greeting_Apply($1))))
-  If (Not($bridge.ok=True))
+  If (Not($bridge.ok=True) & ($bridge.error#"dependencyUnavailable"))
    Form.axbError:=$bridge.error
   End if
  : (Form event code=On Unload)

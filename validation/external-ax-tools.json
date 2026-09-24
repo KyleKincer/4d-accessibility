@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-24",
+  "sourceCommit": "a78a0796ea37570351700a510840dfd9b14a0251",
+  "runtime": "4D 20.8, interpreted native ARM; macOS 26.6.2",
+  "checks": [
+    "Read both 599-row tables through a 150-node bounded sample",
+    "Output mode 0600; no viewport, selection or source-value changes",
+    "Documented full-identifier resolver and AXValue action edit an ordinary field after normal window activation",
+    "Documented AXPress closes the disposable fixture normally"
+  ],
+  "scope": "Synthetic repeated AreaList form; read-only inspector and ordinary action recipe only",
+  "sourcesSHA256": {
+    "inspect_ax.py": "6ab2ac4a622dec67a5d7661b9f25ee1521164249f7cd3d263b6c487a5acb2334",
+    "tests/mac_ax.py": "a5d1c647a701c19aa65ddebd83a4323d129cffe51b07d044cb8e56db12f044e2",
+    "skills/4d-accessibility/references/AX-ACTIONS.md": "38070ba5640258aeb6d0cb4178908a863eb4be124db6a481158d00de220d742b"
+  }
+}

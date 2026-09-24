@@ -1,6 +1,6 @@
 # Exercise an existing window through AX
 
-Run this from the matching checkout or complete kit in an unlocked session. First find the target PID with `pgrep -x 4D`, then use `inspect_ax.py` on its exact window title. Copy the full `AXIdentifier` of the ordinary field or button and of the bridge root beginning `axb.window.` from that report. Use synthetic data in a permitted test window.
+Run this from the matching checkout or complete kit in an unlocked session. First find the target PID with `pgrep -x 4D`, then use `inspect_ax.py` on its exact window title. Copy the full `AXIdentifier` of the ordinary field or button and of the bridge root beginning `axb.window.` from that report. Use synthetic data in a permitted test window. Bring that window to the foreground through the normal application UI before sending input. The read-only inspector does not activate it; native editor actions require the correct active window.
 
 This Python recipe resolves ordinary controls without expanding logical tables. Replace the four example strings/numbers with the observed values. Keep this local test script out of the host project.
 
