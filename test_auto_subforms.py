@@ -252,6 +252,9 @@ def main():
         find("Change record").press()
         wait_for(lambda: (current := field("Nested")) and current.read("AXIdentifier") != old_id,
                  "Root scope did not invalidate descendants")
+        settle()
+        check(group.read("AXHelp") == "Activation dispatched through the control's normal event path",
+              "a normal button that changes record scope acknowledges activation without claiming a business result")
         old_nested.set_text("Previous record")
         time.sleep(.3)
         check(field("Nested").read("AXValue") == "Nested edit", "declarative record scope rejects retained descendant actions")

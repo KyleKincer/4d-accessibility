@@ -26,6 +26,8 @@ Read an ordinary field, edit synthetic text and leave it to trigger native valid
 
 ## Scenario checks
 
+A button activation receipt confirms that the bridge posted the click through the verified control's normal event path. The existing handler may change records, replace a child, open a dialog or close the window. Verify that resulting UI or business state separately. A final receipt releases the bridge for the next request; an AX setter's success return alone does not. After a record change, reacquire the published elements before acting again.
+
 | Scenario | Observable pass criterion |
 | --- | --- |
 | Ordinary edit | A named `AXTextField` or appropriate typed role exposes the expected readable value, enabled state and permitted actions. Edit through the real editor, leave the field, and verify native validation and committed model state. Protected text remains undisclosed. |

@@ -116,6 +116,12 @@ Case of
   End for each
   CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
   POST CLICK($x; $y; Current process)
+  If ($target.role="button")
+   // A button's normal handler may navigate, replace a child or close a form.
+   // Acknowledge posting that activation while its verified route still exists.
+   // This receipt does not confirm the application's business result.
+   return New object("status"; "completed"; "message"; "Activation dispatched through the control's normal event path")
+  End if
  Else
   $result.message:="Operation is unavailable"
   return
