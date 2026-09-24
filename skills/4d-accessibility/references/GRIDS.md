@@ -253,4 +253,3 @@ $bridge:=AXB_Form("stop"; New object)
 If loading finishes asynchronously, retain its captured invoice ID with that load and use it at completion. Do not substitute the currently displayed ID. Add the picture/custom-column descriptions shown above to `$lines.columns`. If selection needs a dependent-UI refresh, set `$lines.onSelection` to the existing shared selection handler before starting.
 
 Fields, buttons and page subforms remain automatically discovered. Save, return and print keep their existing buttons, menus and business handlers. There is no accessibility-specific copy of those operations.
-
