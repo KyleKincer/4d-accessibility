@@ -52,7 +52,7 @@ Use `AXB_Form` in application code. Ordinary forms do not manage snapshots, revi
 
 The installer includes the native list-box helpers by default. Only the AreaList helpers require the extra `--area-list` flag.
 
-Completion: the application compiles and forms open normally with both packages removed. With both installed, `AXB_Form("start"; options)` on a test form returns `ok: true`. Report other errors through your application's diagnostics. Treat `dependencyUnavailable` as the normal optional-package absence result.
+Completion: the application compiles. If packages are optional in this host, verify that forms open normally with both removed. With both installed, `AXB_Form("start"; options)` on a test form returns `ok: true`. Report other errors through your application's diagnostics. Treat `dependencyUnavailable` as the normal optional-package absence result.
 
 ## 2. Connect one form
 
@@ -257,7 +257,9 @@ $options.grids:=New object("Items"; New object(\
 $bridge:=AXB_Form("start"; $options)
 ```
 
-`Items` is the list box's form-object name. `LineID` is a column bound to a Text array containing one unique, nonempty key per source row. It can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`.
+`Items` is the list box's form-object name. `LineID` is a column bound to a Text array containing one unique, nonempty key of at most 256 UTF-16 units per source row. It can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`.
+
+The list box's own variable must be its Boolean selection array, with the same row count as the key array. Native array grids currently accept only Text keys. If the existing identity is Integer or LongInt, extend the canonical native binding adapter and validate sorting, selection, editing and stale references. Avoid a parallel Text array that adds maintenance to every row mutation. This limitation differs from the AreaList adapter, which already accepts integer keys. Preserve the host's existing IDs while that native binding support is added.
 
 If rows load after On Load or the loader calls `IDLE`, add `"ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID))` to the grid options. Initialize `linesReady` to false at the start of On Load, before any code that can run the line loader. In the existing loader, set it false before touching arrays and capture the record ID when loading begins. When the arrays are complete, store that captured ID in `linesLoadedID`, then set `linesReady` true. The ID comparison also closes the interval between switching records and starting the loader. Changing `scope` alone would publish old rows under the new record identity during that interval. While false, the table is disabled and previous cell references stop working. Use a Formula for changing readiness; a literal Boolean stays fixed.
 

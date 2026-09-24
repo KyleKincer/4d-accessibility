@@ -7,6 +7,7 @@ Use a permitted non-production window and its real UI state. Desktop and assisti
 The complete release kit and source checkout provide a read-only inspector for arbitrary host windows:
 
 ```sh
+mkdir -p build
 python3 inspect_ax.py --pid 12345 --window-title "Customer details" --output build/customer-ax.json
 ```
 
