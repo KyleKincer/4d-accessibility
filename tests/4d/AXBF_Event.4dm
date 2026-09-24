@@ -23,4 +23,7 @@ If ((Form event code=On Clicked) & ($name="Save"))
  Form.saved:=Form.saved+1
  OBJECT SET ENTERABLE(*; "Name"; True)
 End if
+If ((Form event code=On Clicked) & ($name="Help"))
+ OBJECT SET TITLE(*; "Empty"; "Helpful details")
+End if
 AXBF_State

@@ -27,7 +27,7 @@ This provider needs no `describe` or `apply` callback. It enumerates visible con
 
 ## Names that discovery cannot infer
 
-Buttons use their displayed titles. Inputs can use a nearby, vertically aligned static label to their left. An object name is a diagnostic fallback, so inspect the resulting names before shipping. Supply an explicit label for an icon button or an input whose visible label is arranged differently:
+Buttons use their displayed titles. An untitled button, checkbox, radio button or popup can use its current 4D help tip. Inputs can use a nearby, vertically aligned static label to their left. Explicit labels take precedence over these defaults. An object name is a diagnostic fallback, so inspect the resulting names before shipping. A help tip can describe a temporary error instead of the action, or be too wordy to make a useful name. Supply a concise explicit label in those cases, for an icon button without a useful tip, or for an input whose visible label is arranged differently:
 
 ```4d
 var $controls; $options; $accessibility : Object
