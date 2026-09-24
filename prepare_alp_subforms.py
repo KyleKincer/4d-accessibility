@@ -11,7 +11,7 @@ import uuid
 from pathlib import Path
 
 from build_component import BUILD, PACKAGE, ROOT, literal, project_at, run_utility, sha, verify_package
-from install_host_methods import instrument, AREA_METHODS
+from install_host_methods import AREA_METHODS
 
 FIXTURE = BUILD / 'alp-subforms'
 TITLE = 'AX bridge AreaList subforms'
@@ -53,10 +53,10 @@ def main():
     shutil.copytree(BUILD / 'AccessibilityBridge.bundle', FIXTURE / 'Plugins/AccessibilityBridge.bundle')
     shutil.copytree(vendor, FIXTURE / 'Plugins/ALP.bundle')
     for path in (ROOT / 'host/OptionalMethods').glob('*.4dm'):
-        (methods / path.name).write_text(path.read_text() if path.stem.startswith('Compiler_') else instrument(path.read_text(), path.stem))
+        (methods / path.name).write_text(path.read_text())
     for name in AREA_METHODS:
         path = ROOT / 'host/Methods' / (name + '.4dm')
-        (methods / path.name).write_text(instrument(path.read_text(), path.stem))
+        (methods / path.name).write_text(path.read_text())
     declarations = (ROOT / 'host/Methods/Compiler_AXB.4dm').read_text().splitlines()
     (methods / 'Compiler_AXBA.4dm').write_text('\n'.join(line for line in declarations if any('('+name+';' in line for name in AREA_METHODS)) + '''
 C_OBJECT(AXBA_Describe; $0)
