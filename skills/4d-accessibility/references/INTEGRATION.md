@@ -78,6 +78,8 @@ $bridge:=AXB_Form("stop"; New object)
 
 Keep existing form and object methods. Enable the form's On Load and On Unload events if necessary. The bridge's scheduler leaves the existing form timer intact. Buttons run their ordinary action; text goes through the real editor, keystroke handlers and validation when editing ends. Protected inputs remain write-only. [The complete example](examples/AUTOMATIC-FORM.md) shows labels, coverage and verification.
 
+The scheduler leaves 100 ms to one second idle after a normal refresh, based on its cost. Pending editor operations use a faster interval. No application polling hook is needed. Treat tree updates as asynchronous: after an action, wait for its receipt and verify the application's result instead of relying on a fixed delay.
+
 An ordinary dialog can pass its existing data to `DIALOG` or use the implicit `Form` object. Use application-specific names such as `InvoiceAX_Start` for your configuration methods. Reserve the `AXB_` method prefix, `AXB_PollGuard` and `AXB_FormRoots` for installed bridge helpers. Session ownership is per window, so named roots may share business data. Automatic children may share data too.
 
 ### Preserve the form data and report failures

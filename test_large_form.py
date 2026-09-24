@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -13,12 +14,14 @@ from prepare_large_form import BUILD, FIXTURE, NOTE, ROOT, TITLE
 
 sys.path.insert(0, str(ROOT / "tests"))
 import mac_ax as ax
-from fixture_desktop import press_key, wait_for_start
+from fixture_desktop import activate_fixture, press_key, wait_for_start
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--compiled", action="store_true", help="Run the compiled ARM desktop fixture")
+    parser.add_argument("--voiceover", action="store_true", help="Read the beginning and end of the complete form before editing")
     args = parser.parse_args()
     if not args.run or not ax.trusted() or not doctor.desktop_session()["unlocked"]:
         parser.error(
@@ -53,6 +56,7 @@ def main():
         "checks": checks,
         "native_sha256": compiled["native_sha256"],
         "component_sha256": compiled["component_sha256"],
+        "compiled": args.compiled,
     }
 
     def check(condition, message):
@@ -90,7 +94,7 @@ def main():
                 str(project),
                 "--dataless",
                 "--opening-mode",
-                "interpreted",
+                "compiled" if args.compiled else "interpreted",
                 "--webadmin-auto-start",
                 "false",
             ],
@@ -106,14 +110,8 @@ def main():
             ready["start"]["ok"],
             "automatic discovery starts around the complete large form",
         )
-        app = ax.application(process.pid)
-        window = ax.wait_for(
-            lambda: next(
-                (w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE),
-                None,
-            ),
-            "Owned large form missing",
-        )
+        check(ready["compiled"] is args.compiled, "large form runs in the requested desktop mode")
+        app, window = activate_fixture(process, project, TITLE)
 
         def find_group():
             pending = [window]
@@ -134,6 +132,45 @@ def main():
         )
         close = controls["Close"]
         note = controls["Large note"]
+        report["initialNote"] = {"focusSettable": note.is_settable("AXFocused"),
+                                 "focused": note.read("AXFocused"), "enabled": note.read("AXEnabled")}
+        if args.voiceover:
+            from voiceover import VoiceOver
+            vo = VoiceOver(process, project, TITLE, BUILD / "large-form-voiceover", BUILD / "read-fixture-screen")
+            report["voiceover"] = vo.steps
+            before = state()
+
+            def read_key(name, **modifiers):
+                caption = vo.key(name, **modifiers)
+                assert "not responding" not in caption.lower(), "VoiceOver reports an unresponsive large form"
+                return caption
+
+            try:
+                vo.start()
+                caption = read_key("home", command=True)
+                for _ in range(4):
+                    if "close button" in caption.lower().replace(",", ""):
+                        break
+                    caption = read_key("home", command=True)
+                check("close button" in caption.lower().replace(",", ""), "VoiceOver begins at the window independently of entry focus")
+                for _ in range(8):
+                    caption = read_key("right")
+                    if "Large form" in caption and "group" in caption.lower():
+                        break
+                check("Large form" in caption and "group" in caption.lower(), "VoiceOver reaches the complete form group")
+                read_key("down", shift=True)
+                first = read_key("home")
+                last = read_key("end")
+                long_note = read_key("left")
+                last_button = read_key("left")
+                check(re.search(r"\b0,?\s+button\b", first, re.I) is not None, "VoiceOver reads the first ordinary button")
+                check("Close" in last and "button" in last.lower(), "VoiceOver reaches the final form control")
+                check("Large note" in long_note, "VoiceOver reads the ordinary field beyond 600 buttons")
+                check(re.search(r"\b599,?\s+button\b", last_button, re.I) is not None, "VoiceOver reads the last of all 600 ordinary buttons")
+                after = state()
+                check(after["pressed"] == before["pressed"] and after["note"] == before["note"], "read-only VoiceOver traversal preserves handlers and form data")
+            finally:
+                vo.stop()
         started = time.perf_counter()
         check(
             note.read("AXValue") == NOTE,
@@ -144,6 +181,11 @@ def main():
             note.read("AXNumberOfCharacters") == len(NOTE),
             "native character count covers the complete note",
         )
+        # Establish an actual entry target before the first button action.
+        # Launch activation can otherwise change focus while it is queued.
+        check(note.set_boolean("AXFocused", True) == 0, "long note accepts initial entry focus")
+        ax.wait_for(lambda: state().get("editor") and note.read("AXFocused") is True,
+                    "Initial long-note focus was not published", timeout=20)
         ticks = state()["ticks"]
         check(
             controls["599"].press() == 0,
@@ -166,7 +208,10 @@ def main():
             "Button action did not settle",
             timeout=15,
         )
-        note.set_boolean("AXFocused", True)
+        report["noteBeforeFocus"] = {"focusSettable": note.is_settable("AXFocused"),
+                                     "focused": note.read("AXFocused"), "enabled": note.read("AXEnabled")}
+        report["focusTransport"] = note.set_boolean("AXFocused", True)
+        check(report["focusTransport"] == 0, "long note accepts the initial AX focus request")
         ax.wait_for(
             lambda: state().get("editor") and note.read("AXFocused") is True,
             "Long note did not receive real focus",
