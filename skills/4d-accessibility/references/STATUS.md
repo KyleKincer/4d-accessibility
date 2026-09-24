@@ -6,7 +6,7 @@ This is a development preview. The goal is complete access to the UI through sta
 
 Synthetic live 4D 20.8 fixtures on Apple Silicon/macOS 26 cover ordinary text, buttons, checkboxes/radios, typed dropdowns, hierarchical popup menus, editable combos, semantic groups, described images, progress, numeric/date/time rulers and steppers, automatic repeated/nested page subforms, generated forms and custom providers. Editable progress uses a shared-controller mapping.
 
-Full logical flat grids support native arrays, collections, entity selections and AreaList Pro. AreaList stable keys may use existing Text, Integer or LongInt arrays, so integer line IDs need no extra column. Tests cover distant rows, stable identity, sorting, selection, native editors, validation, Undo/Redo, stale requests, repeated child grids and native checkbox/popup cells. Coverage and execution modes differ by family. See [validation](VALIDATION.md).
+Full logical flat grids support native arrays, collections, entity selections and AreaList Pro. Native array and AreaList stable keys may use existing Text, Integer or LongInt arrays, so integer line IDs need no extra column. Tests cover distant rows, stable identity, sorting, selection, native editors, validation, Undo/Redo, stale requests, repeated child grids and native checkbox/popup cells. Coverage and execution modes differ by family. See [validation](VALIDATION.md).
 
 ## Work required before full accessibility
 

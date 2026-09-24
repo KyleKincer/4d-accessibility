@@ -13,5 +13,8 @@ If ($cell.item#Null)
  $text:="Ready: "+This.name
 Else
  $row:=$cell.row
+ If (((Value type($cell.key)=Is text)#(Type(aGridKey)=Text array)) | ($cell.key#aGridKey{$row}))
+  return "Incorrect original row identity"
+ End if
  $text:="Ready: "+aGridName{$row}
 End if

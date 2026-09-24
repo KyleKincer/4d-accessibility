@@ -30,6 +30,8 @@ python3 prepare_grid_fixture.py --server /path/to/4D\ Server.app --collection --
 python3 test_grid_controls_fixture.py --run
 ```
 
+For native array identities, prepare with `prepare_grid_fixture.py --key-type integer` or `--key-type longint`, plus `--row-states --described`. Run `test_grid_fixture.py --run` and then `--compiled` to exercise both desktop modes. Keep the required `--server` argument when preparing.
+
 For generated repeated/nested children sharing ordinary data, with parent-owned discovery:
 
 ```sh

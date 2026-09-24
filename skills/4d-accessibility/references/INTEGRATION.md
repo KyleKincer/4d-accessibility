@@ -278,9 +278,9 @@ $options.grids:=New object("Items"; New object(\
 $bridge:=AXB_Form("start"; $options)
 ```
 
-`Items` is the list box's form-object name. `LineID` is a column bound to a Text array containing one unique, nonempty key of at most 256 UTF-16 units per source row. It can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`.
+`Items` is the list box's form-object name. `LineID` is a column bound to the existing Text, Integer or LongInt identity array, with one unique key per source row. Text keys must be nonempty and at most 256 UTF-16 units. Negative integer keys and zero are valid. The column can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`.
 
-The list box's own variable must be its Boolean selection array, with the same row count as the key array. Native array grids currently accept only Text keys. If the existing identity is Integer or LongInt, extend the canonical native binding adapter and validate sorting, selection, editing and stale references. Avoid a parallel Text array that adds maintenance to every row mutation. This limitation differs from the AreaList adapter, which already accepts integer keys. Preserve the host's existing IDs while that native binding support is added.
+The list box's own variable must be its Boolean selection array, with the same row count as the key array. Keep numeric IDs in their original array. The bridge converts them to Text only for accessibility identity; callbacks receive the original numeric key. No parallel identity array is needed. Real-array keys are unsupported.
 
 If rows load after On Load or the loader calls `IDLE`, add `"ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID))` to the grid options. Initialize `linesReady` to false at the start of On Load, before any code that can run the line loader. In the existing loader, set it false before touching arrays and capture the record ID when loading begins. When the arrays are complete, store that captured ID in `linesLoadedID`, then set `linesReady` true. The ID comparison also closes the interval between switching records and starting the loader. Changing `scope` alone would publish old rows under the new record identity during that interval. While false, the table is disabled and previous cell references stop working. Use a Formula for changing readiness; a literal Boolean stays fixed.
 
@@ -351,7 +351,7 @@ The `value` Formula receives one object:
 
 | Field | 4D type and meaning |
 | --- | --- |
-| `key` | Text for arrays. For collections/entities, the original Text or Number key property. Numeric keys are whole numbers within the supported range, not necessarily an `Is integer` value. |
+| `key` | The original Text or Number key from the bound array or row property. Numeric keys are whole numbers within the supported range, not necessarily an `Is integer` value. |
 | `row` | Number, whole and one-based, in the current key array, collection or entity selection. It changes after sorting/filtering and can be passed to an Integer parameter. |
 | `column` | Text. The native column's object name; one formatter can serve several columns. |
 | `item` | The original collection object or `4D.Entity`, by reference. Undefined for arrays, so `$1.item=Null`. It stays in the host. Do not modify, save or reload it. |

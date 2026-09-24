@@ -13,12 +13,13 @@ from prepare_grid_fixture import BUILD, FIXTURE, ROOT, TITLE
 sys.path.insert(0, str(ROOT / "tests"))
 import mac_ax as ax
 import doctor
-from fixture_desktop import press_key, wait_for_start
+from fixture_desktop import activate_fixture, press_key, wait_for_start
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--compiled", action="store_true", help="Run the compiled ARM desktop fixture")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--voiceover", action="store_true", help="Check grid reading, beginning/end navigation, reveal and return to ordinary controls")
     mode.add_argument("--voiceover-probe", action="store_true", help="Record owned VoiceOver navigation instead of the action suite")
@@ -35,6 +36,13 @@ def main():
     assert sha(FIXTURE / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge") == compiled["native_sha256"]
     assert sha(FIXTURE / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ") == compiled["component_sha256"]
     config = json.loads((FIXTURE / "Resources/launch.json").read_text())
+    def source_key(text):
+        key_type = config.get("keyType", "text")
+        if key_type == "text":
+            return text
+        minimum, maximum = (-32768, 32767) if key_type == "integer" else (-2147483648, 2147483647)
+        return {"line-0001": 1, "line-0600": maximum, "café": minimum, "CAFÉ": minimum + 1, "CAFE": 0, "cafe": maximum - 1}[text]
+
     status = FIXTURE / "Resources/runtime-status.json"
     status.unlink(missing_ok=True)
     closed = FIXTURE / "Resources/closed.json"
@@ -42,7 +50,7 @@ def main():
     native_error = FIXTURE / "Resources/native-error.json"
     native_error.unlink(missing_ok=True)
     checks = []
-    report = {"passed": False, "mode": "voiceover-probe" if args.voiceover_probe else "voiceover" if args.voiceover else "cancel" if args.cancel else "actions", "checks": checks, **config, "native_sha256": compiled["native_sha256"], "component_sha256": compiled["component_sha256"]}
+    report = {"passed": False, "mode": "voiceover-probe" if args.voiceover_probe else "voiceover" if args.voiceover else "cancel" if args.cancel else "actions", "checks": checks, "compiled": args.compiled, **config, "native_sha256": compiled["native_sha256"], "component_sha256": compiled["component_sha256"]}
 
     def check(condition, message):
         checks.append({"passed": bool(condition), "name": message})
@@ -68,18 +76,17 @@ def main():
     application_path = Path("/Applications/4D/4D.app/Contents/MacOS/4D")
     project = FIXTURE / "Project/LogicalGridFixture.4DProject"
     command = ["/usr/bin/arch", "-arm64", str(application_path), "--project", str(project),
-               *(["--data", str(FIXTURE / "synthetic.4dd")] if config.get("kind") == "entity" else ["--dataless"]), "--opening-mode", "interpreted", "--webadmin-auto-start", "false"]
+               *(["--data", str(FIXTURE / "synthetic.4dd")] if config.get("kind") == "entity" else ["--dataless"]), "--opening-mode", "compiled" if args.compiled else "interpreted", "--webadmin-auto-start", "false"]
     with (BUILD / "logical-grid-desktop.log").open("w") as log:
         process = subprocess.Popen(command, stdout=log, stderr=log)
     close = None
     try:
         ready, report["application_mode_notice_acknowledged"] = wait_for_start(
             process, project, lambda: state() if state().get("runId") == config["runId"] else None, BUILD)
-        check(ready.get("start", {}).get("ok") is True and ready["compiled"] is False, "automatic form starts in the actual interpreted desktop")
+        check(ready.get("start", {}).get("ok") is True and ready["compiled"] is args.compiled, "automatic form starts in the requested desktop mode")
         report["architecture"] = ax.process_architecture(process.pid)
         check(report["architecture"].replace("-", "").startswith("ARM64"), "actual native ARM execution")
-        app = ax.application(process.pid)
-        window = ax.wait_for(lambda: next((w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE), None), "Exact fixture window not found")
+        app, window = activate_fixture(process, project, TITLE)
         pending = [window]
         group = None
         while pending:
@@ -116,8 +123,22 @@ def main():
                     return item
             return None
 
+        def current_cell_attribute(column, row, attribute):
+            current = find("Invoice lines")
+            if current is None:
+                return None
+            try:
+                return current.cell(column, row).read(attribute)
+            except RuntimeError as error:
+                # A renderer change stops and restarts the bridge. A table
+                # can retire between the lookup and the indexed AX read.
+                if str(error).endswith(", -25202"):  # kAXErrorInvalidUIElement
+                    return None
+                raise
+
         table = ax.wait_for(lambda: find("Invoice lines"), "Logical grid not published")
         close = find("Close")
+        ax.wait_for(lambda: state().get("windowActive") and state().get("focused"), "Initial active focus was not published")
         def settle():
             ax.wait_for(lambda: state() and group.read("AXHelp") not in (None, "Action queued", "Waiting for the application to complete the action"), "Action did not receive provider completion", timeout=30)
         if args.voiceover_probe or args.voiceover:
@@ -152,7 +173,7 @@ def main():
                         check("Ready: Line item 0600" in readiness and state()["descriptionCalls"] > 0, "VoiceOver reads the custom offscreen description in its owning form context")
                         check("PRIVATE" not in protected and state()["protectedCalls"] == 0, "VoiceOver does not expose or compute protected descriptions")
                     vo.key("space")
-                    ax.wait_for(lambda: state()["selected"] == ["line-0600"], "VoiceOver activation did not select the revealed row", timeout=15)
+                    ax.wait_for(lambda: state()["selected"] == [source_key("line-0600")], "VoiceOver activation did not select the revealed row", timeout=15)
                     check(True, "VoiceOver activation selects the revealed row through the existing handler")
                     first = vo.key("home")
                     ax.wait_for(lambda: any(row.read("AXIndex") == 0 for row in table.read("AXVisibleRows") or []), "VoiceOver Home did not reveal the first row", timeout=15)
@@ -201,14 +222,14 @@ def main():
             old_description = described
             old_id = described.read("AXIdentifier")
             check(find("Descriptions").press() == 0, "replace the application description with an invalid result")
-            ax.wait_for(lambda: (current := find("Invoice lines")) is not None and current.cell(2, 598).read("AXIdentifier") != old_id, "Changed renderer did not retire prior cells")
+            ax.wait_for(lambda: (identity := current_cell_attribute(2, 598, "AXIdentifier")) is not None and identity != old_id, "Changed renderer did not retire prior cells")
             table = find("Invoice lines")
             described = table.cell(2, 598)
             ax.wait_for(lambda: described.read("AXValue") == "Cell description required", "Invalid description was serialized or ignored")
             ax.wait_for(lambda: any(issue["reason"] == "gridValueDescriptionRequired" for issue in state()["diagnostics"]["issues"]), "Description failure is missing from coverage")
             check(old_description.read("AXSize") in (None, (0.0, 0.0)), "replaced description retires retained cell references")
             check(find("Descriptions").press() == 0, "restore the existing application renderer")
-            ax.wait_for(lambda: (current := find("Invoice lines")) is not None and current.cell(2, 598).read("AXValue") == "Ready: Line item 0600", "Corrected renderer did not recover")
+            ax.wait_for(lambda: current_cell_attribute(2, 598, "AXValue") == "Ready: Line item 0600", "Corrected renderer did not recover")
             ax.wait_for(lambda: not state()["diagnostics"]["issues"], "Corrected renderer kept obsolete diagnostics")
             table = find("Invoice lines")
             described = table.cell(2, 598)
@@ -244,7 +265,7 @@ def main():
             check(not blocked.is_settable("AXValue") and not conditional.is_settable("AXValue"), "disabled and nonselectable rows initially reject text editing")
             check(conditional.read("AXEnabled") is True and "AXPress" not in conditional_row.actions() and "AXPress" not in conditional.actions(), "nonselectable rows and cells stay readable without advertising unavailable actions")
             check(table.slice("AXRows", 1, 1)[0].press() == 0, "disabled row accepts selection independently of its cell editing restriction")
-            ax.wait_for(lambda: state()["selected"] == ["café"] and group.read("AXHelp") == "List box selection confirmed", "Disabled row selection did not match native 4D")
+            ax.wait_for(lambda: state()["selected"] == [source_key("café")] and group.read("AXHelp") == "List box selection confirmed", "Disabled row selection did not match native 4D")
             check(not blocked.is_settable("AXValue"), "selecting a disabled row does not enable its cell editor")
             table.set_elements("AXSelectedRows", [])
             ax.wait_for(lambda: state()["selected"] == [] and group.read("AXHelp") == "List box selection confirmed", "Disabled row selection did not clear")
@@ -258,7 +279,7 @@ def main():
             check(conditional.set_text("Unselected 🎸") == 0, "nonselectable row accepts its existing single-click editor")
             ax.wait_for(lambda: state().get("edited") == "Unselected 🎸", "Single-click row editor did not receive supplementary Unicode", timeout=20)
             settle()
-            check("CAFÉ" not in state()["selected"], "editing the nonselectable row does not highlight it")
+            check(source_key("CAFÉ") not in state()["selected"], "editing the nonselectable row does not highlight it")
             find("Note", "AXTextField").set_boolean("AXFocused", True)
             ax.wait_for(lambda: state().get("focus") == "Note", "Single-click row edit did not commit normally")
             settle()
@@ -289,15 +310,15 @@ def main():
             check(far.read("AXIdentifier") == far_identity, "row-state changes preserve record identity")
             settle()
             far_row.press()
-            ax.wait_for(lambda: state()["selected"] == ["line-0600"] and group.read("AXHelp") == "List box selection confirmed", "Initial retained selection did not settle")
+            ax.wait_for(lambda: state()["selected"] == [source_key("line-0600")] and group.read("AXHelp") == "List box selection confirmed", "Initial retained selection did not settle")
             find("Restrict selection").press()
             ax.wait_for(lambda: state().get("unselectFar") is True and "AXPress" not in far_row.actions(), "Selected row did not become unselectable")
             settle()
             first_row = table.slice("AXRows", 0, 1)[0]
             check(first_row.set_boolean("AXSelected", True) == 0, "multi-selection can add a row while retaining a restricted selected row")
-            ax.wait_for(lambda: set(state()["selected"]) == {"line-0001", "line-0600"} and group.read("AXHelp") == "List box selection confirmed", "Adding another row lost or rejected the restricted selection")
+            ax.wait_for(lambda: set(state()["selected"]) == {source_key("line-0001"), source_key("line-0600")} and group.read("AXHelp") == "List box selection confirmed", "Adding another row lost or rejected the restricted selection")
             check(first_row.set_boolean("AXSelected", False) == 0, "multi-selection can remove another row while retaining the restricted row")
-            ax.wait_for(lambda: state()["selected"] == ["line-0600"] and group.read("AXHelp") == "List box selection confirmed", "Removing another row changed the restricted selection")
+            ax.wait_for(lambda: state()["selected"] == [source_key("line-0600")] and group.read("AXHelp") == "List box selection confirmed", "Removing another row changed the restricted selection")
             report["restricted_deselection_probe"] = {"before": state(), "nativeSelected": [r.read("AXIdentifier") for r in table.read("AXSelectedRows") or []], "rowSelected": far_row.read("AXSelected"), "rowEnabled": far_row.read("AXEnabled"), "settable": far_row.is_settable("AXSelected"), "rowIdentifier": far_row.read("AXIdentifier"), "beforeHelp": group.read("AXHelp")}
             check(far_row.set_boolean("AXSelected", False) == 0, "a previously selected restricted row can be deselected")
             report["restricted_deselection_probe"]["immediateHelp"] = group.read("AXHelp")
@@ -357,10 +378,10 @@ def main():
 
         selection_hooks = state()["hooks"]
         check(far_row.press() == 0, "select the final row directly from the first viewport")
-        ax.wait_for(lambda: state()["selected"] == ["line-0600"], "Direct final-row selection did not update the real binding")
+        ax.wait_for(lambda: state()["selected"] == [source_key("line-0600")], "Direct final-row selection did not update the real binding")
         ax.wait_for(lambda: any(row.read("AXIdentifier") == far_row.read("AXIdentifier") for row in table.read("AXVisibleRows") or []), "Selection must reveal the final row after the selected-items binding settles", timeout=10)
         ax.wait_for(lambda: group.read("AXHelp") == "List box selection confirmed", "Direct selection lacked confirmed completion")
-        check(state()["hookSelection"] == ["line-0600"] and state()["hooks"] == selection_hooks + 1, "the shared selection handler reads the settled binding exactly once")
+        check(state()["hookSelection"] == [source_key("line-0600")] and state()["hooks"] == selection_hooks + 1, "the shared selection handler reads the settled binding exactly once")
         check(True, "selection confirmation waits for the binding and visible row")
         check(table.set_elements("AXSelectedRows", []) == 0, "clear the selected rows through the existing list box")
         ax.wait_for(lambda: state()["selected"] == [], "Selection did not clear")
@@ -422,26 +443,27 @@ def main():
         ax.wait_for(lambda: state().get("focus") == "Note", "Ordinary focus did not leave rejected grid edit", timeout=15)
         settle()
         check(far_row.press() == 0, "offscreen selection is accepted through standard AXPress")
-        ax.wait_for(lambda: state().get("selected") == ["line-0600"], "Real listbox selection did not change", timeout=15)
+        ax.wait_for(lambda: state().get("selected") == [source_key("line-0600")], "Real listbox selection did not change", timeout=15)
         settle()
         check(state()["hooks"] > 0, "existing shared selection handler runs")
         check(len(table.read("AXSelectedRows")) == 1, "native selection readback matches 4D")
-        for index, key in [(3, "CAFE"), (4, "cafe")]:
+        for index, text_key in [(3, "CAFE"), (4, "cafe")]:
+            key = source_key(text_key)
             cell = table.cell(0, index)
-            ax.wait_for(lambda: cell.read("AXValue") != "Loading", "Case-distinct cell did not load", timeout=15)
-            check(cell.read("AXEnabled") is True, "enabled key " + key + " does not inherit the accented disabled key's state")
+            ax.wait_for(lambda: cell.read("AXValue") != "Loading", "Distinct-key cell did not load", timeout=15)
+            check(cell.read("AXEnabled") is True, "enabled key " + str(key) + " keeps its own row state")
             row = table.slice("AXRows", index, 1)[0]
-            check(row.press() == 0, "case-distinct row " + key + " accepts selection")
-            ax.wait_for(lambda: state()["selected"] == [key], "Case-distinct selection reached another row", timeout=15)
+            check(row.press() == 0, "distinct row " + str(key) + " accepts selection")
+            ax.wait_for(lambda: state()["selected"] == [key], "Distinct-key selection reached another row", timeout=15)
             settle()
-            check(True, "host selection confirms the exact key " + key)
+            check(True, "host selection confirms the exact key " + str(key))
         check(find("Sort").press() == 0, "ordinary sort button invokes its existing handler")
-        ax.wait_for(lambda: state().get("first") == "line-0600", "Existing sort handler did not run", timeout=15)
+        ax.wait_for(lambda: state().get("first") == source_key("line-0600"), "Existing sort handler did not run", timeout=15)
         settle()
         ax.wait_for(lambda: far.read("AXRowIndexRange") == (0, 1), "Far cell identity did not survive real sort", timeout=15)
         check(True, "real 4D sorting preserves the same keyed cell at its new position")
         if config.get("rowStates") and config.get("kind") in ("collection", "entity") and not config.get("storedMeta"):
-            expected_meta_key = 600 if config.get("kind") == "entity" else "line-0600"
+            expected_meta_key = 600 if config.get("kind") == "entity" else source_key("line-0600")
             ax.wait_for(lambda: state().get("metaFirst", {}).get("key") == expected_meta_key, "Metadata request did not follow the sorted source position")
             check(state().get("metaArgumentsOK") is True and state()["metaFirst"]["row"] == 1, "metadata preserves the original Text or numeric key and receiver after sorting")
         if described is not None:
