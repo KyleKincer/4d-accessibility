@@ -16,7 +16,7 @@ From a release package, copy `Plugins/AccessibilityBridge.bundle` and `Component
 python3 install_host_methods.py --project-dir /path/to/MyApp/Project
 ```
 
-Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Until releases are available, [build both packages from source](CONTRIBUTING.md).
+Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download an available [release candidate](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Candidates are ad hoc signed and not notarized; their notes define the tested scope.
 
 At the end of an ordinary form's successful On Load initialization:
 

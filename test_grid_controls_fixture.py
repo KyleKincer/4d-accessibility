@@ -18,6 +18,7 @@ from fixture_desktop import wait_for_start
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--compiled", action="store_true")
     parser.add_argument("--voiceover", action="store_true")
     args = parser.parse_args()
     if not args.run or not ax.trusted() or not doctor.desktop_session()["unlocked"]:
@@ -38,8 +39,8 @@ def main():
     for path in [status, native_error, FIXTURE / "Resources/closed.json", FIXTURE / "Resources/widget-command.json"]:
         path.unlink(missing_ok=True)
     checks = []
-    report = {"passed": False, "mode": "voiceover" if args.voiceover else "actions", **config, "checks": checks, "actions": [],
-              "native_sha256": compiled["native_sha256"], "component_sha256": compiled["component_sha256"]}
+    report = {"passed": False, "mode": "voiceover" if args.voiceover else "actions", "compiled": args.compiled, **config, "checks": checks, "actions": [],
+              "native_sha256": compiled["native_sha256"], "component_sha256": compiled["component_sha256"], "test_sha256": sha(Path(__file__).resolve())}
     last_state = {}
 
     def state():
@@ -61,7 +62,7 @@ def main():
     project = FIXTURE / "Project/LogicalGridFixture.4DProject"
     command = ["/usr/bin/arch", "-arm64", "/Applications/4D/4D.app/Contents/MacOS/4D", "--project", str(project),
                *(["--data", str(FIXTURE / "synthetic.4dd")] if config["kind"] == "entity" else ["--dataless"]),
-               "--opening-mode", "interpreted", "--webadmin-auto-start", "false"]
+               "--opening-mode", "compiled" if args.compiled else "interpreted", "--webadmin-auto-start", "false"]
     with (BUILD / "grid-controls-desktop.log").open("w") as log:
         process = subprocess.Popen(command, stdout=log, stderr=log)
     close = None
@@ -69,7 +70,7 @@ def main():
     try:
         ready, report["application_mode_notice_acknowledged"] = wait_for_start(
             process, project, lambda: state() if state().get("runId") == config["runId"] else None, BUILD)
-        check(ready.get("start", {}).get("ok") is True and not ready["compiled"], "actual interpreted 4D starts the prepared widget fixture")
+        check(ready.get("start", {}).get("ok") is True and ready["compiled"] is args.compiled, "actual " + ("compiled" if args.compiled else "interpreted") + " 4D starts the prepared widget fixture")
         app = ax.application(process.pid)
         report["architecture"] = ax.process_architecture(process.pid)
         window = ax.wait_for(lambda: next((w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE), None), "No owned fixture window")
@@ -195,6 +196,14 @@ def main():
                 check("Mixed" in after_menu and "checkbox" in after_menu.lower().replace(" ", ""), "VoiceOver stays in the grid after choosing a popup item")
                 end = vo.key("end")
                 check("row599of599" in end.replace(" ", ""), "VoiceOver reaches the final logical row across widget columns")
+                check(content(4, 598, "AXCheckBox").read("AXValue") == 0, "the final logical checkbox exposes its loaded state")
+                report["delayed_value_captions"] = []
+                def loaded_speech():
+                    caption = vo.read_caption()
+                    report["delayed_value_captions"].append(caption)
+                    assert "not responding" not in caption.lower(), caption
+                    return "Mixed" in caption and "unchecked" in caption.lower() and "checkbox" in caption.replace(" ", "").lower()
+                check(bool(ax.wait_for(loaded_speech, "VoiceOver did not speak the arriving final-cell value", timeout=20)), "VoiceOver reads the loaded distant checkbox without another navigation command")
                 vo.key("home")
                 for _ in range(3):
                     popup_again = vo.key("right")
@@ -297,7 +306,16 @@ def main():
             sequence += 1
             (FIXTURE / "Resources/widget-command.json").write_text(json.dumps({"action": "configure", "sequence": sequence, **flags}))
             ax.wait_for(lambda: state()["widgets"]["sequence"] == sequence, "Application validation configuration was not consumed")
+            acknowledged_at = time.monotonic()
             time.sleep(.2)
+            # The fixture command restores enterability before the bridge's
+            # next page refresh. Wait for that capability before one press;
+            # AXPress can report transport success for a disabled control.
+            def enabled():
+                node = content(2, 0, "AXCheckBox")
+                return node.read("AXEnabled") is True and "AXPress" in node.actions()
+            ax.wait_for(enabled, "Re-enabled checkbox did not publish its press action", timeout=20)
+            report.setdefault("configurationReady", []).append({"sequence": sequence, "afterAcknowledgedSeconds": round(time.monotonic() - acknowledged_at, 3)})
 
         if config["kind"] == "array":
             for alignment, padding, column_padding in [(2, 12, -255), (3, 12, 18), (4, 12, 0)]:

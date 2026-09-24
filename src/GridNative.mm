@@ -79,6 +79,7 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @property(nonatomic, weak) AXBGridRow *row;
 @property(nonatomic, copy) NSString *columnKey;
 @property(nonatomic, strong) NSDictionary *lastValue;
+@property(nonatomic) BOOL waitingForValue;
 @property(nonatomic, strong) id<AXBGridContentElement> content;
 @property(nonatomic, copy) NSString *contentRole;
 - (NSDictionary *)value;
@@ -150,7 +151,9 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 - (NSDictionary *)value { return self.isAccessibilityElement ? [self.table.grid cellForRow:self.row.key column:self.columnKey now:NSProcessInfo.processInfo.systemUptime] : nil; }
 - (id)accessibilityValue {
     NSDictionary *focus = self.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
-    return focus[@"value"] ?: self.value[@"value"] ?: (self.isAccessibilityElement ? @"Loading" : nil);
+    id value = focus[@"value"] ?: self.value[@"value"];
+    if (!value && self.isAccessibilityElement) { self.waitingForValue = YES; return @"Loading"; }
+    return value;
 }
 - (NSString *)accessibilityHelp { return self.value ? nil : @"Loading cell value"; }
 - (BOOL)isAccessibilityEnabled { return [super isAccessibilityEnabled] && self.row.isAccessibilityEnabled && ![self.table.grid.descriptor[@"disabled"] containsObject:self.row.key] && [self.table column:self.columnKey].isAccessibilityEnabled && (!self.value || [self.value[@"enabled"] boolValue]); }
@@ -688,14 +691,21 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
                 [row.cells[key] invalidate]; [row.cells removeObjectForKey:key];
             }
     }
+    NSMutableArray<AXBGridCell *> *loaded = [NSMutableArray new];
     NSDictionary *cache = grid.cacheSnapshot;
     if (self.lastCacheSerial != [cache[@"serial"] unsignedIntegerValue]) {
         for (NSDictionary *page in cache[@"pages"]) for (NSDictionary *row in page[@"rows"]) for (NSDictionary *value in row[@"cells"]) {
             AXBGridCell *cell = self.rowRegistry[row[@"id"]].cells[value[@"column"]];
-            if (cell && ![cell.lastValue isEqual:value]) {
+            // Loading -> value also changes the exposed value when a retained
+            // cell reloads an identical page after sorting or cache eviction.
+            if (cell && (cell.waitingForValue || ![cell.lastValue isEqual:value])) {
                 cell.lastValue = value; NSAccessibilityPostNotification(cell, NSAccessibilityValueChangedNotification);
                 if (cell.content) (void)cell.accessibilityChildren;
                 if (cell.content) NSAccessibilityPostNotification(cell.content, NSAccessibilityValueChangedNotification);
+                if (cell.waitingForValue) {
+                    cell.waitingForValue = NO;
+                    if (cell.isAccessibilityElement) [loaded addObject:cell];
+                }
             }
         }
         self.lastCacheSerial = [cache[@"serial"] unsignedIntegerValue];
@@ -733,6 +743,13 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
     }
     if (self.lastDescriptor && [self.lastDescriptor[@"rows"] count] != [descriptor[@"rows"] count]) NSAccessibilityPostNotification(self, NSAccessibilityRowCountChangedNotification);
     if (self.lastDescriptor && (orderChanged || ![self.lastDescriptor[@"visible"] isEqual:descriptor[@"visible"]])) NSAccessibilityPostNotification(self, NSAccessibilityLayoutChangedNotification);
+    // ValueChanged alone leaves a stationary VoiceOver cursor saying Loading.
+    // A table layout notification identifies the newly readable content. Send
+    // each cell separately: a batch speaks only "N updated items". The client
+    // decides whether its current reading position needs attention; AX reads
+    // from other clients never become focus or explicit speech requests.
+    for (AXBGridCell *cell in loaded)
+        NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[cell]});
     self.lastDescriptor = descriptor;
 }
 - (void)invalidate {

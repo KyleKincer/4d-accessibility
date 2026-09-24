@@ -23,12 +23,22 @@ python3 ci/check_repository.py
 
 `test_native.py` compiles the AppKit provider tests. Add `--run` only in an unlocked graphical session. Live fixture scripts also require 4D desktop and appropriate Accessibility permission. Screen recording is needed for visual/VoiceOver probes.
 
+For delayed grid values, without a 4D installation:
+
+```sh
+python3 test_grid_value_speech.py --run
+```
+
+This builds the production native provider in an owned synthetic window and starts its own VoiceOver session. Eight cases verify speech when a cold cell loads, navigation between pending cells, leaving the grid, unrelated AX inspection, reloading the same value and delayed checkbox/popup roles. Each case observes speech without moving the reading cursor, then checks its position. Existing user VoiceOver sessions are left alone. Reports and synthetic caption images stay under ignored `build/grid-value-speech/`. Use `--case single` for the shortest reproduction or omit `--run` to compile only. `test_native_grids.py --run --voiceover` separately tests all 50,000 logical rows and 24 columns.
+
 For example, after building the two packages:
 
 ```sh
-python3 prepare_grid_fixture.py --server /path/to/4D\ Server.app --collection --cell-controls
-python3 test_grid_controls_fixture.py --run
+python3 prepare_grid_fixture.py --server /path/to/4D\ Server.app --collection --row-states --cell-controls
+python3 test_grid_controls_fixture.py --run --compiled --voiceover
 ```
+
+Omit `--compiled` for interpreted execution or `--voiceover` for the external AX action suite alone. Add `--subform --repeated` when preparing to test independent copies of the widget grid in child forms.
 
 For native array identities, prepare with `prepare_grid_fixture.py --key-type integer` or `--key-type longint`, plus `--row-states --described`. Run `test_grid_fixture.py --run` and then `--compiled` to exercise both desktop modes. Keep the required `--server` argument when preparing.
 
@@ -65,3 +75,7 @@ For AreaList checkboxes, add `--controls` when preparing the AreaList fixture, t
 The full integration reference and examples live under `skills/4d-accessibility/references` so the agent skill can be installed as a self-contained folder. Update that source once. Build checks validate local links and the skill's required files.
 
 When changing a control, test observable behavior against its ordinary native UI: ownership, focus, state, editor/handler callbacks and stale elements. Keep the [status](skills/4d-accessibility/references/STATUS.md) precise about failures and untested modes.
+
+## Application instrumentation
+
+An application-specific installer can import `install_host_methods.main` and pass a trusted `transform(body, method_name)` callback. This lets a host apply its existing instrumentation while sharing upstream overwrite, hash and compiler-declaration checks. The ordinary CLI installs source unchanged. Transformations finish before any destination is written; an exception leaves the installation untouched. Keep application-specific wrappers in the host repository.

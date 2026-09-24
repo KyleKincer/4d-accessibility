@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from install_host_methods import BEGIN, END, ROOT
+from install_host_methods import BEGIN, END, ROOT, main
 
 
 class InstallTests(unittest.TestCase):
@@ -57,6 +57,20 @@ class InstallTests(unittest.TestCase):
         (self.methods / "AXB_View.4dm").write_text("// Application-owned method\n")
         before = self.snapshot()
         self.run_installer(success=False)
+        self.assertEqual(before, self.snapshot())
+
+    def test_instrumentation_failure_blocks_every_write(self):
+        self.run_installer()
+        before = self.snapshot()
+        visited = []
+        def instrument(body, name):
+            visited.append(name)
+            if len(visited) == 3:
+                raise ValueError("Application instrumentation failed")
+            return body + "// instrumentation\n"
+        with self.assertRaisesRegex(ValueError, "instrumentation failed"):
+            main(["--project-dir", str(self.project), "--compiler-method", "Compiler_Application"],
+                 transform=instrument)
         self.assertEqual(before, self.snapshot())
 
     def test_removing_area_list_option_cannot_leave_untyped_helpers(self):

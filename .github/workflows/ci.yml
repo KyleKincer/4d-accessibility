@@ -4,6 +4,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      preview_tag:
+        description: 'Optional candidate tag, vVERSION-rc.N; prepares a draft prerelease after these checks'
+        required: false
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -32,6 +37,7 @@ jobs:
         run: |
           python3 build.py
           python3 test_native.py
+          python3 test_grid_value_speech.py
       - name: Build compiled component with pinned tool4d
         run: |
           python3 ci/download_tool4d.py
@@ -46,3 +52,30 @@ jobs:
           path: dist/*
           if-no-files-found: error
           retention-days: 14
+  preview:
+    if: github.event_name == 'workflow_dispatch' && inputs.preview_tag != '' && github.ref == 'refs/heads/main'
+    needs: macos
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Prepare tested development kit as a draft prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PREVIEW_TAG: ${{ inputs.preview_tag }}
+        run: |
+          python3 - <<'PY'
+          import os, pathlib, re, subprocess
+          version = pathlib.Path('VERSION').read_text().strip()
+          tag = os.environ['PREVIEW_TAG']
+          assert re.fullmatch(r'v' + re.escape(version) + r'-rc\.[1-9][0-9]*', tag), 'Use vVERSION-rc.N'
+          subprocess.run(['gh', 'run', 'download', os.environ['GITHUB_RUN_ID'], '--name', 'development-macos', '--dir', 'dist'], check=True)
+          subprocess.run(['sha256sum', '--check', 'SHA256SUMS'], cwd='dist', check=True)
+          subprocess.run(['gh', 'release', 'create', tag, '--target', os.environ['GITHUB_SHA'],
+                          '--draft', '--prerelease', '--latest=false', '--title', tag, '--notes-file', 'RELEASE-NOTES.md',
+                          *[str(p) for p in sorted(pathlib.Path('dist').iterdir()) if p.is_file()]], check=True)
+          PY

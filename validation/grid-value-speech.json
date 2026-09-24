@@ -1,0 +1,1853 @@
+{
+  "version": "0.19.4",
+  "scope": "Production native provider with synthetic AppKit and compiled 4D 20.8 hosts, actual VoiceOver captions on macOS 26.6.2/Apple Silicon",
+  "passed": true,
+  "originalProvider": {
+    "scope": "Synthetic native host using production grid/session/provider sources and actual VoiceOver captions; no 4D host",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "passed": false,
+    "cases": [
+      {
+        "case": "single",
+        "passed": false,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.738,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.481,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 4.267,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 6.078,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 7.93,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.729,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.494,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.331,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "error": "VoiceOver speaks the arriving value without cursor movement",
+        "exitCode": 0
+      }
+    ],
+    "sources_sha256": {
+      "src/Session.mm": "8a4710042a3671837b2e7e34dce4654fe0c59264ea553335fe1670586b79a0ca",
+      "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+      "src/Grid.mm": "853fc6a8f16d513b661f6488c822dbc3cdd5b6fe4e02aee38a5bca1f57f88a90",
+      "src/Grid.h": "77215c0bcbd54a0b745d228e196cc2de74499e3a039b8baf3a354d4f3e450cff",
+      "src/Bridge.mm": "3fe6c2e7b83a482bfd428498822404fc6b1b64c50b2a2765f993f4b72f2fc1ea",
+      "src/Bridge.h": "797289bee0c5d1e2c90655be3f04f14479c63549c7a184c222f06454557aa577",
+      "src/BridgePrivate.h": "98c44cb12a69b5045be23baccfd23fe44af42d7228ce0c69285e74f97f21fbca",
+      "src/GridNative.mm": "5120c33dccd020d485c056f48de0524a898894229ba2c8f2b027ff5a6b4b2db1",
+      "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+      "tests/NativeGridFixture.mm": "a1ffabd505bc6406cf96ad18276cff413280decd063a0309243ee62c86ab6282",
+      "tests/mac_ax.py": "a5d1c647a701c19aa65ddebd83a4323d129cffe51b07d044cb8e56db12f044e2",
+      "tests/voiceover.py": "8637a8c2a47ac6368be87a3d0a90beaf394d51bb61495b94a38fc15baa55dc1b",
+      "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62",
+      "test_grid_value_speech.py": "3da21a434008152525abc540e51feda6282d1282e7f6f30e5753513fc20db17b"
+    },
+    "binary_sha256": "b6625c80a952e3b71778bc7e74e8de4eb675dedfdb82e0a7f064620d7618c3e4"
+  },
+  "speech": {
+    "scope": "Synthetic native host using production grid/session/provider sources and actual VoiceOver captions; no 4D host",
+    "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "passed": true,
+    "cases": [
+      {
+        "case": "single",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.76,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.486,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.212,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 5.939,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.806,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.609,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.407,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.212,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "forward",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 3 row-00000 / column-2 / value-0"
+          }
+        ],
+        "observations": [
+          {
+            "column": 1,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.807,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.582,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.362,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.103,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.831,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.547,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.304,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.047,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "back",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "VoiceOver returns to the first cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.795,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.524,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.262,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.05,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 7.978,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.771,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.551,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.415,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "leave",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "VoiceOver leaves both cold cells for native window controls",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "pending grid values do not interrupt reading outside the grid",
+          "VoiceOver remains at the window close button",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          }
+        ],
+        "observations": [
+          {
+            "column": 1,
+            "leftGrid": true,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.824,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 2.585,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 4.355,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 6.148,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 7.915,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 9.67,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 11.444,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 13.18,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "inspection",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "an unrelated AX client inspects another cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.802,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.582,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.307,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.032,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.817,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.608,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.397,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.19,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "reload",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "cache invalidation preserves cell identity",
+          "VoiceOver revisits the retained cell while its identical value reloads",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.828,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.596,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.316,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.138,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.949,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.739,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.594,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.387,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          },
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.828,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.59,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.389,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.196,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.994,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.794,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.563,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.326,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "checkbox",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.796,
+                "caption": "\u00d7 Approved dimmed checked checkbox, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.557,
+                "caption": "\u00d7 Approved dimmed checked checkbox, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.356,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 6.135,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 7.988,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 9.758,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 11.522,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 13.43,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "popup",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.753,
+                "caption": "\u00d7 Allowed Decision dimmed pop up button, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.53,
+                "caption": "\u00d7 Allowed Decision dimmed pop up button, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.332,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 6.129,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 7.916,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 9.682,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 11.449,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 13.25,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      }
+    ],
+    "sources_sha256": {
+      "src/Session.mm": "8a4710042a3671837b2e7e34dce4654fe0c59264ea553335fe1670586b79a0ca",
+      "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+      "src/Grid.mm": "853fc6a8f16d513b661f6488c822dbc3cdd5b6fe4e02aee38a5bca1f57f88a90",
+      "src/Grid.h": "77215c0bcbd54a0b745d228e196cc2de74499e3a039b8baf3a354d4f3e450cff",
+      "src/Bridge.mm": "3fe6c2e7b83a482bfd428498822404fc6b1b64c50b2a2765f993f4b72f2fc1ea",
+      "src/Bridge.h": "797289bee0c5d1e2c90655be3f04f14479c63549c7a184c222f06454557aa577",
+      "src/BridgePrivate.h": "98c44cb12a69b5045be23baccfd23fe44af42d7228ce0c69285e74f97f21fbca",
+      "src/GridNative.mm": "765951f22b26fc306fa3f058fe3cf31cb5b4bd73214f1d9385551b3e9d4b2c9e",
+      "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+      "tests/NativeGridFixture.mm": "a1ffabd505bc6406cf96ad18276cff413280decd063a0309243ee62c86ab6282",
+      "tests/mac_ax.py": "a5d1c647a701c19aa65ddebd83a4323d129cffe51b07d044cb8e56db12f044e2",
+      "tests/voiceover.py": "8637a8c2a47ac6368be87a3d0a90beaf394d51bb61495b94a38fc15baa55dc1b",
+      "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62",
+      "test_grid_value_speech.py": "3da21a434008152525abc540e51feda6282d1282e7f6f30e5753513fc20db17b"
+    },
+    "binary_sha256": "c3eb28849d2e84aa39ceca093804da77cc4e563779e0bd53eaf393f2713505ea",
+    "count": 120
+  },
+  "nativeGrid": {
+    "checks": [
+      "exact owned native grid window",
+      "logical table is discoverable without traversing its rows",
+      "read-only cell does not advertise AXValue mutation",
+      "native counts include every logical row and column",
+      "visible rows are a separate viewport subset",
+      "all columns have header relationships",
+      "indexed row 1 has its logical position",
+      "row 1 belongs to its table",
+      "indexed row 25000 has its logical position",
+      "row 25000 belongs to its table",
+      "indexed row 50000 has its logical position",
+      "row 50000 belongs to its table",
+      "far cell belongs to its stable row",
+      "far cell has full row and column index ranges",
+      "uncached external read reports loading",
+      "owning provider supplies the offscreen value on a later cycle",
+      "offscreen cell retains its actual layout bounds for VoiceOver navigation",
+      "offscreen layout does not invent viewport visibility",
+      "read-only cells expose reveal without inventing edit or selection actions",
+      "the readable offscreen content offers the same reveal action as its cell",
+      "a structural cell contains its readable text",
+      "position lookup reaches visible cell text without scanning 50000 rows",
+      "complete children include rows columns and one header group",
+      "VoiceOver End reaches logical row 50000",
+      "VoiceOver reveals the final cell inside the actual viewport",
+      "VoiceOver reads the final row and column value",
+      "sorting preserves the same row and cell objects by key",
+      "post-sort loading resolves current positions without changing identity",
+      "cached values refresh independently of the form revision",
+      "removed row retires retained geometry and changes logical count",
+      "replacement creates new identities even for the same row key",
+      "owned grid host exits normally"
+    ],
+    "count": 32,
+    "voiceover": [
+      {
+        "key": "home",
+        "shift": false,
+        "command": false,
+        "caption": "\u00d7 All 50000 rows and 24 columns, table"
+      },
+      {
+        "key": "down",
+        "shift": true,
+        "command": false,
+        "caption": "X In All 50000 rows and 24 columns, table, Column 1 row-00000 / column-0 / value-o"
+      },
+      {
+        "key": "end",
+        "shift": false,
+        "command": false,
+        "caption": "\u00d7 Column 24 row-49999 / column-23 / value-0, row 50,000 of 50,000"
+      },
+      {
+        "key": "right",
+        "shift": false,
+        "command": false,
+        "caption": "\u00d7 Column 24 row-49999 / column-23 / value-0, row 50,000 of 50,000"
+      }
+    ],
+    "sources_sha256": {
+      "src/Session.mm": "8a4710042a3671837b2e7e34dce4654fe0c59264ea553335fe1670586b79a0ca",
+      "src/Grid.mm": "853fc6a8f16d513b661f6488c822dbc3cdd5b6fe4e02aee38a5bca1f57f88a90",
+      "src/GridNative.mm": "765951f22b26fc306fa3f058fe3cf31cb5b4bd73214f1d9385551b3e9d4b2c9e",
+      "src/Bridge.mm": "3fe6c2e7b83a482bfd428498822404fc6b1b64c50b2a2765f993f4b72f2fc1ea",
+      "src/BridgePrivate.h": "98c44cb12a69b5045be23baccfd23fe44af42d7228ce0c69285e74f97f21fbca",
+      "tests/NativeGridFixture.mm": "a1ffabd505bc6406cf96ad18276cff413280decd063a0309243ee62c86ab6282",
+      "tests/mac_ax.py": "a5d1c647a701c19aa65ddebd83a4323d129cffe51b07d044cb8e56db12f044e2",
+      "test_native_grids.py": "35fd7fd878e8a800c531cd1ba96dffdfb5f49778966fb4ca352edb79a8db2f77"
+    }
+  },
+  "additionalChecks": {
+    "session": 273,
+    "logicalGrid": 169,
+    "appKit": {
+      "passed": true,
+      "checks": 182
+    }
+  },
+  "builds": {
+    "native": {
+      "version": "0.19.4",
+      "architectures": [
+        "arm64",
+        "x86_64"
+      ],
+      "signing": "ad hoc, verified; not notarized",
+      "binary_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+      "sources_sha256": {
+        "src/Bridge.h": "797289bee0c5d1e2c90655be3f04f14479c63549c7a184c222f06454557aa577",
+        "src/Bridge.mm": "3fe6c2e7b83a482bfd428498822404fc6b1b64c50b2a2765f993f4b72f2fc1ea",
+        "src/BridgePrivate.h": "98c44cb12a69b5045be23baccfd23fe44af42d7228ce0c69285e74f97f21fbca",
+        "src/Grid.h": "77215c0bcbd54a0b745d228e196cc2de74499e3a039b8baf3a354d4f3e450cff",
+        "src/Grid.mm": "853fc6a8f16d513b661f6488c822dbc3cdd5b6fe4e02aee38a5bca1f57f88a90",
+        "src/GridNative.mm": "765951f22b26fc306fa3f058fe3cf31cb5b4bd73214f1d9385551b3e9d4b2c9e",
+        "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+        "src/Plugin.mm": "38e4c864c8498633977cb6c36cff93d75105562bd2d82f45c293329a81f42952",
+        "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+        "src/Session.mm": "8a4710042a3671837b2e7e34dce4654fe0c59264ea553335fe1670586b79a0ca",
+        "host/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "host/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "host/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "host/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "host/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "host/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "host/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "host/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "host/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "host/Methods/AXB_ALPTable.4dm": "22df5b137ebf4e3f2c1d20dc2afc6d520eb5a1995f28b8748b7843a4fdfb19f5",
+        "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+        "host/Methods/AXB_Dispatch.4dm": "084897c72087e2bf8629cbaeebb5748a7a254ef9cada20db7ab2f720e4dece6c",
+        "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+        "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+        "host/Methods/AXB_Start.4dm": "322ae31ec5c82e0c0fc38b167460ad0a4855a8bf92e51118c9269c416b2cbfb1",
+        "host/Methods/AXB_Stop.4dm": "40fb9b05685c93a3df8acf02cc95f2b16161e034aa43f053d279814e764f8ad3",
+        "host/Methods/Compiler_AXB.4dm": "c46cd8260902a46d5b4dd60eaee9ba705dd6fbd60c183efefc3b88dd9199d461",
+        "resources/en.lproj/AccessibilityBridge.strings": "aa5d6eaae366b799f006c76d88d9fd44b36de0027113ecdf4ba581c1d5ab446a",
+        "manifest.json": "67268196e69f4e50eac32325dcf48f56b5f0e37eff8c6e75112db8fc6881afb9",
+        "VERSION": "216d83197de6656b968dc0c259a50bde9ab9f3f146045dcec536a5d820a45954"
+      }
+    },
+    "component": {
+      "passed": true,
+      "version": "0.19.4",
+      "sources_sha256": {
+        "host/Methods/AXB_Start.4dm": "322ae31ec5c82e0c0fc38b167460ad0a4855a8bf92e51118c9269c416b2cbfb1",
+        "host/Methods/AXB_Stop.4dm": "40fb9b05685c93a3df8acf02cc95f2b16161e034aa43f053d279814e764f8ad3",
+        "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+        "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+        "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+        "host/Methods/AXB_Dispatch.4dm": "084897c72087e2bf8629cbaeebb5748a7a254ef9cada20db7ab2f720e4dece6c",
+        "host/Methods/Compiler_AXB.4dm": "c46cd8260902a46d5b4dd60eaee9ba705dd6fbd60c183efefc3b88dd9199d461",
+        "VERSION": "216d83197de6656b968dc0c259a50bde9ab9f3f146045dcec536a5d820a45954",
+        "build_component.py": "5c52f53e13265c07f08743b2dd3e24ef3fc8844cb00af81f2e331b08a4de4319"
+      },
+      "native_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+      "package_sha256": {
+        "AccessibilityBridge.4DZ": "66dc1266cc102337bb2ee17c3db068e93b0b71278408ce0ed7ca7fc7ee0ac8a8",
+        "Libraries/lib4d-arm64.dylib": "41dc168813b09e4b6159701a573299fe529369ce678d869be181c22c7438ce4a"
+      }
+    },
+    "compilerVersion": "tool4d 20.8 build 20.102083"
+  },
+  "limits": [
+    "These synthetic hosts do not establish every application workflow or control family.",
+    "VoiceOver behavior is tested on the recorded macOS version, not every deployment target.",
+    "The 4D case verifies a distant native checkbox after normal popup interaction; complete application workflows require separate validation."
+  ],
+  "compiled4D": {
+    "before": {
+      "passed": false,
+      "mode": "voiceover",
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "actual compiled 4D starts the prepared widget fixture"
+        },
+        {
+          "passed": true,
+          "name": "owned fixture accepts foreground activation"
+        },
+        {
+          "passed": true,
+          "name": "all logical rows and widget columns are available"
+        },
+        {
+          "passed": true,
+          "name": "identical keys and control names have distinct subform identities"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver enters the first logical row"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the real checkbox role and caption"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver checkbox activation reaches native validation"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver announces the confirmed checkbox state"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the popup's selected label and role"
+        },
+        {
+          "passed": true,
+          "name": "the native menu belongs to its exact accessible popup cell"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver chooses through the actual native popup menu"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver stays in the grid after choosing a popup item"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the final logical row across widget columns"
+        },
+        {
+          "passed": true,
+          "name": "the final logical checkbox exposes its loaded state"
+        }
+      ],
+      "native_sha256": "9dea596c51edc3aeb94766db43f50f4a2748cad90c78fa4bfa1200620b123c47",
+      "component_sha256": "49f0f02ffac4f4ad2f968ab31bf9a0b8f3ed3e731df3c0e9ca78a33928a12897",
+      "test_sha256": "dc4db3c9383a9e0770493b8b306ed43560b934f458ebf2880d0257e8971143f0",
+      "architecture": "ARM64",
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Grid: Invoice lines, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In Grid: Invoice lines, table, Description Line item 0001"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Line item 0001, column 1, row 1 row 1 of 599"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Amount 1.25"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Approved Approved; reviewed unchecked checkbox"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Approved Approved; reviewed unchecked checkbox"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Decision Denied Decision pop up button"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "X Decision Denied Decision pop up button"
+        },
+        {
+          "key": "down",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Allowed",
+          "voiceoverModifier": false
+        },
+        {
+          "key": "return",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Allowed",
+          "voiceoverModifier": false
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Mixed Mixed unchecked checkbox"
+        },
+        {
+          "key": "end",
+          "shift": false,
+          "command": false,
+          "caption": "X Loading, row 599 of 599"
+        }
+      ],
+      "delayed_value_captions": [
+        "X Loading, row 599 of 599",
+        "X Loading, row 599 of 599",
+        "X Loading, row 599 of 599",
+        "X Loading, row 599 of 599",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+        "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+      ],
+      "error": "VoiceOver did not speak the arriving final-cell value"
+    },
+    "after": {
+      "passed": true,
+      "mode": "voiceover",
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "actual compiled 4D starts the prepared widget fixture"
+        },
+        {
+          "passed": true,
+          "name": "owned fixture accepts foreground activation"
+        },
+        {
+          "passed": true,
+          "name": "all logical rows and widget columns are available"
+        },
+        {
+          "passed": true,
+          "name": "identical keys and control names have distinct subform identities"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts independent cell focus"
+        },
+        {
+          "passed": true,
+          "name": "global focus resolves the owning grid after both retain cell positions"
+        },
+        {
+          "passed": true,
+          "name": "repeated grid accepts native checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "ordinary editor accepts keyboard focus"
+        },
+        {
+          "passed": true,
+          "name": "repeated activation changes only the owning form binding"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver enters the first logical row"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the real checkbox role and caption"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver checkbox activation reaches native validation"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver announces the confirmed checkbox state"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the popup's selected label and role"
+        },
+        {
+          "passed": true,
+          "name": "the native menu belongs to its exact accessible popup cell"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver chooses through the actual native popup menu"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver stays in the grid after choosing a popup item"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the final logical row across widget columns"
+        },
+        {
+          "passed": true,
+          "name": "the final logical checkbox exposes its loaded state"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the loaded distant checkbox without another navigation command"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver returns to the same popup with its new value"
+        },
+        {
+          "passed": true,
+          "name": "cancelling the popup preserves its value and VoiceOver's table context"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver leaves widget cells for the ordinary editor"
+        }
+      ],
+      "native_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+      "component_sha256": "66dc1266cc102337bb2ee17c3db068e93b0b71278408ce0ed7ca7fc7ee0ac8a8",
+      "test_sha256": "dc4db3c9383a9e0770493b8b306ed43560b934f458ebf2880d0257e8971143f0",
+      "architecture": "ARM64",
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Grid: Invoice lines, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In Grid: Invoice lines, table, Description Line item 0001"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Line item 0001, column 1, row 1 row 1 of 599"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Amount 1.25"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Approved Approved; reviewed unchecked checkbox"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Approved Approved; reviewed unchecked checkbox"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Decision Denied Decision pop up button"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 AXB complete 4D grid fixture, menu, 2 items"
+        },
+        {
+          "key": "down",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Allowed",
+          "voiceoverModifier": false
+        },
+        {
+          "key": "return",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Allowed",
+          "voiceoverModifier": false
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Mixed Mixed unchecked checkbox"
+        },
+        {
+          "key": "end",
+          "shift": false,
+          "command": false,
+          "caption": "X Loading, row 599 of 599"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "X Description Line item 0001, row 1 of 599"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Amount 1.25"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Approved Approved; reviewed checked checkbox"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Decision Allowed Decision pop up button"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "X menu, 2 items V Allowed"
+        },
+        {
+          "key": "escape",
+          "shift": false,
+          "command": false,
+          "caption": "X Closing menu Allowed, Decision, pop up button Allowed, Decision, pop up button, group",
+          "voiceoverModifier": false
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Mixed Mixed unchecked checkbox"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "X Description Line item 0001, row 1 of 599"
+        },
+        {
+          "key": "up",
+          "shift": true,
+          "command": false,
+          "caption": "\u00d7 Out of Grid: Invoice lines, table"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Note, Grid: Note"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Original note, Insertion at beginning of text., Grid: Note, edit text"
+        }
+      ],
+      "delayed_value_captions": [
+        "\u00d7 Mixed unchecked checkbox, cell"
+      ]
+    },
+    "correction": "The table layout notification identifies the stable structural cell rather than its replaceable content child. No host hooks or keyboard-focus changes were added."
+  }
+}

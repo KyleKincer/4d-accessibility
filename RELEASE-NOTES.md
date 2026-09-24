@@ -1,4 +1,6 @@
-This is a development preview of 4D Accessibility for macOS and 4D 20.8.
+This is a development release candidate of 4D Accessibility for macOS and 4D 20.8. The downloads are ad hoc signed and not notarized. The 4D plugin ID remains provisional. Use this candidate for local integration and evaluation; it is not a production distribution.
+
+VoiceOver now reads grid values when they arrive after Loading, including checkbox and popup cells. The native provider preserves the reading position and requires no additional host application code. Eight live VoiceOver cases cover delayed values, navigation, leaving the grid, unrelated AX reads and reloading unchanged data. The compiled 4D regression also verifies the formerly stuck distant checkbox after native popup interaction.
 
 Large forms now leave time for input and VoiceOver between accessibility refreshes. Grid-page reads validate their current grid and containing form without rescanning unrelated ordinary controls. Background pages use normal polling; pending editor operations keep their fast path. The component adapts its idle interval to callback cost. Existing application hooks and form timers stay the same.
 
