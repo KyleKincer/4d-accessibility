@@ -194,12 +194,16 @@ int main(void) {
             Check(AXBValidateGridPage(widgetPage) != nil, "checkbox state rejects nonintegral and out-of-range data");
         }
         widget[@"checked"] = @2;
+        widget[@"focusable"] = @1;
+        Check(AXBValidateGridPage(widgetPage) != nil, "cell focus capability rejects a numeric stand-in for a boolean");
+        widget[@"focusable"] = @NO;
         session = [[AXBSession alloc] initWithIdentifier:@"grid-widgets" windowID:9];
         NSMutableDictionary *widgetGeometry = Copy(changed);
         widgetGeometry[@"visible"] = @[@"row-00000"];
         widgetGeometry[@"frames"] = @{@"row-00000": @{@"column-0": @[@10, @20, @100, @28]}};
         snapshot = Snapshot(widgetGeometry, 1);
         Check([[session exchange:@{@"snapshot": snapshot, @"gridPages": @[widgetPage]} now:0][@"ok"] boolValue], "typed checkbox enters the live cache");
+        Check(![session enqueueNode:@"grid" revision:@1 operation:@"gridEdit" value:edit now:0.1], "a non-focusable checkbox cannot activate through a focus request");
         Check(![session enqueueNode:@"grid" revision:@1 operation:@"gridSetValue" value:edit now:0.1], "checkbox rejects string assignment through the text editor");
         Check([session enqueueNode:@"grid" revision:@1 operation:@"gridPress" value:edit now:0.1], "checkbox accepts its native activation");
         reply = [session exchange:@{@"snapshot": snapshot} now:0.2];
@@ -230,6 +234,7 @@ int main(void) {
         reply = [session exchange:@{@"snapshot": snapshot, @"gridPages": @[widgetPage]} now:0.5];
         Check(!reply[@"action"] && [reply[@"result"][@"status"] isEqual:@"rejected"], "changed checkbox state rejects an undelivered toggle");
         widget[@"role"] = @"popup";
+        [widget removeObjectForKey:@"focusable"];
         Check(AXBValidateGridPage(widgetPage) != nil, "popup cannot carry a checkbox state");
         [widget removeObjectForKey:@"checked"];
         Check([[session exchange:@{@"snapshot": snapshot, @"gridPages": @[widgetPage]} now:0.6][@"ok"] boolValue], "popup typed page publishes");

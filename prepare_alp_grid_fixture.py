@@ -23,6 +23,7 @@ def main():
     parser.add_argument("--server", type=Path, required=True)
     parser.add_argument("--area-list-plugin", type=Path, default=ROOT / "fixture/Plugins/ALP.bundle", help="Vendor bundle to validate in this isolated fixture")
     parser.add_argument("--key-type", choices=["text", "integer", "longint"], default="text", help="Keep stable IDs in the vendor's original bound array type")
+    parser.add_argument("--controls", action="store_true", help="Add Boolean and integer checkbox columns to the repeated form fixture")
     parser.add_argument("--license-file", type=Path, help="Existing protected vendor license file; contents are never printed")
     args = parser.parse_args()
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
@@ -100,6 +101,7 @@ def main():
               "areaListSha256": sha(vendor / "Contents/MacOS/ALP")}
     (FIXTURE / "Resources/launch.json").write_text(json.dumps(config) + "\n")
     config["keyType"] = args.key_type
+    config["controls"] = args.controls
     (FIXTURE / "Resources/launch.json").write_text(json.dumps(config) + "\n")
     if args.key_type != "text":
         command = "ARRAY INTEGER" if args.key_type == "integer" else "ARRAY LONGINT"
@@ -109,6 +111,40 @@ def main():
                 text = text.replace(f"ARRAY TEXT(a{side}Key;", f"{command}(a{side}Key;")
             text = text.replace('aLeftKey{$row}:="line-"+String($row; "0000")', 'aLeftKey{$row}:=$row')
             method.write_text(text)
+    if args.controls:
+        for name in ("Compiler_AXBP", "AXBP_Open"):
+            method = methods / (name + ".4dm")
+            content = method.read_text()
+            declarations = "\n".join(f"ARRAY {kind}(a{side}{field}; {0 if name.startswith('Compiler') else 600})"
+                                     for side in ("Left", "Right")
+                                     for kind, field in (("BOOLEAN", "Direct"), ("BOOLEAN", "Focusable"), ("LONGINT", "Mixed"), ("INTEGER", "Numeric"))) + "\n"
+            if name.startswith("Compiler"):
+                content += declarations
+            else:
+                content = content.replace('READ PICTURE FILE(', declarations + 'READ PICTURE FILE(', 1)
+                content = content.replace('For ($row; 1; 600)', 'For ($row; 1; 600)\n aLeftMixed{$row}:=2\n aRightMixed{$row}:=2', 1)
+            method.write_text(content)
+        method = methods / "AXBP_Child.4dm"
+        content = method.read_text()
+        content = content.rsplit("End if", 1)[0] + (ROOT / "tests/4d/AXPK_Setup.4dm").read_text() + "End if\n"
+        method.write_text(content)
+        method = methods / "AXBP_State.4dm"
+        content = method.read_text()
+        start = content.index('If (AL_GetAreaLongProperty(Form.left.area; ALP_Area_EntryInProgress)=1)')
+        end = content.index('File("/RESOURCES/runtime-status.json")', start)
+        content = content[:start] + (ROOT / "tests/4d/AXPK_State.4dm").read_text() + content[end:]
+        method.write_text(content)
+        (methods / "AXBP_Enter.4dm").write_text((ROOT / "tests/4d/AXPK_Enter.4dm").read_text())
+        method = methods / "AXBP_EntryEnd.4dm"
+        content = method.read_text()
+        marker = ' If ((AL_GetAreaLongProperty($area; ALP_Area_EntryColumn)=2) & ($row>0))'
+        content = content.replace(marker, ''' If (($data.reject=True) & (AL_GetAreaLongProperty($area; ALP_Area_EntryColumn)=8) & ($row>0))
+  aLeftDirect{$row}:=aLeftDirect{0}
+  $data.rejections:=$data.rejections+1
+  $accepted:=False
+ End if
+''' + marker)
+        method.write_text(content)
     hashes = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     with tempfile.TemporaryDirectory(prefix="alp-grid-compile-", dir=BUILD) as temporary:
         driver = Path(temporary)

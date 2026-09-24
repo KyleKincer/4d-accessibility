@@ -1,11 +1,9 @@
 // Paging does not change selection, scroll position, focus or the record buffer.
 #DECLARE($operation : Text; $options : Object; $state : Object; $request : Object) -> $result : Object
-var $descriptor; $query; $column; $definition; $cell; $action; $reply; $editor; $data : Object
+var $descriptor; $query; $column; $definition; $cell; $action; $reply; $editor; $data; $value : Object
 var $rows; $cells; $actual; $requested : Collection
 var $key; $columnID; $text : Text
 var $area; $r; $c; $start; $end; $firstColumn; $lastColumn; $position; $error; $mode; $unit; $code : Integer
-var $hidden; $protected; $editable : Boolean
-var $semantic : Variant
 ARRAY LONGINT($selection; 0)
 $result:=New object("ok"; True; "pages"; New collection; "status"; "rejected"; "message"; "AreaList changed before the request")
 If (Not($state.valid=True))
@@ -32,29 +30,14 @@ If ($operation="readGrid")
      $definition:=$descriptor.columns[$c]
      $columnID:=$definition.id
      $column:=$state.columns[$columnID]
-     $hidden:=AL_GetCellLongProperty($area; $position; $column.number; ALP_Cell_Invisible)#0
-     $protected:=AL_GetCellTextProperty($area; $position; $column.number; ALP_Cell_FormatResolved)=Char(8226)
-     $text:=""
-     If (Not($hidden | $protected))
-      If ($column.value#Null)
-       $semantic:=$column.value.call(Null; New object("key"; $key; "row"; $position; "column"; $column.number))
-       If (Value type($semantic)#Is text)
-        return New object("ok"; False; "error"; "invalidGridCellDescription")
-       End if
-       $text:=$semantic
-      Else
-       $text:=AL_GetCellTextProperty($area; $position; $column.number; ALP_Cell_FormattedValue)
-       If (AL_GetColumnLongProperty($area; $column.number; ALP_Column_Attributed)#0)
-        $text:=AL_GetPlainText($text)
-       End if
-      End if
+     $value:=AXB_ALPGridValue($state; $column; $position)
+     If (Not($value.ok))
+      return New object("ok"; False; "error"; "invalidGridCellDescription")
      End if
-     $mode:=AL_GetCellLongProperty($area; $position; $column.number; ALP_Cell_Enterable)
-     If ($mode=-1)
-      $mode:=AL_GetColumnLongProperty($area; $column.number; ALP_Column_Enterable)
-     End if
-     $editable:=$definition.editable & Not($hidden | $protected) & (New collection(1; 3; 5).indexOf($mode)>=0)
-     $cells.push(New object("column"; $columnID; "value"; $text; "enabled"; Not($hidden); "editable"; $editable))
+     OB REMOVE($value; "ok")
+     OB REMOVE($value; "active")
+     $value.column:=$columnID
+     $cells.push($value)
     End for
     $rows.push(New object("id"; $key; "cells"; $cells))
    End for
@@ -70,7 +53,7 @@ $action:=$request.action
 If (($action.node#$options.id) | Not(OBJECT Get enabled(*; $options.objectName)))
  return
 End if
-If (New collection("gridReveal"; "gridEdit"; "gridSetValue"; "gridSetSelection"; "gridReplaceSelection").indexOf($action.operation)>=0)
+If (New collection("gridReveal"; "gridEdit"; "gridPress"; "gridSetValue"; "gridSetSelection"; "gridReplaceSelection").indexOf($action.operation)>=0)
  If (Value type($action.value)#Is object)
   return
  End if
@@ -101,6 +84,34 @@ If (New collection("gridReveal"; "gridEdit"; "gridSetValue"; "gridSetSelection";
  If ($action.operation="gridReveal")
   AL_SetCellLongProperty($area; $position; $column.number; ALP_Cell_Reveal; 0; 1; 1)
  Else
+  If (Current form window#Frontmost window)
+   return
+  End if
+  If ($column.checkbox)
+   If (New collection("gridPress"; "gridEdit").indexOf($action.operation)<0)
+    return
+   End if
+   $value:=AXB_ALPGridValue($state; $column; $position)
+   $cell:=$action.value.expectedCell
+   If (($cell=Null) || Not($value.ok & $value.enabled & $value.editable) || ($value.role#$cell.role) || ($value.checked#$cell.checked) || ($value.value#$cell.value) || ($value.focusable#$cell.focusable))
+    return
+   End if
+   If (($action.operation="gridEdit") & Not($value.focusable))
+    $result.message:="This AreaList checkbox activates without keyboard focus"
+    return
+   End if
+   $data.widget:=$value
+   // A non-focusable checkbox toggles immediately through this vendor call.
+   // A focusable checkbox only opens its editor. Never change the host's mode.
+   If (Not($value.active) | Not(AXB_ControlFocus($options.objectName)))
+    GOTO OBJECT(*; $options.objectName)
+    AL_SetAreaTextProperty($area; ALP_Area_EntryGotoCell; String($position)+","+String($column.gridCell))
+   End if
+   return New object("status"; "pending"; "confirm"; Formula(AXB_ALPGridConfirm($1)); "data"; $data)
+  End if
+  If ($action.operation="gridPress")
+   return
+  End if
   $mode:=AL_GetCellLongProperty($area; $position; $column.number; ALP_Cell_Enterable)
   If ($mode=-1)
    $mode:=AL_GetColumnLongProperty($area; $column.number; ALP_Column_Enterable)

@@ -151,7 +151,7 @@ The dispatcher checks the cell, value, permissions, window and hit region before
 
 Negative numeric checkbox states follow 4D: `-1` is blank, and `-2`, `-3` and `-4` are disabled unchecked, checked and mixed states. Disabled cells stay readable. Other negative values report `gridValueDescriptionRequired`; correct the stored state rather than adding a text description to an interactive checkbox. Values above `2` are mixed. Null cells are blank and read-only. Existing row restrictions and Single-Click Edit settings govern whether the native editor is available. A semicolon in a checkbox caption does not make it a popup; discovery also reads the column's native display type.
 
-This adapter covers native flat list boxes. AreaList checkbox/popup cells require a separate vendor path. [Validation scope](VALIDATION.md) distinguishes historical coverage from checks still owed in a new host.
+This adapter covers native flat list boxes. [AreaList checkboxes](#arealist-checkbox-cells) use the vendor's own entry path. [Validation scope](VALIDATION.md) distinguishes historical coverage from checks still owed in a new host.
 
 ## Add an AreaList grid to the same form
 
@@ -212,7 +212,17 @@ The current flat-grid adapter requires row selection mode, a non-transposed sing
 
 AreaList flat row selection and ordinary text editing work in isolated fixtures. Supplementary Unicode is rejected before opening or changing an editor. AreaList Pro 11.4.2 corrupts memory while reading, copying or committing long supplementary text even without this bridge; the 11.4.3b5 preview also fails. The guard protects bridge requests, not the vendor's direct-input path. See the [reproduction](https://github.com/KyleKincer/4d-accessibility/blob/main/tests/AREA-LIST-UNICODE.md).
 
-Protected-cell editing, checkbox/popup interaction, hierarchical and multiline layouts, and complete assistive-technology validation remain open. These are implementation gaps, not the final accessibility contract.
+Protected-cell editing, vendor popup/radio interaction, hierarchical and multiline layouts, and complete assistive-technology validation remain open. These are implementation gaps, not the final accessibility contract.
+
+### AreaList checkbox cells
+
+Keep the same grid configuration. Boolean columns displayed as checkboxes and Integer/LongInt columns configured as two- or three-state checkboxes are discovered automatically. The column header supplies the label; use `columns.<number>.label` when it needs clarification. Leave `value` descriptions off interactive checkboxes, since a description replaces the control with read-only text.
+
+The adapter preserves the column's `ALP_Column_FocusableCheckbox` setting. For a non-focusable checkbox, AXPress uses AreaList's normal cell-entry command, which toggles the value and runs the existing entry/exit callbacks. AXFocused is unavailable because that vendor command would also toggle the value. For a focusable checkbox, AXFocused opens the editor without changing the value, and AXPress sends Space to that editor. Its uncommitted value appears in AX; normal Escape and focus transfer retain the vendor's cancel, commit and validation behavior. A completed press confirms the displayed checkbox state, not a database save.
+
+Area, column and cell entry permissions remain authoritative. Hidden and password-formatted cells publish no state. A validation callback that restores the previous value produces a rejected action receipt; the adapter does not retry it. Sorting follows stable row keys, and a loading or scope transition retires old controls.
+
+Install matching plugin, component and host helpers. Startup requires `cellFocus 1` so an older plugin cannot advertise a focus operation on a control that activates immediately. The synthetic fixture exercises normal, small and mini checkbox display modes. Formatted Boolean editors, vendor radio/popup choices and custom-picture checkbox rendering need separate validation or implementation.
 
 ## Put the invoice-like form together
 

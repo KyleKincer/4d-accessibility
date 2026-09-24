@@ -4,10 +4,10 @@
 var $node; $columnsByID; $column; $known; $positions; $frames; $headers; $rowFrames; $descriptor; $item; $cell; $editor; $metadata : Object
 var $rows; $columns; $selected; $visible; $rowLayout; $columnLayout; $bindings; $allKeys : Collection
 var $handle; $keys; $previous : Pointer
-var $area; $error; $count; $columnCount; $row; $i; $number; $originX; $originY; $locked; $keyColumn; $entryRow; $entryColumn : Integer
+var $area; $error; $count; $columnCount; $row; $i; $number; $originX; $originY; $locked; $keyColumn; $entryRow; $entryColumn; $display; $entry; $kind : Integer
 var $left; $top; $width; $height; $scrollTop; $scrollLeft; $offset; $columnLeft; $columnWidth; $rowTop; $rowHeight; $headerHeight; $lockedRight; $x; $y; $right; $bottom : Real
 var $name; $key; $id; $label; $signature; $orderState : Text
-var $rebound; $typed; $editable : Boolean
+var $rebound; $typed; $editable; $checkbox; $focusable : Boolean
 ARRAY LONGINT($grid; 0)
 ARRAY LONGINT($selection; 0)
 ARRAY LONGINT($levels; 0)
@@ -195,12 +195,21 @@ For ($i; 1; Size of array($grid))
   If ($label="")
    $label:="Column "+String($columns.length+1)
   End if
-  $typed:=New collection(Text array; Real array; Integer array; LongInt array; Date array; Time array).indexOf(Type($sources{$number}->))>=0
+  $kind:=Type($sources{$number}->)
+  $display:=AL_GetColumnLongProperty($area; $number; ALP_Column_DisplayControl)
+  $entry:=AL_GetColumnLongProperty($area; $number; ALP_Column_EntryControl)
+  $checkbox:=(New collection(Boolean array; Integer array; LongInt array).indexOf($kind)>=0) & (New collection(0; 1; 2; 4).indexOf($display)>=0) & (New collection(0; 1).indexOf($entry)>=0) & ($metadata.value=Null)
+  $focusable:=$checkbox & (New collection(0; 1; 2).indexOf($display)>=0) & (AL_GetColumnLongProperty($area; $number; ALP_Column_FocusableCheckbox)=1)
+  $typed:=New collection(Text array; Real array; Integer array; LongInt array; Date array; Time array).indexOf($kind)>=0
+  $typed:=$typed & Not($checkbox)
   $typed:=$typed & (AL_GetColumnLongProperty($area; $number; ALP_Column_Attributed)=0) & ($metadata.value=Null)
-  $columns.push(New object("id"; $id; "label"; $label; "enabled"; True; "editable"; $typed & $editable))
+  $columns.push(New object("id"; $id; "label"; $label; "enabled"; True; "editable"; ($typed | $checkbox) & $editable))
   $columnLayout.push(New collection($columnLeft; $columnWidth))
   $column:=New object("number"; $number; "gridCell"; $i; "left"; $columnLeft; "width"; $columnWidth; "locked"; $i<=$locked; "typed"; $typed)
   $column.value:=$metadata.value
+  $column.checkbox:=$checkbox
+  $column.focusable:=$focusable
+  $column.source:=$sources{$number}
   $columnsByID[$id]:=$column
   $x:=New collection($left; $columnLeft).max()
   If ($i>$locked)
@@ -280,6 +289,7 @@ If ($columns.length>0)
 End if
 $state.descriptor:=$descriptor
 $state.positions:=$positions
+$state.rowKeys:=$allKeys
 $state.columns:=$columnsByID
 $state.valid:=True
 $node.grid:=$descriptor
@@ -290,9 +300,17 @@ If ((AL_GetAreaLongProperty($area; ALP_Area_Selected)=1) & (AL_GetAreaLongProper
  $entryColumn:=AL_GetAreaLongProperty($area; ALP_Area_EntryColumn)
  If (($entryRow>0) & ($entryRow<=$count))
   $cell:=New object("objectName"; $name; "row"; $allKeys[$entryRow-1]; "column"; "column."+String($entryColumn); "generation"; $state.generation; "state"; $state)
-  $editor:=AXB_ALPEditor($cell; "read"; Null)
-  If ($editor.active)
-   $node.editor:=New object("row"; $cell.row; "column"; $cell.column; "value"; $editor.text; "selection"; New collection($editor.start-1; $editor.end-$editor.start))
+  $column:=$state.columns[$cell.column]
+  If (($column#Null) && $column.checkbox)
+   $editor:=AXB_ALPGridValue($state; $column; $entryRow)
+   If ($editor.ok & $editor.active)
+    $node.editor:=New object("row"; $cell.row; "column"; $cell.column)
+   End if
+  Else
+   $editor:=AXB_ALPEditor($cell; "read"; Null)
+   If ($editor.active)
+    $node.editor:=New object("row"; $cell.row; "column"; $cell.column; "value"; $editor.text; "selection"; New collection($editor.start-1; $editor.end-$editor.start))
+   End if
   End if
  End if
 End if

@@ -1,6 +1,6 @@
 // Re-enter the same owning view and verify the resulting vendor viewport.
 #DECLARE($data : Object) -> $result : Object
-var $reply; $grid; $action; $cell; $editor; $node; $textAction : Object
+var $reply; $grid; $action; $cell; $editor; $node; $textAction; $value : Object
 var $key; $column : Text
 $result:=New object("status"; "rejected"; "message"; "AreaList changed before action completion")
 $reply:=AXB_ALPGrid("describe"; $data.options; $data.state; New object)
@@ -19,6 +19,35 @@ If ($action.operation="gridReveal")
   return New object("status"; "completed"; "message"; "AreaList cell is visible")
  End if
 Else
+ If ($data.widget#Null)
+  $value:=AXB_ALPGridValue($data.state; $data.state.columns[$column]; $data.state.positions[$key])
+  If (Not($value.ok) | ($value.role#$data.widget.role))
+   return
+  End if
+  If (($data.inputSent=True) | Not($data.widget.focusable))
+   If ($value.checked#$data.widget.checked)
+    return New object("status"; "completed"; "message"; "AreaList checkbox state confirmed")
+   End if
+  Else
+   If (Not($value.enabled & $value.editable & $value.active & $value.focusable) | (Current form window#Frontmost window) | Not(AXB_ControlFocus($data.options.objectName)))
+    return
+   End if
+   If (($value.checked#$data.widget.checked) | ($value.value#$data.widget.value))
+    return New object("status"; "rejected"; "message"; "AreaList checkbox changed before activation")
+   End if
+   If ($action.operation="gridEdit")
+    return New object("status"; "completed"; "message"; "AreaList checkbox is focused")
+   End if
+   // Use the same process-targeted keyboard path as ordinary controls.
+   // The vendor retains its entry callbacks, validation and commit/cancel.
+   $data.inputSent:=True
+   POST KEY(32; 0; Current process)
+  End if
+  If (Milliseconds<$data.deadline)
+   return New object("status"; "pending"; "confirm"; Formula(AXB_ALPGridConfirm($1)); "data"; $data)
+  End if
+  return New object("status"; "rejected"; "message"; "AreaList did not accept the checkbox state change")
+ End if
  $cell:=New object("objectName"; $data.options.objectName; "row"; $key; "column"; $column; "generation"; $grid.generation; "state"; $data.state; "editor"; Formula(AXB_ALPEditor($1; $2; $3)))
  $editor:=AXB_ALPEditor($cell; "read"; Null)
  If ($editor.active)

@@ -33,6 +33,8 @@ C_OBJECT(AXB_ALPGrid; $0; $2; $3; $4)
 C_TEXT(AXB_ALPGridAction; $1)
 C_OBJECT(AXB_ALPGridAction; $0; $2; $3; $4)
 C_OBJECT(AXB_ALPGridConfirm; $0; $1)
+C_OBJECT(AXB_ALPGridValue; $0; $1; $2)
+C_LONGINT(AXB_ALPGridValue; $3)
 
 C_OBJECT(AXB_ALPEditor; $0; $1)
 C_TEXT(AXB_ALPEditor; $2)
