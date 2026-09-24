@@ -1,0 +1,4248 @@
+{
+  "version": "0.19.3",
+  "scope": "Polling regression suites on macOS 26.6.2 and native ARM 4D 20.8; execution mode recorded per case",
+  "passed": true,
+  "cases": [
+    {
+      "case": "ordinary-interpreted",
+      "checks": 69,
+      "passed": true
+    },
+    {
+      "case": "ordinary-compiled",
+      "checks": 69,
+      "passed": true
+    },
+    {
+      "case": "dynamic-interpreted",
+      "checks": 69,
+      "passed": true
+    },
+    {
+      "case": "dynamic-compiled",
+      "checks": 69,
+      "passed": true
+    },
+    {
+      "case": "collection-child-interpreted",
+      "checks": 62,
+      "passed": true
+    },
+    {
+      "case": "collection-child-compiled",
+      "checks": 62,
+      "passed": true
+    },
+    {
+      "case": "array-interpreted",
+      "checks": 59,
+      "passed": true
+    },
+    {
+      "case": "array-compiled",
+      "checks": 59,
+      "passed": true
+    },
+    {
+      "case": "entity-interpreted",
+      "checks": 60,
+      "passed": true
+    },
+    {
+      "case": "entity-compiled",
+      "checks": 60,
+      "passed": true
+    },
+    {
+      "case": "metadata-lifecycle",
+      "checks": 9,
+      "passed": true
+    },
+    {
+      "case": "alp-controls-interpreted",
+      "checks": 30,
+      "passed": true
+    },
+    {
+      "case": "alp-controls-compiled",
+      "checks": 30,
+      "passed": true
+    },
+    {
+      "case": "alp-controls-voiceover",
+      "checks": 34,
+      "passed": true
+    },
+    {
+      "case": "alp-text-interpreted",
+      "checks": 45,
+      "passed": true
+    },
+    {
+      "case": "alp-text-compiled",
+      "checks": 45,
+      "passed": true
+    },
+    {
+      "case": "large-form",
+      "checks": 23,
+      "passed": true
+    },
+    {
+      "case": "large-form-compiled-voiceover",
+      "checks": 30,
+      "passed": true
+    }
+  ],
+  "checks": 884,
+  "reports": {
+    "ordinary-interpreted": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": false,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "90df9b476b155d47675e4ca7ad85485b3248743560ae71e0a7c4be00cdb0c6f0",
+      "compiled": false
+    },
+    "ordinary-compiled": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": false,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "90df9b476b155d47675e4ca7ad85485b3248743560ae71e0a7c4be00cdb0c6f0",
+      "compiled": true
+    },
+    "dynamic-interpreted": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": true,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "d740bc9f7a2fcbd66ad7fea151073fde133f05dfaecc7dfaabe162d1acdae3fe",
+      "compiled": false
+    },
+    "dynamic-compiled": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": true,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "d740bc9f7a2fcbd66ad7fea151073fde133f05dfaecc7dfaabe162d1acdae3fe",
+      "compiled": true
+    },
+    "collection-child-interpreted": {
+      "passed": true,
+      "mode": "actions",
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "child field accepts initial focus through AX"
+        },
+        {
+          "passed": true,
+          "name": "child focus agrees with the actual 4D entry control"
+        },
+        {
+          "passed": true,
+          "name": "grid configuration preserves ordinary fields and buttons"
+        },
+        {
+          "passed": true,
+          "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "all 599 non-hidden logical rows are accessible"
+        },
+        {
+          "passed": true,
+          "name": "hidden identity and decorative columns stay out of readable columns"
+        },
+        {
+          "passed": true,
+          "name": "viewport is separate from complete row count"
+        },
+        {
+          "passed": true,
+          "name": "unchanged bindings preserve cell identity across refreshes"
+        },
+        {
+          "passed": true,
+          "name": "offscreen final row loads through the owning 4D process"
+        },
+        {
+          "passed": true,
+          "name": "each offscreen column has its own formatted value"
+        },
+        {
+          "passed": true,
+          "name": "select the final row directly from the first viewport"
+        },
+        {
+          "passed": true,
+          "name": "the shared selection handler reads the settled binding exactly once"
+        },
+        {
+          "passed": true,
+          "name": "selection confirmation waits for the binding and visible row"
+        },
+        {
+          "passed": true,
+          "name": "clear the selected rows through the existing list box"
+        },
+        {
+          "passed": true,
+          "name": "external grid action enumeration includes standard reveal"
+        },
+        {
+          "passed": true,
+          "name": "standard scroll-to-visible action reaches an offscreen cell"
+        },
+        {
+          "passed": true,
+          "name": "revealing a value preserves selection and handlers"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column cannot be edited through accessibility"
+        },
+        {
+          "passed": true,
+          "name": "enterable column advertises the existing cell editor"
+        },
+        {
+          "passed": true,
+          "name": "cell text enters through standard AXValue"
+        },
+        {
+          "passed": true,
+          "name": "focus identifies the exact edited row and column"
+        },
+        {
+          "passed": true,
+          "name": "cell editor exposes the correct Unicode text length"
+        },
+        {
+          "passed": true,
+          "name": "standard text selection targets the real cell editor"
+        },
+        {
+          "passed": true,
+          "name": "selected cell text can be replaced through the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "replacement publishes its real insertion position"
+        },
+        {
+          "passed": true,
+          "name": "the existing Undo menu accepts cell-editor changes"
+        },
+        {
+          "passed": true,
+          "name": "the existing Redo menu accepts the undone cell edit"
+        },
+        {
+          "passed": true,
+          "name": "normal Undo and Redo preserve the editor's Unicode text"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after grid editing"
+        },
+        {
+          "passed": true,
+          "name": "existing data-change and after-edit handlers run on commit"
+        },
+        {
+          "passed": true,
+          "name": "AX transport accepts a request that application validation may reject"
+        },
+        {
+          "passed": true,
+          "name": "filtered first character stops the remaining text without bypassing validation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen selection is accepted through standard AXPress"
+        },
+        {
+          "passed": true,
+          "name": "existing shared selection handler runs"
+        },
+        {
+          "passed": true,
+          "name": "native selection readback matches 4D"
+        },
+        {
+          "passed": true,
+          "name": "enabled key CAFE keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row CAFE accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key CAFE"
+        },
+        {
+          "passed": true,
+          "name": "enabled key cafe keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row cafe accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key cafe"
+        },
+        {
+          "passed": true,
+          "name": "ordinary sort button invokes its existing handler"
+        },
+        {
+          "passed": true,
+          "name": "real 4D sorting preserves the same keyed cell at its new position"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during paged access and actions"
+        },
+        {
+          "passed": true,
+          "name": "enable application selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "the current row accepts the selection-rejection test request"
+        },
+        {
+          "passed": true,
+          "name": "selection rejection is confirmed without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "replace collection objects while retaining their keys"
+        },
+        {
+          "passed": true,
+          "name": "a retained cell cannot target a replacement object with the same key"
+        },
+        {
+          "passed": true,
+          "name": "ordinary record-change handler runs"
+        },
+        {
+          "passed": true,
+          "name": "retained prior-record cell has no active geometry"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close exits the owned 4D host"
+        },
+        {
+          "passed": true,
+          "name": "4D confirms normal acceptance separately from cancellation"
+        }
+      ],
+      "compiled": false,
+      "keyType": "text",
+      "kind": "collection",
+      "subform": true,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "collection-child-compiled": {
+      "passed": true,
+      "mode": "actions",
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "child field accepts initial focus through AX"
+        },
+        {
+          "passed": true,
+          "name": "child focus agrees with the actual 4D entry control"
+        },
+        {
+          "passed": true,
+          "name": "grid configuration preserves ordinary fields and buttons"
+        },
+        {
+          "passed": true,
+          "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "all 599 non-hidden logical rows are accessible"
+        },
+        {
+          "passed": true,
+          "name": "hidden identity and decorative columns stay out of readable columns"
+        },
+        {
+          "passed": true,
+          "name": "viewport is separate from complete row count"
+        },
+        {
+          "passed": true,
+          "name": "unchanged bindings preserve cell identity across refreshes"
+        },
+        {
+          "passed": true,
+          "name": "offscreen final row loads through the owning 4D process"
+        },
+        {
+          "passed": true,
+          "name": "each offscreen column has its own formatted value"
+        },
+        {
+          "passed": true,
+          "name": "select the final row directly from the first viewport"
+        },
+        {
+          "passed": true,
+          "name": "the shared selection handler reads the settled binding exactly once"
+        },
+        {
+          "passed": true,
+          "name": "selection confirmation waits for the binding and visible row"
+        },
+        {
+          "passed": true,
+          "name": "clear the selected rows through the existing list box"
+        },
+        {
+          "passed": true,
+          "name": "external grid action enumeration includes standard reveal"
+        },
+        {
+          "passed": true,
+          "name": "standard scroll-to-visible action reaches an offscreen cell"
+        },
+        {
+          "passed": true,
+          "name": "revealing a value preserves selection and handlers"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column cannot be edited through accessibility"
+        },
+        {
+          "passed": true,
+          "name": "enterable column advertises the existing cell editor"
+        },
+        {
+          "passed": true,
+          "name": "cell text enters through standard AXValue"
+        },
+        {
+          "passed": true,
+          "name": "focus identifies the exact edited row and column"
+        },
+        {
+          "passed": true,
+          "name": "cell editor exposes the correct Unicode text length"
+        },
+        {
+          "passed": true,
+          "name": "standard text selection targets the real cell editor"
+        },
+        {
+          "passed": true,
+          "name": "selected cell text can be replaced through the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "replacement publishes its real insertion position"
+        },
+        {
+          "passed": true,
+          "name": "the existing Undo menu accepts cell-editor changes"
+        },
+        {
+          "passed": true,
+          "name": "the existing Redo menu accepts the undone cell edit"
+        },
+        {
+          "passed": true,
+          "name": "normal Undo and Redo preserve the editor's Unicode text"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after grid editing"
+        },
+        {
+          "passed": true,
+          "name": "existing data-change and after-edit handlers run on commit"
+        },
+        {
+          "passed": true,
+          "name": "AX transport accepts a request that application validation may reject"
+        },
+        {
+          "passed": true,
+          "name": "filtered first character stops the remaining text without bypassing validation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen selection is accepted through standard AXPress"
+        },
+        {
+          "passed": true,
+          "name": "existing shared selection handler runs"
+        },
+        {
+          "passed": true,
+          "name": "native selection readback matches 4D"
+        },
+        {
+          "passed": true,
+          "name": "enabled key CAFE keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row CAFE accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key CAFE"
+        },
+        {
+          "passed": true,
+          "name": "enabled key cafe keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row cafe accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key cafe"
+        },
+        {
+          "passed": true,
+          "name": "ordinary sort button invokes its existing handler"
+        },
+        {
+          "passed": true,
+          "name": "real 4D sorting preserves the same keyed cell at its new position"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during paged access and actions"
+        },
+        {
+          "passed": true,
+          "name": "enable application selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "the current row accepts the selection-rejection test request"
+        },
+        {
+          "passed": true,
+          "name": "selection rejection is confirmed without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "replace collection objects while retaining their keys"
+        },
+        {
+          "passed": true,
+          "name": "a retained cell cannot target a replacement object with the same key"
+        },
+        {
+          "passed": true,
+          "name": "ordinary record-change handler runs"
+        },
+        {
+          "passed": true,
+          "name": "retained prior-record cell has no active geometry"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close exits the owned 4D host"
+        },
+        {
+          "passed": true,
+          "name": "4D confirms normal acceptance separately from cancellation"
+        }
+      ],
+      "compiled": true,
+      "keyType": "text",
+      "kind": "collection",
+      "subform": true,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "array-interpreted": {
+      "passed": true,
+      "mode": "actions",
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "grid configuration preserves ordinary fields and buttons"
+        },
+        {
+          "passed": true,
+          "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "all 599 non-hidden logical rows are accessible"
+        },
+        {
+          "passed": true,
+          "name": "hidden identity and decorative columns stay out of readable columns"
+        },
+        {
+          "passed": true,
+          "name": "viewport is separate from complete row count"
+        },
+        {
+          "passed": true,
+          "name": "unchanged bindings preserve cell identity across refreshes"
+        },
+        {
+          "passed": true,
+          "name": "offscreen final row loads through the owning 4D process"
+        },
+        {
+          "passed": true,
+          "name": "each offscreen column has its own formatted value"
+        },
+        {
+          "passed": true,
+          "name": "disabled cells remain noneditable while their row can be selected like native 4D"
+        },
+        {
+          "passed": true,
+          "name": "select the final row directly from the first viewport"
+        },
+        {
+          "passed": true,
+          "name": "the shared selection handler reads the settled binding exactly once"
+        },
+        {
+          "passed": true,
+          "name": "selection confirmation waits for the binding and visible row"
+        },
+        {
+          "passed": true,
+          "name": "clear the selected rows through the existing list box"
+        },
+        {
+          "passed": true,
+          "name": "external grid action enumeration includes standard reveal"
+        },
+        {
+          "passed": true,
+          "name": "standard scroll-to-visible action reaches an offscreen cell"
+        },
+        {
+          "passed": true,
+          "name": "revealing a value preserves selection and handlers"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column cannot be edited through accessibility"
+        },
+        {
+          "passed": true,
+          "name": "enterable column advertises the existing cell editor"
+        },
+        {
+          "passed": true,
+          "name": "cell text enters through standard AXValue"
+        },
+        {
+          "passed": true,
+          "name": "focus identifies the exact edited row and column"
+        },
+        {
+          "passed": true,
+          "name": "cell editor exposes the correct Unicode text length"
+        },
+        {
+          "passed": true,
+          "name": "standard text selection targets the real cell editor"
+        },
+        {
+          "passed": true,
+          "name": "selected cell text can be replaced through the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "replacement publishes its real insertion position"
+        },
+        {
+          "passed": true,
+          "name": "the existing Undo menu accepts cell-editor changes"
+        },
+        {
+          "passed": true,
+          "name": "the existing Redo menu accepts the undone cell edit"
+        },
+        {
+          "passed": true,
+          "name": "normal Undo and Redo preserve the editor's Unicode text"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after grid editing"
+        },
+        {
+          "passed": true,
+          "name": "existing data-change and after-edit handlers run on commit"
+        },
+        {
+          "passed": true,
+          "name": "AX transport accepts a request that application validation may reject"
+        },
+        {
+          "passed": true,
+          "name": "filtered first character stops the remaining text without bypassing validation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen selection is accepted through standard AXPress"
+        },
+        {
+          "passed": true,
+          "name": "existing shared selection handler runs"
+        },
+        {
+          "passed": true,
+          "name": "native selection readback matches 4D"
+        },
+        {
+          "passed": true,
+          "name": "enabled key 0 keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row 0 accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key 0"
+        },
+        {
+          "passed": true,
+          "name": "enabled key 2147483646 keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row 2147483646 accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key 2147483646"
+        },
+        {
+          "passed": true,
+          "name": "ordinary sort button invokes its existing handler"
+        },
+        {
+          "passed": true,
+          "name": "real 4D sorting preserves the same keyed cell at its new position"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during paged access and actions"
+        },
+        {
+          "passed": true,
+          "name": "enable application selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "the current row accepts the selection-rejection test request"
+        },
+        {
+          "passed": true,
+          "name": "selection rejection is confirmed without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "ordinary record-change handler runs"
+        },
+        {
+          "passed": true,
+          "name": "retained prior-record cell has no active geometry"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close exits the owned 4D host"
+        },
+        {
+          "passed": true,
+          "name": "4D confirms normal acceptance separately from cancellation"
+        }
+      ],
+      "compiled": false,
+      "keyType": "longint",
+      "kind": "array",
+      "subform": false,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "array-compiled": {
+      "passed": true,
+      "mode": "actions",
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "grid configuration preserves ordinary fields and buttons"
+        },
+        {
+          "passed": true,
+          "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "all 599 non-hidden logical rows are accessible"
+        },
+        {
+          "passed": true,
+          "name": "hidden identity and decorative columns stay out of readable columns"
+        },
+        {
+          "passed": true,
+          "name": "viewport is separate from complete row count"
+        },
+        {
+          "passed": true,
+          "name": "unchanged bindings preserve cell identity across refreshes"
+        },
+        {
+          "passed": true,
+          "name": "offscreen final row loads through the owning 4D process"
+        },
+        {
+          "passed": true,
+          "name": "each offscreen column has its own formatted value"
+        },
+        {
+          "passed": true,
+          "name": "disabled cells remain noneditable while their row can be selected like native 4D"
+        },
+        {
+          "passed": true,
+          "name": "select the final row directly from the first viewport"
+        },
+        {
+          "passed": true,
+          "name": "the shared selection handler reads the settled binding exactly once"
+        },
+        {
+          "passed": true,
+          "name": "selection confirmation waits for the binding and visible row"
+        },
+        {
+          "passed": true,
+          "name": "clear the selected rows through the existing list box"
+        },
+        {
+          "passed": true,
+          "name": "external grid action enumeration includes standard reveal"
+        },
+        {
+          "passed": true,
+          "name": "standard scroll-to-visible action reaches an offscreen cell"
+        },
+        {
+          "passed": true,
+          "name": "revealing a value preserves selection and handlers"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column cannot be edited through accessibility"
+        },
+        {
+          "passed": true,
+          "name": "enterable column advertises the existing cell editor"
+        },
+        {
+          "passed": true,
+          "name": "cell text enters through standard AXValue"
+        },
+        {
+          "passed": true,
+          "name": "focus identifies the exact edited row and column"
+        },
+        {
+          "passed": true,
+          "name": "cell editor exposes the correct Unicode text length"
+        },
+        {
+          "passed": true,
+          "name": "standard text selection targets the real cell editor"
+        },
+        {
+          "passed": true,
+          "name": "selected cell text can be replaced through the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "replacement publishes its real insertion position"
+        },
+        {
+          "passed": true,
+          "name": "the existing Undo menu accepts cell-editor changes"
+        },
+        {
+          "passed": true,
+          "name": "the existing Redo menu accepts the undone cell edit"
+        },
+        {
+          "passed": true,
+          "name": "normal Undo and Redo preserve the editor's Unicode text"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after grid editing"
+        },
+        {
+          "passed": true,
+          "name": "existing data-change and after-edit handlers run on commit"
+        },
+        {
+          "passed": true,
+          "name": "AX transport accepts a request that application validation may reject"
+        },
+        {
+          "passed": true,
+          "name": "filtered first character stops the remaining text without bypassing validation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen selection is accepted through standard AXPress"
+        },
+        {
+          "passed": true,
+          "name": "existing shared selection handler runs"
+        },
+        {
+          "passed": true,
+          "name": "native selection readback matches 4D"
+        },
+        {
+          "passed": true,
+          "name": "enabled key 0 keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row 0 accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key 0"
+        },
+        {
+          "passed": true,
+          "name": "enabled key 2147483646 keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row 2147483646 accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key 2147483646"
+        },
+        {
+          "passed": true,
+          "name": "ordinary sort button invokes its existing handler"
+        },
+        {
+          "passed": true,
+          "name": "real 4D sorting preserves the same keyed cell at its new position"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during paged access and actions"
+        },
+        {
+          "passed": true,
+          "name": "enable application selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "the current row accepts the selection-rejection test request"
+        },
+        {
+          "passed": true,
+          "name": "selection rejection is confirmed without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "ordinary record-change handler runs"
+        },
+        {
+          "passed": true,
+          "name": "retained prior-record cell has no active geometry"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close exits the owned 4D host"
+        },
+        {
+          "passed": true,
+          "name": "4D confirms normal acceptance separately from cancellation"
+        }
+      ],
+      "compiled": true,
+      "keyType": "longint",
+      "kind": "array",
+      "subform": false,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "entity-interpreted": {
+      "passed": true,
+      "mode": "actions",
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "grid configuration preserves ordinary fields and buttons"
+        },
+        {
+          "passed": true,
+          "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "all 599 non-hidden logical rows are accessible"
+        },
+        {
+          "passed": true,
+          "name": "hidden identity and decorative columns stay out of readable columns"
+        },
+        {
+          "passed": true,
+          "name": "viewport is separate from complete row count"
+        },
+        {
+          "passed": true,
+          "name": "unchanged bindings preserve cell identity across refreshes"
+        },
+        {
+          "passed": true,
+          "name": "offscreen final row loads through the owning 4D process"
+        },
+        {
+          "passed": true,
+          "name": "each offscreen column has its own formatted value"
+        },
+        {
+          "passed": true,
+          "name": "select the final row directly from the first viewport"
+        },
+        {
+          "passed": true,
+          "name": "the shared selection handler reads the settled binding exactly once"
+        },
+        {
+          "passed": true,
+          "name": "selection confirmation waits for the binding and visible row"
+        },
+        {
+          "passed": true,
+          "name": "clear the selected rows through the existing list box"
+        },
+        {
+          "passed": true,
+          "name": "external grid action enumeration includes standard reveal"
+        },
+        {
+          "passed": true,
+          "name": "standard scroll-to-visible action reaches an offscreen cell"
+        },
+        {
+          "passed": true,
+          "name": "revealing a value preserves selection and handlers"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column cannot be edited through accessibility"
+        },
+        {
+          "passed": true,
+          "name": "enterable column advertises the existing cell editor"
+        },
+        {
+          "passed": true,
+          "name": "cell text enters through standard AXValue"
+        },
+        {
+          "passed": true,
+          "name": "focus identifies the exact edited row and column"
+        },
+        {
+          "passed": true,
+          "name": "cell editor exposes the correct Unicode text length"
+        },
+        {
+          "passed": true,
+          "name": "standard text selection targets the real cell editor"
+        },
+        {
+          "passed": true,
+          "name": "selected cell text can be replaced through the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "replacement publishes its real insertion position"
+        },
+        {
+          "passed": true,
+          "name": "the existing Undo menu accepts cell-editor changes"
+        },
+        {
+          "passed": true,
+          "name": "the existing Redo menu accepts the undone cell edit"
+        },
+        {
+          "passed": true,
+          "name": "normal Undo and Redo preserve the editor's Unicode text"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after grid editing"
+        },
+        {
+          "passed": true,
+          "name": "existing data-change and after-edit handlers run on commit"
+        },
+        {
+          "passed": true,
+          "name": "AX transport accepts a request that application validation may reject"
+        },
+        {
+          "passed": true,
+          "name": "filtered first character stops the remaining text without bypassing validation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen selection is accepted through standard AXPress"
+        },
+        {
+          "passed": true,
+          "name": "existing shared selection handler runs"
+        },
+        {
+          "passed": true,
+          "name": "native selection readback matches 4D"
+        },
+        {
+          "passed": true,
+          "name": "enabled key CAFE keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row CAFE accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key CAFE"
+        },
+        {
+          "passed": true,
+          "name": "enabled key cafe keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row cafe accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key cafe"
+        },
+        {
+          "passed": true,
+          "name": "ordinary sort button invokes its existing handler"
+        },
+        {
+          "passed": true,
+          "name": "real 4D sorting preserves the same keyed cell at its new position"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during paged access and actions"
+        },
+        {
+          "passed": true,
+          "name": "enable application selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "the current row accepts the selection-rejection test request"
+        },
+        {
+          "passed": true,
+          "name": "selection rejection is confirmed without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "switch dataclasses with identical primary keys"
+        },
+        {
+          "passed": true,
+          "name": "identical keys in another dataclass cannot reuse an old accessible cell"
+        },
+        {
+          "passed": true,
+          "name": "ordinary record-change handler runs"
+        },
+        {
+          "passed": true,
+          "name": "retained prior-record cell has no active geometry"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close exits the owned 4D host"
+        },
+        {
+          "passed": true,
+          "name": "4D confirms normal acceptance separately from cancellation"
+        }
+      ],
+      "compiled": false,
+      "keyType": "text",
+      "kind": "entity",
+      "subform": false,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "entity-compiled": {
+      "passed": true,
+      "mode": "actions",
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "grid configuration preserves ordinary fields and buttons"
+        },
+        {
+          "passed": true,
+          "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridLoading"
+        },
+        {
+          "passed": true,
+          "name": "exercise coverage state: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "restore configured grid after gridUnavailable"
+        },
+        {
+          "passed": true,
+          "name": "all 599 non-hidden logical rows are accessible"
+        },
+        {
+          "passed": true,
+          "name": "hidden identity and decorative columns stay out of readable columns"
+        },
+        {
+          "passed": true,
+          "name": "viewport is separate from complete row count"
+        },
+        {
+          "passed": true,
+          "name": "unchanged bindings preserve cell identity across refreshes"
+        },
+        {
+          "passed": true,
+          "name": "offscreen final row loads through the owning 4D process"
+        },
+        {
+          "passed": true,
+          "name": "each offscreen column has its own formatted value"
+        },
+        {
+          "passed": true,
+          "name": "select the final row directly from the first viewport"
+        },
+        {
+          "passed": true,
+          "name": "the shared selection handler reads the settled binding exactly once"
+        },
+        {
+          "passed": true,
+          "name": "selection confirmation waits for the binding and visible row"
+        },
+        {
+          "passed": true,
+          "name": "clear the selected rows through the existing list box"
+        },
+        {
+          "passed": true,
+          "name": "external grid action enumeration includes standard reveal"
+        },
+        {
+          "passed": true,
+          "name": "standard scroll-to-visible action reaches an offscreen cell"
+        },
+        {
+          "passed": true,
+          "name": "revealing a value preserves selection and handlers"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column cannot be edited through accessibility"
+        },
+        {
+          "passed": true,
+          "name": "enterable column advertises the existing cell editor"
+        },
+        {
+          "passed": true,
+          "name": "cell text enters through standard AXValue"
+        },
+        {
+          "passed": true,
+          "name": "focus identifies the exact edited row and column"
+        },
+        {
+          "passed": true,
+          "name": "cell editor exposes the correct Unicode text length"
+        },
+        {
+          "passed": true,
+          "name": "standard text selection targets the real cell editor"
+        },
+        {
+          "passed": true,
+          "name": "selected cell text can be replaced through the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "replacement publishes its real insertion position"
+        },
+        {
+          "passed": true,
+          "name": "the existing Undo menu accepts cell-editor changes"
+        },
+        {
+          "passed": true,
+          "name": "the existing Redo menu accepts the undone cell edit"
+        },
+        {
+          "passed": true,
+          "name": "normal Undo and Redo preserve the editor's Unicode text"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after grid editing"
+        },
+        {
+          "passed": true,
+          "name": "existing data-change and after-edit handlers run on commit"
+        },
+        {
+          "passed": true,
+          "name": "AX transport accepts a request that application validation may reject"
+        },
+        {
+          "passed": true,
+          "name": "filtered first character stops the remaining text without bypassing validation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen selection is accepted through standard AXPress"
+        },
+        {
+          "passed": true,
+          "name": "existing shared selection handler runs"
+        },
+        {
+          "passed": true,
+          "name": "native selection readback matches 4D"
+        },
+        {
+          "passed": true,
+          "name": "enabled key CAFE keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row CAFE accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key CAFE"
+        },
+        {
+          "passed": true,
+          "name": "enabled key cafe keeps its own row state"
+        },
+        {
+          "passed": true,
+          "name": "distinct row cafe accepts selection"
+        },
+        {
+          "passed": true,
+          "name": "host selection confirms the exact key cafe"
+        },
+        {
+          "passed": true,
+          "name": "ordinary sort button invokes its existing handler"
+        },
+        {
+          "passed": true,
+          "name": "real 4D sorting preserves the same keyed cell at its new position"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during paged access and actions"
+        },
+        {
+          "passed": true,
+          "name": "enable application selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "the current row accepts the selection-rejection test request"
+        },
+        {
+          "passed": true,
+          "name": "selection rejection is confirmed without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "switch dataclasses with identical primary keys"
+        },
+        {
+          "passed": true,
+          "name": "identical keys in another dataclass cannot reuse an old accessible cell"
+        },
+        {
+          "passed": true,
+          "name": "ordinary record-change handler runs"
+        },
+        {
+          "passed": true,
+          "name": "retained prior-record cell has no active geometry"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close exits the owned 4D host"
+        },
+        {
+          "passed": true,
+          "name": "4D confirms normal acceptance separately from cancellation"
+        }
+      ],
+      "compiled": true,
+      "keyType": "text",
+      "kind": "entity",
+      "subform": false,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "metadata-lifecycle": {
+      "passed": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "metadata lifecycle starts in interpreted desktop"
+        },
+        {
+          "passed": true,
+          "name": "not-ready grid does not evaluate its metadata callback"
+        },
+        {
+          "passed": true,
+          "name": "expression is captured before readiness and old mapping never runs"
+        },
+        {
+          "passed": true,
+          "name": "repairing invalid keys cannot authorize a changed metadata expression"
+        },
+        {
+          "passed": true,
+          "name": "configured Formula with empty native expression reports a named configuration failure"
+        },
+        {
+          "passed": true,
+          "name": "matching public restart restores grid cells"
+        },
+        {
+          "passed": true,
+          "name": "callback error stops the owning bridge and preserves its diagnostic"
+        },
+        {
+          "passed": true,
+          "name": "callback error retires the retained cell"
+        },
+        {
+          "passed": true,
+          "name": "ordinary form timer and close survive bridge cleanup"
+        }
+      ],
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "test_sha256": "063746b76a5497b635a3c46b370740f9a9a33f60b9e6477cc2231560172ff197"
+    },
+    "alp-controls-interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "7245ea541d6076f6d221ed966045a947bd07042abb2fc85e86c5768ded50ea1d",
+        "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+        "Project/Sources/Methods/AXBP_Child.4dm": "f58633ac51fd6d5e2005a4a3f8d45d91d6db20b6a78d8a97cfa6f85158865af1",
+        "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "Project/Sources/Methods/AXB_View.4dm": "63be8b3eaa276ee6055b16fa488f1798547726b21ba1e6e9574c0cd72ef15a00",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBP_Enter.4dm": "2647584541227567a0a8242cf0a91993b84f12e0263cb1cdae9b1e998a9a0d4e",
+        "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXBP_State.4dm": "2430466ce1b6638bf3611ab024f398274c03fee80a4c8c2c1386c69c8ef04a70",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "Project/Sources/Methods/AXBP_EntryEnd.4dm": "68b4fb476c328498db8dc52033fe7bfa824aa320fb99f504622487b7aeb4e2b7",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXBP_Open.4dm": "3a0f9d90e0cd861755e18c27c6cfcc388efb14212d70a2390f344a0a516c8146",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "e41f6430f4e9a725750d4ee63ff09df1f1c25731e6e1ea733d4cfdf57e1a5fe7",
+        "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBP.4dm": "5702237d63f9726d80d7619c317b8550b63084f2c3bec849273780622bdeb194",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+        "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+        "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+        "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+      },
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "areaListVersion": "11.4.2"
+    },
+    "alp-controls-compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "3fdc6bb20e57edf669d95dfb2b0a616f7d39f6269f208a018f063522cc155ceb",
+        "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+        "Project/Sources/Methods/AXBP_Child.4dm": "f58633ac51fd6d5e2005a4a3f8d45d91d6db20b6a78d8a97cfa6f85158865af1",
+        "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "Project/Sources/Methods/AXB_View.4dm": "63be8b3eaa276ee6055b16fa488f1798547726b21ba1e6e9574c0cd72ef15a00",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBP_Enter.4dm": "2647584541227567a0a8242cf0a91993b84f12e0263cb1cdae9b1e998a9a0d4e",
+        "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXBP_State.4dm": "2430466ce1b6638bf3611ab024f398274c03fee80a4c8c2c1386c69c8ef04a70",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "Project/Sources/Methods/AXBP_EntryEnd.4dm": "68b4fb476c328498db8dc52033fe7bfa824aa320fb99f504622487b7aeb4e2b7",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXBP_Open.4dm": "3a0f9d90e0cd861755e18c27c6cfcc388efb14212d70a2390f344a0a516c8146",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "e41f6430f4e9a725750d4ee63ff09df1f1c25731e6e1ea733d4cfdf57e1a5fe7",
+        "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBP.4dm": "5702237d63f9726d80d7619c317b8550b63084f2c3bec849273780622bdeb194",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+        "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+        "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+        "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+      },
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "areaListVersion": "11.4.2"
+    },
+    "alp-controls-voiceover": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the repeated AreaList table"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the checkbox label and control role"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver activates the checkbox through the original entry and commit handlers"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver leaves checkbox cells and reaches the ordinary form editor"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "3fdc6bb20e57edf669d95dfb2b0a616f7d39f6269f208a018f063522cc155ceb",
+        "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+        "Project/Sources/Methods/AXBP_Child.4dm": "f58633ac51fd6d5e2005a4a3f8d45d91d6db20b6a78d8a97cfa6f85158865af1",
+        "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "Project/Sources/Methods/AXB_View.4dm": "63be8b3eaa276ee6055b16fa488f1798547726b21ba1e6e9574c0cd72ef15a00",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBP_Enter.4dm": "2647584541227567a0a8242cf0a91993b84f12e0263cb1cdae9b1e998a9a0d4e",
+        "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXBP_State.4dm": "2430466ce1b6638bf3611ab024f398274c03fee80a4c8c2c1386c69c8ef04a70",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "Project/Sources/Methods/AXBP_EntryEnd.4dm": "68b4fb476c328498db8dc52033fe7bfa824aa320fb99f504622487b7aeb4e2b7",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXBP_Open.4dm": "3a0f9d90e0cd861755e18c27c6cfcc388efb14212d70a2390f344a0a516c8146",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "e41f6430f4e9a725750d4ee63ff09df1f1c25731e6e1ea733d4cfdf57e1a5fe7",
+        "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBP.4dm": "5702237d63f9726d80d7619c317b8550b63084f2c3bec849273780622bdeb194",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+        "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+        "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+        "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+      },
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "areaListVersion": "11.4.2",
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Left invoice: Left lines, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In Left invoice: Left lines, table, Item SKU"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "X selection replaced"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Description Left line 0600"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Amount 600.25"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Styled Left styled 0600"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Readiness Left ready"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Direct Direct checked checkbox"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+        },
+        {
+          "key": "up",
+          "shift": true,
+          "command": false,
+          "caption": "X Out of Left invoice: Left lines, table"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Note, Left invoice: Note"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Left note, Insertion at beginning of text., Left invoice: Note, edit text"
+        }
+      ]
+    },
+    "alp-text-interpreted": {
+      "passed": true,
+      "textMode": "bmp",
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "areaListVersion": "11.4.2",
+      "keyType": "text",
+      "controls": false,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "alp-text-compiled": {
+      "passed": true,
+      "textMode": "bmp",
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "areaListVersion": "11.4.2",
+      "keyType": "text",
+      "controls": false,
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "architecture": "ARM64"
+    },
+    "large-form": {
+      "passed": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic discovery starts around the complete large form"
+        },
+        {
+          "passed": true,
+          "name": "large form runs in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "all 600 ordinary buttons, the long note and Close are independently discoverable"
+        },
+        {
+          "passed": true,
+          "name": "the entire 65,546-character note is readable without truncation"
+        },
+        {
+          "passed": true,
+          "name": "native character count covers the complete note"
+        },
+        {
+          "passed": true,
+          "name": "long note accepts initial entry focus"
+        },
+        {
+          "passed": true,
+          "name": "a control beyond the old node limit accepts AXPress"
+        },
+        {
+          "passed": true,
+          "name": "the real last button handler ran"
+        },
+        {
+          "passed": true,
+          "name": "long note accepts the initial AX focus request"
+        },
+        {
+          "passed": true,
+          "name": "selection beyond the old text limit reaches the editor"
+        },
+        {
+          "passed": true,
+          "name": "selected text agrees with the actual distant range"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement reaches the existing long-note editor"
+        },
+        {
+          "passed": true,
+          "name": "the full accessible value preserves both sides of the partial edit"
+        },
+        {
+          "passed": true,
+          "name": "a complete long Unicode replacement is accepted"
+        },
+        {
+          "passed": true,
+          "name": "the existing keystroke handler receives the long text and its trailing Return"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Undo restores the entire previous note"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Redo restores the long Unicode insertion"
+        },
+        {
+          "passed": true,
+          "name": "normal editing completion commits the full long value"
+        },
+        {
+          "passed": true,
+          "name": "the long rejection case reaches the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "rejected long input never commits its forbidden value"
+        },
+        {
+          "passed": true,
+          "name": "the original form timer continues while reading and editing the large form"
+        },
+        {
+          "passed": true,
+          "name": "the ordinary close action is accepted"
+        },
+        {
+          "passed": true,
+          "name": "the ordinary close action exits the large form normally"
+        }
+      ],
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "compiled": false,
+      "enumerationSeconds": 0.024382292293012142,
+      "initialNote": {
+        "focusSettable": true,
+        "focused": false,
+        "enabled": true
+      },
+      "readNoteSeconds": 0.00030945800244808197,
+      "noteBeforeFocus": {
+        "focusSettable": true,
+        "focused": false,
+        "enabled": true
+      },
+      "focusTransport": 0
+    },
+    "large-form-compiled-voiceover": {
+      "passed": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic discovery starts around the complete large form"
+        },
+        {
+          "passed": true,
+          "name": "large form runs in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "all 600 ordinary buttons, the long note and Close are independently discoverable"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver begins at the window independently of entry focus"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the complete form group"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the first ordinary button"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the final form control"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the ordinary field beyond 600 buttons"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the last of all 600 ordinary buttons"
+        },
+        {
+          "passed": true,
+          "name": "read-only VoiceOver traversal preserves handlers and form data"
+        },
+        {
+          "passed": true,
+          "name": "the entire 65,546-character note is readable without truncation"
+        },
+        {
+          "passed": true,
+          "name": "native character count covers the complete note"
+        },
+        {
+          "passed": true,
+          "name": "long note accepts initial entry focus"
+        },
+        {
+          "passed": true,
+          "name": "a control beyond the old node limit accepts AXPress"
+        },
+        {
+          "passed": true,
+          "name": "the real last button handler ran"
+        },
+        {
+          "passed": true,
+          "name": "long note accepts the initial AX focus request"
+        },
+        {
+          "passed": true,
+          "name": "selection beyond the old text limit reaches the editor"
+        },
+        {
+          "passed": true,
+          "name": "selected text agrees with the actual distant range"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement reaches the existing long-note editor"
+        },
+        {
+          "passed": true,
+          "name": "the full accessible value preserves both sides of the partial edit"
+        },
+        {
+          "passed": true,
+          "name": "a complete long Unicode replacement is accepted"
+        },
+        {
+          "passed": true,
+          "name": "the existing keystroke handler receives the long text and its trailing Return"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Undo restores the entire previous note"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Redo restores the long Unicode insertion"
+        },
+        {
+          "passed": true,
+          "name": "normal editing completion commits the full long value"
+        },
+        {
+          "passed": true,
+          "name": "the long rejection case reaches the existing editor"
+        },
+        {
+          "passed": true,
+          "name": "rejected long input never commits its forbidden value"
+        },
+        {
+          "passed": true,
+          "name": "the original form timer continues while reading and editing the large form"
+        },
+        {
+          "passed": true,
+          "name": "the ordinary close action is accepted"
+        },
+        {
+          "passed": true,
+          "name": "the ordinary close action exits the large form normally"
+        }
+      ],
+      "native_sha256": "0bcc5d4381cb46fe6419f7a7d5694b8a5cb6729acae728a700ccfb5e992e5473",
+      "component_sha256": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+      "compiled": true,
+      "enumerationSeconds": 0.023786749690771103,
+      "initialNote": {
+        "focusSettable": true,
+        "focused": false,
+        "enabled": true
+      },
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": true,
+          "caption": "\u00d7 close, button"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X minimize, button"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X full screen, button"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 AXB complete large form"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Large form, group"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In Large form, group, 602 items 0, button"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 0, button"
+        },
+        {
+          "key": "end",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Close, button"
+        },
+        {
+          "key": "left",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Large note, edit text, Insertion at beginning of text. Readable note text."
+        },
+        {
+          "key": "left",
+          "shift": false,
+          "command": false,
+          "caption": "X 599, button"
+        }
+      ],
+      "readNoteSeconds": 0.0005164998583495617,
+      "noteBeforeFocus": {
+        "focusSettable": true,
+        "focused": false,
+        "enabled": true
+      },
+      "focusTransport": 0
+    }
+  },
+  "sources_sha256": {
+    "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+    "host/OptionalMethods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+    "host/OptionalMethods/AXB_View.4dm": "63be8b3eaa276ee6055b16fa488f1798547726b21ba1e6e9574c0cd72ef15a00",
+    "prepare_grid_fixture.py": "18e57f6eccd636290d949958852f23a8da2ba6d5445cec4ff67f8ab051bdaaca",
+    "test_grid_fixture.py": "7a6d32b6303e229bfc201eb825efde7192d8392a1bab8fafac068c151af2d1ef",
+    "test_grid_metadata_lifecycle.py": "063746b76a5497b635a3c46b370740f9a9a33f60b9e6477cc2231560172ff197",
+    "prepare_large_form.py": "b5077d2b964616209fea9380d43432a3979e0b843e8dadbf4d8e0ae5de3f6e22",
+    "test_large_form.py": "da0c67ae4d9bdf953003ca4f0fb030d4ed972692aad7684bb617b2f271a1ea45",
+    "test_discovery_fixture.py": "c8a98da796802dba0051c65b3f04a258e3b1464e501778967d9d0b897fd711ed",
+    "test_alp_grid_fixture.py": "3c149393c73a33494f1ddbc781d7b511523a7f1e1428aed55ee136556820cbfb",
+    "test_alp_controls_fixture.py": "951cad9cbe4b094a4164a4563d8fff4b58bc506c6f438a41a1de8d76ac7758bc"
+  },
+  "component_package_sha256": {
+    "AccessibilityBridge.4DZ": "a904875accf58bc5392aea6b24208ffd72bd77f97722a4df00401620fe202814",
+    "Libraries/lib4d-arm64.dylib": "3f7a9559e41c0830501889450af449fc28c59bdf7d8b20efa7caacc0d019c769"
+  }
+}

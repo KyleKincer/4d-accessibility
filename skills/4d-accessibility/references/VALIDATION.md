@@ -1,5 +1,26 @@
 # Validation scope
 
+## Polling and large forms, September 24
+
+Version 0.19.3 passes 884 live checks across 18 runs on native ARM 4D 20.8 and macOS 26.6.2. The plugin and compiled component match in every case. [Checks and source/package hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/polling.json).
+
+| Scenario | Execution and checks |
+| --- | --- |
+| Ordinary and generated controls | Interpreted/compiled, 69 each, 276 total |
+| Collection grid inside an automatic child | Interpreted/compiled, 62 each |
+| Native array grid with LongInt keys | Interpreted/compiled, 59 each |
+| Local entity-selection grid | Interpreted/compiled, 60 each |
+| Readiness, metadata changes and fatal callback cleanup | Interpreted, 9 |
+| AreaList checkbox editors | Interpreted/compiled, 30 each; compiled VoiceOver, 34 |
+| AreaList BMP text editors | Interpreted/compiled, 45 each |
+| 600 ordinary buttons and a 65,546-character field | Interpreted, 23; compiled with VoiceOver, 30 |
+
+The large-form VoiceOver test confirms the native window starting point, enters the form group, reads its first and last buttons, ordinary note and Close control, and preserves form data. It then runs the same distant text selection, partial/whole Unicode replacement, validation, Undo/Redo and original-timer checks as the interpreted suite. It rejects unresponsive speech. This checks both ends of the form, not a spoken traversal of every button.
+
+The child fixture now reads focus state from its root observer and explicitly focuses a real child field before testing actions. The metadata and large-form launchers activate their owned window. The large-form test establishes entry focus before its first button action, avoiding requests during startup focus changes. These are test corrections; the original focus and business-result assertions remain. The compiled entity run uses a fresh prepared fixture because interpreted 4D rewrites its generated catalog when opening the synthetic data file. Test source/package guards remain enabled.
+
+Reproduce with the preparers and tests in `CONTRIBUTING.md`. Prepare AreaList text and checkbox cases separately; `--controls` adds columns that the text-only suite does not expect. These results do not establish supplementary Unicode in AreaList, remote entities, Intel desktop runtime or every control family.
+
 ## Control names and empty captions, September 24
 
 Version 0.19.2 passes 69 checks in each of four runs: ordinary and generated JSON forms, each interpreted and compiled on native ARM 4D 20.8. The 276 checks include normal object handlers, text validation and standard Cancel behavior. Untitled buttons, checkboxes, radio buttons and popups use their existing help tips. Visible button captions retain precedence. A tip exceeding 512 UTF-16 units is shortened at a character boundary. An empty static caption contributes no nameless stop, then appears when the application's normal button handler sets its text. An explicit label can retain an intentionally empty static node.

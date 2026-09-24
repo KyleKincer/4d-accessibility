@@ -138,6 +138,14 @@ def main():
 
         table = ax.wait_for(lambda: find("Invoice lines"), "Logical grid not published")
         close = find("Close")
+        if config.get("subform"):
+            # 4D initially focuses the subform container. Choose a real entry
+            # control before testing actions that preserve keyboard focus.
+            ax.wait_for(lambda: state().get("windowActive"), "Initial active window was not published")
+            note = find("Note", "AXTextField")
+            check(note.set_boolean("AXFocused", True) == 0, "child field accepts initial focus through AX")
+            ax.wait_for(lambda: note.read("AXFocused") is True and state().get("focus") == "Note", "Child field did not receive actual keyboard focus")
+            check(True, "child focus agrees with the actual 4D entry control")
         ax.wait_for(lambda: state().get("windowActive") and state().get("focused"), "Initial active focus was not published")
         def settle():
             ax.wait_for(lambda: state() and group.read("AXHelp") not in (None, "Action queued", "Waiting for the application to complete the action"), "Action did not receive provider completion", timeout=30)

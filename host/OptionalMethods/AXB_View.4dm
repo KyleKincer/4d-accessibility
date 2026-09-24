@@ -81,8 +81,22 @@ If (($view=Null) | (Value type($view)#Is object))
  return
 End if
 If ($view.automatic=True)
- $description:=AXB_Discover($view.options)
- $view.discovery:=$description
+ If ($reading)
+  // A grid page needs fresh grid state and its containing form path. Reading
+  // unrelated labels/values for every page can prevent a large form's cache
+  // from ever catching up. Keep the scope, instance and live-child checks
+  // below, and describe the grids through their normal readiness guards.
+  $description:=New object("ok"; True; "nodes"; New collection; "subforms"; New collection; "unsupported"; New collection)
+  If ($request.path.length>0)
+   $name:=$request.path[0]
+   If ((Find in array($objects; $name)>0) && (OBJECT Get type(*; $name)=Object type subform) && OBJECT Get visible(*; $name))
+    $description.subforms.push($name)
+   End if
+  End if
+ Else
+  $description:=AXB_Discover($view.options)
+  $view.discovery:=$description
+ End if
  $grids:=AXB_Grids($view; New object("operation"; "describe"))
  If (Not($grids.ok=True))
   return $grids

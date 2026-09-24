@@ -101,6 +101,7 @@ Case of
  : (Form event code=On Timer)
   Form.ticks:=Form.ticks+1
   $state:=New object("ready"; True; "start"; Form.start; "ticks"; Form.ticks; "pressed"; Form.pressed; "bridgeError"; Form.axbError; "failure"; Form.axbFailure; "note"; Form.note)
+  $state.compiled:=Is compiled mode
   $state.beforeCount:=Form.beforeCount
   $state.lastInputLength:=Form.lastInputLength
   $state.bulkInputLength:=Form.bulkInputLength

@@ -16,7 +16,7 @@ from prepare_grid_fixture import BUILD, FIXTURE, ROOT, TITLE
 sys.path.insert(0, str(ROOT / "tests"))
 import mac_ax as ax
 import doctor
-from fixture_desktop import wait_for_start
+from fixture_desktop import activate_fixture, wait_for_start
 
 
 def prepare(server):
@@ -127,8 +127,7 @@ def main():
     try:
         ready, report["noticeAcknowledged"] = wait_for_start(process, project, state, BUILD)
         check(ready.get("start", {}).get("ok") is True and ready["compiled"] is False, "metadata lifecycle starts in interpreted desktop")
-        app = ax.application(process.pid)
-        window = ax.wait_for(lambda: next((w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE), None), "Owned metadata window missing")
+        app, window = activate_fixture(process, project, TITLE)
 
         def tables():
             pending, found = [window], []

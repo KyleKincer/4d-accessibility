@@ -426,8 +426,11 @@ End if
             source = source[:boundary] + '  Form.restartRequested:=True\n' + source[boundary:]
             click.write_text(source)
         state_method = methods / "AXBG_State.4dm"
-        state_method.write_text(state_method.read_text().replace('"bridgeError"; Form.axbError', '"bridgeError"; Form.rootBridgeError').replace('"failure"; Form.failure', '"failure"; Form.rootFailure').replace('AXB_Form("diagnostics"; New object)', 'Form.rootCoverage'))
+        # The child has no root registration. Its read-only observer consumes
+        # the snapshot captured by the owning root, just like diagnostics.
+        state_method.write_text(state_method.read_text().replace('"bridgeError"; Form.axbError', '"bridgeError"; Form.rootBridgeError').replace('"failure"; Form.failure', '"failure"; Form.rootFailure').replace('AXB_Form("diagnostics"; New object)', 'Form.rootCoverage').replace('$context:=AXB_FormContext', '$context:=New object("state"; Form.rootSnapshot)'))
         (methods / "AXBG_Root.4dm").write_text('''var $options; $reply : Object
+var $context : Object
 Case of
  : (Form event code=On Load)
   ON ERR CALL("AXBG_Error")
@@ -449,6 +452,8 @@ Case of
    Form.grid.rootBridgeError:=Form.axbError
    Form.grid.rootFailure:=Form.axbFailure
    Form.grid.rootCoverage:=AXB_Form("diagnostics"; New object)
+   $context:=AXB_FormContext
+   Form.grid.rootSnapshot:=$context.state
    EXECUTE METHOD IN SUBFORM("Grid"; "AXBG_State")
   End if
  : (Form event code=On Unload)

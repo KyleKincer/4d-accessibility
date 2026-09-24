@@ -35,5 +35,7 @@ For ($i; 1; 2)
 End for
 $token:=$context.token
 Use ($token)
- $token.fast:=($context.pending#Null) | ($context.gridQueue.length>0) | ($context.gridPages.length>0)
+ // Background cache requests must not keep full-form discovery in the fast
+ // editor loop. They continue on the ordinary bounded polling schedule.
+ $token.fast:=($context.pending#Null)
 End use

@@ -1,5 +1,7 @@
 This is a development preview of 4D Accessibility for macOS and 4D 20.8.
 
+Large forms now leave time for input and VoiceOver between accessibility refreshes. Grid-page reads validate their current grid and containing form without rescanning unrelated ordinary controls. Background pages use normal polling; pending editor operations keep their fast path. The component adapts its idle interval to callback cost. Existing application hooks and form timers stay the same.
+
 Untitled buttons, checkboxes, radio buttons and popups reuse their current 4D help tips as accessible names. Displayed captions and explicit labels take precedence. Empty static captions appear in the tree when the application fills them, avoiding nameless stops for empty placeholders. These defaults reduce application metadata; review the resulting names because a help tip can describe temporary state instead of the control's action.
 
 Button activation now acknowledges dispatch before the existing handler changes record scope. A successful navigation no longer produces a false rejection solely because its old accessibility route retired. The receipt confirms dispatch; callers must still verify the application's result. Stale requests and state-changing checkbox/radio actions retain their checks.
