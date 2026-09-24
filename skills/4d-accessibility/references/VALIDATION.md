@@ -1,5 +1,11 @@
 # Validation scope
 
+## Control names and empty captions, September 24
+
+Version 0.19.2 passes 69 checks in each of four runs: ordinary and generated JSON forms, each interpreted and compiled on native ARM 4D 20.8. The 276 checks include normal object handlers, text validation and standard Cancel behavior. Untitled buttons, checkboxes, radio buttons and popups use their existing help tips. Visible button captions retain precedence. A tip exceeding 512 UTF-16 units is shortened at a character boundary. An empty static caption contributes no nameless stop, then appears when the application's normal button handler sets its text. An explicit label can retain an intentionally empty static node.
+
+Before the changes, the untitled-button test failed to find its help-tip name, and the empty-caption test found an extra node. [Reports and source/package hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/control-names.json) preserve those reproductions and the final runs. This matrix does not establish VoiceOver speech for the new naming cases or safe activation of off-window keyboard commands.
+
 ## Button activation across record changes, September 24
 
 Version 0.19.1 passes 58 generated-child checks and 62 ordinary-control checks in each of interpreted and compiled ARM desktop execution, 240 total. The new regression first failed when an ordinary button changed root record scope: its handler ran, but the bridge rejected its confirmation because the old route had retired. The button now acknowledges posting its verified click. The receipt does not claim a business result. The same tests retain stale-descendant rejection, existing object handlers, native checkbox/radio state, text validation and standard Cancel behavior. [Failure, final reports and source hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/button-activation.json).

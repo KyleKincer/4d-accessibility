@@ -1,0 +1,2989 @@
+{
+  "version": "0.19.2",
+  "scope": "Automatic names and empty dynamic captions, ordinary/generated forms, interpreted/compiled ARM 4D 20.8",
+  "beforeHelpTip": {
+    "passed": false,
+    "runId": "e9a74fa9c8c54f4b9cbeb18e7a7f3d2b",
+    "checks": [
+      {
+        "name": "one start call registers a form without describe/apply callbacks",
+        "passed": true
+      },
+      {
+        "name": "all visible fixture controls are exposed once",
+        "passed": true
+      },
+      {
+        "name": "untitled button uses its existing help tip as its accessible name",
+        "passed": false
+      }
+    ],
+    "dynamic": false,
+    "process_architecture": "ARM64",
+    "compile_report_sha256": "5a84e3009a22863bb3a79b5a1cec8e487978fe5a14ee47b2b84e31aa9b101fbd",
+    "compiled": false
+  },
+  "beforeEmptyCaption": {
+    "passed": false,
+    "runId": "f2bf1ecf632e4154b4dec0a30d836c99",
+    "checks": [
+      {
+        "name": "one start call registers a form without describe/apply callbacks",
+        "passed": true
+      },
+      {
+        "name": "all visible fixture controls are exposed once",
+        "passed": false
+      }
+    ],
+    "dynamic": false,
+    "process_architecture": "ARM64",
+    "compile_report_sha256": "7c0017825c3528db67d1e3ac9a1081dffb5459908b63bc6ec16192ef4dfd0174",
+    "compiled": false
+  },
+  "cases": {
+    "ordinary-interpreted": {
+      "passed": true,
+      "runId": "f23377207ff044fd8876f1dc1e738824",
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": false,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "a33f900f75da8fba3d8298d77127e2d2e64554945bc1db8ef96a191e310b561a",
+      "compiled": false,
+      "focusedUIRole": "AXTextField",
+      "events": [
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Help",
+          "event": 4
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Allowed",
+          "event": 4
+        },
+        {
+          "object": "Phone",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 20
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Secret",
+          "event": 15
+        },
+        {
+          "object": "Secret",
+          "event": 20
+        },
+        {
+          "object": "Secret",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Country",
+          "event": 4
+        },
+        {
+          "object": "Close",
+          "event": 4
+        }
+      ]
+    },
+    "ordinary-compiled": {
+      "passed": true,
+      "runId": "f23377207ff044fd8876f1dc1e738824",
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": false,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "a33f900f75da8fba3d8298d77127e2d2e64554945bc1db8ef96a191e310b561a",
+      "compiled": true,
+      "focusedUIRole": "AXTextField",
+      "events": [
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Help",
+          "event": 4
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Allowed",
+          "event": 4
+        },
+        {
+          "object": "Phone",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 20
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Secret",
+          "event": 15
+        },
+        {
+          "object": "Secret",
+          "event": 20
+        },
+        {
+          "object": "Secret",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Country",
+          "event": 4
+        },
+        {
+          "object": "Close",
+          "event": 4
+        }
+      ]
+    },
+    "dynamic-interpreted": {
+      "passed": true,
+      "runId": "05daedf17c5f498fb212ed1ec1226300",
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": true,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "63d3e6ad551cadef897ed65f72ea15134cb114f31fe366d1ff9573fc2237e1b3",
+      "compiled": false,
+      "focusedUIRole": "AXTextField",
+      "events": [
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Help",
+          "event": 4
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Allowed",
+          "event": 4
+        },
+        {
+          "object": "Phone",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 20
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Secret",
+          "event": 15
+        },
+        {
+          "object": "Secret",
+          "event": 20
+        },
+        {
+          "object": "Secret",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Country",
+          "event": 4
+        },
+        {
+          "object": "Close",
+          "event": 4
+        }
+      ]
+    },
+    "dynamic-compiled": {
+      "passed": true,
+      "runId": "05daedf17c5f498fb212ed1ec1226300",
+      "checks": [
+        {
+          "name": "one start call registers a form without describe/apply callbacks",
+          "passed": true
+        },
+        {
+          "name": "all visible fixture controls are exposed once",
+          "passed": true
+        },
+        {
+          "name": "untitled button uses its existing help tip as its accessible name",
+          "passed": true
+        },
+        {
+          "name": "long help tip fits the node-name limit without splitting a Unicode character",
+          "passed": true
+        },
+        {
+          "name": "visible button caption takes precedence over its help tip",
+          "passed": true
+        },
+        {
+          "name": "empty static text does not create a nameless accessibility stop",
+          "passed": true
+        },
+        {
+          "name": "Explain form accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "help-tip-named button retains its normal object handler",
+          "passed": true
+        },
+        {
+          "name": "previously empty static text appears when the application supplies content",
+          "passed": true
+        },
+        {
+          "name": "hidden and disabled states match the live UI",
+          "passed": true
+        },
+        {
+          "name": "ordinary field is discovered with its current value",
+          "passed": true
+        },
+        {
+          "name": "input names refer to their visible labels",
+          "passed": true
+        },
+        {
+          "name": "masked field has secure semantics and omits its contents",
+          "passed": true
+        },
+        {
+          "name": "radio semantics and selected state are discovered",
+          "passed": true
+        },
+        {
+          "name": "array popup exposes its displayed choice",
+          "passed": true
+        },
+        {
+          "name": "button with an object method and standard action is discovered",
+          "passed": true
+        },
+        {
+          "name": "read-only input publishes its value without advertising edits",
+          "passed": true
+        },
+        {
+          "name": "numeric input uses its displayed number format",
+          "passed": true
+        },
+        {
+          "name": "date input uses its displayed date format",
+          "passed": true
+        },
+        {
+          "name": "time input uses its displayed time format",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "AX press runs the existing object handler exactly once",
+          "passed": true
+        },
+        {
+          "name": "Send updates accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "checkbox activation runs its ordinary handler and publishes state",
+          "passed": true
+        },
+        {
+          "name": "Phone accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "radio activation preserves native group exclusivity",
+          "passed": true
+        },
+        {
+          "name": "disabled action cannot dispatch an object event",
+          "passed": true
+        },
+        {
+          "name": "AX focus request is accepted",
+          "passed": true
+        },
+        {
+          "name": "AX focus uses 4D keyboard focus and normal focus events",
+          "passed": true
+        },
+        {
+          "name": "application focused element is the real semantic input",
+          "passed": true
+        },
+        {
+          "name": "Unicode replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "AX reads the editing buffer before normal data-source commit",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "leaving the editor commits through its existing On Data Change handler",
+          "passed": true
+        },
+        {
+          "name": "text range requested through AX",
+          "passed": true
+        },
+        {
+          "name": "selected text comes from the real editor selection",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested through AX",
+          "passed": true
+        },
+        {
+          "name": "adjacent supplementary characters requested at the start of an empty replacement",
+          "passed": true
+        },
+        {
+          "name": "each supplementary character runs one ordinary keystroke event",
+          "passed": true
+        },
+        {
+          "name": "filtered input requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing keystroke filter rejects input and stops the remaining characters",
+          "passed": true
+        },
+        {
+          "name": "input that changes application focus requested",
+          "passed": true
+        },
+        {
+          "name": "focus-changing handler cannot redirect remaining queued text into another field",
+          "passed": true
+        },
+        {
+          "name": "valid text re-entered after interruption",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "empty text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "existing validation rejects the edit and preserves its accepted value",
+          "passed": true
+        },
+        {
+          "name": "text that makes its field read-only requested",
+          "passed": true
+        },
+        {
+          "name": "entry stops when a host handler makes the field read-only",
+          "passed": true
+        },
+        {
+          "name": "retained writable element cannot edit a field after its capabilities change",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "ordinary host action restores the field's editing capability",
+          "passed": true
+        },
+        {
+          "name": "multiline input uses text-area semantics",
+          "passed": true
+        },
+        {
+          "name": "multiline Unicode text requested through AX",
+          "passed": true
+        },
+        {
+          "name": "existing Undo command accepts native AX activation",
+          "passed": true
+        },
+        {
+          "name": "AX text entry participates in 4D's existing undo behavior",
+          "passed": true
+        },
+        {
+          "name": "secure input accepts write-only AX text entry",
+          "passed": true
+        },
+        {
+          "name": "secure text and selected contents remain undisclosed during editing",
+          "passed": true
+        },
+        {
+          "name": "Save contact accepts AXPress",
+          "passed": true
+        },
+        {
+          "name": "protected input commits through the normal editor",
+          "passed": true
+        },
+        {
+          "name": "popup opens through its normal control event",
+          "passed": true
+        },
+        {
+          "name": "existing native menu exposes every popup choice",
+          "passed": true
+        },
+        {
+          "name": "native popup tracking restores application focus to its own accessibility provider",
+          "passed": true
+        },
+        {
+          "name": "choice is selected through the native menu's AX action",
+          "passed": true
+        },
+        {
+          "name": "popup selection preserves its existing On Clicked handler",
+          "passed": true
+        },
+        {
+          "name": "standard Cancel button accepts AX activation",
+          "passed": true
+        },
+        {
+          "name": "existing standard Cancel action closes the dialog",
+          "passed": true
+        },
+        {
+          "name": "Close object method runs exactly once before its standard action",
+          "passed": true
+        }
+      ],
+      "dynamic": true,
+      "process_architecture": "ARM64",
+      "compile_report_sha256": "63d3e6ad551cadef897ed65f72ea15134cb114f31fe366d1ff9573fc2237e1b3",
+      "compiled": true,
+      "focusedUIRole": "AXTextField",
+      "events": [
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Help",
+          "event": 4
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Allowed",
+          "event": 4
+        },
+        {
+          "object": "Phone",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 20
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Name",
+          "event": 15
+        },
+        {
+          "object": "Name",
+          "event": 17
+        },
+        {
+          "object": "Name",
+          "event": 28
+        },
+        {
+          "object": "Name",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Notes",
+          "event": 15
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 28
+        },
+        {
+          "object": "Notes",
+          "event": 20
+        },
+        {
+          "object": "Notes",
+          "event": 14
+        },
+        {
+          "object": "Secret",
+          "event": 15
+        },
+        {
+          "object": "Secret",
+          "event": 20
+        },
+        {
+          "object": "Secret",
+          "event": 14
+        },
+        {
+          "object": "Save",
+          "event": 4
+        },
+        {
+          "object": "Country",
+          "event": 4
+        },
+        {
+          "object": "Close",
+          "event": 4
+        }
+      ]
+    }
+  },
+  "compiler": {
+    "ordinary": {
+      "passed": true,
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "dbaccb91e554d9d7a9cffc9aef18e7c31fc39b7b44bebcd5fdb465a622c0d028",
+        "Project/Sources/Methods/AXBF_Event.4dm": "87e4e19f4c21ca3313f42c751e165d3b5a193e78278076d0bd2addfc0ae991c3",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXBF_Form.4dm": "b146132bb73a9011bcdec49cb46d3ee05f1dc52a22236919c1c226a5870ab8f4",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXBF_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBF_State.4dm": "8631dba64a8fbad800f75ddb9701f0879500baa9b100f9b20027f72746a9cbbe",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "e41f6430f4e9a725750d4ee63ff09df1f1c25731e6e1ea733d4cfdf57e1a5fe7",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBF.4dm": "57c557c4b9c5936c3b0f03df09e26ad6a28ce843db3c498628e7118b6d9cd3ff",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "d8041bbcfd56bbfacf5945df29dcae941de680a194eefe42cf71cef0be1e96b4",
+        "Project/Sources/Forms/Probe/method.4dm": "c37e7f3475ca6ee70e55c9dff66402728164c69460c9e83f79a68f38c65ad721",
+        "Project/Sources/Forms/Probe/form.4DForm": "cfff111abc73dc69c8bb43fd1c093918c6500001d490cbd534c9aba8051f097b",
+        "Project/Sources/Forms/Probe/ObjectMethods/Email.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/DueDate.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Appointment.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Country.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Hidden.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Allowed.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Notes.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Disabled.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Help.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Amount.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/LongTip.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Phone.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Secret.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Name.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Save.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Close.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Resources/discovery.json": "25d95c2055689ddffaecab6058b74543cd9fa75a34c16e14efd8a2ed267e810b"
+      },
+      "component_sha256": "2f9b9fea48e26c97dfdb1e4a1597288c892b8b5524713053d0e77a8fc540bf5a",
+      "native_sha256": "71fda7bbc10284fc4525817ee47e37124434ccc64564b559d251c81bb50a52b3",
+      "reportSHA256": "a33f900f75da8fba3d8298d77127e2d2e64554945bc1db8ef96a191e310b561a"
+    },
+    "dynamic": {
+      "passed": true,
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "a4bd422cc67e3cd9c5746e80dd16916b5fe8e0b76a95e9c2b49a640bc5fd2e0c",
+        "Project/Sources/Methods/AXBF_Event.4dm": "87e4e19f4c21ca3313f42c751e165d3b5a193e78278076d0bd2addfc0ae991c3",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXBF_Form.4dm": "b146132bb73a9011bcdec49cb46d3ee05f1dc52a22236919c1c226a5870ab8f4",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXBF_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBF_State.4dm": "8631dba64a8fbad800f75ddb9701f0879500baa9b100f9b20027f72746a9cbbe",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "e41f6430f4e9a725750d4ee63ff09df1f1c25731e6e1ea733d4cfdf57e1a5fe7",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBF.4dm": "57c557c4b9c5936c3b0f03df09e26ad6a28ce843db3c498628e7118b6d9cd3ff",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "d8041bbcfd56bbfacf5945df29dcae941de680a194eefe42cf71cef0be1e96b4",
+        "Project/Sources/Forms/Probe/method.4dm": "c37e7f3475ca6ee70e55c9dff66402728164c69460c9e83f79a68f38c65ad721",
+        "Project/Sources/Forms/Probe/form.4DForm": "cfff111abc73dc69c8bb43fd1c093918c6500001d490cbd534c9aba8051f097b",
+        "Project/Sources/Forms/Probe/ObjectMethods/Email.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/DueDate.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Appointment.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Country.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Hidden.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Allowed.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Notes.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Disabled.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Help.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Amount.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/LongTip.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Phone.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Secret.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Name.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Save.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Project/Sources/Forms/Probe/ObjectMethods/Close.4dm": "2b1e59805d1a904e8eb4f85dc6fdd28c83db801b8b29315719f69ded20c14b83",
+        "Resources/discovery.json": "25d95c2055689ddffaecab6058b74543cd9fa75a34c16e14efd8a2ed267e810b"
+      },
+      "component_sha256": "2f9b9fea48e26c97dfdb1e4a1597288c892b8b5524713053d0e77a8fc540bf5a",
+      "native_sha256": "71fda7bbc10284fc4525817ee47e37124434ccc64564b559d251c81bb50a52b3",
+      "reportSHA256": "63d3e6ad551cadef897ed65f72ea15134cb114f31fe366d1ff9573fc2237e1b3"
+    }
+  },
+  "sources_sha256": {
+    "host/OptionalMethods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+    "host/OptionalMethods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+    "prepare_discovery_fixture.py": "7349d637602c5b1941a8d524aed78ab47d1fee8fdc05310376540c6ed7ebcecb",
+    "test_discovery_fixture.py": "c8a98da796802dba0051c65b3f04a258e3b1464e501778967d9d0b897fd711ed",
+    "tests/4d/AXBF_Event.4dm": "87e4e19f4c21ca3313f42c751e165d3b5a193e78278076d0bd2addfc0ae991c3"
+  },
+  "packages": {
+    "AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge": "71fda7bbc10284fc4525817ee47e37124434ccc64564b559d251c81bb50a52b3",
+    "AccessibilityBridge.4dbase/AccessibilityBridge.4DZ": "2f9b9fea48e26c97dfdb1e4a1597288c892b8b5524713053d0e77a8fc540bf5a"
+  }
+}

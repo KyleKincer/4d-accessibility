@@ -1,5 +1,7 @@
 This is a development preview of 4D Accessibility for macOS and 4D 20.8.
 
+Untitled buttons, checkboxes, radio buttons and popups reuse their current 4D help tips as accessible names. Displayed captions and explicit labels take precedence. Empty static captions appear in the tree when the application fills them, avoiding nameless stops for empty placeholders. These defaults reduce application metadata; review the resulting names because a help tip can describe temporary state instead of the control's action.
+
 Button activation now acknowledges dispatch before the existing handler changes record scope. A successful navigation no longer produces a false rejection solely because its old accessibility route retired. The receipt confirms dispatch; callers must still verify the application's result. Stale requests and state-changing checkbox/radio actions retain their checks.
 
 Download the versioned macOS integration kit for the plugin, component, host-method installer, documentation and agent skill. `4d-accessibility.zip` is the component-only archive for 4D Dependency Manager; the plugin and host methods are still required.

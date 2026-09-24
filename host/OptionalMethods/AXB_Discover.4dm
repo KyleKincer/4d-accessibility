@@ -51,8 +51,12 @@ For ($i; 1; Size of array($names))
     $label:=OBJECT Get title(*; $name)
     $value:=Num(OBJECT Get value($name))#0
    : ($type=Object type static text)
-    $role:="text"
     $label:=OBJECT Get title(*; $name)
+    // Empty dynamic captions contribute no content until the host fills them.
+    // An explicit semantic name can still retain an intentionally empty node.
+    If (($label#"") || (($metadata#Null) && (Value type($metadata.label)=Is text) && ($metadata.label#"")))
+     $role:="text"
+    End if
     $value:=$label
    : (($type=Object type text input) | ($type=Object type combobox))
     $role:="textfield"
@@ -139,6 +143,18 @@ For ($i; 1; Size of array($names))
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "providerPending"))
     End if
   End case
+  If (($label="") && (New collection("button"; "checkbox"; "radio"; "popup").indexOf($role)>=0))
+   // Icon and invisible buttons often already have a localized help tip.
+   // Prefer a real caption; explicit accessibility metadata still wins below.
+   $label:=OBJECT Get help tip(*; $name)
+   If (Length($label)>512)
+    $end:=512
+    If (AXB_TextIndex($label; $end; False)<0)
+     $end:=$end-1
+    End if
+    $label:=Substring($label; 1; $end)
+   End if
+  End if
   If ($role#"")
    OBJECT GET COORDINATES(*; $name; $left; $top; $right; $bottom)
    If (($right>$left) & ($bottom>$top))
