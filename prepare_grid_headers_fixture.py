@@ -63,17 +63,16 @@ If (File("/RESOURCES/header-command.json").exists)
  If ($command.headers#Null)
   LISTBOX SET PROPERTY(*; "Items"; lk display header; Num($command.headers))
  End if
- If ($command.enabled#Null)
-  OBJECT SET ENABLED(*; "Items"; $command.enabled)
- End if
- If ($command.columnEnabled#Null)
-  OBJECT SET ENABLED(*; "ItemAmount"; $command.columnEnabled)
+ // OBJECT SET ENABLED does not support native list boxes. Exercise
+ // the provider's supported loading boundary instead of a transient flag.
+ If ($command.ready#Null)
+  Form.linesReady:=$command.ready
  End if
  If ($command.empty=True)
   If (Form.rows=Null)
    LISTBOX DELETE ROWS(*; "Items"; 1; Size of array(aGridKey))
   Else
-   If (OB Instance of(Form.rows; 4D.EntitySelection))
+   If ((Value type(Form.rows)=Is object) && OB Instance of(Form.rows; 4D.EntitySelection))
     Form.rows:=Form.rows.slice(0; 0)
    Else
     Form.rows:=New collection
