@@ -123,6 +123,7 @@ NSString *AXBValidateGridPage(id page) {
                 !Text(cell[@"value"], AXBLimits::text) || !Bool(cell[@"enabled"]) || !Bool(cell[@"editable"])) return @"invalid grid cell";
             if (cell[@"role"] && ![@[@"text", @"checkbox", @"popup"] containsObject:cell[@"role"]]) return @"invalid grid cell role";
             if (cell[@"label"] && !Text(cell[@"label"], 512)) return @"invalid grid cell label";
+            if (cell[@"focusable"] && !Bool(cell[@"focusable"])) return @"invalid grid cell focus capability";
             if ([cell[@"role"] isEqual:@"checkbox"]) {
                 if (!Integer(cell[@"checked"]) || [cell[@"checked"] integerValue] > 2) return @"invalid grid checkbox state";
             } else if (cell[@"checked"]) return @"checkbox state requires a checkbox cell";

@@ -8,6 +8,16 @@ Before extraction, licensed AreaList action suites passed 43 checks each in inte
 
 Run the scripts described in `CONTRIBUTING.md` at the root of a matching source checkout. An independently installed skill does not contain those scripts; locate the checkout before running them. Keep exact source revision, package hashes, compiler/runtime versions, execution mode and test outcome with every new validation report. Reproduce each claimed workflow in the integrating application.
 
+## AreaList checkbox cells, September 24
+
+The 0.19 fixture passes 30 external AX checks in interpreted mode and 30 in native ARM compiled 4D 20.8. Its compiled VoiceOver run passes 34 checks. Two repeated forms each contain 600 source rows, Boolean checkboxes, Integer two-state and LongInt three-state checkboxes. Normal, small and mini display modes use their original AreaList configuration. Tests cover offscreen values, focus without toggling, uncommitted editor state, ordinary Escape and commit, callback counts, area/column/cell permissions, validation rejection, sorted row identity and retired controls. VoiceOver reads and activates a checkbox, then returns to the ordinary form editor. No application accessibility callbacks were added to the child forms.
+
+`validation/arealist-checkboxes.json` contains the checks, source/package hashes and VoiceOver captions. Prepare with `prepare_alp_grid_fixture.py --controls --server <4D Server.app>` and run `test_alp_controls_fixture.py --run`, then `--compiled` and `--compiled --voiceover`. Keep the existing vendor plugin/license arguments described in `CONTRIBUTING.md`.
+
+The shared paging change also passes all six existing Text/Integer/LongInt text-editor suites, 45 checks each in interpreted and compiled mode, 270 total. Deterministic checks pass 273 Session and 169 logical-grid assertions; native AppKit passes 182. Installer and development-package checks pass. The universal plugin and ARM/Intel component build successfully; these runtime results cover native ARM only.
+
+The fixture initially inherited legacy AreaList compatibility mode, which resets visibility and hides the final column. Its checkbox configuration now explicitly uses modern visibility settings. A disabled AXPress can still return transport success on macOS; permission tests assert absent actions, unchanged values and unchanged callback counts after application event cycles. A transport return code is not a mutation receipt. Vendor popup/radio editors, custom-picture rendering and modal editors remain outside this result.
+
 ## Standalone generated-child validation, September 24
 
 The standalone universal plugin and tool4d-built component passed 57 external AX checks in an interpreted host and 57 in a native ARM compiled host on 4D 20.8/macOS 26.6.2. These runs used JSON-generated repeated and nested children, shared plain business data, replacement invalidation, ordinary editing/handlers and a second root window. Children had no explicit providers or registration. The source checkout contains the sanitized check results and exact source/package hashes in `validation/generated-children.json`.

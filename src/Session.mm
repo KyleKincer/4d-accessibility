@@ -586,6 +586,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 if (![column[@"editable"] boolValue] || ![column[@"enabled"] boolValue] || ![gridValue[@"editable"] boolValue] || ![gridValue[@"enabled"] boolValue]) return NO;
                 BOOL widget = [@[@"checkbox", @"popup"] containsObject:gridValue[@"role"] ?: @""];
                 if ([operation isEqual:@"gridPress"] && !widget) return NO;
+                if ([operation isEqual:@"gridEdit"] && gridValue[@"focusable"] && ![gridValue[@"focusable"] boolValue]) return NO;
                 if (widget && ![@[@"gridPress", @"gridEdit"] containsObject:operation]) return NO;
                 if (widget) {
                     target[@"expectedCell"] = gridValue;

@@ -7,3 +7,5 @@ Read the included `skills/4d-accessibility/references/STATUS.md` before integrat
 Active grid-editor actions now survive a delayed backing-cell cache update after Undo/Redo, while changed editor contents and permissions still reject. AreaList supplementary Unicode remains blocked by a reproduced vendor conversion defect. The repository includes a one-cell reproduction without the bridge.
 
 Generated forms opened with mismatched shared, entity or class-instance data now preserve application events without adding bridge properties. The installer rejects duplicate compiler-declaration targets. The integration guide separates ordinary forms from grids and uses the application's existing error reporter.
+
+AreaList Boolean and Integer/LongInt checkbox columns now use their existing vendor editors and callbacks. Non-focusable controls expose activation without an unsafe focus operation; focusable controls expose uncommitted values and preserve normal commit/cancel. The grid configuration needs no additional application callbacks. Refresh the plugin and generated helpers together for the new `cellFocus 1` startup check.

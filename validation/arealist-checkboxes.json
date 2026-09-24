@@ -1,0 +1,2466 @@
+{
+  "version": "0.19.0",
+  "runtime": {
+    "4D": "20.8",
+    "macOS": "26.6.2",
+    "architecture": "native ARM"
+  },
+  "scope": "Synthetic repeated flat AreaList checkboxes. Does not establish a complete application workflow or all vendor control types.",
+  "runs": {
+    "interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "18e4d7f55c6e378d869cf0854bfce5da4e4aaabdcdc29535189524efe652c760",
+        "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+        "Project/Sources/Methods/AXBP_Child.4dm": "f58633ac51fd6d5e2005a4a3f8d45d91d6db20b6a78d8a97cfa6f85158865af1",
+        "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBP_Enter.4dm": "2647584541227567a0a8242cf0a91993b84f12e0263cb1cdae9b1e998a9a0d4e",
+        "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXBP_State.4dm": "2430466ce1b6638bf3611ab024f398274c03fee80a4c8c2c1386c69c8ef04a70",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "Project/Sources/Methods/AXBP_EntryEnd.4dm": "68b4fb476c328498db8dc52033fe7bfa824aa320fb99f504622487b7aeb4e2b7",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXBP_Open.4dm": "3a0f9d90e0cd861755e18c27c6cfcc388efb14212d70a2390f344a0a516c8146",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+        "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBP.4dm": "5702237d63f9726d80d7619c317b8550b63084f2c3bec849273780622bdeb194",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+        "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+        "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+        "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+      },
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8",
+      "areaListVersion": "11.4.2",
+      "application_mode_notice_acknowledged": false,
+      "last_state": {
+        "registration": 0,
+        "phase": "ready",
+        "runId": "6a87586ad652470aa4498e6047398d44",
+        "compiled": false,
+        "timerTicks": 71,
+        "startResult": {
+          "ok": true,
+          "session": "0563663E-8BAB-4CF0-B6AA-247DAA964507"
+        },
+        "leftSelected": [],
+        "rightSelected": [],
+        "leftSelections": 0,
+        "rightSelections": 0,
+        "leftFirst": "line-0600",
+        "leftTop": 591,
+        "rightTop": 1,
+        "leftError": 0,
+        "rightError": 0,
+        "leftStarts": 6,
+        "leftEnds": 7,
+        "leftRejections": 1,
+        "leftValue": "Left line 0001",
+        "rightValue": "Right line 0600",
+        "permissionPhase": 5,
+        "columns": [
+          {
+            "number": 1,
+            "source": "aLeftItem",
+            "title": "Item",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 2,
+            "source": "aLeftDescription",
+            "title": "Description",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 3,
+            "source": "aLeftAmount",
+            "title": "Amount",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 4,
+            "source": "aLeftStyled",
+            "title": "Styled",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 5,
+            "source": "aLeftPicture",
+            "title": "R",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 6,
+            "source": "aLeftSpacer",
+            "title": "",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 7,
+            "source": "aLeftKey",
+            "title": "",
+            "visible": 0,
+            "display": -1
+          },
+          {
+            "number": 8,
+            "source": "aLeftDirect",
+            "title": "Direct",
+            "visible": 1,
+            "display": 0
+          },
+          {
+            "number": 9,
+            "source": "aLeftFocusable",
+            "title": "Focusable",
+            "visible": 1,
+            "display": 1
+          },
+          {
+            "number": 10,
+            "source": "aLeftMixed",
+            "title": "Mixed",
+            "visible": 1,
+            "display": 0
+          },
+          {
+            "number": 11,
+            "source": "aLeftNumeric",
+            "title": "Numeric",
+            "visible": 1,
+            "display": 2
+          }
+        ],
+        "leftControls": [
+          true,
+          true,
+          0,
+          1
+        ],
+        "rightControls": [
+          false,
+          false,
+          2,
+          0
+        ]
+      }
+    },
+    "compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "18e4d7f55c6e378d869cf0854bfce5da4e4aaabdcdc29535189524efe652c760",
+        "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+        "Project/Sources/Methods/AXBP_Child.4dm": "f58633ac51fd6d5e2005a4a3f8d45d91d6db20b6a78d8a97cfa6f85158865af1",
+        "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBP_Enter.4dm": "2647584541227567a0a8242cf0a91993b84f12e0263cb1cdae9b1e998a9a0d4e",
+        "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXBP_State.4dm": "2430466ce1b6638bf3611ab024f398274c03fee80a4c8c2c1386c69c8ef04a70",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "Project/Sources/Methods/AXBP_EntryEnd.4dm": "68b4fb476c328498db8dc52033fe7bfa824aa320fb99f504622487b7aeb4e2b7",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXBP_Open.4dm": "3a0f9d90e0cd861755e18c27c6cfcc388efb14212d70a2390f344a0a516c8146",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+        "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBP.4dm": "5702237d63f9726d80d7619c317b8550b63084f2c3bec849273780622bdeb194",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+        "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+        "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+        "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+      },
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8",
+      "areaListVersion": "11.4.2",
+      "application_mode_notice_acknowledged": false,
+      "last_state": {
+        "registration": 0,
+        "phase": "ready",
+        "runId": "6a87586ad652470aa4498e6047398d44",
+        "compiled": true,
+        "timerTicks": 62,
+        "startResult": {
+          "ok": true,
+          "session": "37721745-9F36-4E96-B8EC-94491D2C79FC"
+        },
+        "leftSelected": [],
+        "rightSelected": [],
+        "leftSelections": 0,
+        "rightSelections": 0,
+        "leftFirst": "line-0600",
+        "leftTop": 591,
+        "rightTop": 1,
+        "leftError": 0,
+        "rightError": 0,
+        "leftStarts": 6,
+        "leftEnds": 7,
+        "leftRejections": 1,
+        "leftValue": "Left line 0001",
+        "rightValue": "Right line 0600",
+        "permissionPhase": 5,
+        "columns": [
+          {
+            "number": 1,
+            "source": "ALEFTITEM",
+            "title": "Item",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 2,
+            "source": "ALEFTDESCRIPTION",
+            "title": "Description",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 3,
+            "source": "ALEFTAMOUNT",
+            "title": "Amount",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 4,
+            "source": "ALEFTSTYLED",
+            "title": "Styled",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 5,
+            "source": "ALEFTPICTURE",
+            "title": "R",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 6,
+            "source": "ALEFTSPACER",
+            "title": "",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 7,
+            "source": "ALEFTKEY",
+            "title": "",
+            "visible": 0,
+            "display": -1
+          },
+          {
+            "number": 8,
+            "source": "ALEFTDIRECT",
+            "title": "Direct",
+            "visible": 1,
+            "display": 0
+          },
+          {
+            "number": 9,
+            "source": "ALEFTFOCUSABLE",
+            "title": "Focusable",
+            "visible": 1,
+            "display": 1
+          },
+          {
+            "number": 10,
+            "source": "ALEFTMIXED",
+            "title": "Mixed",
+            "visible": 1,
+            "display": 0
+          },
+          {
+            "number": 11,
+            "source": "ALEFTNUMERIC",
+            "title": "Numeric",
+            "visible": 1,
+            "display": 2
+          }
+        ],
+        "leftControls": [
+          true,
+          true,
+          0,
+          1
+        ],
+        "rightControls": [
+          false,
+          false,
+          2,
+          0
+        ]
+      }
+    },
+    "voiceover": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the repeated AreaList table"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the checkbox label and control role"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver activates the checkbox through the original entry and commit handlers"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver leaves checkbox cells and reaches the ordinary form editor"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "sources_sha256": {
+        "Project/Sources/catalog.4DCatalog": "18e4d7f55c6e378d869cf0854bfce5da4e4aaabdcdc29535189524efe652c760",
+        "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+        "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+        "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+        "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+        "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+        "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+        "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+        "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+        "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+        "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+        "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+        "Project/Sources/Methods/AXBP_Child.4dm": "f58633ac51fd6d5e2005a4a3f8d45d91d6db20b6a78d8a97cfa6f85158865af1",
+        "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+        "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+        "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+        "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+        "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+        "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+        "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+        "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+        "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+        "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+        "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+        "Project/Sources/Methods/AXBP_Enter.4dm": "2647584541227567a0a8242cf0a91993b84f12e0263cb1cdae9b1e998a9a0d4e",
+        "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+        "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+        "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+        "Project/Sources/Methods/AXBP_State.4dm": "2430466ce1b6638bf3611ab024f398274c03fee80a4c8c2c1386c69c8ef04a70",
+        "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+        "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+        "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+        "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+        "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+        "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+        "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+        "Project/Sources/Methods/AXBP_EntryEnd.4dm": "68b4fb476c328498db8dc52033fe7bfa824aa320fb99f504622487b7aeb4e2b7",
+        "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+        "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+        "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+        "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+        "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+        "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+        "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+        "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+        "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+        "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+        "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+        "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+        "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+        "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+        "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+        "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+        "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+        "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+        "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+        "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+        "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+        "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+        "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+        "Project/Sources/Methods/AXBP_Open.4dm": "3a0f9d90e0cd861755e18c27c6cfcc388efb14212d70a2390f344a0a516c8146",
+        "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+        "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+        "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+        "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+        "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+        "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+        "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+        "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+        "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+        "Project/Sources/Methods/Compiler_AXBP.4dm": "5702237d63f9726d80d7619c317b8550b63084f2c3bec849273780622bdeb194",
+        "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+        "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+        "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+        "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+        "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+        "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+        "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+        "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+      },
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8",
+      "areaListVersion": "11.4.2",
+      "application_mode_notice_acknowledged": false,
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Left invoice: Left lines, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In Left invoice: Left lines, table, Item SKU"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "X selection replaced"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Description Left line 0600"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Amount 600.25"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Styled Left styled 0600"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Readiness Left ready"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Direct Direct checked checkbox"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+        },
+        {
+          "key": "up",
+          "shift": true,
+          "command": false,
+          "caption": "X Out of Left invoice: Left lines, table"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Note, Left invoice: Note"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Left note, Insertion at beginning of text., Left invoice: Note, edit text"
+        }
+      ],
+      "last_state": {
+        "registration": 0,
+        "phase": "ready",
+        "runId": "6a87586ad652470aa4498e6047398d44",
+        "compiled": true,
+        "timerTicks": 272,
+        "startResult": {
+          "ok": true,
+          "session": "31EE52F0-0DDA-4561-961E-CD6A67BA578E"
+        },
+        "leftSelected": [],
+        "rightSelected": [],
+        "leftSelections": 1,
+        "rightSelections": 0,
+        "leftFirst": "line-0600",
+        "leftTop": 1,
+        "rightTop": 1,
+        "leftError": 0,
+        "rightError": 0,
+        "leftStarts": 7,
+        "leftEnds": 8,
+        "leftRejections": 1,
+        "leftValue": "Left line 0001",
+        "rightValue": "Right line 0600",
+        "permissionPhase": 5,
+        "columns": [
+          {
+            "number": 1,
+            "source": "ALEFTITEM",
+            "title": "Item",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 2,
+            "source": "ALEFTDESCRIPTION",
+            "title": "Description",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 3,
+            "source": "ALEFTAMOUNT",
+            "title": "Amount",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 4,
+            "source": "ALEFTSTYLED",
+            "title": "Styled",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 5,
+            "source": "ALEFTPICTURE",
+            "title": "R",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 6,
+            "source": "ALEFTSPACER",
+            "title": "",
+            "visible": 1,
+            "display": -1
+          },
+          {
+            "number": 7,
+            "source": "ALEFTKEY",
+            "title": "",
+            "visible": 0,
+            "display": -1
+          },
+          {
+            "number": 8,
+            "source": "ALEFTDIRECT",
+            "title": "Direct",
+            "visible": 1,
+            "display": 0
+          },
+          {
+            "number": 9,
+            "source": "ALEFTFOCUSABLE",
+            "title": "Focusable",
+            "visible": 1,
+            "display": 1
+          },
+          {
+            "number": 10,
+            "source": "ALEFTMIXED",
+            "title": "Mixed",
+            "visible": 1,
+            "display": 0
+          },
+          {
+            "number": 11,
+            "source": "ALEFTNUMERIC",
+            "title": "Numeric",
+            "visible": 1,
+            "display": 2
+          }
+        ],
+        "leftControls": [
+          false,
+          true,
+          0,
+          1
+        ],
+        "rightControls": [
+          false,
+          false,
+          2,
+          0
+        ]
+      }
+    }
+  },
+  "textRegression": {
+    "text-interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8"
+    },
+    "text-compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8"
+    },
+    "text-sources": {
+      "Project/Sources/catalog.4DCatalog": "f17ca7d0d8f82b1236df6953d5467609e3abdcefafdfc85a85807513ab2fa4ba",
+      "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+      "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+      "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+      "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+      "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+      "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+      "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+      "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+      "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+      "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+      "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+      "Project/Sources/Methods/AXBP_Child.4dm": "28cb4042e2b1a77506db1f6a23767300623d580e4a80bec2d7b7e77d1031e0a4",
+      "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+      "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+      "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+      "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+      "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+      "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+      "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+      "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+      "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+      "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+      "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+      "Project/Sources/Methods/AXBP_Enter.4dm": "78af1945369f7e68d8cc46938a867f75af9a1831862dcf25cc0cc872768b4809",
+      "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+      "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+      "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+      "Project/Sources/Methods/AXBP_State.4dm": "3c9025076e7b1c19a7b0294eb4e0fc0b34207d1af19fa34b2a0d93683dac533d",
+      "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+      "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+      "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+      "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+      "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+      "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+      "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+      "Project/Sources/Methods/AXBP_EntryEnd.4dm": "3350c298b1e0f601784880e96a55cf0778b7facdf908ba07a2cf58ac8f8c4387",
+      "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+      "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+      "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+      "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+      "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+      "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+      "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+      "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+      "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+      "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+      "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+      "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+      "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+      "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+      "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+      "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+      "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+      "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+      "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+      "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+      "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+      "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+      "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+      "Project/Sources/Methods/AXBP_Open.4dm": "19ee1184cb52c9feede20f44868890d518919e7f7f36f0fd39bc6d07a900debc",
+      "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+      "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+      "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+      "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+      "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+      "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+      "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+      "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+      "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+      "Project/Sources/Methods/Compiler_AXBP.4dm": "af27d6d65ce54c3ef583456c1c73b95e78d53f642077fddbb8eac875ae131014",
+      "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+      "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+      "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+      "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+      "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+      "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+      "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+      "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+    },
+    "integer-interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8"
+    },
+    "integer-compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8"
+    },
+    "integer-sources": {
+      "Project/Sources/catalog.4DCatalog": "a0c3e84d34ac1e2c861b0c172c9945f81c63027137c4e01e603b95b8b4d03782",
+      "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+      "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+      "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+      "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+      "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+      "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+      "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+      "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+      "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+      "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+      "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+      "Project/Sources/Methods/AXBP_Child.4dm": "28cb4042e2b1a77506db1f6a23767300623d580e4a80bec2d7b7e77d1031e0a4",
+      "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+      "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+      "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+      "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+      "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+      "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+      "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+      "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+      "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+      "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+      "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+      "Project/Sources/Methods/AXBP_Enter.4dm": "78af1945369f7e68d8cc46938a867f75af9a1831862dcf25cc0cc872768b4809",
+      "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+      "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+      "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+      "Project/Sources/Methods/AXBP_State.4dm": "3c9025076e7b1c19a7b0294eb4e0fc0b34207d1af19fa34b2a0d93683dac533d",
+      "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+      "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+      "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+      "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+      "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+      "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+      "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+      "Project/Sources/Methods/AXBP_EntryEnd.4dm": "3350c298b1e0f601784880e96a55cf0778b7facdf908ba07a2cf58ac8f8c4387",
+      "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+      "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+      "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+      "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+      "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+      "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+      "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+      "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+      "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+      "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+      "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+      "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+      "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+      "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+      "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+      "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+      "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+      "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+      "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+      "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+      "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+      "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+      "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+      "Project/Sources/Methods/AXBP_Open.4dm": "8a9ff8c4070ff09de31f4ff17ceffddf4421a554981176822116e9134395b090",
+      "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+      "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+      "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+      "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+      "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+      "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+      "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+      "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+      "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+      "Project/Sources/Methods/Compiler_AXBP.4dm": "47fc9eba9fac552ac933c21aaf19426c47f259c3fbb3faf156bb6acc2d2b7596",
+      "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+      "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+      "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+      "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+      "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+      "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+      "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+      "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+    },
+    "longint-interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8"
+    },
+    "longint-compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "native_sha256": "7db581990eeef85739763e7c6fe9fb805cf856fd580a34aa0bdc4d2166eafccf",
+      "component_sha256": "e5d82845b175926b1f10351d35a522163f80244605311211ebe5a150c152fae8"
+    },
+    "longint-sources": {
+      "Project/Sources/catalog.4DCatalog": "b71a96ba1e533a4dde50ae880ecf262aae6f5831f990d570dcd9e989a98f085b",
+      "Project/Sources/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+      "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+      "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+      "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+      "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+      "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+      "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+      "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+      "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+      "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+      "Project/Sources/Methods/AXBP_GridEvent.4dm": "a15ce50cc7ce42ce5d25dbad0284888ef16d27f979b24ddaaba2d360b0db2863",
+      "Project/Sources/Methods/AXBP_Child.4dm": "28cb4042e2b1a77506db1f6a23767300623d580e4a80bec2d7b7e77d1031e0a4",
+      "Project/Sources/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+      "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+      "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+      "Project/Sources/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+      "Project/Sources/Methods/AXB_View.4dm": "cab6e9c04eb6a50c0d721ba28903e541810c5c742e9c33ad023450e80a0cca87",
+      "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+      "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+      "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+      "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+      "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+      "Project/Sources/Methods/AXBP_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+      "Project/Sources/Methods/AXBP_Enter.4dm": "78af1945369f7e68d8cc46938a867f75af9a1831862dcf25cc0cc872768b4809",
+      "Project/Sources/Methods/AXBP_Click.4dm": "a32ebc4f212298eb1181fe469d17f3c3fac21bf26f927f28870328f24bed1d2f",
+      "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+      "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+      "Project/Sources/Methods/AXBP_State.4dm": "3c9025076e7b1c19a7b0294eb4e0fc0b34207d1af19fa34b2a0d93683dac533d",
+      "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+      "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+      "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+      "Project/Sources/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+      "Project/Sources/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+      "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+      "Project/Sources/Methods/AXB_ALPGridConfirm.4dm": "d44d5c723248cf4cb5294a4da7fe7cbc957a63a9d98eeef1937d67462b6b6c31",
+      "Project/Sources/Methods/AXBP_EntryEnd.4dm": "3350c298b1e0f601784880e96a55cf0778b7facdf908ba07a2cf58ac8f8c4387",
+      "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+      "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+      "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+      "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+      "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+      "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+      "Project/Sources/Methods/AXBP_Failed.4dm": "68ab782057a2681438791065e28550402e9dfcda8822d8544af87936de135ab4",
+      "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+      "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+      "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+      "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+      "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+      "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+      "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+      "Project/Sources/Methods/AXBP_Form.4dm": "8995429ad6e427d14e723d0aa57de79de4183b042225a2deae0632d211c21d17",
+      "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+      "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+      "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+      "Project/Sources/Methods/AXB_GridBinding.4dm": "ee2fcff1a671f1bc894f827899f375f1da81b062dfa84e89af1929a19a35d146",
+      "Project/Sources/Methods/AXB_ALPGridAction.4dm": "70991191fea82d282a5a70c153dd9325fb7696a41300329accc99def3eba4aca",
+      "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+      "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+      "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+      "Project/Sources/Methods/AXBP_Open.4dm": "749b926bdd65c6627a979c3807ab9b47ca8d6b9af043af2d10c43ef05d5065ca",
+      "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+      "Project/Sources/Methods/AXBP_EntryStart.4dm": "c41ef21c386b10d053f18a77082cc25583979e56ba62648f89ed6ba060d1fb32",
+      "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+      "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+      "Project/Sources/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+      "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+      "Project/Sources/Methods/AXBP_Selected.4dm": "f2a3f925f2542965becdcacf7eaa2f101ed2b5b2ccddf6bec71bb252f10670d6",
+      "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+      "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+      "Project/Sources/Methods/Compiler_AXBP.4dm": "afb08b13499ced1e6fec47f608f8f4b39dd4477631c436be3979699710655f78",
+      "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+      "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+      "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+      "Project/Sources/Methods/AXB_ALPGrid.4dm": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+      "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+      "Project/Sources/DatabaseMethods/onStartup.4dm": "8b0feda25394c0bf01d29bd36a6fd7929462e0b7138eb74264898cdf6d38695d",
+      "Project/Sources/Forms/Lines/form.4DForm": "d7e6f9a952f207d5b99024e23fd76290138533086001133015adc6530f403149",
+      "Project/Sources/Forms/Grid/form.4DForm": "3efea504d1615367a0416b2cb4399017cf77bce06a67869b75f9004bffbad737"
+    }
+  },
+  "deterministic": {
+    "session": 273,
+    "logicalGrid": 169,
+    "nativeAppKit": 182,
+    "publicInstaller": 7,
+    "privateInstaller": 8,
+    "package": 2
+  }
+}

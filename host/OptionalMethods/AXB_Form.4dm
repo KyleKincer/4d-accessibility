@@ -121,6 +121,10 @@ If ($view.automatic)
   $result:=New object("ok"; False; "error"; "gridControlsUnavailable")
   return
  End if
+ If (Position("; cellFocus 1;"; $result.nativeStatus)=0)
+  $result:=New object("ok"; False; "error"; "cellFocusUnavailable")
+  return
+ End if
  If (Position("; rowStates 1;"; $result.nativeStatus)=0)
   $result:=New object("ok"; False; "error"; "gridRowStatesUnavailable")
   return

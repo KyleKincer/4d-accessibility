@@ -46,6 +46,8 @@ Read each script's `--help` before choosing a case. Fixture preparers create dis
 
 For the independent AreaList supplementary Unicode crash, see the [bridge-free reproduction](tests/AREA-LIST-UNICODE.md). The adapter rejects these requests before mutation; ordinary native 4D text editing has separate Unicode coverage.
 
+For AreaList checkboxes, add `--controls` when preparing the AreaList fixture, then run `test_alp_controls_fixture.py --run` in interpreted and `--compiled` modes. Add `--voiceover` for spoken navigation and activation. The fixture keeps normal vendor initialization and entry/exit callbacks in the child forms; the root uses the same grid configuration as other AreaList forms.
+
 ## Source ownership
 
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.

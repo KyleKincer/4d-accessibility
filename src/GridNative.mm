@@ -83,6 +83,7 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @property(nonatomic, copy) NSString *contentRole;
 - (NSDictionary *)value;
 - (BOOL)canEdit;
+- (BOOL)canFocus;
 - (BOOL)isWidget;
 @end
 @interface AXBGridContent : AXBEditableTextNode <AXBGridContentElement>
@@ -160,12 +161,13 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
         [self.table.grid.descriptor[@"columns"][column][@"editable"] boolValue] && [self.value[@"editable"] boolValue];
 }
 - (BOOL)isWidget { return [@[@"checkbox", @"popup"] containsObject:self.value[@"role"] ?: @""]; }
+- (BOOL)canFocus { return [self canEdit] && (!self.value[@"focusable"] || [self.value[@"focusable"] boolValue]); }
 - (BOOL)isAccessibilityFocused {
     NSDictionary *focused = self.table.grid.descriptor[@"focused"];
     return self.isAccessibilityElement && self.table.owner.window.isKeyWindow && [focused[@"row"] isEqual:self.row.key] && [focused[@"column"] isEqual:self.columnKey];
 }
 - (void)setAccessibilityFocused:(BOOL)focused {
-    if (focused && [self.table synchronizeForAction] && [self canEdit]) (void)[self.table queue:@"gridEdit" value:@{@"row": self.row.key, @"column": self.columnKey}];
+    if (focused && [self.table synchronizeForAction] && [self canFocus]) (void)[self.table queue:@"gridEdit" value:@{@"row": self.row.key, @"column": self.columnKey}];
 }
 // AppKit exposes ScrollToVisible through its action-name protocol. There is
 // no corresponding method in NSAccessibilityProtocol, including the 26 SDK.
@@ -204,7 +206,7 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
     return [self.table queue:@"gridSelect" value:@[self.row.key]];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
-    if (selector == @selector(setAccessibilityFocused:)) return [self canEdit];
+    if (selector == @selector(setAccessibilityFocused:)) return [self canFocus];
     if (selector == @selector(setAccessibilityValue:)) return ![self isWidget] && [self canEdit];
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled && ([self canEdit] || ([self.table.grid.descriptor[@"actions"][@"select"] boolValue] && AXBGridRowAllowsSelection(self.table.grid.descriptor, self.row.key)));
     return [super isAccessibilitySelectorAllowed:selector];
@@ -268,7 +270,8 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 }
 #pragma clang diagnostic pop
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
-    if (selector == @selector(setAccessibilityFocused:) || selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled;
+    if (selector == @selector(setAccessibilityFocused:)) return self.isAccessibilityElement && [self.cell canFocus];
+    if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled;
     if (selector == @selector(accessibilityPerformShowMenu)) return self.isAccessibilityEnabled && [self.role isEqual:@"popup"];
     return [super isAccessibilitySelectorAllowed:selector];
 }
