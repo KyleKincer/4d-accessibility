@@ -1,0 +1,4 @@
+interface:
+  display_name: "4D Accessibility"
+  short_description: "Integrate accessible 4D forms with minimal host changes"
+  default_prompt: "Use $4d-accessibility to integrate the bridge with this 4D form and validate its accessibility."

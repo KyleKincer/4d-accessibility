@@ -1,0 +1,31 @@
+{
+  "name": "Accessibility Bridge",
+  "id": 31071,
+  "commands": [
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Exchange(&L;&T;&T):T",
+      "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Detach(&T)",
+      "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Status:T",
+      "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Native focus(&L):T",
+      "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Open(&L):T",
+      "threadSafe": false
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+ARRAY REAL(DropdownNumbers; 0)
+ARRAY LONGINT(DropdownIntegers; 0)
+ARRAY DATE(DropdownDates; 0)
+ARRAY TIME(DropdownTimes; 0)
+C_LONGINT(DropdownList; DropdownHierarchy; DropdownSublist)

@@ -1,0 +1,188 @@
+{
+  "windowTitle": "4D accessibility probe",
+  "width": 640,
+  "height": 610,
+  "method": "method.4dm",
+  "events": [
+    "onLoad",
+    "onTimer",
+    "onUnload"
+  ],
+  "pages": [
+    null,
+    {
+      "objects": {
+        "Instructions": {
+          "type": "text",
+          "left": 20,
+          "top": 15,
+          "width": 600,
+          "height": 40,
+          "text": "Queued form callbacks preserve the host timer. No business data is loaded."
+        },
+        "NameLabel": {
+          "type": "text",
+          "left": 20,
+          "top": 65,
+          "width": 110,
+          "height": 24,
+          "text": "Tester name"
+        },
+        "Name": {
+          "type": "input",
+          "dataSource": "Form.name",
+          "left": 150,
+          "top": 65,
+          "width": 360,
+          "height": 26,
+          "events": [
+            "onDataChange"
+          ],
+          "method": "ObjectMethods/Name.4dm"
+        },
+        "Allowed": {
+          "type": "checkbox",
+          "text": "Allow submission",
+          "dataSource": "Form.allowed",
+          "left": 150,
+          "top": 110,
+          "width": 300,
+          "height": 26,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Allowed.4dm"
+        },
+        "Submit": {
+          "type": "button",
+          "text": "Submit in 4D",
+          "left": 150,
+          "top": 155,
+          "width": 220,
+          "height": 30,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Submit.4dm"
+        },
+        "Status": {
+          "type": "input",
+          "dataSource": "Form.message",
+          "left": 20,
+          "top": 455,
+          "width": 600,
+          "height": 40,
+          "enterable": false,
+          "multiline": true
+        },
+        "Close": {
+          "type": "button",
+          "text": "Close",
+          "left": 510,
+          "top": 565,
+          "width": 110,
+          "height": 24,
+          "action": "cancel",
+          "events": [
+            "onClick"
+          ]
+        },
+        "Grid": {
+          "type": "plugin",
+          "pluginAreaKind": "%AreaListPro",
+          "dataSource": "vAXBGrid",
+          "left": 20,
+          "top": 275,
+          "width": 600,
+          "height": 170,
+          "events": [
+            "onLoad",
+            "onPluginArea"
+          ]
+        },
+        "Reverse": {
+          "type": "button",
+          "text": "Reverse grid rows",
+          "left": 390,
+          "top": 155,
+          "width": 220,
+          "height": 30,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Reverse.4dm"
+        },
+        "Geometry": {
+          "type": "input",
+          "dataSource": "Form.gridGeometry",
+          "left": 20,
+          "top": 510,
+          "width": 600,
+          "height": 44,
+          "enterable": false,
+          "multiline": true
+        },
+        "Modal": {
+          "type": "button",
+          "text": "Open modal",
+          "left": 20,
+          "top": 210,
+          "width": 140,
+          "height": 28,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Modal.4dm"
+        },
+        "Hide": {
+          "type": "button",
+          "text": "Hide name",
+          "left": 170,
+          "top": 210,
+          "width": 140,
+          "height": 28,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Hide.4dm"
+        },
+        "Remove": {
+          "type": "button",
+          "text": "Remove line 003",
+          "left": 320,
+          "top": 210,
+          "width": 140,
+          "height": 28,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Remove.4dm"
+        },
+        "Second": {
+          "type": "button",
+          "text": "Second window",
+          "left": 470,
+          "top": 210,
+          "width": 140,
+          "height": 28,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/Second.4dm"
+        },
+        "More": {
+          "type": "button",
+          "text": "Load 60 rows",
+          "left": 20,
+          "top": 565,
+          "width": 160,
+          "height": 24,
+          "events": [
+            "onClick"
+          ],
+          "method": "ObjectMethods/More.4dm"
+        }
+      }
+    }
+  ]
+}
