@@ -1,0 +1,38 @@
+{
+  "windowTitle": "Accessibility modal test",
+  "width": 400,
+  "height": 160,
+  "method": "method.4dm",
+  "events": [
+    "onLoad",
+    "onTimer",
+    "onUnload"
+  ],
+  "pages": [
+    null,
+    {
+      "objects": {
+        "Message": {
+          "type": "text",
+          "text": "The parent window must reject actions while this dialog is open.",
+          "left": 20,
+          "top": 20,
+          "width": 360,
+          "height": 65
+        },
+        "CloseModal": {
+          "type": "button",
+          "text": "Close modal",
+          "left": 230,
+          "top": 110,
+          "width": 150,
+          "height": 28,
+          "action": "cancel",
+          "events": [
+            "onClick"
+          ]
+        }
+      }
+    }
+  ]
+}

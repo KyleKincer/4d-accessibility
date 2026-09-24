@@ -1,0 +1,562 @@
+{
+  "date": "2026-09-24",
+  "scope": "Standalone sources and binaries; synthetic generated children with shared plain data, replacement and second root window. No complete application or whole-UI claim.",
+  "macOS": "26.6.2",
+  "desktop": "4D 20.8 build 20.102009",
+  "componentCompiler": "20.8 build 20.102083",
+  "version": "0.17.0",
+  "nativeSHA256": "c206cbd22504795c9be5ea9be587d909af326d282424d5ec255bd76af9e609dc",
+  "componentSHA256": {
+    "AccessibilityBridge.4DZ": "cd708588d53097a09d435fa74dccca9ca7edc0181aea3f0336322af8ea01b6b6",
+    "Libraries/lib4d-arm64.dylib": "7c333c392af81bdde15dd7ee78c231cefd1b97cc3ccb343cf12c5f1f978bae4f"
+  },
+  "fixtureSourceSHA256": {
+    "Project/Sources/catalog.4DCatalog": "753d6abc3da1c6bdd76ac93d937dcd20768119bf86894bd70e857a1236f7183b",
+    "Project/Sources/Methods/AXBC_Child.4dm": "d377d3c4ce8e0ba3c1f988ecbb2ac5754985c0a4e82ca6383be897d2a1579745",
+    "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+    "Project/Sources/Methods/AXB_Dynamic.4dm": "263de3c73127c1b37168217c3056a0b24e687dbf67ade65f0277c089e97b4385",
+    "Project/Sources/Methods/AXB_ViewCreate.4dm": "14c72e3c6ff0d74d639e61120a1d738a300eb4606091bbc95e8b9ee978142575",
+    "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+    "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+    "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+    "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+    "Project/Sources/Methods/AXB_GridPoll.4dm": "7999bd824fecd4a8763cafbdafc4523fce8059174e608c26a9757d7204ad1c38",
+    "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+    "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+    "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+    "Project/Sources/Methods/AXB_View.4dm": "bb5bf4ec001435d6713c763fb0ac05610bf75a84e546a398cd1288abc4d1e8a1",
+    "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+    "Project/Sources/Methods/AXB_FormStop.4dm": "cd415388b9f584081a9ca2997a92972660f91aa4bbcc2a7628df15477857de4b",
+    "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+    "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+    "Project/Sources/Methods/AXB_Form.4dm": "a6502f05e25c2121d286a9abad1c5df42dafb45d8dfaeb351b2e17bfab7db35c",
+    "Project/Sources/Methods/AXB_FormError.4dm": "3f50793622e84d7251a5c22ee168469e1d62e74da9a72e62fce13ae869d35a67",
+    "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+    "Project/Sources/Methods/AXB_GridListbox.4dm": "9cbac6d815012757d3d2247584fcb949ee5db67d536df1149fb263c43f52620a",
+    "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+    "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+    "Project/Sources/Methods/AXB_DynamicClose.4dm": "26c695a9a4a8e966418892fbdc1a971c1d8d9bbcbf126a29a522f2c7835fb427",
+    "Project/Sources/Methods/AXBC_Error.4dm": "eb459c85ee7ff8dced2eb48f0245a3a81a64d2f6e032bc33caa1a5c37b6c8fe0",
+    "Project/Sources/Methods/AXBC_Parent.4dm": "a22ba25a404639fa57bbca1e1069be63a1823fc2e5889709088b8f2ae515355a",
+    "Project/Sources/Methods/AXBC_State.4dm": "0859f500d86c29f57169abb8a9c89afb7e94836328de53c4f5f8a78f1b308fc2",
+    "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+    "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f",
+    "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+    "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+    "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+    "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+    "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+    "Project/Sources/Methods/AXB_DynamicEvent.4dm": "cfd09fe006ecce18811e403558840a7f64b7be2dcece6018fe50e4089ce9ada1",
+    "Project/Sources/Methods/AXBC_Nested.4dm": "825ae672e105257c28fe57955866458f8dafa0ca4dc07e6d1474722c412af669",
+    "Project/Sources/Methods/AXBC_OpenRoot.4dm": "a1dfed8a9d982ce7cb7d6a85a6c304f91b835dc412cde2a5acd7dc78bca7f95b",
+    "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+    "Project/Sources/Methods/AXB_GridValue.4dm": "ab396fa705b5735128833129eece625bfbd7452a15d544de4cf37a146bee468d",
+    "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+    "Project/Sources/Methods/AXBC_GenerateNested.4dm": "05a8af9d46b67e4687d5a52c855ec8aa08e199df0a32f6949c4934f9824de15e",
+    "Project/Sources/Methods/AXB_FormFailed.4dm": "930be262663ab4e800c0e85b1cff2dd3a16403e849b3c109caafa3e8284bd641",
+    "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+    "Project/Sources/Methods/AXBC_Read.4dm": "74cbf1e438084e202127300494a4aa2df04be0cd84794776bfe90bd4d2ddf2a6",
+    "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+    "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+    "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+    "Project/Sources/Methods/AXB_GridBinding.4dm": "640369eb5d69f11277d9e6ae8d66c736a966d35d4e5f8c5b39fff7bb2e6046b8",
+    "Project/Sources/Methods/Compiler_AXBHost.4dm": "565e3ee32dacee348eae46be4aad1a8596c426723ecdb90c4a21e7b3014c82ba",
+    "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+    "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+    "Project/Sources/Methods/AXB_FormExchange.4dm": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+    "Project/Sources/Methods/AXBC_RootForm.4dm": "7c65d31d0633c6d357d0b6fb205ad6dffdc9000842f8bd5650881732c0a41479",
+    "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+    "Project/Sources/Methods/Compiler_AXBC.4dm": "d2fb5894489f6c649636b6901ddf365bb4f0f80665dec5c4928a4dede5508c37",
+    "Project/Sources/Methods/AXB_ControlAction.4dm": "7584b603eaa72c22975893af2aee9053b520c5f2a374fe7c12d16b293f759089",
+    "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+    "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+    "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+    "Project/Sources/Methods/AXBC_Event.4dm": "a84f153183a9d49547087a4aa329884a9e73794da10b30d5720f5cec887acc5d",
+    "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+    "Project/Sources/Methods/AXB_DynamicStop.4dm": "df5b495e2fbd76d509ca6201a79754dd82c752403991d141826d3fa73148b6c3",
+    "Project/Sources/Methods/AXB_Discover.4dm": "6e1abec4417c05d7669633e7cf4fe7eaebd137d6b0b206ec055815b41fd18916",
+    "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+    "Project/Sources/DatabaseMethods/onStartup.4dm": "f5c0f9acded00145db9d73a9c75f9883d2deebaf0591214ecc913542de2b80b9",
+    "Project/Sources/Forms/Panel/form.4DForm": "ac160d91b027bd033498be25844b38925e6773c55f737ac9aea79ae15f3d091d",
+    "Project/Sources/Forms/Parent/form.4DForm": "12141478749f883453742f553abc77f261fb3adf6ab3094d4e61444e55980b9c",
+    "Project/Sources/Forms/ChildProcess/form.4DForm": "0d4e5e101eb42911e5aa09b8d0a247cad1e0573e51e929ad75d89ce8cd84f14b",
+    "Project/Sources/Forms/SharedRoot/form.4DForm": "f769c7c5f1d670ac5f2460cdca879b1144314558c8918d37a90d70de0770b289",
+    "Project/Sources/Forms/Child/form.4DForm": "138702c130d8605809f1d2623ff9ad7f835c2ac8e293cd68a97420c8fc4ab00e"
+  },
+  "results": [
+    {
+      "mode": "interpreted",
+      "passed": true,
+      "checks": [
+        {
+          "name": "root start discovers all child controls",
+          "passed": true
+        },
+        {
+          "name": "shared, scalar, unbound and nested inputs are exposed once",
+          "passed": true
+        },
+        {
+          "name": "shared business data does not merge instance identities",
+          "passed": true
+        },
+        {
+          "name": "automatic child discovery does not write provider state into child business data",
+          "passed": true
+        },
+        {
+          "name": "repeated children preserve their intentional shared binding",
+          "passed": true
+        },
+        {
+          "name": "scalar-bound child retains its implicit Form object",
+          "passed": true
+        },
+        {
+          "name": "a child with Null Form still exposes its process-bound controls",
+          "passed": true
+        },
+        {
+          "name": "nested child reads its own data",
+          "passed": true
+        },
+        {
+          "name": "repeated child frames use their own coordinate origin",
+          "passed": true
+        },
+        {
+          "name": "Shipping child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Billing child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Scalar child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Unbound child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Nested child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Billing button is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Billing repeated button accepts a focus request",
+          "passed": true
+        },
+        {
+          "name": "Billing button focus identifies exactly one instance",
+          "passed": true
+        },
+        {
+          "name": "Shipping button is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Shipping repeated button accepts a focus request",
+          "passed": true
+        },
+        {
+          "name": "Shipping button focus identifies exactly one instance",
+          "passed": true
+        },
+        {
+          "name": "Nested button is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Nested repeated button accepts a focus request",
+          "passed": true
+        },
+        {
+          "name": "Nested button focus identifies exactly one instance",
+          "passed": true
+        },
+        {
+          "name": "edit requested in the second shared-data child",
+          "passed": true
+        },
+        {
+          "name": "keyboard and application AX focus identify the actual repeated child",
+          "passed": true
+        },
+        {
+          "name": "only one repeated child claims keyboard focus",
+          "passed": true
+        },
+        {
+          "name": "uncommitted text stays on the actual editor instead of every same-named child",
+          "passed": true
+        },
+        {
+          "name": "selection requested inside the second shared-data child",
+          "passed": true
+        },
+        {
+          "name": "selected text belongs to the actual repeated-child editor",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested inside the child",
+          "passed": true
+        },
+        {
+          "name": "selection replacement does not publish the other child's uncommitted buffer",
+          "passed": true
+        },
+        {
+          "name": "button requested inside the second child",
+          "passed": true
+        },
+        {
+          "name": "normal commit updates the shared business value in both children",
+          "passed": true
+        },
+        {
+          "name": "normal validation runs in the targeted child context",
+          "passed": true
+        },
+        {
+          "name": "edit requested two levels deep",
+          "passed": true
+        },
+        {
+          "name": "nested input commits through its normal editor",
+          "passed": true
+        },
+        {
+          "name": "Scalar child accepts an editor action",
+          "passed": true
+        },
+        {
+          "name": "Scalar child owns application accessibility focus",
+          "passed": true
+        },
+        {
+          "name": "Scalar edit commits through the normal binding",
+          "passed": true
+        },
+        {
+          "name": "Unbound child accepts an editor action",
+          "passed": true
+        },
+        {
+          "name": "Unbound child owns application accessibility focus",
+          "passed": true
+        },
+        {
+          "name": "Unbound edit commits through the normal binding",
+          "passed": true
+        },
+        {
+          "name": "replacement boundary finds the owning parent",
+          "passed": true
+        },
+        {
+          "name": "replacing one child preserves its sibling identity",
+          "passed": true
+        },
+        {
+          "name": "retained control cannot edit its same-data replacement",
+          "passed": true
+        },
+        {
+          "name": "hidden ancestor blocks retained child actions",
+          "passed": true
+        },
+        {
+          "name": "disabled ancestor blocks child edits",
+          "passed": true
+        },
+        {
+          "name": "declarative record scope rejects retained descendant actions",
+          "passed": true
+        },
+        {
+          "name": "ordinary parent timer remains active",
+          "passed": true
+        },
+        {
+          "name": "two roots sharing business data have independent sessions",
+          "passed": true
+        },
+        {
+          "name": "modal shared-data window blocks parent actions",
+          "passed": true
+        },
+        {
+          "name": "shared-data root editor accepts normal input",
+          "passed": true
+        },
+        {
+          "name": "second root started without detaching its parent",
+          "passed": true
+        },
+        {
+          "name": "closing the shared-data root preserves the original parent session",
+          "passed": true
+        },
+        {
+          "name": "retained child-window editor cannot edit the shared parent data",
+          "passed": true
+        },
+        {
+          "name": "ordinary close requested",
+          "passed": true
+        },
+        {
+          "name": "root close retires all automatic children",
+          "passed": true
+        }
+      ],
+      "generatedChildren": true,
+      "processArchitecture": "ARM64",
+      "compileReportSHA256": "edb55a38428fb791bce5cbef8663a90420f9b617027a7c31d5c4d19fa655c9e5"
+    },
+    {
+      "mode": "compiled",
+      "passed": true,
+      "checks": [
+        {
+          "name": "root start discovers all child controls",
+          "passed": true
+        },
+        {
+          "name": "shared, scalar, unbound and nested inputs are exposed once",
+          "passed": true
+        },
+        {
+          "name": "shared business data does not merge instance identities",
+          "passed": true
+        },
+        {
+          "name": "automatic child discovery does not write provider state into child business data",
+          "passed": true
+        },
+        {
+          "name": "repeated children preserve their intentional shared binding",
+          "passed": true
+        },
+        {
+          "name": "scalar-bound child retains its implicit Form object",
+          "passed": true
+        },
+        {
+          "name": "a child with Null Form still exposes its process-bound controls",
+          "passed": true
+        },
+        {
+          "name": "nested child reads its own data",
+          "passed": true
+        },
+        {
+          "name": "repeated child frames use their own coordinate origin",
+          "passed": true
+        },
+        {
+          "name": "Shipping child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Billing child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Scalar child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Unbound child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Nested child is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Billing button is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Billing repeated button accepts a focus request",
+          "passed": true
+        },
+        {
+          "name": "Billing button focus identifies exactly one instance",
+          "passed": true
+        },
+        {
+          "name": "Shipping button is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Shipping repeated button accepts a focus request",
+          "passed": true
+        },
+        {
+          "name": "Shipping button focus identifies exactly one instance",
+          "passed": true
+        },
+        {
+          "name": "Nested button is discoverable by external screen-position lookup",
+          "passed": true
+        },
+        {
+          "name": "Nested repeated button accepts a focus request",
+          "passed": true
+        },
+        {
+          "name": "Nested button focus identifies exactly one instance",
+          "passed": true
+        },
+        {
+          "name": "edit requested in the second shared-data child",
+          "passed": true
+        },
+        {
+          "name": "keyboard and application AX focus identify the actual repeated child",
+          "passed": true
+        },
+        {
+          "name": "only one repeated child claims keyboard focus",
+          "passed": true
+        },
+        {
+          "name": "uncommitted text stays on the actual editor instead of every same-named child",
+          "passed": true
+        },
+        {
+          "name": "selection requested inside the second shared-data child",
+          "passed": true
+        },
+        {
+          "name": "selected text belongs to the actual repeated-child editor",
+          "passed": true
+        },
+        {
+          "name": "selected text replacement requested inside the child",
+          "passed": true
+        },
+        {
+          "name": "selection replacement does not publish the other child's uncommitted buffer",
+          "passed": true
+        },
+        {
+          "name": "button requested inside the second child",
+          "passed": true
+        },
+        {
+          "name": "normal commit updates the shared business value in both children",
+          "passed": true
+        },
+        {
+          "name": "normal validation runs in the targeted child context",
+          "passed": true
+        },
+        {
+          "name": "edit requested two levels deep",
+          "passed": true
+        },
+        {
+          "name": "nested input commits through its normal editor",
+          "passed": true
+        },
+        {
+          "name": "Scalar child accepts an editor action",
+          "passed": true
+        },
+        {
+          "name": "Scalar child owns application accessibility focus",
+          "passed": true
+        },
+        {
+          "name": "Scalar edit commits through the normal binding",
+          "passed": true
+        },
+        {
+          "name": "Unbound child accepts an editor action",
+          "passed": true
+        },
+        {
+          "name": "Unbound child owns application accessibility focus",
+          "passed": true
+        },
+        {
+          "name": "Unbound edit commits through the normal binding",
+          "passed": true
+        },
+        {
+          "name": "replacement boundary finds the owning parent",
+          "passed": true
+        },
+        {
+          "name": "replacing one child preserves its sibling identity",
+          "passed": true
+        },
+        {
+          "name": "retained control cannot edit its same-data replacement",
+          "passed": true
+        },
+        {
+          "name": "hidden ancestor blocks retained child actions",
+          "passed": true
+        },
+        {
+          "name": "disabled ancestor blocks child edits",
+          "passed": true
+        },
+        {
+          "name": "declarative record scope rejects retained descendant actions",
+          "passed": true
+        },
+        {
+          "name": "ordinary parent timer remains active",
+          "passed": true
+        },
+        {
+          "name": "two roots sharing business data have independent sessions",
+          "passed": true
+        },
+        {
+          "name": "modal shared-data window blocks parent actions",
+          "passed": true
+        },
+        {
+          "name": "shared-data root editor accepts normal input",
+          "passed": true
+        },
+        {
+          "name": "second root started without detaching its parent",
+          "passed": true
+        },
+        {
+          "name": "closing the shared-data root preserves the original parent session",
+          "passed": true
+        },
+        {
+          "name": "retained child-window editor cannot edit the shared parent data",
+          "passed": true
+        },
+        {
+          "name": "ordinary close requested",
+          "passed": true
+        },
+        {
+          "name": "root close retires all automatic children",
+          "passed": true
+        }
+      ],
+      "generatedChildren": true,
+      "processArchitecture": "ARM64",
+      "compileReportSHA256": "edb55a38428fb791bce5cbef8663a90420f9b617027a7c31d5c4d19fa655c9e5"
+    }
+  ]
+}

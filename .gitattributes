@@ -1,0 +1,2 @@
+# Preserve the pinned upstream SDK's formatting; review our documented patch.
+vendor/4DPluginAPI/* -whitespace linguist-vendored

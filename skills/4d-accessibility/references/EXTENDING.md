@@ -1,0 +1,15 @@
+# Extend a missing accessibility family
+
+Use this branch when the requested UI includes unsupported interactive behavior and a working native provider is absent. A role or read-only description alone cannot satisfy the request. Keep the existing application controls and their behavior. Do not replace a tab, editor or other control merely to clear diagnostics. Keep the limitation visible until the new behavior passes live tests. For an authorized implementation request, extend the bridge; for a bounded integration-only request, report the unsupported family and the extension needed.
+
+Work in the matching source checkout. `src/Bridge.mm` and `src/GridNative.mm` expose AppKit elements; `src/Session.mm` and `src/Grid.mm` validate asynchronous actions, scope and stable identity. `host/OptionalMethods` discovers 4D controls and implements the high-level adapters. `host/Methods` contains the scheduler/component and vendor grid adapters. Update canonical helpers, then refresh the host with the installer.
+
+First reproduce the native control's normal behavior in a synthetic 4D form. Inspect its existing AX provider, public runtime getters, editor, event ordering and shared controller. Use public 4D/AppKit APIs. Choose the smallest reusable adapter that preserves this behavior; map a shared application controller only where the public runtime cannot provide the operation. Add a controller callback to the family configuration rather than forcing each host to replace its entire form provider.
+
+For tabs, preserve the actual tab activation and page-change handlers; changing the page directly is not evidence that the native tab action ran. Expose the real role, state, relationships, accessible actions and focus. Preserve working native children. Retained elements must be rejected after scope change, replacement or closing. Confirm accepted input against actual UI/model state after native callbacks settle; a queued action may already have side effects even when later rejected. Keep array dereferencing in host helpers: a compiled component cannot dereference pointers into an interpreted host.
+
+Use the [acceptance matrix](REQUIREMENTS.md) for the family. Test native keyboard/mouse behavior against AX actions, then VoiceOver, with repeated/empty/loading/disabled/read-only states and stale references. Keep tests synthetic until exercising the authorized integrating application. Run compiler drivers and live fixtures sequentially.
+
+The checkout provides `test.py` for session behavior, `test_grids.py` for logical grids, `test_native.py --run` for AppKit and `prepare_*`/`test_*` scripts for live 4D families. Inspect `--help` and the relevant test source rather than assuming every family has identical options. New native protocol behavior needs matching component/helper capabilities and an explicit startup compatibility check.
+
+Complete when the new adapter and the real requested workflow pass in each claimed execution mode. Update status, integration options and version/build evidence. If the platform or vendor blocks an operation, document the exact missing behavior and the tested alternatives; leave full-UI completion open.

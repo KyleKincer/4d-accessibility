@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE base SYSTEM "http://www.4d.com/dtd/2007/base.dtd">
+<base name="AccessibilityProbe" uuid="7E7A2DAFB6074A75B6A0D062A5B82740" collation_locale="en">
+  <schema name="DEFAULT_SCHEMA"/>
+</base>
