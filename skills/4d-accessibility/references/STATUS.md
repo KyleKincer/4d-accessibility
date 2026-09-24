@@ -13,7 +13,7 @@ Full logical flat grids support native arrays, collections, entity selections an
 - Tabs, dials, editable pictures, hierarchical lists and standard-action-generated menus need implementation or further validation.
 - Classic current/named-selection grids, native hierarchy, custom/styled/protected editors and further AreaList layouts remain open.
 - Cold asynchronous values can still be spoken as Loading after data arrives. Licensed compiled AreaList navigation/reveal and explicit VO-Space selection now pass separately.
-- Native grid headers are implemented in the working source, but disabled-state publication still fails a live regression. Do not treat header actions as validated.
+- Native grid headers pass array, collection and entity tests in interpreted and compiled modes. An earlier intermittent compiled entity activation reported delivery without a handler event. A fresh full run passes; its cause remains unresolved and is retained in the validation record.
 - AreaList supplementary Unicode editing, IME/grapheme behavior, wrapped text geometry, errors/status speech and complete reading order need further work.
 - Starting a root directly on a persisted entity or 4D shared object is unsupported; the current API writes form state and does not yet return a safe named rejection for this case.
 - Generated forms and explicit providers require private data objects. Shared-data ownership is incomplete for those paths.

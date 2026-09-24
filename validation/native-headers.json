@@ -1,0 +1,816 @@
+{
+  "date": "2026-09-24",
+  "version": "0.17.0",
+  "runtime": "4D 20.8, native ARM; macOS 26.6.2",
+  "scope": "Native header activation, sorting and supported loading/hidden/empty states across arrays, collections and entity selections, interpreted and compiled. Earlier intermittent action failures remain recorded below.",
+  "runs": [
+    {
+      "name": "array-interpreted",
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "4D starts the header fixture in the requested execution mode"
+        },
+        {
+          "passed": true,
+          "name": "complete grid exposes both visible column headers"
+        },
+        {
+          "passed": true,
+          "name": "sortable header has native button semantics"
+        },
+        {
+          "passed": true,
+          "name": "first sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "first sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "native header variable reports the resulting sort direction"
+        },
+        {
+          "passed": true,
+          "name": "sorting retains the header identity"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "second activation reverses native sorting"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing On Header Click rejection preserves row order"
+        },
+        {
+          "passed": true,
+          "name": "custom sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "custom sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing custom sort handler remains in charge"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "offscreen header activation scrolls the real list box"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column still has an operable header"
+        },
+        {
+          "passed": true,
+          "name": "retained hidden header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "loading table is unavailable"
+        },
+        {
+          "passed": true,
+          "name": "loading grid removes unavailable header controls"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header offers no activation"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "empty grid retains its headers"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "header activation does not create or select a row"
+        },
+        {
+          "passed": true,
+          "name": "normal form close remains accessible"
+        },
+        {
+          "passed": true,
+          "name": "owned 4D fixture closes normally"
+        }
+      ],
+      "nativeSHA256": "e883e55585841604e5ec1a10dc77028a6c794784737e2d1a240e80613a7fba78",
+      "componentSHA256": "e510c548959b52b8300234912025daf2c1f313586057334940244b568577c58d"
+    },
+    {
+      "name": "array-compiled",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "4D starts the header fixture in the requested execution mode"
+        },
+        {
+          "passed": true,
+          "name": "complete grid exposes both visible column headers"
+        },
+        {
+          "passed": true,
+          "name": "sortable header has native button semantics"
+        },
+        {
+          "passed": true,
+          "name": "first sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "first sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "native header variable reports the resulting sort direction"
+        },
+        {
+          "passed": true,
+          "name": "sorting retains the header identity"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "second activation reverses native sorting"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing On Header Click rejection preserves row order"
+        },
+        {
+          "passed": true,
+          "name": "custom sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "custom sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing custom sort handler remains in charge"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "offscreen header activation scrolls the real list box"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column still has an operable header"
+        },
+        {
+          "passed": true,
+          "name": "retained hidden header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "loading table is unavailable"
+        },
+        {
+          "passed": true,
+          "name": "loading grid removes unavailable header controls"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header offers no activation"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "empty grid retains its headers"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "header activation does not create or select a row"
+        },
+        {
+          "passed": true,
+          "name": "normal form close remains accessible"
+        },
+        {
+          "passed": true,
+          "name": "owned 4D fixture closes normally"
+        }
+      ],
+      "nativeSHA256": "e883e55585841604e5ec1a10dc77028a6c794784737e2d1a240e80613a7fba78",
+      "componentSHA256": "e510c548959b52b8300234912025daf2c1f313586057334940244b568577c58d"
+    },
+    {
+      "name": "collection-interpreted",
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "4D starts the header fixture in the requested execution mode"
+        },
+        {
+          "passed": true,
+          "name": "complete grid exposes both visible column headers"
+        },
+        {
+          "passed": true,
+          "name": "sortable header has native button semantics"
+        },
+        {
+          "passed": true,
+          "name": "first sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "first sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "native header variable reports the resulting sort direction"
+        },
+        {
+          "passed": true,
+          "name": "sorting retains the header identity"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "second activation reverses native sorting"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing On Header Click rejection preserves row order"
+        },
+        {
+          "passed": true,
+          "name": "custom sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "custom sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing custom sort handler remains in charge"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "offscreen header activation scrolls the real list box"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column still has an operable header"
+        },
+        {
+          "passed": true,
+          "name": "retained hidden header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "loading table is unavailable"
+        },
+        {
+          "passed": true,
+          "name": "loading grid removes unavailable header controls"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header offers no activation"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "empty grid retains its headers"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "header activation does not create or select a row"
+        },
+        {
+          "passed": true,
+          "name": "normal form close remains accessible"
+        },
+        {
+          "passed": true,
+          "name": "owned 4D fixture closes normally"
+        }
+      ],
+      "nativeSHA256": "e883e55585841604e5ec1a10dc77028a6c794784737e2d1a240e80613a7fba78",
+      "componentSHA256": "e510c548959b52b8300234912025daf2c1f313586057334940244b568577c58d"
+    },
+    {
+      "name": "collection-compiled",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "4D starts the header fixture in the requested execution mode"
+        },
+        {
+          "passed": true,
+          "name": "complete grid exposes both visible column headers"
+        },
+        {
+          "passed": true,
+          "name": "sortable header has native button semantics"
+        },
+        {
+          "passed": true,
+          "name": "first sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "first sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "native header variable reports the resulting sort direction"
+        },
+        {
+          "passed": true,
+          "name": "sorting retains the header identity"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "second activation reverses native sorting"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing On Header Click rejection preserves row order"
+        },
+        {
+          "passed": true,
+          "name": "custom sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "custom sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing custom sort handler remains in charge"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "offscreen header activation scrolls the real list box"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column still has an operable header"
+        },
+        {
+          "passed": true,
+          "name": "retained hidden header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "loading table is unavailable"
+        },
+        {
+          "passed": true,
+          "name": "loading grid removes unavailable header controls"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header offers no activation"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "empty grid retains its headers"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "header activation does not create or select a row"
+        },
+        {
+          "passed": true,
+          "name": "normal form close remains accessible"
+        },
+        {
+          "passed": true,
+          "name": "owned 4D fixture closes normally"
+        }
+      ],
+      "nativeSHA256": "e883e55585841604e5ec1a10dc77028a6c794784737e2d1a240e80613a7fba78",
+      "componentSHA256": "e510c548959b52b8300234912025daf2c1f313586057334940244b568577c58d"
+    },
+    {
+      "name": "entity-interpreted",
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "4D starts the header fixture in the requested execution mode"
+        },
+        {
+          "passed": true,
+          "name": "complete grid exposes both visible column headers"
+        },
+        {
+          "passed": true,
+          "name": "sortable header has native button semantics"
+        },
+        {
+          "passed": true,
+          "name": "first sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "first sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "native header variable reports the resulting sort direction"
+        },
+        {
+          "passed": true,
+          "name": "sorting retains the header identity"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "second activation reverses native sorting"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing On Header Click rejection preserves row order"
+        },
+        {
+          "passed": true,
+          "name": "custom sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "custom sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing custom sort handler remains in charge"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "offscreen header activation scrolls the real list box"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column still has an operable header"
+        },
+        {
+          "passed": true,
+          "name": "retained hidden header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "loading table is unavailable"
+        },
+        {
+          "passed": true,
+          "name": "loading grid removes unavailable header controls"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header offers no activation"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "empty grid retains its headers"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "header activation does not create or select a row"
+        },
+        {
+          "passed": true,
+          "name": "normal form close remains accessible"
+        },
+        {
+          "passed": true,
+          "name": "owned 4D fixture closes normally"
+        }
+      ],
+      "nativeSHA256": "e883e55585841604e5ec1a10dc77028a6c794784737e2d1a240e80613a7fba78",
+      "componentSHA256": "e510c548959b52b8300234912025daf2c1f313586057334940244b568577c58d"
+    },
+    {
+      "name": "entity-compiled",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "4D starts the header fixture in the requested execution mode"
+        },
+        {
+          "passed": true,
+          "name": "complete grid exposes both visible column headers"
+        },
+        {
+          "passed": true,
+          "name": "sortable header has native button semantics"
+        },
+        {
+          "passed": true,
+          "name": "first sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "first sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "native header variable reports the resulting sort direction"
+        },
+        {
+          "passed": true,
+          "name": "sorting retains the header identity"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "reverse sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "second activation reverses native sorting"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "rejected sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing On Header Click rejection preserves row order"
+        },
+        {
+          "passed": true,
+          "name": "custom sort accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "custom sort confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "existing custom sort handler remains in charge"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "offscreen amount header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "offscreen header activation scrolls the real list box"
+        },
+        {
+          "passed": true,
+          "name": "read-only numeric column still has an operable header"
+        },
+        {
+          "passed": true,
+          "name": "retained hidden header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "loading table is unavailable"
+        },
+        {
+          "passed": true,
+          "name": "loading grid removes unavailable header controls"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header offers no activation"
+        },
+        {
+          "passed": true,
+          "name": "retained loading header cannot invoke its handler"
+        },
+        {
+          "passed": true,
+          "name": "empty grid retains its headers"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header accepts AX activation"
+        },
+        {
+          "passed": true,
+          "name": "empty-grid header confirms native input delivery"
+        },
+        {
+          "passed": true,
+          "name": "header activation does not create or select a row"
+        },
+        {
+          "passed": true,
+          "name": "normal form close remains accessible"
+        },
+        {
+          "passed": true,
+          "name": "owned 4D fixture closes normally"
+        }
+      ],
+      "nativeSHA256": "e883e55585841604e5ec1a10dc77028a6c794784737e2d1a240e80613a7fba78",
+      "componentSHA256": "e510c548959b52b8300234912025daf2c1f313586057334940244b568577c58d"
+    }
+  ],
+  "retainedFailures": [
+    {
+      "case": "OBJECT SET ENABLED applied to a native list box",
+      "finding": "Unsupported 4D command target. Disabled flag reverted even with bridge stopped; timer continued. The corrected live tests use provider readiness and retained-element rejection."
+    },
+    {
+      "case": "Entity compiled first header activation",
+      "finding": "An earlier compiled run reported input delivery without a header handler event or sort. An isolated two-activation probe and a freshly prepared complete compiled run pass. The cause is unresolved; no scheduler workaround or mutation retry was added."
+    }
+  ]
+}

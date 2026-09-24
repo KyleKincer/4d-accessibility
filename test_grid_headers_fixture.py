@@ -109,6 +109,12 @@ def main():
             report["actions"].append({"label": label, "receipt": receipt, "events": events, "headers": state()["headers"], "first_rows": state()["rows"][:3]})
             check(receipt == "Column header activated", label + " confirms native input delivery")
             return events
+        # Licensed activation can precede publication of the form's active
+        # snapshot. Start actions only after that actual state is published.
+        ax.wait_for(lambda: state().get("snapshot", {}).get("enabled") is True
+                    and state().get("timerTicks", 0) >= 3,
+                    "Active form snapshot did not settle", timeout=10)
+        report["initial_state"] = state()
         retained_id = description.read("AXIdentifier")
         press(description, "first sort")
         first_sort = state()["headers"]["ItemNameHeader"].get("sort")
@@ -135,12 +141,17 @@ def main():
         description.press()
         time.sleep(.35)
         check(len(state()["events"]) == before_events, "retained hidden header cannot invoke its handler")
-        configure(headers=True, enabled=False)
-        disabled_at = time.monotonic()
-        ax.wait_for(lambda: headers() and header("Description").read("AXEnabled") is False, "Disabled grid header is still enabled", timeout=20)
-        report["disabled_state_delay_seconds"] = time.monotonic() - disabled_at
-        check("AXPress" not in header("Description").actions(), "disabled header offers no activation")
-        configure(enabled=True, empty=True)
+        configure(headers=True, ready=False)
+        loading = ax.wait_for(lambda: find("Invoice lines: loading"), "Loading table missing", timeout=15)
+        check(loading.read("AXEnabled") is False, "loading table is unavailable")
+        check(not headers(), "loading grid removes unavailable header controls")
+        check("AXPress" not in description.actions(), "retained loading header offers no activation")
+        before_events = len(state()["events"])
+        description.press()
+        time.sleep(.35)
+        check(len(state()["events"]) == before_events, "retained loading header cannot invoke its handler")
+        configure(ready=True, empty=True)
+        table = ax.wait_for(lambda: find("Invoice lines"), "Restored grid missing", timeout=15)
         ax.wait_for(lambda: table.count("AXRows") == 0, "Empty grid still exposes rows")
         check(len(headers()) == 2, "empty grid retains its headers")
         press(header("Description"), "empty-grid header")
@@ -158,6 +169,11 @@ def main():
             report["failure_table"] = {key: table.read(key) for key in ("AXEnabled", "AXTitle", "AXDescription")}
         raise
     finally:
+        try:
+            if process.poll() is None:
+                state()
+        except Exception as error:
+            report["final_state_error"] = str(error)
         report["final_state"] = last_state
         if group is not None and process.poll() is None:
             report["final_receipt"] = group.read("AXHelp")
