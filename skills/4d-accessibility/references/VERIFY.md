@@ -7,11 +7,10 @@ Use a permitted non-production window and its real UI state. Desktop and assisti
 The complete release kit and source checkout provide a read-only inspector for arbitrary host windows:
 
 ```sh
-mkdir -p build
-python3 inspect_ax.py --pid 12345 --window-title "Customer details" --output build/customer-ax.json
+python3 inspect_ax.py --pid 12345 --window-title "Customer details" --output /host-local/ignored/customer-ax.json
 ```
 
-Use the actual process ID and exact window title. The invoking app needs normal macOS Accessibility permission. The script sends no actions, focus changes, mouse events or keystrokes. It reports roles, identifiers, names, state, geometry, offered actions, logical table counts and the bridge root's receipt. It reads bounded slices and records truncation. Use `--row-start 590` to sample distant logical rows and `--include-values` when the test requires field values. Reports are private mode-0600 files; labels and identifiers can also contain application data. Keep them outside source control.
+Use the actual process ID and exact window title, and a fresh `--output` path for each run. The inspector refuses to overwrite an existing file. The invoking app needs normal macOS Accessibility permission. The script sends no actions, focus changes, mouse events or keystrokes. It reports roles, identifiers, names, state, geometry, offered actions, logical table counts and the bridge root's receipt. It reads bounded slices and records truncation. Use `--row-start 590` to sample distant logical rows and `--include-values` when the test requires field values. Use an existing ignored host-local output directory. Reports are private mode-0600 files; labels and identifiers can also contain application data. Keep them outside source control.
 
 A truncated sample does not establish entire-UI coverage. Traverse omitted branches and logical row ranges with a suitable AX client. A native provider can coexist with the bridge; inspect both. `AXHelp` on the root whose identifier begins `axb.window.` is the action receipt, not the internal coverage diagnostics.
 

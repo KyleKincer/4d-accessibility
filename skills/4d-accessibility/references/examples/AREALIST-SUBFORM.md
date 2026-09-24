@@ -1,6 +1,8 @@
 # Example: two AreaList input subforms
 
-This is the earlier explicit row-summary API. New integrations configure each grid under `options.children.<container>.grids` in the [automatic AreaList recipe](../INTEGRATION.md#add-an-arealist-grid-to-the-same-form). That path needs no child bridge methods. The example below remains for existing summary integrations.
+This is the earlier explicit row-summary API. New integrations configure each grid under `options.children.<container>.grids` in the [automatic AreaList recipe](../GRIDS.md#add-an-arealist-grid-to-the-same-form). That path needs no child bridge methods. The example below remains for existing summary integrations.
+
+`ReportAccessibilityFailure` below stands for the existing application diagnostic reporter accepting a failure object. Substitute its name and reuse its declaration. Use `onError` in root start options for later failures, as shown in [the ordinary-form recipe](AUTOMATIC-FORM.md). The example's application state uses plain local form data; with entity, class-instance or shared roots, keep that state in the application's existing UI controller.
 
 Use this recipe when a parent displays two independently loaded grids. Each child owns its bridge registration and AreaList area reference. The parent owns loading the two sets of arrays and tells each child when its data is ready. [Install the AreaList host helpers first](AREALIST-FORM.md#add-the-grid-helpers-to-the-host).
 
@@ -53,7 +55,7 @@ Case of
    $keys:=->aRightLineKey
   Else
    If (Form.side#"Left")
-    Form.axbError:="unknownGridSlot"
+    ReportAccessibilityFailure(New object("error"; "unknownGridSlot"))
     return
    End if
   End if
@@ -74,7 +76,7 @@ Case of
   Form.gridAX:=New object("id"; "lines"; "label"; Form.side+" lines"; "columnCount"; 3; "keyColumn"; 3; "keySource"; $prefix+"LineKey"; "labelColumns"; New collection(New object("column"; 1; "source"; $prefix+"Item"); New object("column"; 2; "source"; $prefix+"Description")))
   $reply:=AXB_Form("register"; New object("label"; Form.side+" lines"; "describe"; Formula(LinePicker_Describe); "apply"; Formula(LinePicker_Apply($1))))
   If (Not($reply.ok=True))
-   Form.axbError:=$reply.error
+   ReportAccessibilityFailure($reply)
   End if
  : (Form event code=On Unload)
   LinePicker_Stop
@@ -138,4 +140,4 @@ The adapter converts AreaList's window-relative row coordinates to child-local c
 
 [The fixture evidence](../VALIDATION.md) distinguishes these synthetic tests from real application validation. Test your actual reload, sort, business selection callback, error and close paths before enabling the integration.
 
-Only rows in the current viewport are accessible. VoiceOver's row count describes that published subset, not the total bound array. This older explicit adapter exposes no scrolling action or keyboard-focus transfer into the vendor grid. Use [automatic grid composition](../INTEGRATION.md#add-an-arealist-grid-to-the-same-form) for complete rows, editing and reveal. An agent can use ordinary mouse/keyboard scrolling, then inspect the refreshed AX rows; this is not a complete VoiceOver-only navigation path for long grids. Preserve that limitation when evaluating a real application rollout.
+Only rows in the current viewport are accessible. VoiceOver's row count describes that published subset, not the total bound array. This older explicit adapter exposes no scrolling action or keyboard-focus transfer into the vendor grid. Use [automatic grid composition](../GRIDS.md#add-an-arealist-grid-to-the-same-form) for complete rows, editing and reveal. An agent can use ordinary mouse/keyboard scrolling, then inspect the refreshed AX rows; this is not a complete VoiceOver-only navigation path for long grids. Preserve that limitation when evaluating a real application rollout.

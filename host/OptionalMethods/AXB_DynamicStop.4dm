@@ -14,6 +14,6 @@ Else
   End if
  End if
 End if
-If (($data.axbView#Null) && Not($data.axbView.root=True))
+If ((New collection(4D.Object).indexOf(OB Class($data))=0) && Not(OB Is shared($data)) && ($data.axbView#Null) && Not($data.axbView.root=True))
  OB REMOVE($data; "axbView")
 End if

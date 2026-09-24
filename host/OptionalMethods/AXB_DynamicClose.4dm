@@ -13,6 +13,9 @@ If ($context#Null)
   $context.data.axbDynamic.closed:=True
  End if
 Else
+ If ((Form=Null) || (New collection(4D.Object).indexOf(OB Class(Form))#0) || OB Is shared(Form))
+  return
+ End if
  AXB_DynamicStop(Form; Null)
  If (Form.axbDynamic#Null)
   // A pending preparation can share data with an unregistered old child.

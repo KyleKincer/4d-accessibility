@@ -84,15 +84,15 @@ If (New collection("gridReveal"; "gridEdit"; "gridSetValue"; "gridSetSelection";
  End if
  $position:=$state.positions[$key]
  $column:=$state.columns[$columnID]
- // The vendor's text setters corrupt memory with supplementary Unicode in
- // the supported 11.4.2 host. Reject before entering/selecting/deleting text;
- // never substitute an unsafe setter for its keyboard path.
+ // The vendor corrupts memory while reading or committing supplementary
+ // Unicode, including text inserted by ordinary Paste without this bridge.
+ // Reject before entering/selecting/deleting text in the tested versions.
  If (New collection("gridSetValue"; "gridReplaceSelection").indexOf($action.operation)>=0)
   $text:=$action.value.text
   For ($unit; 1; Length($text))
    $code:=Character code(Substring($text; $unit; 1))
    If (($code>=55296) & ($code<=57343))
-    $result.message:="AreaList supplementary Unicode entry is not yet supported; vendor editor defect under investigation"
+    $result.message:="AreaList cannot safely edit supplementary Unicode in the tested vendor versions"
     return
    End if
   End for

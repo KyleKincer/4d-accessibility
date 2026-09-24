@@ -1,6 +1,8 @@
 # Example: invoice lines in AreaList Pro
 
-This is the earlier explicit row-summary API. For a new integration, use the [complete AreaList grid configuration](../INTEGRATION.md#add-an-arealist-grid-to-the-same-form), which composes with automatic ordinary controls and exposes logical rows and columns. This example remains for existing integrations; its viewport summaries do not satisfy the full accessibility target.
+This is the earlier explicit row-summary API. For a new integration, use the [complete AreaList grid configuration](../GRIDS.md#add-an-arealist-grid-to-the-same-form), which composes with automatic ordinary controls and exposes logical rows and columns. This example remains for existing integrations; its viewport summaries do not satisfy the full accessibility target.
+
+`ReportAccessibilityFailure` below stands for the existing application diagnostic reporter accepting a failure object. Substitute its name and reuse its declaration. Use `onError` in root start options for later failures, as shown in [the ordinary-form recipe](AUTOMATIC-FORM.md). The example's application state uses plain local form data; with entity, class-instance or shared roots, keep that state in the application's existing UI controller.
 
 An invoice screen uses the same start, describe, apply, and stop pattern as the [simple form](SIMPLE-FORM.md). The extra work is to describe the grid's bindings and choose a stable key for each line. The adapter selects rows through AreaList and reads the selection back. Verify that the application's existing Return command consumes those same line records, including after a sort.
 
@@ -43,7 +45,7 @@ Every `source` and `keySource` must match the array name returned by `ALP_Column
 
 ## Connect the form
 
-This legacy explicit provider requires a private UI data object for `Form`, as described in the integration skill. An entity or 4D shared object used directly as root data needs bridge ownership work first.
+This example keeps its own `gridAX`, `gridReady` and `loadedInvoiceID` state on plain local `Form` data. With entity, class-instance or shared roots, keep that state in the application's existing UI controller. Root bridge ownership already supports those bindings.
 
 This example supplies `describe`, which replaces automatic control discovery. Its grid-only description leaves the form's other controls out of the bridge tree. Include required buttons and fields with `AXB_Controls` and route their actions in `InvoiceAX_Apply`, as shown below. For new integrations, the full grid adapter already composes with automatic discovery through `options.grids`.
 
@@ -56,7 +58,7 @@ $bridge:=AXB_Form("start"; New object(\
  "describe"; Formula(InvoiceAX_Describe); \
  "apply"; Formula(InvoiceAX_Apply($1))))
 If (Not($bridge.ok=True) & ($bridge.error#"dependencyUnavailable"))
- Form.axbError:=$bridge.error
+ ReportAccessibilityFailure($bridge)
 End if
 ```
 
@@ -95,7 +97,7 @@ Follow [the complete repeated-subform recipe](AREALIST-SUBFORM.md). It includes 
 
 ## Leave business commands in the application
 
-Select the intended line, verify AreaList's resulting selection, then invoke the normal Return menu item or button. The row adapter does not create a return or service order. For a custom button that needs bridge exposure, add it to the description with `AXB_Controls` and route `press` through the existing shared handler and its permission checks. Preserve an accessible native menu instead of adding a duplicate virtual command.
+Select the intended line, verify AreaList's resulting selection, then invoke the normal Return menu item or button. The row adapter does not create a business record. For a custom button that needs bridge exposure, add it to the description with `AXB_Controls` and route `press` through the existing shared handler and its permission checks. Preserve an accessible native menu instead of adding a duplicate virtual command.
 
 To combine ordinary controls with the grid, build both collections inside the same readiness gate:
 
@@ -119,8 +121,8 @@ Use duplicate products with distinct line keys. Select a line, sort, refresh, an
 
 Current row-adapter limits are 200 bound rows, 100 viewport rows, 100 requested selections, a flat compatibility-mode layout, row selection mode, and unique nonempty keys matching the bound key column. The whole bridge also has a 4,096-node snapshot limit. Unsupported layouts return a disabled table, not guessed row actions. See [form families](../FORM-SUPPORT.md) for editable grids and other table types.
 
-Use [automatic grid composition](../INTEGRATION.md#add-an-arealist-grid-to-the-same-form) for complete rows, editing and reveal. Only viewport rows are published and selectable through this older explicit adapter. The reported AX row count is the published subset. Ordinary UI scrolling updates that subset, but this explicit summary adapter exposes no scrolling action or keyboard-focus transfer into AreaList. Selecting a row through VoiceOver works within the published viewport; long-grid VoiceOver-only navigation remains unvalidated.
+Use [automatic grid composition](../GRIDS.md#add-an-arealist-grid-to-the-same-form) for complete rows, editing and reveal. Only viewport rows are published and selectable through this older explicit adapter. The reported AX row count is the published subset. Ordinary UI scrolling updates that subset, but this explicit summary adapter exposes no scrolling action or keyboard-focus transfer into AreaList. Selecting a row through VoiceOver works within the published viewport; long-grid VoiceOver-only navigation remains unvalidated.
 
 After a successful selection, the vendor reveal call can bring a partially clipped viewport row fully into view. It does not authorize selecting an unpublished row.
 
-Runtime column numbering can differ from legacy setup arguments. The current invoice source test observes 23 columns and the key at physical 22, because an empty binding was omitted. Treat the older 24-column / key-column-23 numbers in this historical recipe as unverified assumptions. New integrations should resolve the existing key array through the [automatic grid provider](../INTEGRATION.md#add-an-arealist-grid-to-the-same-form). The installer now includes both the four legacy row helpers and the four full-grid/editor helpers when `--area-list` is supplied.
+Runtime column numbering can differ from legacy setup arguments. The current invoice source test observes 23 columns and the key at physical 22, because an empty binding was omitted. Treat the older 24-column / key-column-23 numbers in this historical recipe as unverified assumptions. New integrations should resolve the existing key array through the [automatic grid provider](../GRIDS.md#add-an-arealist-grid-to-the-same-form). The installer now includes both the four legacy row helpers and the four full-grid/editor helpers when `--area-list` is supplied.

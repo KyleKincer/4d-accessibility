@@ -9,14 +9,17 @@ var $accessibility : Object
 Case of
  : (Form event code=On Load)
   // Keep the form's existing initialization here.
-  $accessibility:=AXB_Form("start"; New object("label"; "Contact details"))
+  $accessibility:=AXB_Form("start"; New object("label"; "Contact details"; \
+   "onError"; Formula(ReportAccessibilityFailure($1))))
   If (Not($accessibility.ok=True) & ($accessibility.error#"dependencyUnavailable"))
-   Form.axbError:=$accessibility.error
+   ReportAccessibilityFailure($accessibility)
   End if
  : (Form event code=On Unload)
   $accessibility:=AXB_Form("stop"; New object)
 End case
 ```
+
+`ReportAccessibilityFailure` is a placeholder for the existing application error reporter, accepting the failure object. Substitute its name and reuse its compiler declaration. Startup failures come from the returned object; later polling failures go to `onError`. The example works without adding properties to entity, class-instance or shared roots.
 
 Enable the form's `On Load` and `On Unload` events. Add these calls to the existing event branches; do not replace the form method. Check the start result and send errors through the application's existing diagnostic handling. `dependencyUnavailable` is expected when the optional packages are absent. An incompatible package returns an error before starting. The current source supports an object passed to `DIALOG` and the implicit `Form` object when that argument is omitted.
 
@@ -80,6 +83,6 @@ The mixed-control fixture exercises static labels, ordinary and standard-action 
 
 The external tests check existing handlers, Unicode editing, partial replacement, validation rejection, undo, focus redirection, a field becoming read-only during typing, and retained references after capability changes. See [validation](../VALIDATION.md) for the exact build and execution scope. ARM and Intel compilation does not establish licensed compiled desktop execution.
 
-For complete flat native array, collection, entity-selection and AreaList grids, add [`options.grids`](../INTEGRATION.md#add-a-native-array-list-box-without-replacing-discovery) alongside ordinary discovery. Other grid families, additional ordinary control families, text glyph geometry and whole-workflow assistive-technology validation remain required work. Existing explicit `describe`/`apply` integrations continue to use their callbacks. Installing the new provider does not silently combine those descriptions with automatic discovery.
+To expose all logical rows and columns of flat native array, collection, entity-selection and AreaList grids, add [`options.grids`](../GRIDS.md#add-a-native-array-list-box-without-replacing-discovery) alongside ordinary discovery. Other grid families, additional ordinary control families, text glyph geometry and whole-workflow assistive-technology validation remain required work. Existing explicit `describe`/`apply` integrations continue to use their callbacks. Installing the new provider does not silently combine those descriptions with automatic discovery.
 
 The integration goal is one shared form lifecycle hook plus declarative labels and special-control adapters where needed. These adapters belong in the reusable bridge. An application should not have to reproduce its validation, business actions, or ordinary control descriptions to become accessible.

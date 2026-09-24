@@ -51,6 +51,12 @@ def main():
             if match and match[1] in AREA_METHODS:
                 declarations.append(line)
     compiler = methods / (args.compiler_method + ".4dm")
+    for other in methods.glob("*.4dm"):
+        if other == compiler:
+            continue
+        content = other.read_text()
+        if BEGIN in content or END in content:
+            parser.error(f"Bridge declarations already exist in {other.stem}. Keep that compiler target or move its marked block deliberately before reinstalling.")
     old = compiler.read_text() if compiler.exists() else ""
     block = BEGIN + "\n" + "\n".join(declarations) + "\n" + END
     if BEGIN in old or END in old:

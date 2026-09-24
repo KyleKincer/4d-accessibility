@@ -86,6 +86,19 @@ static BOOL SameDispatchState(NSDictionary *before, NSDictionary *after, NSStrin
     return [before isEqual:normalized];
 }
 
+static BOOL SameGridDispatchValue(NSDictionary *before, NSDictionary *after, NSDictionary *action) {
+    if ([before isEqual:after]) return YES;
+    if (!before || !after || !action[@"value"][@"expectedEditor"] ||
+        ![@[@"gridSetValue", @"gridSetSelection", @"gridReplaceSelection"] containsObject:action[@"operation"]]) return NO;
+    // A text editor owns its current value and selection. A delayed backing
+    // page can catch up after Undo/Redo while that editor is unchanged. Keep
+    // all cached capability guards, and let SameDispatchState compare the
+    // exact live editor, focus, identity and generation independently.
+    NSMutableDictionary *oldCell = [before mutableCopy], *newCell = [after mutableCopy];
+    [oldCell removeObjectForKey:@"value"]; [newCell removeObjectForKey:@"value"];
+    return [oldCell isEqual:newCell];
+}
+
 NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (![envelope isKindOfClass:NSDictionary.class]) return @"envelope must be an object";
     NSDictionary *s = envelope[@"snapshot"];
@@ -482,7 +495,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (_inputResult) result[@"editorInputResult"] = _inputResult;
         if (_lastResult) result[@"result"] = _lastResult;
         if (_pending && !_delivered) {
-            BOOL changedGridValue = _pendingGridValue && ![_pendingGridValue isEqual:[_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:now]];
+            BOOL changedGridValue = _pendingGridValue && !SameGridDispatchValue(_pendingGridValue,
+                [_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:now], _pending);
             if (now - _queuedAt > 3.0 || changedGridValue || !SameDispatchState(_pendingState, ActionState(next, _pending), _pending[@"node"]) || ![next[@"enabled"] boolValue]) {
                 _lastResult = @{@"id": _pending[@"id"], @"status": @"rejected", @"message": @"expired or changed before dispatch"};
                 result[@"result"] = _lastResult;

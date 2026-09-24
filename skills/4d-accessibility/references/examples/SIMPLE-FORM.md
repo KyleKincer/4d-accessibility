@@ -2,6 +2,8 @@
 
 This example documents an explicit custom provider. For ordinary controls, start with [automatic discovery](AUTOMATIC-FORM.md); it avoids these per-form description/action methods and uses existing editors and handlers.
 
+`ReportAccessibilityFailure` below stands for the existing application diagnostic reporter accepting a failure object. Substitute its name and reuse its declaration. Use `onError` in root start options for later failures, as shown in [the ordinary-form recipe](AUTOMATIC-FORM.md). The example's application state uses plain local form data; with entity, class-instance or shared roots, keep that state in the application's existing UI controller.
+
 This example displays a greeting. It writes no records. A human and an accessibility client use the same name validation and button handler. Once this works, replace the greeting operation with your application's existing action.
 
 Complete [the one-time installation](../INTEGRATION.md#1-install-once) first. The names beginning with `Greeting` below are application methods to create, not bridge exports.
@@ -43,7 +45,7 @@ Case of
    "describe"; Formula(GreetingAX_Describe); \
    "apply"; Formula(Greeting_Apply($1))))
   If (Not($bridge.ok=True) & ($bridge.error#"dependencyUnavailable"))
-   Form.axbError:=$bridge.error
+   ReportAccessibilityFailure($bridge)
   End if
  : (Form event code=On Unload)
   $bridge:=AXB_Form("stop"; New object)
