@@ -210,7 +210,7 @@ def main():
         old_button = find("Shipping: Remember")
         old_id = old_left.read("AXIdentifier")
         find("Replace left").press()
-        wait_for(lambda: field("Shipping") and field("Shipping").read("AXIdentifier") != old_id, "Same-form/data replacement kept old identity")
+        wait_for(lambda: (current := field("Shipping")) and current.read("AXIdentifier") != old_id, "Same-form/data replacement kept old identity")
         settle()
         wait_for(lambda: state().get("invalidated"), "Replacement result was not published by the host timer")
         check(state()["invalidated"]["matchedParents"] == 1, "replacement boundary finds the owning parent")

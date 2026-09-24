@@ -12,6 +12,9 @@ End if
 $data:=$registry.data
 $reply:=AXB_Host("stop"; New object("session"; $context.session))
 OB REMOVE(AXB_FormRoots; String(Current form window))
+If (Not($context.aliases=True))
+ return
+End if
 If ($data.axb.token.session=$context.session)
  OB REMOVE($data; "axb")
 End if

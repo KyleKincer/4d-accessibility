@@ -6,7 +6,7 @@ var $name; $prefix; $id; $key; $registration : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported : Collection
 var $left; $top; $right; $bottom; $originX; $originY : Integer
 var $x; $y; $r; $b : Real
-var $allowed; $replace; $reading; $readOnly : Boolean
+var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
 var $pointer : Pointer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
@@ -24,13 +24,14 @@ If (((Value type(Form)#Is object) | (Form=Null)) & ($request.autoParent=Null))
  return
 End if
 $registry:=AXB_FormRoots[String(Current form window)]
+$aliases:=(Value type(Form)=Is object) && (Form#Null) && (New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form))
 If ($request.autoParent#Null)
  // Each path owns its provider state, even when two children bind the same
  // business object. Never store automatic child state on that shared object.
  $name:=$request.container
  $options:=New object("label"; $name)
  $registration:=""
- If ((Form.axbView#Null) && Not(Form.axbView.root=True))
+ If ($aliases && (Form.axbView#Null) && Not(Form.axbView.root=True))
   $options:=Form.axbView.options
   $registration:=Form.axbView.instance
  End if
@@ -70,7 +71,9 @@ Else
  If ($request.depth=0)
   $view:=$request.rootView
  Else
-  $view:=Form.axbView
+  If ($aliases)
+   $view:=Form.axbView
+  End if
  End if
 End if
 If (($view=Null) | (Value type($view)#Is object))

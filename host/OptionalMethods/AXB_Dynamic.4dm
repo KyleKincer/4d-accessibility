@@ -19,6 +19,10 @@ While (True)
   $result.error:="invalidDynamicOperation"
   break
  End if
+ If ((New collection(4D.Object).indexOf(OB Class($data))#0) || OB Is shared($data))
+  $result.error:="unsupportedDynamicData"
+  break
+ End if
  If ($data.axbDynamic#Null)
   If (Not($data.axbDynamic.closed=True))
    $result.error:="dynamicDataInUse"

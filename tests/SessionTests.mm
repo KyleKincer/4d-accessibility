@@ -88,6 +88,30 @@ int main(void) {
         backgroundUpdate = MutableCopy(Envelope(2));
         backgroundUpdate[@"snapshot"][@"nodes"][1][@"focused"] = @YES;
         Check([s exchange:backgroundUpdate now:2][@"action"] == nil, "focus context change cancels action even if target is unchanged");
+        for (NSString *mutation in @[@"initialFocus", @"initialFocusFalse", @"value", @"selection", @"otherFocus", @"priorFocus", @"expired"]) {
+            NSMutableDictionary *beforeFocus = MutableCopy(Envelope(1));
+            beforeFocus[@"snapshot"][@"nodes"][1][@"editable"] = @YES;
+            beforeFocus[@"snapshot"][@"nodes"][1][@"focusable"] = @YES;
+            beforeFocus[@"snapshot"][@"nodes"][1][@"selection"] = @[@0, @0];
+            if ([mutation isEqual:@"initialFocusFalse"]) beforeFocus[@"snapshot"][@"nodes"][1][@"focused"] = @NO;
+            if ([mutation isEqual:@"priorFocus"]) beforeFocus[@"snapshot"][@"nodes"][0][@"focused"] = @YES;
+            s = [[AXBSession alloc] initWithIdentifier:@"initial-field-focus" windowID:1];
+            Check([[s exchange:beforeFocus now:0][@"ok"] boolValue], "initial-focus fixture accepted");
+            Check([s enqueueNode:@"field" revision:@1 operation:@"setValue" value:@"Edited" now:1], "field action queued before initial focus settles");
+            NSMutableDictionary *afterFocus = MutableCopy(beforeFocus);
+            afterFocus[@"snapshot"][@"revision"] = @2;
+            [afterFocus[@"snapshot"][@"nodes"][0] removeObjectForKey:@"focused"];
+            afterFocus[@"snapshot"][@"nodes"][1][@"focused"] = @YES;
+            if ([mutation isEqual:@"value"]) afterFocus[@"snapshot"][@"nodes"][1][@"value"] = @"Changed";
+            if ([mutation isEqual:@"selection"]) afterFocus[@"snapshot"][@"nodes"][1][@"selection"] = @[@1, @0];
+            if ([mutation isEqual:@"otherFocus"]) afterFocus[@"snapshot"][@"nodes"][0][@"focused"] = @YES;
+            NSDictionary *focusReply = [s exchange:afterFocus now:[mutation isEqual:@"expired"] ? 5 : 2];
+            Check((focusReply[@"action"] != nil) == [mutation hasPrefix:@"initialFocus"], "only initial focus on the unchanged requested field preserves its queued action");
+            s = [[AXBSession alloc] initWithIdentifier:@"initial-focus-refresh" windowID:1];
+            [s exchange:beforeFocus now:0]; [s exchange:afterFocus now:1];
+            BOOL accepted = [s enqueueNode:@"field" revision:@1 operation:@"setValue" value:@"Edited" observedSnapshot:beforeFocus[@"snapshot"] now:2];
+            Check(accepted == ([mutation hasPrefix:@"initialFocus"] || [mutation isEqual:@"expired"]), "native refresh lag permits only the same initial target-focus transition");
+        }
         s = Fresh(); Check(Press(s, 1), "action queued before window scope label change");
         backgroundUpdate = MutableCopy(Envelope(2)); backgroundUpdate[@"snapshot"][@"label"] = @"Another record";
         Check([s exchange:backgroundUpdate now:2][@"action"] == nil, "window context change cancels action");

@@ -10,7 +10,9 @@ $token:=$context.token
 If (($token.session#$session) | Not($token.active) | ($token.window#Current form window) | ($token.owner#Current process))
  return
 End if
-Form.axb:=$context
+If ((New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+ Form.axb:=$context
+End if
 $context.poll.call()
 // Use the captured token: the callback may have closed or replaced its form.
 Use ($token)

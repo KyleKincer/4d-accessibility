@@ -15,7 +15,7 @@ Full logical flat grids support native arrays, collections, entity selections an
 - Cold asynchronous values can still be spoken as Loading after data arrives. Licensed compiled AreaList navigation/reveal and explicit VO-Space selection now pass separately.
 - Native grid headers pass array, collection and entity tests in interpreted and compiled modes. An earlier intermittent compiled entity activation reported delivery without a handler event. A fresh full run passes; its cause remains unresolved and is retained in the validation record.
 - AreaList supplementary Unicode editing, IME/grapheme behavior, wrapped text geometry, errors/status speech and complete reading order need further work.
-- Starting a root directly on a persisted entity or 4D shared object is unsupported; the current API writes form state and does not yet return a safe named rejection for this case.
+- Generated wrappers and explicit child registration still require private plain data. Root forms now keep ownership outside persisted entities, class instances and 4D shared objects; their live interpreted/compiled ownership matrix passes.
 - Generated forms and explicit providers require private data objects. Shared-data ownership is incomplete for those paths.
 - Voice Control/Switch Control, overlapping providers, multiple displays, older macOS reveal, root forms larger than their window, Intel runtime and remote entity performance need validation.
 - Broader compiled desktop coverage, client/server delivery and complete real application workflows remain open.

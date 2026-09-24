@@ -65,6 +65,27 @@ static NSDictionary *ActionState(NSDictionary *snapshot, NSDictionary *action) {
         @"focused": focused, @"nodes": dependencies, @"rows": rows};
 }
 
+// A newly activated 4D form can assign initial focus after the action was
+// queued. Accept only focus arriving on that exact target with every other
+// dependency unchanged. In particular, values, selections and prior focus
+// in another control remain strict guards. Never use this after dispatch.
+static BOOL SameDispatchState(NSDictionary *before, NSDictionary *after, NSString *target) {
+    if ([before isEqual:after]) return YES;
+    if (!before || !after || [before[@"focused"] count] != 0 ||
+        ![after[@"focused"] isEqual:@[target]]) return NO;
+    NSDictionary *oldNode = before[@"nodes"][target], *newNode = after[@"nodes"][target];
+    if (!oldNode || !newNode || [oldNode[@"focused"] boolValue] || ![newNode[@"focused"] boolValue]) return NO;
+    NSMutableDictionary *normalizedNode = [newNode mutableCopy];
+    if (oldNode[@"focused"]) normalizedNode[@"focused"] = oldNode[@"focused"];
+    else [normalizedNode removeObjectForKey:@"focused"];
+    NSMutableDictionary *nodes = [after[@"nodes"] mutableCopy];
+    nodes[target] = normalizedNode;
+    NSMutableDictionary *normalized = [after mutableCopy];
+    normalized[@"focused"] = before[@"focused"];
+    normalized[@"nodes"] = nodes;
+    return [before isEqual:normalized];
+}
+
 NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (![envelope isKindOfClass:NSDictionary.class]) return @"envelope must be an object";
     NSDictionary *s = envelope[@"snapshot"];
@@ -462,7 +483,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (_lastResult) result[@"result"] = _lastResult;
         if (_pending && !_delivered) {
             BOOL changedGridValue = _pendingGridValue && ![_pendingGridValue isEqual:[_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:now]];
-            if (now - _queuedAt > 3.0 || changedGridValue || ![_pendingState isEqual:ActionState(next, _pending)] || ![next[@"enabled"] boolValue]) {
+            if (now - _queuedAt > 3.0 || changedGridValue || !SameDispatchState(_pendingState, ActionState(next, _pending), _pending[@"node"]) || ![next[@"enabled"] boolValue]) {
                 _lastResult = @{@"id": _pending[@"id"], @"status": @"rejected", @"message": @"expired or changed before dispatch"};
                 result[@"result"] = _lastResult;
                 _pending = nil;
@@ -496,7 +517,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (![revision isEqual:_snapshot[@"revision"]]) {
             NSDictionary *request = @{@"node": nodeID, @"operation": operation};
             if (!observed || ![observed[@"revision"] isEqual:revision] || [revision compare:_snapshot[@"revision"]] != NSOrderedAscending ||
-                ![ActionState(observed, request) isEqual:ActionState(_snapshot, request)]) return NO;
+                !SameDispatchState(ActionState(observed, request), ActionState(_snapshot, request), nodeID)) return NO;
         }
         NSDictionary *node = nil;
         for (NSDictionary *candidate in _snapshot[@"nodes"]) if ([candidate[@"id"] isEqual:nodeID]) { node = candidate; break; }

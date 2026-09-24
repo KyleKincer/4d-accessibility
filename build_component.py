@@ -171,7 +171,7 @@ def main():
             (methods / f"{name}.4dm").write_text(text)
         (methods / "AXB_ComponentInfo.4dm").write_text(
             '//%attributes = {"shared":true}\n#DECLARE -> $info : Object\n'
-            f'$info:=New object("version"; {literal(version)}; "protocol"; 1; "hostAPI"; 1; "automaticControls"; 1; "nativeFocus"; 1; "formOwnership"; 1; "sessionAllocation"; 1; "compiled"; Is compiled mode; "hostCompiled"; Is compiled mode(*))\n'
+            f'$info:=New object("version"; {literal(version)}; "protocol"; 1; "hostAPI"; 1; "automaticControls"; 1; "nativeFocus"; 1; "formOwnership"; 1; "rootDataOwnership"; 1; "sessionAllocation"; 1; "compiled"; Is compiled mode; "hostCompiled"; Is compiled mode(*))\n'
         )
         declarations = (ROOT / "host/Methods/Compiler_AXB.4dm").read_text().splitlines()
         (methods / "Compiler_AXBCore.4dm").write_text(
