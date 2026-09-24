@@ -23,6 +23,7 @@ def main():
     family = parser.add_mutually_exclusive_group()
     family.add_argument("--entity", action="store_true", help="Use a local synthetic entity selection and automatic primary-key identity")
     family.add_argument("--collection", action="store_true", help="Use the complete collection-backed provider with the same editor/action suite")
+    parser.add_argument("--key-type", choices=("text", "integer", "longint"), default="text", help="Use existing Text, Integer or LongInt array identities")
     parser.add_argument("--described", action="store_true", help="Add picture/computed, decorative and protected columns with application descriptions")
     parser.add_argument("--object-description", action="store_true", help="Use a native Object array for the described array column")
     parser.add_argument("--styled-description", action="store_true", help="Use a styled computed description column in a collection/entity grid")
@@ -32,6 +33,8 @@ def main():
     parser.add_argument("--cell-controls", action="store_true", help="Add native Boolean/popup/mixed cells and application validation")
     parser.add_argument("--stored-meta", action="store_true", help="Read the collection's existing This.meta objects automatically")
     args = parser.parse_args()
+    if args.key_type != "text" and (args.collection or args.entity):
+        parser.error("--key-type applies to array grids only")
     if args.repeated and not (args.subform and args.collection and args.cell_controls):
         parser.error("--repeated requires --subform --collection --cell-controls")
     if args.object_description and (not args.described or args.collection or args.entity):
@@ -406,7 +409,7 @@ End if
                 continue
             objects[name] = {"type": "button", "text": name, "left": 20 + index * 200, "top": 490, "width": 190, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
     state_method = methods / "AXBG_State.4dm"
-    state_method.write_text(state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$state.diagnostics:='))
+    state_method.write_text('var $context; $snapshot : Object\n' + state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$context:=AXB_FormContext\nIf (($context#Null) && ($context.state#Null) && (Length($context.state)>0))\n $snapshot:=JSON Parse($context.state)\n $state.windowActive:=$snapshot.enabled\n $state.focused:=$snapshot.nodes.query("focused = :1"; True).extract("id")\nEnd if\n$state.diagnostics:='))
     form = {"windowTitle": TITLE, "width": 645, "height": 550 if args.row_states else 465 if args.described else 425, "method": "AXBG_Form", "events": ["onLoad", "onTimer", "onUnload"], "pages": [None, {"objects": objects}]}
     folder = sources / "Forms/Grid"
     folder.mkdir(parents=True)
@@ -471,7 +474,18 @@ End case
             state_method.write_text(state_method.read_text().replace('$state.widgets:=AXBG_WidgetState', '$state.widgets:=AXBG_WidgetState\n$state.peerWidgets:=Form.peerWidgets'))
         root_folder.mkdir()
         (root_folder / "form.4DForm").write_text(json.dumps(root_form, indent=2) + "\n")
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls}) + "\n")
+    if args.key_type != "text":
+        minimum, maximum = (-32768, 32767) if args.key_type == "integer" else (-2147483648, 2147483647)
+        command = "INTEGER" if args.key_type == "integer" else "LONGINT"
+        for method in [*methods.glob("AXBG_*.4dm"), methods / "Compiler_AXBG.4dm", database / "onStartup.4dm"]:
+            source = method.read_text().replace("ARRAY TEXT(aGridKey;", f"ARRAY {command}(aGridKey;")
+            source = source.replace('aGridKey{$row}:="line-"+String($row; "0000")', 'aGridKey{$row}:=$row')
+            for old, new in [('"café"', minimum), ('"CAFÉ"', minimum + 1), ('"CAFE"', 0), ('"cafe"', maximum - 1), ('"line-0600"', maximum)]:
+                source = source.replace(old, str(new))
+            if method.name == "onStartup.4dm":
+                source = source.replace('$data:=New object', f'aGridKey{{600}}:={maximum}\n$data:=New object', 1)
+            method.write_text(source)
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls}) + "\n")
     if args.entity:
         with (FIXTURE / "seed.log").open("w") as log:
             seeded = subprocess.run([str(server / "Contents/MacOS" / info["CFBundleExecutable"]), "--project", str(project), "--data", str(FIXTURE / "synthetic.4dd"), "--create-data", "--headless", "--utility", "--skip-onstartup", "--startup-method", "AXBG_Seed", "--webadmin-auto-start", "false"], stdout=log, stderr=log, timeout=90)

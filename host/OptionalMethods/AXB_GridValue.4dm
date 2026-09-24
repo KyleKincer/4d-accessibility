@@ -16,7 +16,8 @@ End if
 If ($column.value#Null)
  $request:=New object("row"; $row; "column"; $column.name)
  If (Value type($column.pointer)=Is pointer)
-  $request.key:=$state.binding.keys[$row-1]
+  $pointer:=$state.binding.keyPointer
+  $request.key:=$pointer->{$row}
  Else
   $request.item:=$state.binding.source[$row-1]
   $request.key:=$request.item[$state.binding.keyProperty]

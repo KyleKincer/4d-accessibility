@@ -23,7 +23,7 @@ If ($options.kind="array")
  If (Is nil pointer($keys) | Is nil pointer($selection))
   return
  End if
- If ((Type($keys->)#Text array) | (Type($selection->)#Boolean array))
+ If ((New collection(Text array; Integer array; LongInt array).indexOf(Type($keys->))<0) | (Type($selection->)#Boolean array))
   return
  End if
  If ((Size of array($keys->)#$count) | (Size of array($selection->)#$count))
@@ -35,11 +35,16 @@ If ($options.kind="array")
   End if
  End if
  ARRAY TO COLLECTION($binding.keys; $keys->)
+ If (Type($keys->)#Text array)
+  For ($row; 0; $count-1)
+   $binding.keys[$row]:=String($binding.keys[$row]; "&xml")
+  End for
+ End if
  ARRAY TO COLLECTION($binding.selected; $selection->)
  $binding.keyPointer:=$keys
  $binding.selectionPointer:=$selection
  $binding.controlPointer:=$control
- $binding.identity:="array"
+ $binding.identity:="array:"+String(Type($keys->))
  $binding.ok:=True
  return
 End if
