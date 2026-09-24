@@ -1,5 +1,9 @@
 # Validation scope
 
+## Button activation across record changes, September 24
+
+Version 0.19.1 passes 58 generated-child checks and 62 ordinary-control checks in each of interpreted and compiled ARM desktop execution, 240 total. The new regression first failed when an ordinary button changed root record scope: its handler ran, but the bridge rejected its confirmation because the old route had retired. The button now acknowledges posting its verified click. The receipt does not claim a business result. The same tests retain stale-descendant rejection, existing object handlers, native checkbox/radio state, text validation and standard Cancel behavior. [Failure, final reports and source hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/button-activation.json).
+
 The source was developed with isolated synthetic 4D 20.8 fixtures and external macOS accessibility clients. Prior development runs covered ordinary/child controls, native array/collection/entity grids, cell widgets, explicit providers, generated forms, focus ownership, large virtual grids, native/web interoperability and optional-package loading. Those historical machine reports are not shipped as evidence for this standalone repository.
 
 Current CI builds the universal native plugin, runs deterministic Session/Grid/installer checks and compiles the component with tool4d. Desktop tests require a local unlocked session and the test client's normal macOS Accessibility approval. CI does not claim live VoiceOver, licensed compiled host execution or remote-client delivery.
