@@ -8,7 +8,9 @@ If ($context#Null)
  End use
  AXB Detach($token.session)
  OB REMOVE(AXB_CoreWindows; String(Current form window))
- If (New collection(Form.axb).indexOf($context)=0)
-  OB REMOVE(Form; "axb")
+ If ((New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+  If (New collection(Form.axb).indexOf($context)=0)
+   OB REMOVE(Form; "axb")
+  End if
  End if
 End if

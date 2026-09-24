@@ -2,6 +2,7 @@
 #DECLARE($operation : Text; $options : Object) -> $result : Object
 var $reply; $view; $context; $registry : Object
 var $x; $y : Integer
+var $aliases : Boolean
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
 If (New collection("start"; "register"; "stop"; "invalidate"; "diagnostics"; "event").indexOf($operation)<0)
  return
@@ -41,6 +42,10 @@ If ((Value type(Form)#Is object) | (Form=Null))
  $result.error:="noFormContext"
  return
 End if
+// The window registry owns root state. Compatibility properties are limited
+// to plain, local objects; entities, class instances and shared objects keep
+// their existing schema and locking rules.
+$aliases:=(New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form))
 If ($operation="stop")
  $context:=AXB_FormContext
  If ($context#Null)
@@ -48,12 +53,18 @@ If ($operation="stop")
  Else
   // A registered child must not clear a root's compatibility alias when it
   // intentionally shares that root's data object.
-  $registry:=AXB_FormRoots[String(Current form window)]
-  If (($registry=Null) || (New collection($registry.context.view).indexOf(Form.axbView)#0))
-   OB REMOVE(Form; "axbView")
+  If ($aliases)
+   $registry:=AXB_FormRoots[String(Current form window)]
+   If (($registry=Null) || (New collection($registry.context.view).indexOf(Form.axbView)#0))
+    OB REMOVE(Form; "axbView")
+   End if
   End if
  End if
  $result:=New object("ok"; True)
+ return
+End if
+If (($operation="register") & Not($aliases))
+ $result.error:="unsupportedRegistrationData"
  return
 End if
 $result:=AXB_ViewCreate($options)
@@ -67,6 +78,10 @@ If (Not($result.ok=True))
 End if
 If ($result.componentInfo.formOwnership#1)
  $result:=New object("ok"; False; "error"; "formOwnershipUnavailable")
+ return
+End if
+If (Not($aliases) & ($result.componentInfo.rootDataOwnership#1))
+ $result:=New object("ok"; False; "error"; "rootDataOwnershipUnavailable")
  return
 End if
 If (($result.componentInfo.sessionAllocation#1) | (Position("; sessions 2;"; $result.nativeStatus)=0))
@@ -120,14 +135,19 @@ If ($view.automatic)
  End if
 End if
 $reply:=AXB_Form("stop"; New object)
-OB REMOVE(Form; "axbError")
-OB REMOVE(Form; "axbFailure")
-Form.axbView:=$view
+If ($aliases)
+ OB REMOVE(Form; "axbError")
+ OB REMOVE(Form; "axbFailure")
+ Form.axbView:=$view
+End if
 If ($operation="start")
  $view.root:=True
  $context:=New object("active"; True; "revision"; 0; "state"; ""; "label"; $options.label; "view"; $view)
  $context.nativeInsertion:=Position("; input 2;"; $result.nativeStatus)>0
- Form.axbForm:=$context
+ $context.aliases:=$aliases
+ If ($aliases)
+  Form.axbForm:=$context
+ End if
  If (OB Is defined($options; "onError"))
   $context.onError:=$options.onError
  End if

@@ -6,8 +6,10 @@ $failure:=New object("error"; "callbackError"; "code"; Error; "method"; Error me
 ON ERR CALL($guard.previousHandler; ek local)
 AXB_PollGuard:=$guard.previousGuard
 $guard.context.active:=False
-$guard.form.axbError:=$failure.error
-$guard.form.axbFailure:=$failure
+If ((New collection(4D.Object).indexOf(OB Class($guard.form))=0) && Not(OB Is shared($guard.form)))
+ $guard.form.axbError:=$failure.error
+ $guard.form.axbFailure:=$failure
+End if
 // CALL FORM returns to the root even if the failure occurred inside a subform.
 // Pass the captured context so delayed cleanup cannot stop a replacement.
 CALL FORM($guard.window; Formula(AXB_FormFailed($1; $2)); $guard.context; $failure)

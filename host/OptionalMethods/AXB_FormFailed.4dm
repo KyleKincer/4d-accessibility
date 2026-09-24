@@ -8,8 +8,10 @@ End if
 If ($current.session#$context.session)
  return
 End if
-Form.axbError:=$failure.error
-Form.axbFailure:=$failure
+If ((New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+ Form.axbError:=$failure.error
+ Form.axbFailure:=$failure
+End if
 AXB_FormStop($context)
 $guard:=AXB_PollGuard
 If (($guard#Null) & (Value type($guard)=Is object))

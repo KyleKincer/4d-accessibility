@@ -75,7 +75,28 @@ $bridge:=AXB_Form("stop"; New object)
 
 Keep existing form and object methods. Enable the form's On Load and On Unload events if necessary. The bridge's scheduler leaves the existing form timer intact. Buttons run their ordinary action; text goes through the real editor, keystroke handlers and validation when editing ends. Protected inputs remain write-only. [The complete example](examples/AUTOMATIC-FORM.md) shows labels, coverage and verification.
 
-An ordinary dialog can pass a data object to `DIALOG` or use its implicit `Form` object. Use application-specific names such as `InvoiceAX_Start` for your configuration methods. Reserve the `AXB_` method prefix for installed bridge helpers. Reserve `Form.axb*`, `AXB_PollGuard` and `AXB_FormRoots` for the bridge. Read `Form.axbError` and `Form.axbFailure` for failures. Session ownership is per window, so named roots started with `AXB_Form` may share business data. Automatic children may share data too. Generated forms using `AXB_Dynamic` and explicit child providers still require private data objects. Generated preparation rejects data already carrying bridge state with `dynamicDataInUse`.
+An ordinary dialog can pass its existing data to `DIALOG` or use the implicit `Form` object. Use application-specific names such as `InvoiceAX_Start` for your configuration methods. Reserve the `AXB_` method prefix, `AXB_PollGuard` and `AXB_FormRoots` for installed bridge helpers. Session ownership is per window, so named roots may share business data. Automatic children may share data too.
+
+### Preserve the form data and report failures
+
+`AXB_Form("start"; options)` keeps root ownership in a window registry. A root bound directly to a persisted entity, class instance or 4D shared object needs no wrapper or extra attributes. Start and stop it through the same form hooks. The component must advertise `rootDataOwnership: 1`; otherwise startup returns `rootDataOwnershipUnavailable` before creating a session.
+
+For those data types, report failures through your existing application diagnostics, outside the bound data. Reuse a method that accepts the failure object, shown here as `ReportAccessibilityFailure`:
+
+```4d
+$options:=New object("label"; "Customer details"; \
+ "onError"; Formula(ReportAccessibilityFailure($1)))
+$bridge:=AXB_Form("start"; $options)
+If (Not($bridge.ok=True) & ($bridge.error#"dependencyUnavailable"))
+ ReportAccessibilityFailure($bridge)
+End if
+```
+
+`ReportAccessibilityFailure` is an application method, not an installed helper. The callback reports later polling failures after the bridge detaches its session and restores the existing error handler. Check the returned object for synchronous startup failures. Read coverage with `AXB_Form("diagnostics"; New object)` from the root.
+
+Plain local data objects retain the compatibility properties `Form.axb*`, including `axbError` and `axbFailure`. Reserve them for the bridge and exclude them from persisted business data. Entity/class/shared roots have no such properties, so do not assign `Form.axbError` in their application error handling. Existing shared-object handlers retain their `Use...End use` locking; the bridge does not change the data's mutability or perform model writes.
+
+Generated wrappers using `AXB_Dynamic` and explicit child registration still require private, plain local data. They return `unsupportedDynamicData` or `unsupportedRegistrationData` for entity/class/shared data before adding state. Generated preparation always returns the original form on failure, so open that returned form and report the error. Existing state on otherwise compatible data returns `dynamicDataInUse`. Automatic child discovery does not require explicit registration.
 
 The component allocates and releases sessions. Forms can open and close as often as needed, with up to 64 bridge windows open at once in one 4D application instance.
 
@@ -84,7 +105,7 @@ Every automatic form requires the full automatic-control capability set, even if
 | Startup result | What to do |
 | --- | --- |
 | `dependencyUnavailable` | One or both optional packages are absent. Continue normal application behavior. |
-| `incompatibleComponent`, `incompatibleNativePlugin`, `scrollableControlsUnavailable`, `adjustableControlsUnavailable`, `checkboxStatesUnavailable`, `formOwnershipUnavailable`, `sessionLifecycleUnavailable`, `comboControlsUnavailable`, `nativeInputConfirmationUnavailable`, `controlSemanticsUnavailable`, `logicalGridsUnavailable`, `gridRowStatesUnavailable`, `gridControlsUnavailable`, `gridHeadersUnavailable`, `automaticControlsUnavailable` | Rebuild both packages and reinstall helpers from one source commit. |
+| `incompatibleComponent`, `incompatibleNativePlugin`, `scrollableControlsUnavailable`, `adjustableControlsUnavailable`, `checkboxStatesUnavailable`, `formOwnershipUnavailable`, `rootDataOwnershipUnavailable`, `sessionLifecycleUnavailable`, `comboControlsUnavailable`, `nativeInputConfirmationUnavailable`, `controlSemanticsUnavailable`, `logicalGridsUnavailable`, `gridRowStatesUnavailable`, `gridControlsUnavailable`, `gridHeadersUnavailable`, `automaticControlsUnavailable` | Rebuild both packages and reinstall helpers from one source commit. |
 | `too many active sessions` | 64 bridge windows are already open. Normal form behavior continues; close other bridge windows and reopen this form. |
 | `window already has another session`, `plugin stopped` | Check for competing low-level registration, or restart the entire 4D host after plugin shutdown. Use one lifecycle owner per window. |
 | `invalidLabel`, `invalidControls`, `invalidControlMetadata`, `invalidControlAdjustment`, `invalidChildren`, `invalidGrids`, or another invalid option | Correct the start options. The label is required. Each `controls` entry must be an object; `adjust` must be a Formula. |
@@ -94,7 +115,7 @@ The current native plugin advertises `sessions 2`; its component advertises `ses
 
 For a screen that changes records without closing, set `options.scope` to Text or a Formula returning Text, such as `Formula(String(Form.invoiceID))`. Explicit providers instead return this string as `scope` from `describe`. Changing the scope invalidates retained controls for that record and its descendants. Stable row keys identify records within that scope. Neither a row index nor a product number is a record identity. Use `String()` for numeric record IDs.
 
-Formula results are checked during polling. A `scope` or `controls.<object>.description` formula returning a non-Text value stops the bridge with `invalidScope` or `invalidControlDescription`, recorded in `Form.axbError`. A successful start does not prevalidate later formula results.
+Formula results are checked during polling. A `scope` or `controls.<object>.description` formula returning a non-Text value stops the bridge with `invalidScope` or `invalidControlDescription`, reported through `options.onError` and the plain-data compatibility properties. A successful start does not prevalidate later formula results.
 
 For automatic discovery, omit both `describe` and `apply`. Supplying `apply` alone currently replaces the automatic action handler for every discovered control; it does not add an extra handler for one custom control. Use the explicit provider contract below when supplying your own action routing.
 
@@ -324,7 +345,7 @@ Here `DescribeLineStatus` is the application's existing formatter, which reads `
 
 An array formatter must index arrays that 4D reorders with the list box, including arrays bound to hidden columns. A parallel unbound array keeps its old order after a header sort and describes the wrong line. Bind it to a hidden column, or resolve `$1.key` in the existing application model.
 
-For a grid in an automatic page subform, put the configuration under `options.children.<container>.grids.<listbox>`, including its `columns`. `Form` then refers to that child instance. Invalid child metadata is reported through the root's `Form.axbError` when the child is first discovered. No child event hook is needed.
+For a grid in an automatic page subform, put the configuration under `options.children.<container>.grids.<listbox>`, including its `columns`. `Form` then refers to that child instance. Invalid child metadata is reported through the root's error callback when the child is first discovered. No child event hook is needed.
 
 The `value` Formula receives one object:
 

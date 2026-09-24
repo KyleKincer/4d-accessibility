@@ -198,6 +198,10 @@ $reply:=AXB_Dynamic($source; Null; Null; "start")
 $checks.push(($reply.error="invalidDynamicForm") & (New collection($reply.form).indexOf($source)=0) & (axbFormStateFailures.length=1))
 $reply:=AXB_Dynamic($source; New object; $options; "start")
 $checks.push(($reply.ok=True) & (New collection($reply.form).indexOf($source)<0) & (axbFormStateFailures.length=1))
+$data:=New shared object("name"; "Existing data")
+$reply:=AXB_Dynamic($source; $data; $options; "start")
+$checks.push(($reply.error="unsupportedDynamicData") & (New collection($reply.form).indexOf($source)=0) & (OB Keys($data).length=1))
+$checks.push((axbFormStateFailures.length=2) & (axbFormStateFailures[1].phase="prepare") & (axbFormStateFailures[1].error="unsupportedDynamicData"))
 // Grouping uses the live geometry and never guesses between overlapping boxes.
 var $nodes; $diagnostics : Collection
 var $outer; $inner; $button; $overlap : Object

@@ -159,6 +159,8 @@ static void GridControlsTest(void) {
     Check([action[@"operation"] isEqual:@"gridPress"] && [action[@"value"][@"expectedCell"][@"checked"] isEqual:@2], "native checkbox activation preserves its observed value");
     NSDictionary *input = @{@"action": action[@"id"], @"point": @[@21, @44]};
     Exchange(window, 9012, 1, session, snapshot, nil, nil, input); Pump(); Pump();
+    if (canvas.presses != 1 || canvas.releases != 1 || canvas.lastPoint.x != 21 || canvas.lastPoint.y != 44)
+        fprintf(stderr, "Grid input diagnostic: active=%d key=%d presses=%lu releases=%lu point=%.1f,%.1f\n", NSApp.isActive, window.isKeyWindow, (unsigned long)canvas.presses, (unsigned long)canvas.releases, canvas.lastPoint.x, canvas.lastPoint.y);
     Check(canvas.presses == 1 && canvas.releases == 1 && canvas.lastPoint.x == 21 && canvas.lastPoint.y == 44, "grid control receives exactly one native mouse pair at its checked point");
     Check([Exchange(window, 9012, 1, session, snapshot, nil, nil, input)[@"controlInputResult"][@"accepted"] boolValue], "grid mouse delivery has an exact acknowledgement"); Pump();
     Check(canvas.presses == 1, "grid input replay cannot repeat the native click");

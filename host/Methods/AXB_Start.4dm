@@ -17,5 +17,7 @@ $context:=New object("token"; $token; "poll"; $poll)
 AXB_CoreWindows[String(Current form window)]:=$context
 // Compatibility alias for low-level integrations. Window ownership lives in
 // the process registry, since two dialogs can share the same business object.
-Form.axb:=$context
+If ((New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+ Form.axb:=$context
+End if
 $context.process:=New process("AXB_Pulse"; 0; "AXB "+$token.session; $token)
