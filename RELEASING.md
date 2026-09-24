@@ -1,8 +1,18 @@
 # Releases
 
-CI builds the native plugin and component from the same checkout. A passing build produces development artifacts, not a production-readiness claim. Public release publication requires Developer ID signing and Apple notarization.
+CI builds the native plugin and component from the same checkout. A passing build produces development artifacts, not a production-readiness claim. Production releases require Developer ID signing and Apple notarization.
 
-The release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such as `v0.17.0-alpha.1`. The numeric portion must match `VERSION`. While the native plugin ID remains provisional and the coverage gaps in [status](skills/4d-accessibility/references/STATUS.md) remain open, use development artifacts only. Allocate a permanent 4D plugin ID before publishing a release.
+The signed release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such as `v0.19.4-rc.1`. The numeric portion must match `VERSION`. Allocate a permanent 4D plugin ID before production distribution. Coverage remains defined by [status](skills/4d-accessibility/references/STATUS.md), independently of signing.
+
+## Development release candidates
+
+Run the **Build and test** workflow on `main` with `preview_tag` set to `vVERSION-rc.N`. It builds and checks the kit, verifies the artifact checksums, then prepares a draft GitHub prerelease. Leaving the input empty runs checks only. This path cannot publish a stable tag or mark a release as latest.
+
+Download that draft's kit, verify `SHA256SUMS`, and run the live host checks with its packages. Once those pass, publish the same assets with `gh release edit vVERSION-rc.N --draft=false --prerelease --latest=false`. This final check covers the downloadable binaries, including their component/plugin pairing; CI itself has no licensed graphical 4D host.
+
+These candidates are ad hoc signed and not notarized. They are for local integration and evaluation on the documented test platform. The plugin ID is provisional. State both facts in the release notes, along with unresolved runtime limitations. A candidate is not a claim that every 4D form is accessible.
+
+Use this workflow to publish a candidate; pushing a tag directly invokes the signed workflow and requires its credentials. Production signing gates remain in that separate workflow.
 
 ## Maintainer setup
 

@@ -13,12 +13,13 @@ AREA_METHODS = {"AXB_ALPNode", "AXB_ALPRows", "AXB_ALPRowsSelect", "AXB_ALPSelec
                 "AXB_ALPGrid", "AXB_ALPGridAction", "AXB_ALPGridConfirm", "AXB_ALPGridValue", "AXB_ALPEditor"}
 
 
-def main():
+def main(argv=None, *, transform=None):
+    """Install sources, optionally applying a trusted application's instrumentation."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project-dir", required=True, type=Path, help="Directory containing Sources/Methods")
     parser.add_argument("--compiler-method", default="Compiler_AXBHost", help="Compiler method to create or update")
     parser.add_argument("--area-list", action="store_true", help="Also install the AreaList grid and legacy row adapters")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     methods = args.project_dir / "Sources/Methods"
     if not methods.is_dir():
         parser.error("--project-dir must already contain Sources/Methods")
@@ -37,6 +38,8 @@ def main():
     changes = {}
     for path in sources:
         body = path.read_text()
+        if transform is not None:
+            body = transform(body, path.stem)
         target = methods / path.name
         if target.exists():
             old = target.read_text()

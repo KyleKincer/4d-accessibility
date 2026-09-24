@@ -1,5 +1,19 @@
 # Validation scope
 
+## Delayed grid value speech, September 24
+
+Version 0.19.4 passes 120 checks across eight native VoiceOver cases on macOS 26.6.2/Apple Silicon. A synthetic host compiles the production provider and session, publishes a complete 60-row/24-column grid, and withholds pages until VoiceOver has actually read Loading. It then releases the pages while the reading cursor stays still. [Complete reports and source/build hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/grid-value-speech.json).
+
+The cases cover a single cell, forward navigation, backtracking, leaving for native window controls, another AX client querying a different cell, identical values reloading after cache invalidation, and delayed checkbox/popup roles. External AX checks the actual value and control state. Stationary caption observations check speech; the next navigation step checks that the cursor stayed at the same cell. Reading does not select rows, and read-only controls do not gain mutation actions.
+
+The original provider fails the single-cell case with the same final driver and fixture. Its AX value arrives, but VoiceOver keeps saying Loading or its navigation hint. Only `src/GridNative.mm` differs between those two native builds. The correction identifies each newly readable cell in a separate table layout notification. A batched notification spoke only the number of updated items. It follows Apple's [layout notification](https://developer.apple.com/documentation/appkit/nsaccessibility-swift.struct/notification/layoutchanged) and [changed-element list](https://developer.apple.com/documentation/appkit/nsaccessibility-swift.struct/notificationuserinfokey/uielements) contracts; the individual-cell behavior is established by the live tests. No keyboard focus or explicit announcement is used to infer the reading cursor.
+
+The same native source passes 273 Session, 169 logical-grid and 182 AppKit checks. A separate external native-grid suite passes 32 checks, including VoiceOver navigation/reveal to the final cell of 50,000 rows and 24 columns, sorting with stable identities, value refresh and retired elements. Run `python3 test_grid_value_speech.py --run` and `python3 test_native_grids.py --run --voiceover` from the source checkout. These native fixtures do not establish 4D host execution, Voice Control/Switch Control or behavior on other macOS versions.
+
+The compiled 4D 20.8 native-widget regression passes 38 checks with the matching packages. It operates independent repeated-child grids, activates a checkbox, chooses through a native popup menu, then navigates to row 599. The loaded distant checkbox is spoken without another navigation command. The provider that identified the replaceable content child failed this exact 4D check; identifying its stable cell fixes it. Returning to the popup, cancelling it and leaving for an ordinary editor still pass. `test_grid_controls_fixture.py --run --compiled --voiceover` reproduces that case after preparing the documented collection/repeated/widget fixture.
+
+The action driver now waits for the native checkbox's advertised enabled state and AXPress action after fixture configuration. The previous fixed delay tried to press a still-disabled control. The same failure occurred with the preceding 0.19.3 packages and passed there after correcting this test wait. Interpreted and compiled action suites each pass 127 checks. No application action retry was added.
+
 ## Polling and large forms, September 24
 
 Version 0.19.3 passes 884 live checks across 18 runs on native ARM 4D 20.8 and macOS 26.6.2. The plugin and compiled component match in every case. [Checks and source/package hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/polling.json).

@@ -10,13 +10,15 @@
 @property(nonatomic, strong) NSMutableArray *requests;
 @property(nonatomic) NSInteger revision, command, pages, valueVersion;
 @property(nonatomic) NSInteger firstRow, firstColumn;
+@property(nonatomic) BOOL deferredPages;
+@property(nonatomic, copy) NSString *deferredCellRole;
 @property(nonatomic, strong) NSDictionary *receipt;
 - (void)tick;
 @end
 @implementation GridFixture
 - (NSDictionary *)snapshot {
     return @{@"version": @1, @"revision": @(self.revision), @"label": @"Complete grid fixture", @"enabled": @YES, @"nodes": @[
-        @{@"id": @"grid", @"role": @"table", @"label": @"All 50000 rows and 24 columns", @"value": @"", @"visible": @YES, @"enabled": @YES,
+        @{@"id": @"grid", @"role": @"table", @"label": [NSString stringWithFormat:@"All %lu rows and 24 columns", (unsigned long)[self.grid[@"rows"] count]], @"value": @"", @"visible": @YES, @"enabled": @YES,
           @"frame": @[@20, @20, @720, @370], @"grid": self.grid}]};
 }
 - (void)geometry {
@@ -45,7 +47,13 @@
         NSMutableArray *cells = [NSMutableArray new]; NSString *key = self.grid[@"rows"][r];
         for (NSUInteger c = column; c < column + [request[@"columnCount"] unsignedIntegerValue]; c++) {
             NSString *value = [NSString stringWithFormat:@"%@ / column-%lu / value-%ld", key, c, (long)self.valueVersion];
-            [cells addObject:@{@"column": self.grid[@"columns"][c][@"id"], @"value": value, @"enabled": @YES, @"editable": @NO}];
+            NSMutableDictionary *cell = [@{@"column": self.grid[@"columns"][c][@"id"], @"value": value, @"enabled": @YES, @"editable": @NO} mutableCopy];
+            if (c == 0 && self.deferredCellRole) {
+                cell[@"role"] = self.deferredCellRole;
+                if ([self.deferredCellRole isEqual:@"checkbox"]) { cell[@"checked"] = @1; cell[@"label"] = @"Approved"; }
+                else { cell[@"value"] = @"Allowed"; cell[@"label"] = @"Decision"; }
+            }
+            [cells addObject:cell];
         }
         [rows addObject:@{@"id": key, @"cells": cells}];
     }
@@ -65,6 +73,12 @@
         }
         if ([operation isEqual:@"replace"]) { self.grid[@"generation"] = NSUUID.UUID.UUIDString; self.grid[@"order"] = @1; self.revision++; }
         if ([operation isEqual:@"values"]) self.valueVersion++;
+        if ([operation isEqual:@"releasePages"]) self.deferredPages = NO;
+        if ([operation isEqual:@"reloadPages"]) {
+            // Invalidate cached pages while retaining rows and their values.
+            self.deferredPages = YES; [self.requests removeAllObjects];
+            self.grid[@"order"] = @([self.grid[@"order"] integerValue] + 1); self.revision++;
+        }
         if ([operation isEqual:@"remove"]) {
             NSMutableArray *rows = [self.grid[@"rows"] mutableCopy]; [rows removeObject:@"row-49999"];
             self.grid[@"rows"] = rows; self.grid[@"order"] = @([self.grid[@"order"] integerValue] + 1); [self geometry]; self.revision++;
@@ -73,7 +87,7 @@
     NSMutableArray *pages = [NSMutableArray new];
     // Simulate a bounded provider. Requests observed on one cycle arrive on
     // later cycles; AX reads cannot synthesize their own values synchronously.
-    for (NSUInteger n = 0; n < 2 && self.requests.count; n++) {
+    for (NSUInteger n = 0; n < 2 && self.requests.count && !self.deferredPages; n++) {
         NSDictionary *request = self.requests.firstObject; [self.requests removeObjectAtIndex:0];
         NSDictionary *page = [self page:request]; if (page) [pages addObject:page];
     }
@@ -94,19 +108,23 @@
     }
     [self.requests addObjectsFromArray:reply[@"gridRequests"] ?: @[]];
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSDictionary *state = @{@"pid": @(NSProcessInfo.processInfo.processIdentifier), @"session": self.session, @"command": @(self.command), @"pages": @(self.pages), @"revision": @(self.revision), @"generation": self.grid[@"generation"], @"firstRow": @(self.firstRow), @"firstColumn": @(self.firstColumn)};
+        NSDictionary *state = @{@"pid": @(NSProcessInfo.processInfo.processIdentifier), @"session": self.session, @"command": @(self.command), @"pages": @(self.pages), @"revision": @(self.revision), @"generation": self.grid[@"generation"], @"firstRow": @(self.firstRow), @"firstColumn": @(self.firstColumn), @"deferredPages": @(self.deferredPages)};
         [[NSJSONSerialization dataWithJSONObject:state options:0 error:nil] writeToFile:[self.directory stringByAppendingPathComponent:@"state.json"] atomically:YES];
     });
 }
 @end
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
-        if (argc != 2) return 2;
+        if (argc != 2 && argc != 3) return 2;
+        NSString *mode = argc == 3 ? @(argv[2]) : @"";
+        BOOL deferred = [@[@"--deferred-values", @"--deferred-checkbox", @"--deferred-popup"] containsObject:mode];
+        if (argc == 3 && !deferred) return 2;
         [NSApplication sharedApplication]; [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory]; [NSApp finishLaunching];
         GridFixture *fixture = [GridFixture new]; fixture.directory = @(argv[1]); fixture.revision = 1;
-        fixture.requests = [NSMutableArray new];
+        fixture.requests = [NSMutableArray new]; fixture.deferredPages = deferred;
+        fixture.deferredCellRole = @{@"--deferred-checkbox": @"checkbox", @"--deferred-popup": @"popup"}[mode];
         NSMutableArray *rows = [NSMutableArray new], *columns = [NSMutableArray new];
-        for (NSUInteger row = 0; row < 50000; row++) [rows addObject:[NSString stringWithFormat:@"row-%05lu", row]];
+        for (NSUInteger row = 0; row < (deferred ? 60 : 50000); row++) [rows addObject:[NSString stringWithFormat:@"row-%05lu", row]];
         for (NSUInteger c = 0; c < 24; c++) [columns addObject:@{@"id": [NSString stringWithFormat:@"column-%lu", c], @"label": [NSString stringWithFormat:@"Column %lu", c + 1], @"enabled": @YES, @"editable": @NO}];
         fixture.grid = [@{@"generation": NSUUID.UUID.UUIDString, @"order": @1, @"rows": rows, @"columns": columns, @"selected": @[], @"actions": @{@"select": @NO, @"edit": @NO, @"reveal": @YES}} mutableCopy];
         [fixture geometry];
