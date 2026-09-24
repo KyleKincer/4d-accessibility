@@ -29,6 +29,7 @@ jobs:
         run: |
           python3 ci/check_repository.py
           python3 test_install_host_methods.py
+          python3 prepare_alp_subforms.py --help
       - name: Test session and grid models
         run: |
           python3 test.py
