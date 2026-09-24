@@ -315,6 +315,25 @@ int main(void) {
         Check(![session canPostEditorInput:@{@"action": input[@"action"], @"serial": @1, @"text": @"🎸"}], "character found elsewhere in requested text cannot authorize the wrong position");
         [session invalidate];
 
+        // Undo/Redo updates the live editor before the background page cache.
+        // A cache refresh must preserve actions on the unchanged editor, while
+        // still rejecting newly restricted cells and changed editor contents.
+        for (NSString *transition in @[@"value", @"permission", @"editor"]) {
+            session = [[AXBSession alloc] initWithIdentifier:@"grid-editor-cache" windowID:4];
+            changed[@"focused"] = @{@"row": @"row-00000", @"column": @"column-0", @"value": @"A🎸B", @"selection": @[@1, @2]};
+            snapshot = Snapshot(changed, 1);
+            (void)[session exchange:@{@"snapshot": snapshot, @"gridPages": @[editablePage]} now:0];
+            Check([session enqueueNode:@"grid" revision:@1 operation:@"gridSetSelection" value:@{@"row": @"row-00000", @"column": @"column-0", @"selection": @[@0, @1]} now:0.1], "live editor selection queues before a cell cache refresh");
+            NSMutableDictionary *refreshed = Copy(editablePage);
+            refreshed[@"rows"][0][@"cells"][0][@"value"] = @"Refreshed backing value";
+            if ([transition isEqual:@"permission"]) refreshed[@"rows"][0][@"cells"][0][@"editable"] = @NO;
+            wrong = Copy(changed);
+            if ([transition isEqual:@"editor"]) wrong[@"focused"][@"value"] = @"B🎸B";
+            reply = [session exchange:@{@"snapshot": Snapshot(wrong, 2), @"gridPages": @[refreshed]} now:0.2];
+            Check((reply[@"action"] != nil) == [transition isEqual:@"value"], "backing cache text may refresh only when the exact editor and editing permissions remain unchanged");
+            [session invalidate];
+        }
+
         session = [[AXBSession alloc] initWithIdentifier:@"grid-selection" windowID:4];
         changed[@"focused"] = @{@"row": @"row-00000", @"column": @"column-0", @"value": @"A🎸B", @"selection": @[@1, @2]};
         snapshot = Snapshot(changed, 1);

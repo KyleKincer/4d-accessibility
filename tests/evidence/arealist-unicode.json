@@ -1,0 +1,340 @@
+{
+  "date": "2026-09-24",
+  "environment": {
+    "4D": "20.8",
+    "architecture": "arm64",
+    "macOS": "26",
+    "vendor": "11.4.2",
+    "previewVendor": "11.4.3b5"
+  },
+  "minimalCases": [
+    {
+      "case": "ascii",
+      "operation": "get",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": 0,
+      "inputUTF16": 5500,
+      "exactResult": true,
+      "canonicalResult": true,
+      "closedNormally": true
+    },
+    {
+      "case": "bmp",
+      "operation": "get",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": 0,
+      "inputUTF16": 8000,
+      "exactResult": false,
+      "canonicalResult": true,
+      "closedNormally": true
+    },
+    {
+      "case": "shortSupplementary",
+      "operation": "get",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": 0,
+      "inputUTF16": 2,
+      "exactResult": true,
+      "canonicalResult": true,
+      "closedNormally": true
+    },
+    {
+      "case": "supplementary",
+      "operation": "get",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": -11,
+      "inputUTF16": 2000,
+      "exactResult": false,
+      "canonicalResult": false,
+      "closedNormally": false
+    },
+    {
+      "case": "mixedSupplementary",
+      "operation": "get",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": -11,
+      "inputUTF16": 8999,
+      "exactResult": false,
+      "canonicalResult": false,
+      "closedNormally": false
+    },
+    {
+      "case": "copy",
+      "operation": "copy",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": -11,
+      "inputUTF16": 8999,
+      "exactResult": false,
+      "canonicalResult": false,
+      "closedNormally": false
+    },
+    {
+      "case": "value",
+      "operation": "value",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": -11,
+      "inputUTF16": 8999,
+      "exactResult": false,
+      "canonicalResult": false,
+      "closedNormally": false
+    },
+    {
+      "case": "commit",
+      "operation": "commit",
+      "vendorVersion": "11.4.2",
+      "guardMalloc": true,
+      "bridgeInstalled": false,
+      "exit": -11,
+      "inputUTF16": 8999,
+      "exactResult": false,
+      "canonicalResult": false,
+      "closedNormally": false
+    }
+  ],
+  "stacks": {
+    "get": {
+      "exception": "EXC_BAD_ACCESS",
+      "signal": "SIGSEGV",
+      "frames": [
+        {
+          "symbol": "XF::UString::AssignUTF8(unsigned char const*, long)",
+          "symbolOffset": 408,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMEntry::GetEntryValue(RWValue&, bool, bool)",
+          "symbolOffset": 392,
+          "image": "ALP"
+        },
+        {
+          "symbol": "ALP_GetObjectProperty(DMBase*, PSObject*, unsigned int, PointerBlock*, RWValue*)",
+          "symbolOffset": 128,
+          "image": "ALP"
+        },
+        {
+          "symbol": "ALP_GetAreaProperty(int, unsigned int, PointerBlock*, RWValue*)",
+          "symbolOffset": 1084,
+          "image": "ALP"
+        },
+        {
+          "symbol": "PluginMain",
+          "symbolOffset": 11656,
+          "image": "ALP"
+        },
+        {
+          "symbol": "FourDPackex",
+          "symbolOffset": 92,
+          "image": "ALP"
+        },
+        {
+          "symbol": "CallUnPack(calcblock*, short, int, char*, char***, long long*, unsigned char, bool)",
+          "symbolOffset": 420,
+          "image": "4D"
+        },
+        {
+          "symbol": "do_extfonc(calculLink*, unsigned char const*, champvar_template<256>*)",
+          "symbolOffset": 3184,
+          "image": "4D"
+        }
+      ]
+    },
+    "value": {
+      "exception": "EXC_BAD_ACCESS",
+      "signal": "SIGSEGV",
+      "frames": [
+        {
+          "symbol": "XF::UString::AssignUTF8(unsigned char const*, long)",
+          "symbolOffset": 408,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMEntry::GetEntryValue(RWValue&, bool, bool)",
+          "symbolOffset": 392,
+          "image": "ALP"
+        },
+        {
+          "symbol": "ALP_GetObjectProperty(DMBase*, PSObject*, unsigned int, PointerBlock*, RWValue*)",
+          "symbolOffset": 128,
+          "image": "ALP"
+        },
+        {
+          "symbol": "ALP_GetAreaProperty(int, unsigned int, PointerBlock*, RWValue*)",
+          "symbolOffset": 1084,
+          "image": "ALP"
+        },
+        {
+          "symbol": "PluginMain",
+          "symbolOffset": 19536,
+          "image": "ALP"
+        },
+        {
+          "symbol": "FourDPackex",
+          "symbolOffset": 92,
+          "image": "ALP"
+        },
+        {
+          "symbol": "CallUnPack(calcblock*, short, int, char*, char***, long long*, unsigned char, bool)",
+          "symbolOffset": 420,
+          "image": "4D"
+        },
+        {
+          "symbol": "do_extfonc(calculLink*, unsigned char const*, champvar_template<256>*)",
+          "symbolOffset": 3184,
+          "image": "4D"
+        }
+      ]
+    },
+    "copy": {
+      "exception": "EXC_BAD_ACCESS",
+      "signal": "SIGSEGV",
+      "frames": [
+        {
+          "symbol": "XF::UString::AssignUTF8(unsigned char const*, long)",
+          "symbolOffset": 408,
+          "image": "ALP"
+        },
+        {
+          "symbol": "Scintilla::Internal::Scintilla4D::CopyToClipboard(Scintilla::Internal::SelectionText const&)",
+          "symbolOffset": 160,
+          "image": "ALP"
+        },
+        {
+          "symbol": "Scintilla::Internal::Scintilla4D::Copy()",
+          "symbolOffset": 136,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMArea::HandleEvent()",
+          "symbolOffset": 11400,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMArea::HandleEvent(PluginBlock*)",
+          "symbolOffset": 4524,
+          "image": "ALP"
+        },
+        {
+          "symbol": "PluginMain",
+          "symbolOffset": 15444,
+          "image": "ALP"
+        },
+        {
+          "symbol": "FourDPackex",
+          "symbolOffset": 92,
+          "image": "ALP"
+        },
+        {
+          "symbol": "CallUnPack(calcblock*, short, int, char*, char***, long long*, unsigned char, bool)",
+          "symbolOffset": 420,
+          "image": "4D"
+        }
+      ]
+    },
+    "commit": {
+      "exception": "EXC_BAD_ACCESS",
+      "signal": "SIGSEGV",
+      "frames": [
+        {
+          "symbol": "XF::UString::AssignUTF8(unsigned char const*, long)",
+          "symbolOffset": 408,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMEntry::GetEntryValue(RWValue&, bool, bool)",
+          "symbolOffset": 392,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMArea::WriteEntryData(EEntryCBAction)",
+          "symbolOffset": 200,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMArea::EndEntry(EEntryCBAction, bool)",
+          "symbolOffset": 252,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMArea::HandleEvent()",
+          "symbolOffset": 10180,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMArea::HandleEvent(PluginBlock*)",
+          "symbolOffset": 4524,
+          "image": "ALP"
+        },
+        {
+          "symbol": "PluginMain",
+          "symbolOffset": 15444,
+          "image": "ALP"
+        },
+        {
+          "symbol": "FourDPackex",
+          "symbolOffset": 92,
+          "image": "ALP"
+        }
+      ]
+    },
+    "previewFixture": {
+      "exception": "EXC_BAD_ACCESS",
+      "signal": "SIGSEGV",
+      "frames": [
+        {
+          "symbol": "XF::UString::AssignUTF8(unsigned char const*, long)",
+          "symbolOffset": 396,
+          "image": "ALP"
+        },
+        {
+          "symbol": "DMEntry::GetEntryValue(RWValue&, bool, bool)",
+          "symbolOffset": 368,
+          "image": "ALP"
+        },
+        {
+          "symbol": "ALP_GetObjectProperty(DMBase*, PSObject*, unsigned int, PointerBlock*, RWValue*)",
+          "symbolOffset": 112,
+          "image": "ALP"
+        },
+        {
+          "symbol": "ALP_GetAreaProperty(int, unsigned int, PointerBlock*, RWValue*)",
+          "symbolOffset": 836,
+          "image": "ALP"
+        },
+        {
+          "symbol": "PluginMain",
+          "symbolOffset": 6856,
+          "image": "ALP"
+        },
+        {
+          "symbol": "FourDPackex",
+          "symbolOffset": 92,
+          "image": "ALP"
+        },
+        {
+          "symbol": "CallUnPack(calcblock*, short, int, char*, char***, long long*, unsigned char, bool)",
+          "symbolOffset": 420,
+          "image": "4D"
+        },
+        {
+          "symbol": "RTCallPlugin(tProcessGlobals*, V4DPlugin*, int, champvar_template<256>*, champvar_template<256>**, int)",
+          "symbolOffset": 2656,
+          "image": "4D"
+        }
+      ]
+    }
+  }
+}

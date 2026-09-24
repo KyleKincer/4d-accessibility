@@ -1,8 +1,10 @@
 # Native list-box reading and selection
 
-For collection/entity row metadata, use automatic `options.grids` and [reuse the existing metadata expression](../INTEGRATION.md#reuse-row-metadata). The summary adapter described here still rejects those expressions.
+For collection/entity row metadata, use automatic `options.grids` and [reuse the existing metadata expression](../GRIDS.md#reuse-row-metadata). The summary adapter described here still rejects those expressions.
 
-This is the older explicit summary adapter. For new integrations, use [automatic discovery with a complete logical grid](../INTEGRATION.md#add-a-native-array-list-box-without-replacing-discovery), including the [collection/entity option](../INTEGRATION.md#use-a-collection-or-entity-selection-list-box). It exposes every logical row and keeps ordinary fields in the same tree.
+`ReportAccessibilityFailure` below stands for the existing application diagnostic reporter accepting a failure object. Substitute its name and reuse its declaration. Use `onError` in root start options for later failures, as shown in [the ordinary-form recipe](AUTOMATIC-FORM.md). The example's application state uses plain local form data; with entity, class-instance or shared roots, keep that state in the application's existing UI controller.
+
+This is the older explicit summary adapter. For new integrations, use [automatic discovery with a complete logical grid](../GRIDS.md#add-a-native-array-list-box-without-replacing-discovery), including the [collection/entity option](../GRIDS.md#use-a-collection-or-entity-selection-list-box). It exposes every logical row and keeps ordinary fields in the same tree.
 
 The recipe below remains available for existing integrations. The host installer includes its helpers by default. `AXB_Listbox` validates stable keys and describes visible rows; `AXB_ListboxSelect` resolves a requested selection against the current binding. This recipe's viewport summary does not satisfy the full-UI accessibility target.
 
@@ -51,7 +53,7 @@ Case of
   End if
   $reply:=AXB_Form($operation; $options)
   If (Not($reply.ok=True))
-   Form.axbError:=$reply.error
+   ReportAccessibilityFailure($reply)
   End if
  : (Form event code=On Activate)
   ListAX_SelectionChanged

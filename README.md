@@ -42,8 +42,8 @@ Enable those form events if needed. Existing buttons, fields, object methods and
 | Your form | Integration |
 | --- | --- |
 | Ordinary controls, repeated or nested page subforms | Start/stop the root. Configure child labels under `children`. Invalidate a child before replacing its form or data binding. [Example](skills/4d-accessibility/references/examples/AUTOMATIC-FORM.md). |
-| Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/INTEGRATION.md#add-a-native-array-list-box-without-replacing-discovery). |
-| Invoice-style form with AreaList Pro | Add its area reference, stable line keys, record scope, readiness and meaningful descriptions for custom columns. Configure repeated grids within their owning child. [Assembled example](skills/4d-accessibility/references/INTEGRATION.md#put-the-invoice-like-form-together). |
+| Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery). |
+| Invoice-style form with AreaList Pro | Add its area reference, stable line keys, record scope, readiness and meaningful descriptions for custom columns. Configure repeated grids within their owning child. [Assembled example](skills/4d-accessibility/references/GRIDS.md#put-the-invoice-like-form-together). |
 | JSON-generated forms | Wrap the shared builder with `AXB_Dynamic`, preserving the original method and events. Use private form data and explicit cleanup before child replacement. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
 | Custom controls or existing native/web content | Preserve a usable native provider. Use the explicit provider contract for application-specific controls; account for every interactive element. [Extension contract](skills/4d-accessibility/references/FORM-SUPPORT.md). |
 

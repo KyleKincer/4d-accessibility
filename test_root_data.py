@@ -20,7 +20,7 @@ from fixture_desktop import activate_fixture, wait_for_start
 TITLE = "AXB root data ownership fixture"
 
 
-def prepare(server, kind):
+def prepare(server, kind, dynamic_mismatch=False):
     verify_package(PACKAGE)
     fixture = BUILD / ("root-data-" + uuid.uuid4().hex)
     project = project_at(fixture, "RootData")
@@ -73,7 +73,10 @@ Case of
    AXBR_Status.registration:=AXB_Form("register"; New object("label"; "Child"))
    AXBR_Status.dynamic:=AXB_Dynamic(New object("pages"; New collection(Null)); Form; New object("label"; "Generated"); "start")
   End if
-  AXBR_Start
+  AXBR_Status.originalLoad:=True
+  If (Not(AXBR_Status.dynamicMismatch=True))
+   AXBR_Start
+  End if
   SET TIMER(6)
  : (Form event code=On Timer)
   AXBR_Status.ticks:=AXBR_Status.ticks+1
@@ -91,6 +94,10 @@ Case of
    CANCEL
   End if
  : (Form event code=On Unload)
+  AXBR_Status.originalUnload:=True
+  If (AXBR_Status.dynamicMismatch=True)
+   AXB_DynamicClose
+  End if
   $reply:=AXB_Form("stop"; New object)
 End case
 ''',
@@ -142,6 +149,18 @@ QUIT 4D
     folder.mkdir(parents=True)
     (folder / "form.4DForm").write_text(json.dumps({"windowTitle": TITLE, "width": 510, "height": 130, "method": "AXBR_Form",
         "events": ["onLoad", "onUnload", "onTimer"], "pages": [None, {"objects": objects}]}))
+    if dynamic_mismatch:
+        shutil.copy2(folder / "form.4DForm", fixture / "Resources/root-form.json")
+        startup = database / "onStartup.4dm"
+        text = startup.read_text().replace('var $window : Integer', 'var $window : Integer\nvar $prepared; $form : Object')
+        text = text.replace('$window:=Open form window("Root"; Plain form window)\nDIALOG("Root"; AXBR_Data)',
+            'AXBR_Status.dynamicMismatch:=True\n'
+            '$prepared:=AXB_Dynamic(JSON Parse(File("/RESOURCES/root-form.json").getText()); New object; New object("label"; "Generated"); "start")\n'
+            'AXBR_Status.prepared:=$prepared.ok\n$form:=$prepared.form\n'
+            'File("/RESOURCES/prepared.json").setText(JSON Stringify(New object("ok"; $prepared.ok; "error"; $prepared.error; "form"; $form)))\n'
+            '$window:=Open form window($form; Plain form window)\nDIALOG($form; AXBR_Data)')
+        text = text.replace('"name"; AXBR_Data.name)', '"name"; AXBR_Data.name; "originalUnload"; AXBR_Status.originalUnload)')
+        startup.write_text(text)
     info = plistlib.loads((server / "Contents/Info.plist").read_bytes())
     executable = server / "Contents/MacOS" / info["CFBundleExecutable"]
     with (fixture / "seed.log").open("w") as log:
@@ -165,14 +184,15 @@ def main():
     parser.add_argument("--server", type=Path, required=True)
     parser.add_argument("--kind", choices=["entity", "shared", "plain", "instance"], required=True)
     parser.add_argument("--compiled", action="store_true")
+    parser.add_argument("--dynamic-mismatch", action="store_true", help="Open a generated wrapper with data other than its prepared plain object")
     parser.add_argument("--run", action="store_true")
     args = parser.parse_args()
     if not args.run or not ax.trusted() or not doctor.desktop_session()["unlocked"]:
         parser.error("--run, existing AX permission and an unlocked desktop are required")
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
         parser.error("Close 4D before testing the owned fixture")
-    fixture, project = prepare(args.server.expanduser().resolve(), args.kind)
-    report = {"passed": False, "kind": args.kind, "compiled": args.compiled, "checks": [],
+    fixture, project = prepare(args.server.expanduser().resolve(), args.kind, args.dynamic_mismatch)
+    report = {"passed": False, "kind": args.kind, "compiled": args.compiled, "dynamicMismatch": args.dynamic_mismatch, "checks": [],
               "fixture": str(fixture), "nativeSHA256": sha(fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
               "componentSHA256": sha(PACKAGE / "AccessibilityBridge.4DZ"),
               "sourcesSHA256": {str(p.relative_to(fixture)): sha(p) for p in (fixture / "Project/Sources").rglob("*") if p.is_file()}}
@@ -195,6 +215,23 @@ def main():
             "--data", str(fixture / "synthetic.4dd"), "--opening-mode", "compiled" if args.compiled else "interpreted", "--webadmin-auto-start", "false"], stdout=log, stderr=log)
     try:
         wait_for_start(process, project, state, BUILD)
+        if args.dynamic_mismatch:
+            check(state().get("prepared") is True, "generated preparation succeeds on its private plain object")
+            check(state()["compiled"] is args.compiled, "requested execution mode is running")
+            check(state().get("originalLoad") is True, "wrong-data fallback forwards original On Load")
+            ax.wait_for(lambda: state().get("ticks", 0) >= 3, "Original timer stopped after wrong-data fallback")
+            check(not state().get("active"), "wrong-data fallback creates no unowned bridge session")
+            check(state()["name"] == "Original", "wrong-data fallback preserves application values")
+            if args.kind != "plain":
+                check(sorted(state()["keys"]) == ["id", "name"], "wrapper adds no attributes to incompatible data")
+            else:
+                check("axbError" in state()["keys"], "plain data retains the compatibility failure property")
+            (fixture / "Resources/close.json").write_text("{}")
+            process.wait(timeout=10)
+            closed = json.loads((fixture / "Resources/closed.json").read_text(encoding="utf-8-sig"))
+            check(process.returncode == 0 and closed.get("originalUnload") is True, "wrong-data fallback forwards unload and closes normally")
+            report["passed"] = True
+            return
         check(state()["start"].get("ok") is True, "root starts directly on its existing data")
         check(state()["compiled"] is args.compiled, "requested execution mode is running")
         app, window = activate_fixture(process, project, TITLE)
@@ -259,7 +296,8 @@ def main():
         raise
     finally:
         report["finalState"] = last
-        (BUILD / f"root-data-{args.kind}-{'compiled' if args.compiled else 'interpreted'}.json").write_text(json.dumps(report, indent=2) + "\n")
+        suffix = "-dynamic-mismatch" if args.dynamic_mismatch else ""
+        (BUILD / f"root-data-{args.kind}{suffix}-{'compiled' if args.compiled else 'interpreted'}.json").write_text(json.dumps(report, indent=2) + "\n")
         if process.poll() is None:
             (fixture / "Resources/close.json").write_text("{}")
             try:

@@ -44,6 +44,8 @@ The launcher verifies the project and window before sending input and closes onl
 
 Read each script's `--help` before choosing a case. Fixture preparers create disposable projects under ignored `build/`; run one 4D desktop fixture at a time. Synthetic AreaList tests accept `--area-list-plugin /path/to/ALP.bundle`. Use `--license-file /path/to/protected/alp.license` for an existing license file with mode 0600, or keep it in ignored `fixture/Resources/alp.license`. Add `--key-type integer` or `--key-type longint` to exercise existing numeric key arrays; `test_alp_grid_fixture.py --run --text bmp` tests supported text, while the default supplementary case remains a failing requirement. The vendor's license and redistribution terms remain separate.
 
+For the independent AreaList supplementary Unicode crash, see the [bridge-free reproduction](tests/AREA-LIST-UNICODE.md). The adapter rejects these requests before mutation; ordinary native 4D text editing has separate Unicode coverage.
+
 ## Source ownership
 
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.

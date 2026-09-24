@@ -72,6 +72,23 @@ class InstallTests(unittest.TestCase):
         self.run_installer(success=False)
         self.assertEqual(before, self.snapshot())
 
+    def test_changed_compiler_target_blocks_every_write(self):
+        self.run_installer("--area-list")
+        before = self.snapshot()
+        result = self.run_installer("--area-list", "--compiler-method", "Compiler_Another", success=False)
+        self.assertIn("Compiler_Application", result.stderr)
+        self.assertEqual(before, self.snapshot())
+
+    def test_other_methods_with_partial_declaration_blocks_block_every_write(self):
+        for marker in (BEGIN, END):
+            with self.subTest(marker=marker):
+                target = self.methods / "ApplicationDeclarations.4dm"
+                target.write_text(marker + "\n")
+                before = self.snapshot()
+                result = self.run_installer(success=False)
+                self.assertIn("ApplicationDeclarations", result.stderr)
+                self.assertEqual(before, self.snapshot())
+
 
 if __name__ == "__main__":
     unittest.main()

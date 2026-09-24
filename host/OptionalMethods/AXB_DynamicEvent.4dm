@@ -4,7 +4,9 @@ var $pointer : Pointer
 var $metadata : Text
 var $forward; $sameData : Boolean
 If (Form event code=On Load)
- $context:=Form.axbDynamic
+ If ((Form#Null) && (New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+  $context:=Form.axbDynamic
+ End if
  If ($context#Null)
   If ($context.options#Null)
    $context.data:=Form
@@ -28,7 +30,9 @@ End if
 If ($context=Null)
  // A caller supplied different data than it prepared. Keep the original
  // application method usable, but do not create an unowned bridge session.
- Form.axbError:="missingDynamicContext"
+ If ((Form#Null) && (New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+  Form.axbError:="missingDynamicContext"
+ End if
  $metadata:=OBJECT Get placeholder(*; "__AXB_DynamicContext")
  If ($metadata="")
   return
@@ -51,7 +55,9 @@ If (Not($sameData))
  // Detach the old registration, but keep forwarding the original form method
  // in the current application context. Rebinding is an explicit new lifetime.
  AXB_DynamicStop($context.data; $context.provider)
- Form.axbError:="dynamicDataReplaced"
+ If ((Form#Null) && (New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+  Form.axbError:="dynamicDataReplaced"
+ End if
 End if
 $forward:=$context.method#""
 Case of
@@ -68,7 +74,9 @@ End if
 $sameData:=New collection($context.data).indexOf(Form)=0
 If ((Form event code=On Load) & Not($sameData))
  AXB_DynamicStop($context.data; $context.provider)
- Form.axbError:="dynamicDataReplaced"
+ If ((Form#Null) && (New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+  Form.axbError:="dynamicDataReplaced"
+ End if
 End if
 If ((Form event code=On Load) & $sameData & Not($context.closed))
  $reply:=AXB_Form($context.operation; $context.options)
@@ -77,7 +85,9 @@ If ((Form event code=On Load) & $sameData & Not($context.closed))
  End if
  $context.data.axbDynamic.startResult:=$reply
  If (Not($reply.ok=True))
-  Form.axbError:=$reply.error
+  If ((Form#Null) && (New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
+   Form.axbError:=$reply.error
+  End if
   AXB_DynamicFailure($reply; $context.options; "start")
  End if
 End if

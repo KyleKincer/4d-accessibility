@@ -100,6 +100,19 @@ def main():
             return next((e for e in group.read("AXChildren") or [] if any(text == label or text.endswith(": " + label)
                         for text in [e.read("AXDescription") or "", e.read("AXTitle") or ""])), None)
 
+        def first_cell_identifier():
+            current = find("Left lines")
+            if current is None:
+                return None
+            try:
+                return current.cell(1, 0).read("AXIdentifier")
+            except RuntimeError as error:
+                # Scope replacement retires the table between indexed reads.
+                # Reacquire only this read; never repeat the activation.
+                if str(error).endswith(", -25202"):
+                    return None
+                raise
+
         def settle():
             def done():
                 state()
@@ -205,7 +218,7 @@ def main():
         check(far.is_settable("AXValue"), "enterable AreaList cells advertise the existing vendor editor")
         if args.text != "supplementary":
             check(far.set_text("Unsafe 😀") == 0, "transport accepts a request the vendor cannot safely implement")
-            ax.wait_for(lambda: group.read("AXHelp") == "AreaList supplementary Unicode entry is not yet supported; vendor editor defect under investigation", "Unsafe vendor input was not rejected", timeout=15)
+            ax.wait_for(lambda: group.read("AXHelp") == "AreaList cannot safely edit supplementary Unicode in the tested vendor versions", "Unsafe vendor input was not rejected", timeout=15)
             check(state()["leftValue"] == "Left line 0600" and not state().get("editor"), "unsupported input is rejected before opening or changing the editor")
         check(far.set_text(initial_edit) == 0, "standard AXValue starts vendor text entry")
         ax.wait_for(lambda: state().get("editor", {}).get("text") == initial_edit, "Vendor editor did not receive Unicode text", timeout=20)
@@ -216,6 +229,10 @@ def main():
         check(editor.set_range("AXSelectedTextRange", 0, 6) == 0, "standard selected range reaches the vendor editor")
         ax.wait_for(lambda: editor.read("AXSelectedText") == "Edited", "Vendor selection did not update", timeout=15)
         settle()
+        if args.text != "supplementary":
+            check(editor.set_string("AXSelectedText", "🎸") == 0, "active-editor replacement reaches host validation")
+            ax.wait_for(lambda: group.read("AXHelp") == "AreaList cannot safely edit supplementary Unicode in the tested vendor versions", "Unsafe partial replacement was not rejected", timeout=15)
+            check(editor.read("AXValue") == initial_edit and editor.read("AXSelectedText") == "Edited", "rejected replacement preserves editor text and selection")
         check(editor.set_string("AXSelectedText", replacement) == 0, "partial replacement uses the existing vendor editor")
         edited = replacement + initial_edit[6:]
         ax.wait_for(lambda: state().get("editor", {}).get("text") == edited, "Vendor partial replacement failed", timeout=20)
@@ -265,7 +282,7 @@ def main():
         check(new.read("AXIdentifier") != far.read("AXIdentifier"), "readiness transition retires the prior grid generation")
         identifier = new.read("AXIdentifier")
         press("Scope")
-        ax.wait_for(lambda: find("Left lines").cell(1, 0).read("AXIdentifier") != identifier, "New invoice scope did not retire old cells", timeout=15)
+        ax.wait_for(lambda: (current := first_cell_identifier()) is not None and current != identifier, "New invoice scope did not retire old cells", timeout=15)
         check(new.read("AXSize") in (None, (0, 0)), "old invoice cell has no active geometry after scope change")
         check(state()["timerTicks"] > ticks, "existing form timer continues during grid actions")
         check(state()["leftError"] == state()["rightError"] == 0, "all provider calls leave the sticky vendor error clear")
@@ -275,6 +292,11 @@ def main():
         report["passed"] = True
     finally:
         if process.poll() is None and not report["passed"]:
+            if locals().get("group") is not None:
+                try:
+                    report["failure_help"] = group.read("AXHelp")
+                except RuntimeError as error:
+                    report["failure_help_error"] = str(error)
             try:
                 ax.capture_window(process.pid, BUILD / "alp-grid-last.png")
             except RuntimeError:
