@@ -1,0 +1,1176 @@
+{
+  "passed": true,
+  "change": "Commit the complete active AreaList editor before moving to another text or checkbox cell; revalidate the requested target after existing exit handlers",
+  "nativeOrComponentChange": false,
+  "newHostHooks": 0,
+  "before": {
+    "revision": "3b0ab998cf5efb2e15279c2db12eee4adefe42b7",
+    "passed": false,
+    "command": "python3 test_alp_grid_fixture.py --run --text bmp",
+    "checksPassedBeforeFailure": 35,
+    "failure": "moving directly between cells commits the first edit",
+    "observed": "The editor displayed complete text, but direct cell navigation committed an incomplete value"
+  },
+  "runs": [
+    {
+      "name": "alp-transition-full-interpreted",
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "a second cell accepts a direct edit request"
+        },
+        {
+          "passed": true,
+          "name": "moving directly between cells commits the first edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "leaving the second cell commits its own edit"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "another cell request reaches existing exit validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected cell transition preserves both editors' data"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "column rebind retires stale editors with unchanged keys and scope"
+        },
+        {
+          "passed": true,
+          "name": "column rebind publishes its actual new source"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    {
+      "name": "alp-full-compiled",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "a second cell accepts a direct edit request"
+        },
+        {
+          "passed": true,
+          "name": "moving directly between cells commits the first edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "leaving the second cell commits its own edit"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "another cell request reaches existing exit validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected cell transition preserves both editors' data"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "column rebind retires stale editors with unchanged keys and scope"
+        },
+        {
+          "passed": true,
+          "name": "column rebind publishes its actual new source"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    {
+      "name": "alp-transition-interpreted",
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "direct transition commits the complete first value"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "rejected transition preserves both cells"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "corrected value permits the next cell transition"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "scope change during exit rejects the stale continuation"
+        },
+        {
+          "passed": true,
+          "name": "transitions leave vendor errors clear"
+        },
+        {
+          "passed": true,
+          "name": "normal close accepted"
+        }
+      ],
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    {
+      "name": "alp-transition-compiled",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "direct transition commits the complete first value"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "rejected transition preserves both cells"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "corrected value permits the next cell transition"
+        },
+        {
+          "passed": true,
+          "name": "direct cell edit request accepted"
+        },
+        {
+          "passed": true,
+          "name": "scope change during exit rejects the stale continuation"
+        },
+        {
+          "passed": true,
+          "name": "transitions leave vendor errors clear"
+        },
+        {
+          "passed": true,
+          "name": "normal close accepted"
+        }
+      ],
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    {
+      "name": "alp-checkbox-transition-interpreted",
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "checkbox activation commits the complete preceding text edit"
+        },
+        {
+          "passed": true,
+          "name": "rejected text exit prevents checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "corrected text permits normal checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    {
+      "name": "alp-checkbox-transition-compiled",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "checkbox activation commits the complete preceding text edit"
+        },
+        {
+          "passed": true,
+          "name": "rejected text exit prevents checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "corrected text permits normal checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    {
+      "name": "compiled-checkbox-voiceover",
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one root adapter starts around repeated existing vendor forms"
+        },
+        {
+          "passed": true,
+          "name": "vendor registration succeeds"
+        },
+        {
+          "passed": true,
+          "name": "all rows and checkbox columns remain logically addressable"
+        },
+        {
+          "passed": true,
+          "name": "Boolean and integer controls expose typed unchecked and mixed states"
+        },
+        {
+          "passed": true,
+          "name": "repeated grids keep separate checkbox identities"
+        },
+        {
+          "passed": true,
+          "name": "focus capabilities preserve the vendor column mode"
+        },
+        {
+          "passed": true,
+          "name": "checkboxes expose activation instead of string assignment"
+        },
+        {
+          "passed": true,
+          "name": "cell-level entry permission disables activation"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "hidden or protected checkbox state stays private"
+        },
+        {
+          "passed": true,
+          "name": "non-focusable activation invokes existing entry and commit callbacks exactly once"
+        },
+        {
+          "passed": true,
+          "name": "activation changes only its owning repeated form"
+        },
+        {
+          "passed": true,
+          "name": "three-state control uses the vendor transition from mixed"
+        },
+        {
+          "passed": true,
+          "name": "integer two-state checkbox uses normal vendor activation"
+        },
+        {
+          "passed": true,
+          "name": "keyboard focus opens the checkbox editor without changing its value"
+        },
+        {
+          "passed": true,
+          "name": "AX reports the uncommitted checkbox value without bypassing normal commit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary Escape cancels the checkbox edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary focus transfer commits through the existing vendor callback"
+        },
+        {
+          "passed": true,
+          "name": "checkbox activation commits the complete preceding text edit"
+        },
+        {
+          "passed": true,
+          "name": "rejected text exit prevents checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "corrected text permits normal checkbox activation"
+        },
+        {
+          "passed": true,
+          "name": "area permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "area permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "cell permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "column permissions remove the checkbox activation action"
+        },
+        {
+          "passed": true,
+          "name": "column permissions prevent mutation through a retained checkbox"
+        },
+        {
+          "passed": true,
+          "name": "application validation rejects the edit and its action receipt without bypass or retry"
+        },
+        {
+          "passed": true,
+          "name": "checkbox identity follows its row key after vendor sorting"
+        },
+        {
+          "passed": true,
+          "name": "retired checkbox cannot mutate a replaced binding"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the repeated AreaList table"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the checkbox label and control role"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver activates the checkbox through the original entry and commit handlers"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver leaves checkbox cells and reaches the ordinary form editor"
+        },
+        {
+          "passed": true,
+          "name": "provider calls leave the vendor error state clear"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during checkbox editing"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds"
+        }
+      ],
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69",
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Left invoice: Left lines, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In Left invoice: Left lines, table, Item SKU"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "X selection replaced"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Description Corrected text before checkbox"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Amount 600.25"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Styled Left styled 0600"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Readiness Left ready"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Direct Direct checked checkbox"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+        },
+        {
+          "key": "up",
+          "shift": true,
+          "command": false,
+          "caption": "X Out of Left invoice: Left lines, table"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Note, Left invoice: Note"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Left note, Insertion at beginning of text., Left invoice: Note, edit text"
+        }
+      ]
+    }
+  ],
+  "source_sha256": {
+    "host/Methods/AXB_ALPGridAction.4dm": "366142ef7a5161726832dc7971a772b5d92eda65f9daa8347ec6dbc9fbf3cdbf",
+    "host/Methods/AXB_ALPGridConfirm.4dm": "d7115b943ef2fb80be7a16fa5174985d861b2a7222dd8e9e9159f14d5fc39f8f",
+    "test_alp_grid_fixture.py": "a64d164200d4fec0339b271c8098e138066c579ec3797886bef1de2fe245b195",
+    "test_alp_controls_fixture.py": "b637d6620a3b52e30a1dc8e8ed33486ca09b5a34ecea8a4a116c25010e7db9c3",
+    "tests/4d/AXBP_EntryEnd.4dm": "e6e993a1573448b9206955b1686ffe6dbe199912cb4650386d1831c2366d1c70"
+  }
+}

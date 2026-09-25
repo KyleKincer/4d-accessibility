@@ -151,6 +151,35 @@ def main():
         wait(lambda: state().get('leftControls', [None, None])[1] is True and not state().get('editor'), 'Normal focus transfer did not commit')
         settle()
         check(True, 'ordinary focus transfer commits through the existing vendor callback')
+        text_cell = left.cell(1, 598)
+        def text_editor_value():
+            children = text_cell.read('AXChildren') or []
+            return children[0].read('AXValue') if children else None
+        wait(lambda: text_cell.read('AXValue') == 'Left line 0600', 'Text cell did not load')
+        assert text_cell.set_text('Complete text before checkbox') == 0
+        wait(lambda: text_editor_value() == 'Complete text before checkbox', 'Text editor did not receive complete value')
+        settle()
+        previous = state()['leftControls'][0]
+        assert direct.press() == 0
+        wait(lambda: state()['leftControls'][0] != previous, 'Checkbox did not activate after text editing')
+        settle()
+        check(state()['leftValue'] == 'Complete text before checkbox', 'checkbox activation commits the complete preceding text edit')
+        wait(lambda: text_cell.read('AXValue') == 'Complete text before checkbox', 'Committed text did not refresh')
+        assert text_cell.set_text('REJECT') == 0
+        wait(lambda: text_editor_value() == 'REJECT', 'Rejected text did not enter')
+        settle()
+        previous = state()
+        assert direct.press() == 0
+        wait(lambda: state()['leftRejections'] > previous['leftRejections'], 'Text exit validation did not run before checkbox')
+        settle()
+        check(state()['leftControls'] == previous['leftControls'] and text_editor_value() == 'REJECT', 'rejected text exit prevents checkbox activation')
+        assert text_cell.set_text('Corrected text before checkbox') == 0
+        wait(lambda: text_editor_value() == 'Corrected text before checkbox', 'Corrected text did not enter')
+        settle()
+        assert direct.press() == 0
+        wait(lambda: state()['leftControls'][0] != previous['leftControls'][0], 'Checkbox did not activate after text correction')
+        settle()
+        check(state()['leftValue'] == 'Corrected text before checkbox', 'corrected text permits normal checkbox activation')
         for mode, name in ((1, 'area'), (2, 'cell'), (3, 'column')):
             press('Edit')
             wait(lambda: state().get('permissionPhase') == mode and direct.read('AXEnabled') is False, 'Permission change did not publish')

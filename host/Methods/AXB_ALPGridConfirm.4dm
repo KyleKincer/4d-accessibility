@@ -14,6 +14,14 @@ $column:=$action.value.column
 If (($grid.generation#$data.generation) | Not(OB Is defined($data.state.positions; $key)) | Not(OB Is defined($data.state.columns; $column)))
  return
 End if
+If ($data.resumeAfterExit=True)
+ // The owning form rechecks scope before this callback. Revalidate the
+ // target's value, permissions and binding after application exit handlers.
+ If ((Current form window#Frontmost window) | (AL_GetAreaLongProperty($data.state.area; ALP_Area_EntryInProgress)=1))
+  return New object("status"; "rejected"; "message"; "AreaList focus changed after leaving the editor")
+ End if
+ return AXB_ALPGridAction("apply"; $data.options; $data.state; New object("action"; $action))
+End if
 If ($action.operation="gridReveal")
  If (($grid.frames[$key]#Null) && ($grid.frames[$key][$column]#Null))
   return New object("status"; "completed"; "message"; "AreaList cell is visible")
