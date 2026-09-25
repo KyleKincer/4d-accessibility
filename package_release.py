@@ -103,7 +103,7 @@ def main():
         shutil.copy2(ROOT / "vendor/4DPluginAPI/LICENSE.md", kit / "4D-SDK-LICENSE.md")
         (kit / "README.md").write_text(
             f"# 4D Accessibility {version}\n\n"
-            "Read `skills/4d-accessibility/references/STATUS.md` before adopting this development preview.\n\n"
+            "Read `skills/4d-accessibility/references/STATUS.md` for supported form families, tested platforms and known limits.\n\n"
             "1. Close the entire 4D host. Copy the included `Plugins/AccessibilityBridge.bundle` and "
             "`Components/AccessibilityBridge.4dbase` beside your application's `Project` folder.\n"
             "2. Run `python3 install_host_methods.py --project-dir /path/to/MyApp/Project`. Add `--area-list` for AreaList Pro. "

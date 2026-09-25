@@ -1,0 +1,108 @@
+{
+  "passed": true,
+  "date": "2026-09-25",
+  "release": "0.19.6",
+  "source_revision": "c1d706b3ab8bd48d6dbf49e7391a4a61532842cd",
+  "scope": "Compiled native ARM 4D 20.8 with the signed download and ScreenCaptureKit recording",
+  "finding": "VoiceOver speech arrives asynchronously after the application commits a checkbox. A fixed half-second caption sample can still contain the prior value.",
+  "reproduction": {
+    "initial_recorded_run_passed": false,
+    "failed_check": "VoiceOver announces the confirmed checkbox state",
+    "application_value_committed": true,
+    "unrecorded_39_check_run_passed": true
+  },
+  "repeated_observation": {
+    "trials": 11,
+    "delayed_trials": 8,
+    "results": [
+      {
+        "expected": true,
+        "samples": [
+          "\u00d7 checked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": false,
+        "samples": [
+          "\u00d7 checked, Approved; reviewed, checkbox",
+          "\u00d7 unchecked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": true,
+        "samples": [
+          "\u00d7 unchecked, Approved; reviewed, checkbox",
+          "\u00d7 checked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": false,
+        "samples": [
+          "\u00d7 checked, Approved; reviewed, checkbox",
+          "\u00d7 unchecked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": true,
+        "samples": [
+          "\u00d7 checked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": false,
+        "samples": [
+          "\u00d7 unchecked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": true,
+        "samples": [
+          "\u00d7 unchecked, Approved; reviewed, checkbox",
+          "\u00d7 checked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": false,
+        "samples": [
+          "\u00d7 checked, Approved; reviewed, checkbox",
+          "\u00d7 unchecked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": true,
+        "samples": [
+          "\u00d7 unchecked, Approved; reviewed, checkbox",
+          "\u00d7 checked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": false,
+        "samples": [
+          "\u00d7 checked, Approved; reviewed, checkbox",
+          "\u00d7 unchecked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      },
+      {
+        "expected": true,
+        "samples": [
+          "\u00d7 unchecked, Approved; reviewed, checkbox",
+          "\u00d7 checked, Approved; reviewed, checkbox"
+        ],
+        "passed": true
+      }
+    ]
+  },
+  "correction": "The test observes captions for at most five seconds. It does not resend activation or move focus. No plugin, component or host helper changed.",
+  "native_sha256": "2ca30de2cd5d97fad67c97bd770a583a7b8bb70ceb58446fbd966ea576752c1e",
+  "component_sha256": "edd2fd8a0ed504bb4fb95df57195d739989b98494acd0e6352c5764a37752a70"
+}
