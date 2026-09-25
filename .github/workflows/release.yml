@@ -59,7 +59,7 @@ jobs:
         run: |
           python3 package_release.py --sign "$APPLE_SIGNING_IDENTITY" --keychain "$RUNNER_TEMP/accessibility-release.keychain-db" --notary-profile accessibility-release
           python3 test_release_package.py
-      - name: Publish release
+      - name: Prepare signed draft for live download validation
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
@@ -67,7 +67,7 @@ jobs:
           python3 - <<'PY'
           import os, pathlib, subprocess
           tag = os.environ['RELEASE_TAG']
-          args = ['gh', 'release', 'create', tag, '--verify-tag', '--title', tag, '--notes-file', 'RELEASE-NOTES.md']
+          args = ['gh', 'release', 'create', tag, '--verify-tag', '--draft', '--latest=false', '--title', tag, '--notes-file', 'RELEASE-NOTES.md']
           if '-' in tag:
               args.append('--prerelease')
           subprocess.run(args + [str(p) for p in sorted(pathlib.Path('dist').iterdir()) if p.is_file()], check=True)
