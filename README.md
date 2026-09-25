@@ -6,6 +6,8 @@ The initial release supports the controls and integration patterns listed below.
 
 The implementation targets 4D 20.8 on macOS. Native binaries contain Apple Silicon and Intel code; live validation has primarily used Apple Silicon and macOS 26. Windows accessibility is not implemented.
 
+[Watch recorded examples](DEMOS.md) of native grids, repeated subforms, AreaList editing and VoiceOver, with visible accessibility calls and test results.
+
 ## Start with one form
 
 The system has three parts. The native plugin publishes the accessibility tree. The compiled component schedules work in the owning form without replacing its timer. Generated host methods read the form's controls and invoke their existing behavior.

@@ -2,7 +2,7 @@
 
 The initial release covers the implemented families below on 4D 20.8 and the tested macOS installations. The longer-term goal is complete access to the UI through standard macOS accessibility with minimal application code. That goal is not yet met. Unsupported families remain explicit follow-up work; applications must validate each integrated workflow before relying on it.
 
-Version 0.19.7 packages the helper corrections below together with the plugin and component. Its release workflow requires a live check of the signed download before publication. Historical 0.19.5 evidence remains linked to distinguish earlier binaries from newer helpers.
+Version 0.19.7 packages the helper corrections below together with the plugin and component. Its exact signed download passes 39 compiled VoiceOver checks and 127 interpreted action checks. [Distribution evidence](../../../validation/signed-release-0.19.7.json) records asset hashes and installation checks. Historical 0.19.5 evidence remains linked to distinguish earlier binaries from newer helpers.
 
 The signed 0.19.6 draft passed 39 compiled native-grid VoiceOver checks and 37 compiled AreaList checks. Recording exposed an early checkbox-caption sample in the test; eleven repeated activations confirmed asynchronous speech, eight after an initially stale caption. The driver now observes for up to five seconds without replaying input or moving focus. [Evidence](../../../validation/checkbox-speech-observation.json). Version 0.19.7 changes packaged wording and this test, with no provider behavior change.
 
