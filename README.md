@@ -2,7 +2,7 @@
 
 Expose 4D forms through macOS accessibility so VoiceOver, accessibility tools and AI agents can read and operate them. The bridge discovers supported controls and uses their existing editors, validation and actions.
 
-**Development preview.** The target is the entire application UI. Several control families and assistive-technology behaviors are still unfinished. Read the [support status](skills/4d-accessibility/references/STATUS.md) before adopting it. There is no stable production release yet. The previously failing distant-checkbox speech case passes in the [signed 0.19.5 candidate](validation/signed-release-0.19.5.json).
+The initial release supports the controls and integration patterns listed below. Start with a named workflow and validate its whole path, including prompts, editing and save/reopen. Several control families remain unfinished, so installing the bridge does not make an entire application accessible. Read the [support status](skills/4d-accessibility/references/STATUS.md) for the tested scope and open work.
 
 The implementation targets 4D 20.8 on macOS. Native binaries contain Apple Silicon and Intel code; live validation has primarily used Apple Silicon and macOS 26. Windows accessibility is not implemented.
 
@@ -16,7 +16,7 @@ From a release package, copy `Plugins/AccessibilityBridge.bundle` and `Component
 python3 install_host_methods.py --project-dir /path/to/MyApp/Project
 ```
 
-Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download an available [release candidate](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Candidates are ad hoc signed and not notarized; their notes define the tested scope.
+Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download the [release kit](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Signed releases use Sweetwater's Developer ID and Apple notarization; each release's notes define its tested scope. Older ad hoc candidates remain separately labeled.
 
 At the end of an ordinary form's successful On Load initialization:
 
@@ -45,6 +45,7 @@ Enable those form events if needed. Existing buttons, fields, object methods and
 | Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery). |
 | Invoice-style form with AreaList Pro | Add its area reference, stable line keys, record scope, readiness and meaningful descriptions for custom columns. Configure repeated grids within their owning child. [Assembled example](skills/4d-accessibility/references/GRIDS.md#put-the-invoice-like-form-together). |
 | JSON-generated forms | Wrap the shared builder with `AXB_Dynamic`, preserving the original method and events. Use private form data and explicit cleanup before child replacement. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
+| Existing application alert and confirmation forms | Add the ordinary lifecycle and labels. Route inaccessible built-in prompts through the application's existing dialog methods when their appearance is acceptable. Preserve returned choices and validation. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
 | Custom controls or existing native/web content | Preserve a usable native provider. Use the explicit provider contract for application-specific controls; account for every interactive element. [Extension contract](skills/4d-accessibility/references/FORM-SUPPORT.md). |
 
 The modern grid adapters expose logical rows beyond the viewport and reveal them for supported actions. The older explicit row-summary adapters are retained for compatibility and expose only a subset. They are not the default for new integrations.
