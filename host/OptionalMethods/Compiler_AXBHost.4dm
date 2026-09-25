@@ -82,3 +82,6 @@ C_LONGINT(AXB_GridValue; $3)
 C_TEXT(AXB_ScrollChild; $1)
 C_COLLECTION(AXB_ScrollChild; $2)
 C_OBJECT(AXB_ScrollChild; $0)
+
+C_COLLECTION(AXB_ControlPoint; $0; $2; $4)
+C_OBJECT(AXB_ControlPoint; $1; $3)

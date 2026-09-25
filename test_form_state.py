@@ -28,6 +28,13 @@ var $reply; $source; $data; $options; $prepared; $bad : Object
 var $long : Text
 var $i : Integer
 $checks:=New collection
+$reply:=AXB_ViewCreate(New object("label"; "Layer validation"; "controls"; New object("Background"; New object("layer"; -1))))
+$checks.push($reply.ok=True)
+var $badLayer : Variant
+For each ($badLayer; New collection("-1"; Null; True; 0.5; 32768; -32768))
+ $reply:=AXB_ViewCreate(New object("label"; "Layer validation"; "controls"; New object("Background"; New object("layer"; $badLayer))))
+ $checks.push(($reply.ok=False) & ($reply.error="invalidControlLayer"))
+End for each
 $checks.push(AXB_ControlValue(1234.5; "###,##0.00")="1,234.50")
 $checks.push(AXB_ControlValue(!2026-09-23!; Char(Internal date long))="September 23, 2026")
 $checks.push(AXB_ControlValue(?13:05:09?; Char(HH MM SS))="13:05:09")
@@ -98,8 +105,10 @@ $gridColumn.value:=Formula("Corrected description")
 $gridCell:=AXB_GridValue($gridState; $gridColumn; 1)
 $checks.push($gridCell.ok & ($gridCell.value="Corrected description") & (OB Keys($gridState.valueIssues).length=0))
 ARRAY PICTURE($pictures; 1)
+ARRAY TEXT($keys; 1)
+$keys{1}:="exact-Key"
 $gridColumn.pointer:=->$pictures
-$gridState.binding:=New object("keys"; New collection("exact-Key"))
+$gridState.binding:=New object("keyPointer"; ->$keys)
 $gridColumn.value:=Formula($1.key+":"+$1.column)
 $gridCell:=AXB_GridValue($gridState; $gridColumn; 1)
 $checks.push($gridCell.ok & ($gridCell.value="exact-Key:Summary") & Not($gridCell.editable))

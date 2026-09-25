@@ -128,6 +128,20 @@ Three-state checkboxes need no extra configuration. Discovery reads their curren
 
 Numeric, date and time steppers and rulers need no extra application hooks. They use the control's existing mouse or keyboard handling. Existing handlers and validation decide the result. Dates and times are spoken using 4D's default date/time format. Date rulers expose an incrementor because 4D's keyboard path can move beyond the configured minimum and maximum. Disabled and read-only controls remain readable.
 
+### Controls drawn over other controls
+
+Keep the existing form layout. If a form has a background button behind its other controls, describe that existing layer in its start options:
+
+```4d
+$options.controls.BackgroundDismiss:=New object("label"; "Dismiss suggestions"; "layer"; -1)
+```
+
+Replace `BackgroundDismiss` with the actual object name. `layer` is an integer from -32767 to 32767, defaulting to 0. A larger value means the object is already drawn above a smaller one. This metadata does not move, restyle or reorder any object. Verify it against the form's real layers; [4D does not guarantee an object order from `FORM GET OBJECTS`](https://developer.4d.com/docs/commands/form-get-objects).
+
+Button activation uses an uncovered part of the visible button. Equal or higher layers remain obstacles; a completely covered button rejects activation. A background button can still perform its existing action in a free area. Checkboxes and radio buttons retain their native indicator hit area. Mark purely decorative images with the existing `decorative: True` option, while keeping interactive pictures and background actions accessible.
+
+Completion: activate foreground and background actions through AX and check which application handler ran. Confirm that a covered control cannot accidentally activate its neighbor. Invalid layer metadata returns `invalidControlLayer` during configuration.
+
 ### Child forms
 
 With automatic discovery, start and stop only the root. Put child `label`, `scope`, `controls` and `grids` under `options.children.<containerObjectName>`, nested as deeply as the forms. `Form` in those formulas refers to that child instance.

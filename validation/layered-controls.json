@@ -1,0 +1,170 @@
+{
+  "passed": true,
+  "date": "2026-09-25",
+  "scope": "Existing layered controls with unchanged form layout; 4D 20.8 desktop on macOS, native ARM interpreted and compiled execution",
+  "behavior": "Optional integer control.layer describes existing z-order, default zero. Button clicks use a free part of the clipped control; fully covered buttons reject. No form rendering, native plugin or component change.",
+  "runs": {
+    "interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "parent runs in the requested mode with its automatic bridge"
+        },
+        {
+          "passed": true,
+          "name": "foreground control invokes its existing handler above a background button"
+        },
+        {
+          "passed": true,
+          "name": "foreground controls never invoke the background handler"
+        },
+        {
+          "passed": true,
+          "name": "fully covered control never invokes either handler"
+        },
+        {
+          "passed": true,
+          "name": "partly covered control uses its unobscured native click region"
+        },
+        {
+          "passed": true,
+          "name": "background action uses a free region without hitting a foreground control"
+        },
+        {
+          "passed": true,
+          "name": "ordinary close exits the fixture"
+        }
+      ],
+      "compile_report_sha256": "c757e30f97a99c320f22273e4ac416b2b8bd3c17eb90f9ed883a57ac3ad7c90c",
+      "mode_notice_acknowledged": false,
+      "lastReceipt": null
+    },
+    "compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "parent runs in the requested mode with its automatic bridge"
+        },
+        {
+          "passed": true,
+          "name": "foreground control invokes its existing handler above a background button"
+        },
+        {
+          "passed": true,
+          "name": "foreground controls never invoke the background handler"
+        },
+        {
+          "passed": true,
+          "name": "fully covered control never invokes either handler"
+        },
+        {
+          "passed": true,
+          "name": "partly covered control uses its unobscured native click region"
+        },
+        {
+          "passed": true,
+          "name": "background action uses a free region without hitting a foreground control"
+        },
+        {
+          "passed": true,
+          "name": "ordinary close exits the fixture"
+        }
+      ],
+      "compile_report_sha256": "c757e30f97a99c320f22273e4ac416b2b8bd3c17eb90f9ed883a57ac3ad7c90c",
+      "mode_notice_acknowledged": false,
+      "lastReceipt": null
+    }
+  },
+  "ordinary_controls": {
+    "passed": true,
+    "cases": [
+      {
+        "case": "ordinary-interpreted",
+        "checks": 69,
+        "passed": true
+      },
+      {
+        "case": "ordinary-compiled",
+        "checks": 69,
+        "passed": true
+      }
+    ],
+    "checks": 138
+  },
+  "helper_checks": 101,
+  "helper_fixture_correction": "Updated the existing array-value test to supply the current keyPointer binding. Its former keys collection caused error 85 before the rest of that utility suite ran.",
+  "compiler_report_sha256": "c757e30f97a99c320f22273e4ac416b2b8bd3c17eb90f9ed883a57ac3ad7c90c",
+  "sources_sha256": {
+    "Project/Sources/catalog.4DCatalog": "13f63a54eccb3fc603375ac25561ba897f4285e5710d6bcadecef3cd658a9ad8",
+    "Project/Sources/Methods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+    "Project/Sources/Methods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+    "Project/Sources/Methods/AXB_ViewCreate.4dm": "5514ae9e2d1318c0090aee243b4027666f03041098b7d4ffcd06ca8150263c20",
+    "Project/Sources/Methods/AXB_GridListboxAction.4dm": "77382d8871906d4c275c54ab22ce3b87a986c15405cfd055cc6b6edbe2d84299",
+    "Project/Sources/Methods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+    "Project/Sources/Methods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+    "Project/Sources/Methods/AXB_Grids.4dm": "b4a41853730a4961a02d3a465d315254ea84d2c78d0f256289e07f8b3549be4f",
+    "Project/Sources/Methods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+    "Project/Sources/Methods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+    "Project/Sources/Methods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+    "Project/Sources/Methods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+    "Project/Sources/Methods/AXB_View.4dm": "63be8b3eaa276ee6055b16fa488f1798547726b21ba1e6e9574c0cd72ef15a00",
+    "Project/Sources/Methods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+    "Project/Sources/Methods/AXB_FormStop.4dm": "13a0f6a536f73a12703582a8e1580532255d580d3bca276ccfaab4130e4bd991",
+    "Project/Sources/Methods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+    "Project/Sources/Methods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+    "Project/Sources/Methods/AXB_Form.4dm": "d5fd0abe20672e51d5e9db09c5035ba6237d2d2557c75c122b3f8103d1537a3d",
+    "Project/Sources/Methods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+    "Project/Sources/Methods/AXB_TextSelect.4dm": "30a66f6d57a30734497b511cb1cb1a87ba4a19e600c4d83550509acc709b5409",
+    "Project/Sources/Methods/AXB_GridListbox.4dm": "f3ceab1d2ef527f930386ea8f154817ac3fc17b2761146a7389d001e0047cb50",
+    "Project/Sources/Methods/AXB_GridGeometry.4dm": "07701e41f74e11c4ef76d1c85f8cd9ad6c247e010440fba4b58b370c618a876f",
+    "Project/Sources/Methods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+    "Project/Sources/Methods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+    "Project/Sources/Methods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+    "Project/Sources/Methods/AXB_GridListboxConfirm.4dm": "717ae5ecdfe46232e8d5bee39d8c2b472468e4159253186ce110e3386e718a05",
+    "Project/Sources/Methods/AXB_ControlConfirm.4dm": "548f66f517ebd65f642effe8af86c0096f33811f59bc45a0589fca53cf566de6",
+    "Project/Sources/Methods/LayerClick.4dm": "e455ad55d81749b5f61cfe6956310f8fc572759b4d22ae28d33e289f4fbae128",
+    "Project/Sources/Methods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+    "Project/Sources/Methods/LayerError.4dm": "dada3bbccb32cb7b96c2c27724304ef01fe108aa0aa7e44ec579db6d16224b6d",
+    "Project/Sources/Methods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+    "Project/Sources/Methods/AXB_FormTree.4dm": "98aaa7cad07f8c47540e49075660af94526b44d0fb96494c9b9f28517d7c61e7",
+    "Project/Sources/Methods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+    "Project/Sources/Methods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+    "Project/Sources/Methods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+    "Project/Sources/Methods/LayerForm.4dm": "1cad10d539430b4ce200e6ebc6b42739b18b7feaf60a1c3ed7cd8af446926670",
+    "Project/Sources/Methods/AXB_GridValue.4dm": "a13f48f8b9a72c832893b84150da0daeef6787c467c7a595605a729dcd0901c4",
+    "Project/Sources/Methods/AXB_Focus.4dm": "baa75797a66ff7f8367bd8365e48e8c438e87fe940f98e1f3382c3b8c43f55ad",
+    "Project/Sources/Methods/AXB_FormFailed.4dm": "8b9b4c7cbe8328b9ba657bc2647a3eca6d930828606881261223397c7414b2cb",
+    "Project/Sources/Methods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+    "Project/Sources/Methods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+    "Project/Sources/Methods/AXB_Host.4dm": "738f9975354d549382ef551df144a3d7dd96c0d7739b50918900bd2ac5cfdd8f",
+    "Project/Sources/Methods/AXB_TextAction.4dm": "fd7a70fd78f6a1996a0f0dcdf878ffd5708114311861f189157f1c2fe6e284a3",
+    "Project/Sources/Methods/AXB_GridBinding.4dm": "719094efd57408f1896e785753627d5c65f5f269b3d1dae45378f3aaa5e6984e",
+    "Project/Sources/Methods/Compiler_AXBHost.4dm": "f1dccef4eff85e20c2363618048fd17e4caecdfd92dca688ffaa880788caa15d",
+    "Project/Sources/Methods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+    "Project/Sources/Methods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+    "Project/Sources/Methods/AXB_FormExchange.4dm": "1707c5ea7f0749e1485a6a1bdefc93f7ad7f47780621f0a9c689bb69b3ae3817",
+    "Project/Sources/Methods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+    "Project/Sources/Methods/AXB_ControlAction.4dm": "8495e83dfbff0a817a2fbdb50df7702759699879591ae29f30c8e617362ccf6e",
+    "Project/Sources/Methods/AXB_FormEvent.4dm": "ba3217ccca7f78292e46f58fc9dec32a6aba7369e6d91c36a0b21c6706e2b924",
+    "Project/Sources/Methods/AXB_TextEditor.4dm": "f3fd739cbe5ae8dca04ae13403f91307c05142096a84236d1a80ab9bd7edf845",
+    "Project/Sources/Methods/AXB_Invalidate.4dm": "c8bad683f51b1a086292e4b56521f45c567962d8b2a726f0ba5fb34310d98450",
+    "Project/Sources/Methods/AXB_GridOptions.4dm": "529c9881a822b7227cf2f9edc9a80e52515c4403460e7a1f78ed95b0d1463fb9",
+    "Project/Sources/Methods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+    "Project/Sources/Methods/AXB_Discover.4dm": "3480b1704cb141b6565ab52f29dcdc33e5a76f9f6b7fed5a45906965bd98f2b4",
+    "Project/Sources/Methods/AXB_ControlPoint.4dm": "89a90afe35a992fef0c0d1458f94bbd89fb830ab3070ba761aa70ff1722980d0",
+    "Project/Sources/Methods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+    "Project/Sources/DatabaseMethods/onStartup.4dm": "60e2ae2f1511860146379fa678484f26b3d66939fda88a83b08eeb7dfd1b1ec3",
+    "Project/Sources/Forms/Probe/form.4DForm": "da0295660c34f7b813bf9d276fd5d67a7b8c8182e45e19fe45ed05ebaf33f61f"
+  },
+  "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+  "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69",
+  "limits": [
+    "No new VoiceOver test for the layer option.",
+    "Standard native CONFIRM/ALERT dialog accessibility remains open.",
+    "Layer metadata must match the actual existing form order; it does not reorder controls."
+  ]
+}
