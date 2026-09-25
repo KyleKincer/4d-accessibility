@@ -8,7 +8,7 @@ The signed release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such
 
 Run the **Build and test** workflow on `main` with `preview_tag` set to `vVERSION-rc.N`. It builds and checks the kit, verifies the artifact checksums, then prepares a draft GitHub prerelease. Leaving the input empty runs checks only. This path cannot publish a stable tag or mark a release as latest.
 
-Download that draft's kit, verify `SHA256SUMS`, and run the live host checks with its packages. Once those pass, publish the same assets with `gh release edit vVERSION-rc.N --draft=false --prerelease --latest=false`. This final check covers the downloadable binaries, including their component/plugin pairing; CI itself has no licensed graphical 4D host.
+Download that draft's kit, verify `SHA256SUMS`, and run the live host checks with its packages. Record the exact results, then publish the same assets with `gh release edit vVERSION-rc.N --draft=false --prerelease --latest=false`. This final check covers the downloadable binaries, including their component/plugin pairing; CI itself has no licensed graphical 4D host. A preview with a known failure must name it in the release notes and attach the failing result alongside the successful checks. Stable publication requires all selected acceptance checks to pass.
 
 These candidates are ad hoc signed and not notarized. They are for local integration and evaluation on the documented test platform. The plugin ID is provisional. State both facts in the release notes, along with unresolved runtime limitations. A candidate is not a claim that every 4D form is accessible.
 

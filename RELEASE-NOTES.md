@@ -2,7 +2,7 @@ This is a development release candidate of 4D Accessibility for macOS and 4D 20.
 
 Selecting an already visible native grid row now confirms without an unnecessary scroll-and-wait cycle. That extra cycle could report a timeout despite the correct selection in a form with expensive callbacks. The regression fails before the fix and passes in interpreted and compiled 4D. No host call or timeout increase is needed.
 
-VoiceOver now reads grid values when they arrive after Loading, including checkbox and popup cells. The native provider preserves the reading position and requires no additional host application code. Eight live VoiceOver cases cover delayed values, navigation, leaving the grid, unrelated AX reads and reloading unchanged data. The compiled 4D regression also verifies the formerly stuck distant checkbox after native popup interaction.
+Known VoiceOver limitation: after a native popup interaction followed by a jump to a distant checkbox row, the correct value appears in the accessibility tree but VoiceOver can remain at Loading. Synthetic delayed-value tests pass; the final compiled 4D recheck fails this automatic-speech case. The failure remains in the test suite and validation record. Moving to an adjacent cell and back reads the loaded checkbox. This candidate does not claim reliable automatic speech for that workflow.
 
 Large forms now leave time for input and VoiceOver between accessibility refreshes. Grid-page reads validate their current grid and containing form without rescanning unrelated ordinary controls. Background pages use normal polling; pending editor operations keep their fast path. The component adapts its idle interval to callback cost. Existing application hooks and form timers stay the same.
 
