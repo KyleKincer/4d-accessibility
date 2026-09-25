@@ -1,5 +1,11 @@
 # Validation scope
 
+## Visible selection confirmation, September 24
+
+The native array-grid fixture selects an already visible row while its application scope callback takes 70 ticks whenever an action is pending. The original helper changes the actual selection correctly, then reports `Application did not confirm the requested selection`. It spends another form callback on a scroll that does not change the viewport. The corrected helper completes after verifying the visible selection, avoiding that redundant cycle. The timeout and all identity, permission and application-handler checks remain unchanged.
+
+The controlled before/after test passes nine checks in interpreted 4D 20.8 and nine in compiled ARM execution on macOS 26.6.2. Run `prepare_grid_fixture.py --server /path/to/4D_Server.app --slow-visible-selection`, then `test_grid_fixture.py --run` and `test_grid_fixture.py --run --compiled`. [Reports, helper hashes and reproduction](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/visible-selection.json). This is a bounded callback-delay regression, not a promise of unlimited latency tolerance.
+
 ## Delayed grid value speech, September 24
 
 Version 0.19.4 passes 120 checks across eight native VoiceOver cases on macOS 26.6.2/Apple Silicon. A synthetic host compiles the production provider and session, publishes a complete 60-row/24-column grid, and withholds pages until VoiceOver has actually read Loading. It then releases the pages while the reading cursor stays still. [Complete reports and source/build hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/grid-value-speech.json).
