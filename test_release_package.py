@@ -7,12 +7,23 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
+
+from package_release import signing_identity
 
 ROOT = Path(__file__).resolve().parent
 
 
 class ReleaseTests(unittest.TestCase):
+    def test_signing_uses_exact_valid_identity_fingerprint(self):
+        fingerprint = "A" * 40
+        output = f'  1) {fingerprint} "Developer ID Application: Example (TEAM)"\n     1 valid identities found\n'
+        with mock.patch("package_release.subprocess.run", return_value=mock.Mock(stdout=output)):
+            self.assertEqual(signing_identity("/tmp/release.keychain-db", "Developer ID Application: Example (TEAM)"), fingerprint)
+            with self.assertRaisesRegex(ValueError, "not valid"):
+                signing_identity("/tmp/release.keychain-db", "Developer ID Application: Other (TEAM)")
+
     def test_complete_kit_installs_matching_helpers_without_business_files(self):
         version = (ROOT / "VERSION").read_text().strip()
         with tempfile.TemporaryDirectory() as temporary:

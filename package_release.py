@@ -26,6 +26,16 @@ def run(*args):
     subprocess.run([str(a) for a in args], check=True)
 
 
+def signing_identity(keychain, name):
+    result = subprocess.run(["security", "find-identity", "-v", "-p", "codesigning", str(keychain)],
+                            check=True, capture_output=True, text=True)
+    for line in result.stdout.splitlines():
+        match = re.search(r'\b([0-9A-F]{40})\s+"([^"]+)"', line)
+        if match and match[2] == name:
+            return match[1]
+    raise ValueError("Configured Developer ID identity is not valid in the release keychain")
+
+
 def archive(folder, target):
     with zipfile.ZipFile(target, "w", zipfile.ZIP_DEFLATED) as output:
         for path in sorted(folder.rglob("*")):
@@ -72,6 +82,7 @@ def main():
     if any([args.sign, args.keychain, args.notary_profile]) and not all([args.sign, args.keychain, args.notary_profile]):
         parser.error("Signing requires all three signing options")
     version, plugin, component = verify_inputs()
+    identity = signing_identity(args.keychain, args.sign) if args.sign else None
     dist = ROOT / "dist"
     dist.mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="release-", dir=BUILD) as temporary:
@@ -102,7 +113,7 @@ def main():
                "Development build: ad hoc signed, not notarized. Do not treat this artifact as a production release.\n"))
         if args.sign:
             for path in [kit / "Components/AccessibilityBridge.4dbase/Libraries/lib4d-arm64.dylib", kit / "Plugins/AccessibilityBridge.bundle"]:
-                run("codesign", "--force", "--timestamp", "--options", "runtime", "--keychain", args.keychain, "--sign", args.sign, path)
+                run("codesign", "--force", "--timestamp", "--options", "runtime", "--keychain", args.keychain, "--sign", identity, path)
                 run("codesign", "--verify", "--strict", path)
         manifest = {
             "version": version, "architectures": ["arm64", "x86_64"],
@@ -118,7 +129,7 @@ def main():
         if args.sign:
             dmg = dist / f"4d-accessibility-{version}-macos.dmg"
             run("hdiutil", "create", "-ov", "-format", "UDZO", "-volname", "4D Accessibility", "-srcfolder", kit, dmg)
-            run("codesign", "--timestamp", "--keychain", args.keychain, "--sign", args.sign, dmg)
+            run("codesign", "--timestamp", "--keychain", args.keychain, "--sign", identity, dmg)
             for path in [full, component_zip, dmg]:
                 result = subprocess.run(["xcrun", "notarytool", "submit", str(path), "--keychain-profile", args.notary_profile,
                                          "--keychain", str(args.keychain), "--wait", "--timeout", "20m", "--output-format", "json"], check=True, capture_output=True, text=True)
