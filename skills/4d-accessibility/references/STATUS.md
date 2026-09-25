@@ -24,7 +24,7 @@ Generated wrappers opened with different plain/shared/entity/class data now pres
 
 Synthetic live 4D 20.8 fixtures on Apple Silicon/macOS 26 cover ordinary text, buttons, checkboxes/radios, typed dropdowns, hierarchical popup menus, editable combos, semantic groups, described images, progress, numeric/date/time rulers and steppers, automatic repeated/nested page subforms, generated forms and custom providers. Editable progress uses a shared-controller mapping.
 
-Flat grids expose all logical rows and columns for native arrays, collections, entity selections and AreaList Pro. AreaList text editing supports BMP text only; supplementary text and further cell types remain open. Native array and AreaList stable keys may use existing Text, Integer or LongInt arrays, so integer line IDs need no extra column. Tests cover distant rows, stable identity, sorting, selection, native editors, validation, Undo/Redo, stale requests, repeated child grids, native checkbox/popup cells and AreaList checkboxes. Coverage and execution modes differ by family. Licensed compiled AreaList navigation/reveal and explicit VO-Space selection pass separately. See [validation](VALIDATION.md).
+Flat grids expose all logical rows and columns for native arrays, collections, entity selections and AreaList Pro. AreaList text editing supports BMP text only; supplementary text is an accepted vendor limitation, and further cell types remain open. Native array and AreaList stable keys may use existing Text, Integer or LongInt arrays, so integer line IDs need no extra column. Tests cover distant rows, stable identity, sorting, selection, native editors, validation, Undo/Redo, stale requests, repeated child grids, native checkbox/popup cells and AreaList checkboxes. Coverage and execution modes differ by family. Licensed compiled AreaList navigation/reveal and explicit VO-Space selection pass separately. See [validation](VALIDATION.md).
 
 Root forms keep ownership outside persisted entities, class instances and 4D shared objects; their live interpreted/compiled ownership matrix passes.
 
@@ -40,6 +40,10 @@ Root forms keep ownership outside persisted entities, class instances and 4D sha
 - The plug-in manifest ID must not conflict with another plug-in in a target host. The current ID matches the optional host lookup. Developer ID signing and notarization pass for the 0.19.5 signed candidate; full-UI coverage remains unfinished.
 
 The native binary's deployment target is a compiler setting, not a tested macOS support promise. Windows has no accessibility implementation. A label on an opaque interactive control, a compiler pass or a clean diagnostics report is not proof of an accessible screen.
+
+## Accepted vendor limitation
+
+The AreaList supplementary-Unicode conversion defect does not block a stable release. Keep the documented restriction and reject supplementary text in bridge editing requests before mutation. Ordinary 4D text editors are unaffected. Direct input into the vendor editor remains subject to the vendor defect. Remove the restriction only after a vendor fix passes the [reproduction and editing matrix](https://github.com/KyleKincer/4d-accessibility/blob/main/tests/AREA-LIST-UNICODE.md).
 
 ## Completion
 
