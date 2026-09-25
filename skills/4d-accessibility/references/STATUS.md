@@ -34,6 +34,8 @@ Flat grids expose all logical rows and columns for native arrays, collections, e
 
 Root forms keep ownership outside persisted entities, class instances and 4D shared objects; their live interpreted/compiled ownership matrix passes.
 
+Automatic array grids also accept legacy Boolean hidden-row arrays directly. The regression passes 68 interpreted and 68 compiled checks, 11 compiled VoiceOver checks, and 63 checks with the existing LongInt control array. See [the recorded checks](../../../validation/boolean-hidden-rows.json).
+
 ## Work required before full accessibility
 
 - Tabs, dials, editable pictures, hierarchical lists and standard-action-generated menus need implementation or further validation.

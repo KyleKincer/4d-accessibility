@@ -295,8 +295,23 @@ def main():
         amount = table.cell(1, 598)
         ax.wait_for(lambda: amount.read("AXValue") == "600.25", "Far numeric cell did not load", timeout=15)
         check(True, "each offscreen column has its own formatted value")
-        if config.get("kind", "array") == "array" or config.get("rowStates"):
+        if (config.get("kind", "array") == "array" and not config.get("booleanHidden")) or config.get("rowStates"):
             check(table.cell(0, 1).read("AXEnabled") is False and "AXPress" in table.slice("AXRows", 1, 1)[0].actions(), "disabled cells remain noneditable while their row can be selected like native 4D")
+        if config.get("booleanHidden"):
+            check(table.cell(0, 1).read("AXEnabled") is True and table.cell(0, 1).is_settable("AXValue"), "false Boolean row flags preserve normal editing")
+            check(find("Toggle hidden").press() == 0, "hide the distant row through the existing Boolean array")
+            ax.wait_for(lambda: table.count("AXRows") == 598, "Boolean hidden row remained in the accessibility table")
+            check(far.read("AXSize") in (None, (0.0, 0.0)) and far.set_text("Must not edit") != 0, "hidden retained cells reject editing")
+            check(state()["farValue"] == "Line item 0600", "hidden-row request leaves the actual value unchanged")
+            settle()
+            check(find("Toggle hidden").press() == 0, "restore the row through the same Boolean binding")
+            ax.wait_for(lambda: table.count("AXRows") == 599, "Restored Boolean row did not reappear")
+            far = table.cell(0, 598)
+            far_row = table.slice("AXRows", 598, 1)[0]
+            amount = table.cell(1, 598)
+            ax.wait_for(lambda: far.read("AXValue") == "Line item 0600", "Restored row value did not load")
+            check(far.read("AXIdentifier") == identity, "hide and restore preserve the row's key")
+            settle()
         if config.get("rowStates"):
             blocked = table.cell(0, 1)
             conditional = table.cell(0, 2)
