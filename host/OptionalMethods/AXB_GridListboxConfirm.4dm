@@ -45,7 +45,9 @@ If ($action.operation="gridSelect")
  End if
  If ($action.value.length>0)
   $key:=$action.value[$action.value.length-1]
-  If (Not($data.scrolled=True))
+  // A visible selection is already revealed. Another callback here can spend
+  // the confirmation deadline on a no-op scroll in an expensive host form.
+  If ((AXB_KeyIndex($grid.visible; $key)<0) & Not($data.scrolled=True))
    $position:=$data.state.positions[$key]
    OBJECT GET SCROLL POSITION(*; $data.options.objectName; $scrollRow; $scrollColumn)
    OBJECT SET SCROLL POSITION(*; $data.options.objectName; $position; $scrollColumn)

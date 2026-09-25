@@ -32,7 +32,10 @@ def main():
     parser.add_argument("--row-states", action="store_true", help="Exercise disabled/nonselectable rows and native editing exceptions")
     parser.add_argument("--cell-controls", action="store_true", help="Add native Boolean/popup/mixed cells and application validation")
     parser.add_argument("--stored-meta", action="store_true", help="Read the collection's existing This.meta objects automatically")
+    parser.add_argument("--slow-visible-selection", action="store_true", help="Reproduce visible-row confirmation under expensive application callbacks")
     args = parser.parse_args()
+    if args.slow_visible_selection and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.key_type != "text"):
+        parser.error("--slow-visible-selection uses the default root array fixture")
     if args.key_type != "text" and (args.collection or args.entity):
         parser.error("--key-type applies to array grids only")
     if args.repeated and not (args.subform and args.collection and args.cell_controls):
@@ -490,7 +493,19 @@ End case
             if method.name == "onStartup.4dm":
                 source = source.replace('$data:=New object', f'aGridKey{{600}}:={maximum}\n$data:=New object', 1)
             method.write_text(source)
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls}) + "\n")
+    if args.slow_visible_selection:
+        form_method = methods / "AXBG_Form.4dm"
+        form_method.write_text(form_method.read_text().replace('Formula(Form.scope)', 'Formula(AXBG_SlowScope)').replace('; "onSelection"; Formula(AXBG_Selected)', ''))
+        (methods / "AXBG_SlowScope.4dm").write_text('''// Simulate an expensive application callback while a selection is pending.
+#DECLARE() -> $scope : Text
+If ((Form.axbForm#Null) && (Form.axbForm.pending#Null))
+ DELAY PROCESS(Current process; 70)
+End if
+$scope:=Form.scope
+''')
+        compiler = methods / "Compiler_AXBG.4dm"
+        compiler.write_text(compiler.read_text() + "C_TEXT(AXBG_SlowScope; $0)\n")
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls, "slowVisibleSelection": args.slow_visible_selection}) + "\n")
     if args.entity:
         with (FIXTURE / "seed.log").open("w") as log:
             seeded = subprocess.run([str(server / "Contents/MacOS" / info["CFBundleExecutable"]), "--project", str(project), "--data", str(FIXTURE / "synthetic.4dd"), "--create-data", "--headless", "--utility", "--skip-onstartup", "--startup-method", "AXBG_Seed", "--webadmin-auto-start", "false"], stdout=log, stderr=log, timeout=90)

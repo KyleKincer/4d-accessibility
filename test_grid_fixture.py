@@ -149,6 +149,24 @@ def main():
         ax.wait_for(lambda: state().get("windowActive") and state().get("focused"), "Initial active focus was not published")
         def settle():
             ax.wait_for(lambda: state() and group.read("AXHelp") not in (None, "Action queued", "Waiting for the application to complete the action"), "Action did not receive provider completion", timeout=30)
+        if config.get("slowVisibleSelection"):
+            before = [row.read("AXIdentifier") for row in table.read("AXVisibleRows") or []]
+            row = table.slice("AXRows", 0, 1)[0]
+            check(row.read("AXIdentifier") in before, "selection target is already visible")
+            check(row.press() == 0, "visible selection reaches the normal 4D binding")
+            ax.wait_for(lambda: state().get("selected") == ["line-0001"], "Visible selection did not reach 4D", timeout=15)
+            settle()
+            report["selectionReceipt"] = group.read("AXHelp")
+            check(report["selectionReceipt"] == "List box selection confirmed",
+                  "expensive application callbacks do not cause a false timeout for a visible selection")
+            check([item.read("AXIdentifier") for item in table.read("AXVisibleRows") or []] == before,
+                  "confirmed visible selection preserves the viewport")
+            check(state()["hooks"] == 0, "selection does not invent an application callback")
+            close.press()
+            process.wait(timeout=15)
+            check(process.returncode == 0, "normal host close succeeds after delayed confirmation")
+            report["passed"] = True
+            return
         if args.voiceover_probe or args.voiceover:
             from voiceover import VoiceOver
             vo = VoiceOver(process, project, TITLE, BUILD / "logical-grid-voiceover", BUILD / "read-fixture-screen")
@@ -252,6 +270,20 @@ def main():
             find("Top").press()
             settle()
         check(0 < len(table.read("AXVisibleRows")) < 599, "viewport is separate from complete row count")
+        visible_before = [row.read("AXIdentifier") for row in table.read("AXVisibleRows") or []]
+        visible_row = table.slice("AXRows", 1, 1)[0]
+        selection_hooks = state()["hooks"]
+        check(visible_row.read("AXIdentifier") in visible_before and visible_row.press() == 0,
+              "select an already visible row through the existing list box")
+        ax.wait_for(lambda: group.read("AXHelp") == "List box selection confirmed",
+                    "Visible row selection lacked confirmed completion", timeout=15)
+        check([row.read("AXIdentifier") for row in table.read("AXVisibleRows") or []] == visible_before,
+              "selecting an already visible row preserves the viewport")
+        check(state()["hooks"] == selection_hooks + 1,
+              "visible selection invokes the settled application handler exactly once")
+        check(table.set_elements("AXSelectedRows", []) == 0, "clear the visible-row selection")
+        ax.wait_for(lambda: state()["selected"] == [] and group.read("AXHelp") == "List box selection confirmed",
+                    "Visible-row selection did not clear", timeout=15)
         far_row = table.slice("AXRows", 598, 1)[0]
         far = table.cell(0, 598)
         identity = far.read("AXIdentifier")

@@ -1,0 +1,525 @@
+{
+  "version": "0.19.4",
+  "scope": "Real 4D 20.8 synthetic native-array grid with an expensive pending-action scope callback, macOS 26.6.2 on Apple Silicon.",
+  "passed": true,
+  "change": "Skip the scroll and extra confirmation callback when the selected row is already visible. All existing timeout, identity, permission and application-handler checks remain.",
+  "driver_sha256": "218fc415ed031ad7469204d5de8678f5feacaf12434bcd815db6bacbd52479c3",
+  "reports": {
+    "before": {
+      "passed": false,
+      "mode": "actions",
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "selection target is already visible"
+        },
+        {
+          "passed": true,
+          "name": "visible selection reaches the normal 4D binding"
+        },
+        {
+          "passed": false,
+          "name": "expensive application callbacks do not cause a false timeout for a visible selection"
+        }
+      ],
+      "slowVisibleSelection": true,
+      "selectionReceipt": "Application did not confirm the requested selection",
+      "native_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+      "component_sha256": "66dc1266cc102337bb2ee17c3db068e93b0b71278408ce0ed7ca7fc7ee0ac8a8",
+      "architecture": "ARM64",
+      "provider_sha256": "1326235ee646403e2478240beaed84372658d714aeaa4588f8e0b6300de6cb7f"
+    },
+    "after": {
+      "passed": true,
+      "mode": "actions",
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "selection target is already visible"
+        },
+        {
+          "passed": true,
+          "name": "visible selection reaches the normal 4D binding"
+        },
+        {
+          "passed": true,
+          "name": "expensive application callbacks do not cause a false timeout for a visible selection"
+        },
+        {
+          "passed": true,
+          "name": "confirmed visible selection preserves the viewport"
+        },
+        {
+          "passed": true,
+          "name": "selection does not invent an application callback"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds after delayed confirmation"
+        }
+      ],
+      "slowVisibleSelection": true,
+      "selectionReceipt": "List box selection confirmed",
+      "native_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+      "component_sha256": "66dc1266cc102337bb2ee17c3db068e93b0b71278408ce0ed7ca7fc7ee0ac8a8",
+      "architecture": "ARM64",
+      "provider_sha256": "717ae5ecdfe46232e8d5bee39d8c2b472468e4159253186ce110e3386e718a05"
+    },
+    "after-compiled": {
+      "passed": true,
+      "mode": "actions",
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "selection target is already visible"
+        },
+        {
+          "passed": true,
+          "name": "visible selection reaches the normal 4D binding"
+        },
+        {
+          "passed": true,
+          "name": "expensive application callbacks do not cause a false timeout for a visible selection"
+        },
+        {
+          "passed": true,
+          "name": "confirmed visible selection preserves the viewport"
+        },
+        {
+          "passed": true,
+          "name": "selection does not invent an application callback"
+        },
+        {
+          "passed": true,
+          "name": "normal host close succeeds after delayed confirmation"
+        }
+      ],
+      "slowVisibleSelection": true,
+      "selectionReceipt": "List box selection confirmed",
+      "native_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+      "component_sha256": "66dc1266cc102337bb2ee17c3db068e93b0b71278408ce0ed7ca7fc7ee0ac8a8",
+      "architecture": "ARM64",
+      "provider_sha256": "717ae5ecdfe46232e8d5bee39d8c2b472468e4159253186ce110e3386e718a05"
+    }
+  },
+  "reproduce": [
+    "python3 prepare_grid_fixture.py --server /path/to/4D_Server.app --slow-visible-selection",
+    "python3 test_grid_fixture.py --run",
+    "python3 test_grid_fixture.py --run --compiled"
+  ],
+  "limits": [
+    "The controlled delay establishes this unnecessary-confirmation regression, not an unlimited response-time guarantee for arbitrary application callbacks.",
+    "See STATUS.md for platform, control-family and distribution limits."
+  ],
+  "selectionRegression": {
+    "passed": true,
+    "mode": "actions",
+    "compiled": false,
+    "kind": "collection",
+    "rowStates": true,
+    "checks": [
+      {
+        "passed": true,
+        "name": "automatic form starts in the requested desktop mode"
+      },
+      {
+        "passed": true,
+        "name": "actual native ARM execution"
+      },
+      {
+        "passed": true,
+        "name": "one root contains both ordinary controls and grid"
+      },
+      {
+        "passed": true,
+        "name": "grid configuration preserves ordinary fields and buttons"
+      },
+      {
+        "passed": true,
+        "name": "configured grid and labelled ordinary controls have no false unsupported diagnostics"
+      },
+      {
+        "passed": true,
+        "name": "exercise coverage state: gridLoading"
+      },
+      {
+        "passed": true,
+        "name": "grid reason replaces the generic unsupported diagnostic: gridLoading"
+      },
+      {
+        "passed": true,
+        "name": "restore configured grid after gridLoading"
+      },
+      {
+        "passed": true,
+        "name": "exercise coverage state: gridUnavailable"
+      },
+      {
+        "passed": true,
+        "name": "grid reason replaces the generic unsupported diagnostic: gridUnavailable"
+      },
+      {
+        "passed": true,
+        "name": "restore configured grid after gridUnavailable"
+      },
+      {
+        "passed": true,
+        "name": "all 599 non-hidden logical rows are accessible"
+      },
+      {
+        "passed": true,
+        "name": "hidden identity and decorative columns stay out of readable columns"
+      },
+      {
+        "passed": true,
+        "name": "viewport is separate from complete row count"
+      },
+      {
+        "passed": true,
+        "name": "select an already visible row through the existing list box"
+      },
+      {
+        "passed": true,
+        "name": "selecting an already visible row preserves the viewport"
+      },
+      {
+        "passed": true,
+        "name": "visible selection invokes the settled application handler exactly once"
+      },
+      {
+        "passed": true,
+        "name": "clear the visible-row selection"
+      },
+      {
+        "passed": true,
+        "name": "unchanged bindings preserve cell identity across refreshes"
+      },
+      {
+        "passed": true,
+        "name": "offscreen final row loads through the owning 4D process"
+      },
+      {
+        "passed": true,
+        "name": "each offscreen column has its own formatted value"
+      },
+      {
+        "passed": true,
+        "name": "disabled cells remain noneditable while their row can be selected like native 4D"
+      },
+      {
+        "passed": true,
+        "name": "disabled and nonselectable rows initially reject text editing"
+      },
+      {
+        "passed": true,
+        "name": "nonselectable rows and cells stay readable without advertising unavailable actions"
+      },
+      {
+        "passed": true,
+        "name": "disabled row accepts selection independently of its cell editing restriction"
+      },
+      {
+        "passed": true,
+        "name": "selecting a disabled row does not enable its cell editor"
+      },
+      {
+        "passed": true,
+        "name": "Null row flags and cell-level disabled flags do not restrict a normal native editor"
+      },
+      {
+        "passed": true,
+        "name": "enable the application's native single-click editing option"
+      },
+      {
+        "passed": true,
+        "name": "nonselectable row accepts its existing single-click editor"
+      },
+      {
+        "passed": true,
+        "name": "editing the nonselectable row does not highlight it"
+      },
+      {
+        "passed": true,
+        "name": "native validation commits the unselected row edit"
+      },
+      {
+        "passed": true,
+        "name": "switch the existing list box to selection mode None"
+      },
+      {
+        "passed": true,
+        "name": "selection mode None permits the ordinary editor"
+      },
+      {
+        "passed": true,
+        "name": "disabled rows stay noneditable in selection mode None"
+      },
+      {
+        "passed": true,
+        "name": "change row metadata through the existing application state"
+      },
+      {
+        "passed": true,
+        "name": "retained offscreen cell loses editing when its row becomes disabled"
+      },
+      {
+        "passed": true,
+        "name": "row-state changes preserve record identity"
+      },
+      {
+        "passed": true,
+        "name": "multi-selection can add a row while retaining a restricted selected row"
+      },
+      {
+        "passed": true,
+        "name": "multi-selection can remove another row while retaining the restricted row"
+      },
+      {
+        "passed": true,
+        "name": "a previously selected restricted row can be deselected"
+      },
+      {
+        "passed": true,
+        "name": "select a row whose application callback will restrict it"
+      },
+      {
+        "passed": true,
+        "name": "confirmation rereads row metadata after the single application callback"
+      },
+      {
+        "passed": true,
+        "name": "the metadata Formula receives the original This/item, key, one-based row and owning Form"
+      },
+      {
+        "passed": true,
+        "name": "invalid row metadata retires the cell and rejects further editor requests"
+      },
+      {
+        "passed": true,
+        "name": "replace the native metadata expression through its normal public command"
+      },
+      {
+        "passed": true,
+        "name": "a stale metadata mapping cannot authorize input"
+      },
+      {
+        "passed": true,
+        "name": "select the final row directly from the first viewport"
+      },
+      {
+        "passed": true,
+        "name": "the shared selection handler reads the settled binding exactly once"
+      },
+      {
+        "passed": true,
+        "name": "selection confirmation waits for the binding and visible row"
+      },
+      {
+        "passed": true,
+        "name": "clear the selected rows through the existing list box"
+      },
+      {
+        "passed": true,
+        "name": "external grid action enumeration includes standard reveal"
+      },
+      {
+        "passed": true,
+        "name": "standard scroll-to-visible action reaches an offscreen cell"
+      },
+      {
+        "passed": true,
+        "name": "revealing a value preserves selection and handlers"
+      },
+      {
+        "passed": true,
+        "name": "read-only numeric column cannot be edited through accessibility"
+      },
+      {
+        "passed": true,
+        "name": "enterable column advertises the existing cell editor"
+      },
+      {
+        "passed": true,
+        "name": "cell text enters through standard AXValue"
+      },
+      {
+        "passed": true,
+        "name": "focus identifies the exact edited row and column"
+      },
+      {
+        "passed": true,
+        "name": "cell editor exposes the correct Unicode text length"
+      },
+      {
+        "passed": true,
+        "name": "standard text selection targets the real cell editor"
+      },
+      {
+        "passed": true,
+        "name": "selected cell text can be replaced through the existing editor"
+      },
+      {
+        "passed": true,
+        "name": "replacement publishes its real insertion position"
+      },
+      {
+        "passed": true,
+        "name": "the existing Undo menu accepts cell-editor changes"
+      },
+      {
+        "passed": true,
+        "name": "the existing Redo menu accepts the undone cell edit"
+      },
+      {
+        "passed": true,
+        "name": "normal Undo and Redo preserve the editor's Unicode text"
+      },
+      {
+        "passed": true,
+        "name": "ordinary field accepts focus after grid editing"
+      },
+      {
+        "passed": true,
+        "name": "existing data-change and after-edit handlers run on commit"
+      },
+      {
+        "passed": true,
+        "name": "AX transport accepts a request that application validation may reject"
+      },
+      {
+        "passed": true,
+        "name": "filtered first character stops the remaining text without bypassing validation"
+      },
+      {
+        "passed": true,
+        "name": "offscreen selection is accepted through standard AXPress"
+      },
+      {
+        "passed": true,
+        "name": "existing shared selection handler runs"
+      },
+      {
+        "passed": true,
+        "name": "native selection readback matches 4D"
+      },
+      {
+        "passed": true,
+        "name": "enabled key CAFE keeps its own row state"
+      },
+      {
+        "passed": true,
+        "name": "distinct row CAFE accepts selection"
+      },
+      {
+        "passed": true,
+        "name": "host selection confirms the exact key CAFE"
+      },
+      {
+        "passed": true,
+        "name": "enabled key cafe keeps its own row state"
+      },
+      {
+        "passed": true,
+        "name": "distinct row cafe accepts selection"
+      },
+      {
+        "passed": true,
+        "name": "host selection confirms the exact key cafe"
+      },
+      {
+        "passed": true,
+        "name": "ordinary sort button invokes its existing handler"
+      },
+      {
+        "passed": true,
+        "name": "real 4D sorting preserves the same keyed cell at its new position"
+      },
+      {
+        "passed": true,
+        "name": "metadata preserves the original Text or numeric key and receiver after sorting"
+      },
+      {
+        "passed": true,
+        "name": "existing form timer continues during paged access and actions"
+      },
+      {
+        "passed": true,
+        "name": "enable application selection rejection"
+      },
+      {
+        "passed": true,
+        "name": "the current row accepts the selection-rejection test request"
+      },
+      {
+        "passed": true,
+        "name": "selection rejection is confirmed without replaying its handler"
+      },
+      {
+        "passed": true,
+        "name": "replace collection objects while retaining their keys"
+      },
+      {
+        "passed": true,
+        "name": "a retained cell cannot target a replacement object with the same key"
+      },
+      {
+        "passed": true,
+        "name": "ordinary record-change handler runs"
+      },
+      {
+        "passed": true,
+        "name": "retained prior-record cell has no active geometry"
+      },
+      {
+        "passed": true,
+        "name": "normal standard-action close exits the owned 4D host"
+      },
+      {
+        "passed": true,
+        "name": "4D confirms normal acceptance separately from cancellation"
+      }
+    ],
+    "native_sha256": "8d00ef2da430b469cbbbb23b6c3ff945ae31d19bd90013ae5262d7b681247bac",
+    "component_sha256": "66dc1266cc102337bb2ee17c3db068e93b0b71278408ce0ed7ca7fc7ee0ac8a8",
+    "architecture": "ARM64"
+  }
+}
