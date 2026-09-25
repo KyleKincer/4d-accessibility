@@ -2,7 +2,7 @@
 
 Expose 4D forms through macOS accessibility so VoiceOver, accessibility tools and AI agents can read and operate them. The bridge discovers supported controls and uses their existing editors, validation and actions.
 
-**Development preview.** The target is the entire application UI. Several control families and assistive-technology behaviors are still unfinished. Read the [support status](skills/4d-accessibility/references/STATUS.md) before adopting it. There is no production release yet. A known VoiceOver limitation can leave a newly loaded distant checkbox announced as Loading even after its AX value is available. Moving away and back reads the loaded checkbox.
+**Development preview.** The target is the entire application UI. Several control families and assistive-technology behaviors are still unfinished. Read the [support status](skills/4d-accessibility/references/STATUS.md) before adopting it. There is no stable production release yet. The previously failing distant-checkbox speech case passes in the [signed 0.19.5 candidate](validation/signed-release-0.19.5.json).
 
 The implementation targets 4D 20.8 on macOS. Native binaries contain Apple Silicon and Intel code; live validation has primarily used Apple Silicon and macOS 26. Windows accessibility is not implemented.
 
