@@ -2,6 +2,8 @@
 
 Tested September 24, 2026 with 4D 20.8 on Apple Silicon/macOS 26. This defect prevents complete AreaList text editing support. It does not affect ordinary 4D text editors through the same bridge.
 
+This is an accepted, documented vendor limitation for the release. A vendor fix is not a release prerequisite. The adapter's supplementary-input guard remains required until a corrected vendor version passes the reproduction and full editing matrix below.
+
 A project with one text array and one AreaList Pro 11.4.2 area crashes after pasting long supplementary Unicode text and then reading, copying or committing it. No Accessibility Bridge plugin, component or host methods are installed in that project. Guard Malloc stops inside the vendor's `XF::UString::AssignUTF8` conversion. [Sanitized results and stacks](evidence/arealist-unicode.json) retain the passing controls and failures.
 
 | Operation after Paste | First relevant callers above the conversion |
