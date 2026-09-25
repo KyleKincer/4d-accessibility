@@ -6,9 +6,9 @@ The videos show only 4D's windows, cropped for readability, at 1.5× playback sp
 
 ## Native grids and repeated subforms
 
-[Watch the native-grid video](https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/native-grids.mp4).
+https://github.com/user-attachments/assets/e2177f60-df66-4fc6-9de6-5e5c382ddec4
 
-[![Native grids and VoiceOver](docs/images/native-grids.png)](https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/native-grids.mp4)
+[Download the native-grid video](https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/native-grids.mp4).
 
 Two instances of the same subform keep separate identities and checkbox bindings. VoiceOver activates a checkbox and native popup, reaches the last logical row beyond the viewport, and returns to an ordinary editor. All 39 compiled checks pass.
 
@@ -22,9 +22,9 @@ python3 test_grid_controls_fixture.py --run --compiled --voiceover
 
 ## AreaList editing and validation
 
-[Watch the AreaList video](https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/arealist.mp4).
+https://github.com/user-attachments/assets/710f9760-04cd-4838-93b3-19614d90c61b
 
-[![AreaList editing and VoiceOver](docs/images/arealist.png)](https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/arealist.mp4)
+[Download the AreaList video](https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/arealist.mp4).
 
 The existing vendor editor commits complete text before a checkbox action. Rejected text prevents that action; correcting it permits the normal handler. Disabled permissions and retired elements prevent mutation. Sorting preserves row identity. VoiceOver activates a checkbox and returns to an ordinary field. All 37 compiled checks pass.
 

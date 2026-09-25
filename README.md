@@ -6,7 +6,21 @@ The initial release supports the controls and integration patterns listed below.
 
 The implementation targets 4D 20.8 on macOS. Native binaries contain Apple Silicon and Intel code; live validation has primarily used Apple Silicon and macOS 26. Windows accessibility is not implemented.
 
-[Watch recorded examples](DEMOS.md) of native grids, repeated subforms, AreaList editing and VoiceOver, with visible accessibility calls and test results.
+## Recorded examples
+
+Full recordings from synthetic 4D fixtures, with visible accessibility calls, VoiceOver captions and test results. Both videos are silent and play at 1.5× speed. See [recording details and reproduction steps](DEMOS.md).
+
+### Native grids and repeated subforms
+
+Independent subform controls, native popup editing and VoiceOver navigation to a row beyond the viewport.
+
+https://github.com/user-attachments/assets/e2177f60-df66-4fc6-9de6-5e5c382ddec4
+
+### AreaList editing and validation
+
+Text commits, rejected edits, permissions and VoiceOver checkbox activation through the existing form handlers.
+
+https://github.com/user-attachments/assets/710f9760-04cd-4838-93b3-19614d90c61b
 
 ## Start with one form
 

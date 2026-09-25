@@ -56,7 +56,8 @@
       ],
       "native_sha256": "2ca30de2cd5d97fad67c97bd770a583a7b8bb70ceb58446fbd966ea576752c1e",
       "component_sha256": "edd2fd8a0ed504bb4fb95df57195d739989b98494acd0e6352c5764a37752a70",
-      "url": "https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/native-grids.mp4"
+      "url": "https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/native-grids.mp4",
+      "inline_url": "https://github.com/user-attachments/assets/e2177f60-df66-4fc6-9de6-5e5c382ddec4"
     },
     "arealist": {
       "sha256": "08301f41d6637ec51b4f8cd97ea742ca6332d6d5a357d92fc622e6f05081ae40",
@@ -102,7 +103,8 @@
       ],
       "native_sha256": "2ca30de2cd5d97fad67c97bd770a583a7b8bb70ceb58446fbd966ea576752c1e",
       "component_sha256": "edd2fd8a0ed504bb4fb95df57195d739989b98494acd0e6352c5764a37752a70",
-      "url": "https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/arealist.mp4"
+      "url": "https://github.com/KyleKincer/4d-accessibility/releases/download/v0.19.7/arealist.mp4",
+      "inline_url": "https://github.com/user-attachments/assets/710f9760-04cd-4838-93b3-19614d90c61b"
     }
   }
 }
