@@ -40,6 +40,9 @@ If ($action.operation="gridSelect")
   If ($data.options.onSelection#Null)
    $data.options.onSelection.call()
    // Its normal validation or dependent-UI updates can change the selection.
+   // Give that completed handler a bounded observation period of its own.
+   // Time spent in application code must not consume the reveal deadline.
+   $data.deadline:=Milliseconds+2000
    return
   End if
  End if
@@ -52,6 +55,7 @@ If ($action.operation="gridSelect")
    OBJECT GET SCROLL POSITION(*; $data.options.objectName; $scrollRow; $scrollColumn)
    OBJECT SET SCROLL POSITION(*; $data.options.objectName; $position; $scrollColumn)
    $data.scrolled:=True
+   $data.deadline:=Milliseconds+2000
    return
   End if
   If (AXB_KeyIndex($grid.visible; $key)<0)

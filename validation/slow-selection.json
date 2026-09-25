@@ -1,0 +1,176 @@
+{
+  "date": "2026-09-25",
+  "passed": true,
+  "scope": "Native array list box; 4D 20.8 ARM desktop on macOS; slow selection controller and distant row reveal",
+  "behavior": "Each completed selection callback and scroll receives its own bounded two-second observation period. Identity, permission, selection and visibility checks remain. Neither callback nor scroll is replayed.",
+  "runs": {
+    "before": {
+      "passed": false,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "selection target begins outside the viewport"
+        },
+        {
+          "passed": true,
+          "name": "distant selection request reaches the native list box"
+        },
+        {
+          "passed": false,
+          "name": "slow application controller still confirms and reveals the selected row"
+        }
+      ],
+      "selectionReceipt": "Application did not confirm the requested selection",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    "interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "selection target begins outside the viewport"
+        },
+        {
+          "passed": true,
+          "name": "distant selection request reaches the native list box"
+        },
+        {
+          "passed": true,
+          "name": "slow application controller still confirms and reveals the selected row"
+        },
+        {
+          "passed": true,
+          "name": "confirmed distant selection is actually visible"
+        },
+        {
+          "passed": true,
+          "name": "selection controller runs exactly once with the intended selection"
+        },
+        {
+          "passed": true,
+          "name": "enable the application's normal selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "submit another selection to the slow rejecting controller"
+        },
+        {
+          "passed": true,
+          "name": "slow controller rejection is reported without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "normal close succeeds after slow selection"
+        }
+      ],
+      "selectionReceipt": "List box selection confirmed",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    },
+    "compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "automatic form starts in the requested desktop mode"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM execution"
+        },
+        {
+          "passed": true,
+          "name": "one root contains both ordinary controls and grid"
+        },
+        {
+          "passed": true,
+          "name": "selection target begins outside the viewport"
+        },
+        {
+          "passed": true,
+          "name": "distant selection request reaches the native list box"
+        },
+        {
+          "passed": true,
+          "name": "slow application controller still confirms and reveals the selected row"
+        },
+        {
+          "passed": true,
+          "name": "confirmed distant selection is actually visible"
+        },
+        {
+          "passed": true,
+          "name": "selection controller runs exactly once with the intended selection"
+        },
+        {
+          "passed": true,
+          "name": "enable the application's normal selection rejection"
+        },
+        {
+          "passed": true,
+          "name": "submit another selection to the slow rejecting controller"
+        },
+        {
+          "passed": true,
+          "name": "slow controller rejection is reported without replaying its handler"
+        },
+        {
+          "passed": true,
+          "name": "normal close succeeds after slow selection"
+        }
+      ],
+      "selectionReceipt": "List box selection confirmed",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    }
+  },
+  "compiler_report_sha256": "18b3b7037bad0314d37c58afaf95fcc2a521f6b34b6ab5aa7cf3146d5d588ca2",
+  "source_sha256": {
+    "host/OptionalMethods/AXB_GridListboxConfirm.4dm": "757f394b35cce81c32431e2bf96a78a88439d4c08f3be97db0e78a2d41632684",
+    "prepare_grid_fixture.py": "83a59d4fa00e6c3d19783ee81021fdd43cbcee5784070ef4f623933fb9cf62d7",
+    "test_grid_fixture.py": "3125f790604e9397fd4b547ece321fc9731e54a0a2d4643edd6ddd885ac7a2af"
+  },
+  "ordinary_grid_regression": {
+    "compiled": true,
+    "passed": true,
+    "checks": 63,
+    "report_sha256": "27204f0f3041a3bbdd478cc4d7f662e68f1b825fd8c9f2a2d60fce04e01f33ee"
+  },
+  "reproduce": [
+    "python3 prepare_grid_fixture.py --server /path/to/4D_Server.app --slow-distant-selection",
+    "python3 test_grid_fixture.py --run",
+    "python3 test_grid_fixture.py --run --compiled"
+  ],
+  "limits": [
+    "Application callbacks must eventually return. A blocked host cannot be made responsive by this helper.",
+    "This fixture does not establish complete application workflow coverage."
+  ]
+}

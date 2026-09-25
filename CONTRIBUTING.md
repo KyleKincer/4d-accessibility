@@ -42,6 +42,8 @@ Omit `--compiled` for interpreted execution or `--voiceover` for the external AX
 
 For native array identities, prepare with `prepare_grid_fixture.py --key-type integer` or `--key-type longint`, plus `--row-states --described`. Run `test_grid_fixture.py --run` and then `--compiled` to exercise both desktop modes. Keep the required `--server` argument when preparing.
 
+For a slow selection controller and an offscreen row, prepare with `--slow-distant-selection`. Run `test_grid_fixture.py --run` and `--run --compiled`. The controller deliberately takes 150 ticks. The checks require the selected row to become visible, exactly one controller call and preservation of a later application rejection. `--slow-visible-selection` separately checks a slow scope callback for a row already in view.
+
 For legacy Boolean hidden-row arrays, prepare with `--boolean-hidden` and the required `--server`. Run `test_grid_fixture.py --run` in interpreted and `--compiled` modes. The same editing, selection and sort suite also hides and restores a distant row, checking retained-cell rejection and identity. Add `--voiceover` for the separate spoken-navigation check.
 
 For generated repeated/nested children sharing ordinary data, with parent-owned discovery:

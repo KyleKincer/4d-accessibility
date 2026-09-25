@@ -33,12 +33,15 @@ def main():
     parser.add_argument("--cell-controls", action="store_true", help="Add native Boolean/popup/mixed cells and application validation")
     parser.add_argument("--stored-meta", action="store_true", help="Read the collection's existing This.meta objects automatically")
     parser.add_argument("--slow-visible-selection", action="store_true", help="Reproduce visible-row confirmation under expensive application callbacks")
+    parser.add_argument("--slow-distant-selection", action="store_true", help="Reproduce a distant row reveal with an expensive selection controller")
     parser.add_argument("--boolean-hidden", action="store_true", help="Use the legacy Boolean hidden-row array without changing the host binding")
     args = parser.parse_args()
-    if args.boolean_hidden and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.slow_visible_selection or args.key_type != "text"):
+    if args.boolean_hidden and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.slow_visible_selection or args.slow_distant_selection or args.key_type != "text"):
         parser.error("--boolean-hidden uses the default root array fixture")
-    if args.slow_visible_selection and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.key_type != "text"):
-        parser.error("--slow-visible-selection uses the default root array fixture")
+    if (args.slow_visible_selection or args.slow_distant_selection) and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.key_type != "text"):
+        parser.error("Slow selection probes use the default root array fixture")
+    if args.slow_visible_selection and args.slow_distant_selection:
+        parser.error("Choose one slow selection probe")
     if args.key_type != "text" and (args.collection or args.entity):
         parser.error("--key-type applies to array grids only")
     if args.repeated and not (args.subform and args.collection and args.cell_controls):
@@ -517,7 +520,10 @@ $scope:=Form.scope
 ''')
         compiler = methods / "Compiler_AXBG.4dm"
         compiler.write_text(compiler.read_text() + "C_TEXT(AXBG_SlowScope; $0)\n")
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls, "slowVisibleSelection": args.slow_visible_selection, "booleanHidden": args.boolean_hidden}) + "\n")
+    if args.slow_distant_selection:
+        selected = methods / "AXBG_Selected.4dm"
+        selected.write_text("DELAY PROCESS(Current process; 150)\n" + selected.read_text())
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls, "slowVisibleSelection": args.slow_visible_selection, "slowDistantSelection": args.slow_distant_selection, "booleanHidden": args.boolean_hidden}) + "\n")
     if args.entity:
         with (FIXTURE / "seed.log").open("w") as log:
             seeded = subprocess.run([str(server / "Contents/MacOS" / info["CFBundleExecutable"]), "--project", str(project), "--data", str(FIXTURE / "synthetic.4dd"), "--create-data", "--headless", "--utility", "--skip-onstartup", "--startup-method", "AXBG_Seed", "--webadmin-auto-start", "false"], stdout=log, stderr=log, timeout=90)
