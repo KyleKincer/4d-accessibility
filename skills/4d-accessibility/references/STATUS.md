@@ -37,7 +37,7 @@ Root forms keep ownership outside persisted entities, class instances and 4D sha
 - Generated wrappers and explicit child registration still require private plain data.
 - Voice Control/Switch Control, overlapping providers, multiple displays, older macOS reveal, root forms larger than their window, Intel runtime and remote entity performance need validation.
 - Broader compiled desktop coverage, client/server delivery and complete real application workflows remain open.
-- The native package ID is provisional. Public production distribution also requires release signing and notarization.
+- The plug-in manifest ID must not conflict with another plug-in in a target host. The current ID matches the optional host lookup and does not conflict with Symphony's installed manifests. Public production distribution still requires release signing and notarization.
 
 The native binary's deployment target is a compiler setting, not a tested macOS support promise. Windows has no accessibility implementation. A label on an opaque interactive control, a compiler pass or a clean diagnostics report is not proof of an accessible screen.
 

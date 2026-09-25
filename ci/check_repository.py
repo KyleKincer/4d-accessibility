@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check source boundaries, local documentation links and skill portability."""
 import ast
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -35,6 +36,10 @@ def main():
     skill = ROOT / "skills/4d-accessibility/SKILL.md"
     if not skill.read_text().startswith("---\nname: 4d-accessibility\ndescription: "):
         failures.append("Skill metadata is missing")
+    plugin_id = json.loads((ROOT / "manifest.json").read_text()).get("id")
+    host = (ROOT / "host/OptionalMethods/AXB_Host.4dm").read_text()
+    if not isinstance(plugin_id, int) or plugin_id <= 0 or f"Find in array($numbers; {plugin_id})" not in host:
+        failures.append("Plugin manifest ID and optional host lookup differ")
     for failure in failures:
         print(failure)
     if failures:
