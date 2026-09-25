@@ -199,7 +199,12 @@ For ($row; 1; $count)
  $known[$key]:=True
  $flags:=0
  If (Not(Is nil pointer($control)))
-  $flags:=$control->{$row}
+  If (Type($control->)=Boolean array)
+   // Legacy hidden-row arrays use True for hidden, False for visible.
+   $flags:=Num($control->{$row})
+  Else
+   $flags:=$control->{$row}
+  End if
  Else
   If ($binding.rowFlags#Null)
    $flags:=$binding.rowFlags[$row-1]

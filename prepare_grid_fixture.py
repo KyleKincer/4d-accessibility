@@ -33,7 +33,10 @@ def main():
     parser.add_argument("--cell-controls", action="store_true", help="Add native Boolean/popup/mixed cells and application validation")
     parser.add_argument("--stored-meta", action="store_true", help="Read the collection's existing This.meta objects automatically")
     parser.add_argument("--slow-visible-selection", action="store_true", help="Reproduce visible-row confirmation under expensive application callbacks")
+    parser.add_argument("--boolean-hidden", action="store_true", help="Use the legacy Boolean hidden-row array without changing the host binding")
     args = parser.parse_args()
+    if args.boolean_hidden and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.slow_visible_selection or args.key_type != "text"):
+        parser.error("--boolean-hidden uses the default root array fixture")
     if args.slow_visible_selection and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.key_type != "text"):
         parser.error("--slow-visible-selection uses the default root array fixture")
     if args.key_type != "text" and (args.collection or args.entity):
@@ -221,6 +224,15 @@ QUIT 4D
             column["dataSource"] = "This." + property_name
         objects["Rebind"] = {"type": "button", "text": "Rebind", "left": 390, "top": 370, "width": 130, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
     objects["Reject selection"] = {"type": "button", "text": "Reject selection", "left": 530, "top": 370, "width": 100, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
+    if args.boolean_hidden:
+        for method in [methods / "Compiler_AXBG.4dm", database / "onStartup.4dm"]:
+            source = method.read_text().replace("ARRAY LONGINT(aGridControl;", "ARRAY BOOLEAN(aGridControl;")
+            source = source.replace("aGridControl{2}:=lk row is hidden", "aGridControl{2}:=True")
+            source = source.replace("aGridControl{3}:=lk row is disabled\n", "").replace("aGridControl{4}:=lk row is not selectable\n", "")
+            method.write_text(source)
+        objects["Toggle hidden"] = {"type": "button", "text": "Toggle hidden", "left": 390, "top": 370, "width": 130, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
+        click = methods / "AXBG_Click.4dm"
+        click.write_text(click.read_text().replace("Case of\n", 'Case of\n : (OBJECT Get name(Object current)="Toggle hidden")\n  aGridControl{Find in array(aGridKey; "line-0600")}:=Not(aGridControl{Find in array(aGridKey; "line-0600")})\n', 1))
     if args.cell_controls:
         compiler = methods / "Compiler_AXBG.4dm"
         compiler.write_text(compiler.read_text() + "ARRAY BOOLEAN(aGridCheck; 0)\nARRAY BOOLEAN(aGridPopup; 0)\nARRAY LONGINT(aGridMixed; 0)\nC_OBJECT(AXBG_WidgetState; $0)\nC_LONGINT(AXBG_WidgetEvent; $0)\n")
@@ -505,7 +517,7 @@ $scope:=Form.scope
 ''')
         compiler = methods / "Compiler_AXBG.4dm"
         compiler.write_text(compiler.read_text() + "C_TEXT(AXBG_SlowScope; $0)\n")
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls, "slowVisibleSelection": args.slow_visible_selection}) + "\n")
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "keyType": args.key_type, "kind": "entity" if args.entity else "collection" if args.collection else "array", "described": args.described, "objectDescription": args.object_description, "styledDescription": args.styled_description, "subform": args.subform, "repeated": args.repeated, "rowStates": args.row_states, "storedMeta": args.stored_meta, "cellControls": args.cell_controls, "slowVisibleSelection": args.slow_visible_selection, "booleanHidden": args.boolean_hidden}) + "\n")
     if args.entity:
         with (FIXTURE / "seed.log").open("w") as log:
             seeded = subprocess.run([str(server / "Contents/MacOS" / info["CFBundleExecutable"]), "--project", str(project), "--data", str(FIXTURE / "synthetic.4dd"), "--create-data", "--headless", "--utility", "--skip-onstartup", "--startup-method", "AXBG_Seed", "--webadmin-auto-start", "false"], stdout=log, stderr=log, timeout=90)

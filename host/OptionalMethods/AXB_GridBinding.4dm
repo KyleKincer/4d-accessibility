@@ -30,7 +30,7 @@ If ($options.kind="array")
   return
  End if
  If (Not(Is nil pointer($control)))
-  If ((Type($control->)#LongInt array) | (Size of array($control->)#$count))
+  If ((New collection(Boolean array; LongInt array).indexOf(Type($control->))<0) | (Size of array($control->)#$count))
    return
   End if
  End if
