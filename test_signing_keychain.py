@@ -21,7 +21,7 @@ class SigningKeychainTests(unittest.TestCase):
 
     def execute(self, environment):
         calls = []
-        with mock.patch.dict(os.environ, environment, clear=True), mock.patch.object(signing_keychain, "run", side_effect=lambda *args: calls.append(args)), mock.patch("sys.argv", ["signing_keychain.py"]):
+        with mock.patch.dict(os.environ, environment, clear=True), mock.patch.object(signing_keychain, "run", side_effect=lambda *args: calls.append(args)), mock.patch.object(signing_keychain, "identity_available", return_value=True), mock.patch("sys.argv", ["signing_keychain.py"]):
             signing_keychain.main()
         return calls
 
@@ -34,6 +34,9 @@ class SigningKeychainTests(unittest.TestCase):
                 "APPLE_NOTARY_ISSUER_ID": "ISSUER",
             }
             calls = self.execute(environment)
+            imports = [call for call in calls if call[:2] == ("security", "import")]
+            self.assertEqual(imports[0][2], str(signing_keychain.APPLE_DEVELOPER_ID_G1))
+            self.assertEqual(imports[1][2], str(directory / "accessibility-release.p12"))
             notary = next(call for call in calls if call[:3] == ("xcrun", "notarytool", "store-credentials"))
             self.assertIn("--key-id", notary)
             self.assertIn("--issuer", notary)
