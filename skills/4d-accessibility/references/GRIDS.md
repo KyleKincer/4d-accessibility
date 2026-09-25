@@ -174,7 +174,7 @@ $bridge:=AXB_Form("start"; $options)
 
 `Items` is the form object's name. The provider finds the key array in the area's actual column bindings; it must occur exactly once. An optional `keyColumn` asserts a particular physical column if your application needs that additional check. Initialize `Form.linesReady` to false at the start of On Load, before any line loading. In the existing loader, clear readiness and capture the invoice ID before replacing or refreshing arrays. When that load completes, store its captured ID in `Form.linesLoadedID` before setting readiness true. The formula checks that loaded ID against the displayed invoice, including any delay before loading begins. Change the scope when the record changes; scope alone does not prove which record the arrays contain. The provider reads current vendor bindings and formatting, exposes every non-hidden row and displayed column, and resolves retained cells by their keys after sorting. The other fields and buttons remain automatically discovered.
 
-Scalar text, numeric, date, time and Boolean columns need no description configuration. Boolean values are currently read-only through accessibility, even if the vendor UI permits toggling. Every displayed picture or custom column requires a text description or an explicit decorative declaration; otherwise the grid is disabled with a “needs a text description” label. Add metadata only where the existing UI does not describe its meaning. For example, an image indicator and a decorative spacer:
+Ordinary scalar text, numeric, date, time and Boolean columns need no description configuration. Supported Boolean/integer checkbox displays also retain their existing editing behavior; see [checkbox cells](#arealist-checkbox-cells). Every displayed picture, calculated or custom column requires a text description or an explicit decorative declaration; otherwise the grid is disabled with a “needs a text description” label. Add metadata only where the existing UI does not describe its meaning. For example, an image indicator and a decorative spacer:
 
 ```4d
 // Set this before AXB_Form("start"; $options).
@@ -185,6 +185,15 @@ $lines.columns:=New object(\
 ```
 
 Here `apictVisibility` is the picture array bound to that column, and `<>hiddenPict` is the application's existing hidden-item icon. Use your application's actual array/icon names, or resolve `$1.key` in its existing model.
+
+For a calculated column, reuse the function called by its existing vendor callback:
+
+```4d
+$lines.columns["1"]:=New object("label"; "Location"; \
+ "value"; Formula(DescribeLocation(aLineID{$1.row}; aLineKind{$1.row})))
+```
+
+`DescribeLocation` stands for the application's existing read-only display function. Its required data must already be loaded. AreaList Pro 11.4.2 rejects source-name queries for calculated columns and cannot read an uncached calculated cell by logical row. The bridge compares the actual column pointers and uses this formula to read any requested row without scrolling the vendor control. A missing formula disables the grid before either invalid vendor query. Keep calculated columns read-only; an editable custom display still requires an editor adapter.
 
 Column keys are actual runtime vendor column numbers as Text, independent of display order. An unconfigured custom column disables the table with a label such as `column 5 needs a text description`; read that label through AX to identify the physical column. Confirm its live binding before supplying metadata: legacy setup can omit an empty column and shift later bindings. Never mark an assumed spacer decorative; it may now contain data. Verify this with the vendor's live binding getters before writing column metadata. A `label` overrides the header. A `value` formula provides readable text for a picture or another custom display; it receives `{key, row, column}` in `$1` and runs inside the owning form when a cell page is requested. Read the existing UI model, without querying, saving, or changing selection. A row-based formula must read an array that AreaList sorts together with the grid, or resolve `$1.key` in the model. An unbound parallel array can describe the wrong row after sorting. Custom descriptions are read-only. A decorative column is omitted from the tree while retaining its width for neighboring cells. Hidden and password-formatted cells never call the value formula or publish their contents. Attributed text is published without its formatting markup.
 
