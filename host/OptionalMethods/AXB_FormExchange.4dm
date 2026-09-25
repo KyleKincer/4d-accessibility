@@ -168,6 +168,12 @@ If ($context.active)
   $packet.confirm:=$result.confirm
   $packet.data:=$result.data
   $context.pending:=New object("id"; $action.id; "node"; $action.node; "packet"; $packet)
+  // The first editor step can already have posted a character. Switch the
+  // worker now, before its next sleep: the idle interval may be one second,
+  // long enough for an application's search timer to submit that character.
+  Use ($token)
+   $token.fast:=True
+  End use
  Else
   $result.id:=$action.id
   $context.receipt:=$result
