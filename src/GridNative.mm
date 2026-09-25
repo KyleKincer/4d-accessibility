@@ -52,6 +52,8 @@ static NSString *Identifier(AXBGridNode *table, NSString *kind, NSString *row, N
 @property(nonatomic, strong) NSMutableDictionary<NSString *, AXBGridColumn *> *columnRegistry;
 @property(nonatomic, strong) NSDictionary *lastDescriptor;
 @property(nonatomic) NSUInteger lastCacheSerial;
+@property(nonatomic, weak) AXBGridCell *lastWaitingCell;
+@property(nonatomic) NSTimeInterval lastWaitingAt;
 @property(nonatomic, strong) NSArray *pendingDestroyed;
 @property(nonatomic, strong) AXBGridHeaderGroup *headerGroup;
 - (AXBGridRow *)row:(NSString *)key;
@@ -152,7 +154,12 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 - (id)accessibilityValue {
     NSDictionary *focus = self.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
     id value = focus[@"value"] ?: self.value[@"value"];
-    if (!value && self.isAccessibilityElement) { self.waitingForValue = YES; return @"Loading"; }
+    if (!value && self.isAccessibilityElement) {
+        self.waitingForValue = YES;
+        self.table.lastWaitingCell = self;
+        self.table.lastWaitingAt = NSProcessInfo.processInfo.systemUptime;
+        return @"Loading";
+    }
     return value;
 }
 - (NSString *)accessibilityHelp { return self.value ? nil : @"Loading cell value"; }
@@ -743,17 +750,30 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
     }
     if (self.lastDescriptor && [self.lastDescriptor[@"rows"] count] != [descriptor[@"rows"] count]) NSAccessibilityPostNotification(self, NSAccessibilityRowCountChangedNotification);
     if (self.lastDescriptor && (orderChanged || ![self.lastDescriptor[@"visible"] isEqual:descriptor[@"visible"]])) NSAccessibilityPostNotification(self, NSAccessibilityLayoutChangedNotification);
-    // ValueChanged alone leaves a stationary VoiceOver cursor saying Loading.
-    // A table layout notification identifies the newly readable content. Send
-    // each cell separately: a batch speaks only "N updated items". The client
-    // decides whether its current reading position needs attention; AX reads
-    // from other clients never become focus or explicit speech requests.
-    for (AXBGridCell *cell in loaded)
+    // ValueChanged alone can leave a stationary VoiceOver cursor saying Loading.
+    // Identify each changed cell separately; a batch says only "N updated items".
+    // For a recently requested checkbox, a low-priority announcement supplies
+    // its new state without moving focus or speaking every cell in the page.
+    for (AXBGridCell *cell in loaded) {
+        BOOL recentlyRequested = cell == self.lastWaitingCell &&
+            NSProcessInfo.processInfo.systemUptime - self.lastWaitingAt < 20 && self.owner.window.isKeyWindow;
+        if (cell == self.lastWaitingCell) self.lastWaitingCell = nil;
         NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[cell]});
+        if (!recentlyRequested) continue;
+        NSDictionary *value = cell.value;
+        if ([value[@"role"] isEqual:@"checkbox"]) {
+            NSString *label = value[@"label"] ?: [self column:cell.columnKey].accessibilityLabel;
+            NSString *state = [value[@"checked"] boolValue] ? @"checked" : @"unchecked";
+            NSString *speech = [NSString stringWithFormat:@"%@ %@ checkbox", label ?: @"", state];
+            NSAccessibilityPostNotificationWithUserInfo(NSApp, NSAccessibilityAnnouncementRequestedNotification,
+                @{NSAccessibilityAnnouncementKey: speech, NSAccessibilityPriorityKey: @(NSAccessibilityPriorityLow)});
+        }
+    }
     self.lastDescriptor = descriptor;
 }
 - (void)invalidate {
     [super invalidate];
+    self.lastWaitingCell = nil;
     for (AXBGridRow *row in self.rowRegistry.allValues) [row invalidate];
     for (AXBGridColumn *column in self.columnRegistry.allValues) [column invalidate];
     [self.headerGroup invalidate]; self.headerGroup = nil;

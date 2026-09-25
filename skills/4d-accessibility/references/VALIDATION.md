@@ -1,5 +1,9 @@
 # Validation scope
 
+## Delayed checkbox speech in compiled 4D, September 25
+
+The 0.19.5 provider passes 135 checks across nine synthetic AppKit VoiceOver cases, including leaving a delayed checkbox before it loads. The exact plugin and component extracted from the candidate ZIP pass 39 checks in an isolated native ARM compiled 4D 20.8 host on macOS 26.7. VoiceOver hears the loaded state of a distant checkbox without another navigation command, uses a native popup, and returns to an ordinary editor. The tests also verify repeated subform identity and checkbox actions. [Sanitized checks and package hashes](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/grid-value-speech-0.19.5.json). This resolves the specific 0.19.4 failure described below; it does not establish remote-client delivery, every control family, or production signing.
+
 ## Visible selection confirmation, September 24
 
 The native array-grid fixture selects an already visible row while its application scope callback takes 70 ticks whenever an action is pending. The original helper changes the actual selection correctly, then reports `Application did not confirm the requested selection`. It spends another form callback on a scroll that does not change the viewport. The corrected helper completes after verifying the visible selection, avoiding that redundant cycle. The timeout and all identity, permission and application-handler checks remain unchanged.
