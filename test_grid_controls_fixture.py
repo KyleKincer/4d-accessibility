@@ -54,10 +54,11 @@ def main():
         assert not last_state.get("bridgeError") and not last_state.get("failure"), last_state
         return last_state
 
-    def check(condition, name):
+    def check(condition, name, *, fatal=True):
         checks.append({"passed": bool(condition), "name": name})
         print(("PASS: " if condition else "FAIL: ") + name, flush=True)
-        assert condition, name
+        if fatal:
+            assert condition, name
 
     project = FIXTURE / "Project/LogicalGridFixture.4DProject"
     command = ["/usr/bin/arch", "-arm64", "/Applications/4D/4D.app/Contents/MacOS/4D", "--project", str(project),
@@ -203,7 +204,18 @@ def main():
                     report["delayed_value_captions"].append(caption)
                     assert "not responding" not in caption.lower(), caption
                     return "Mixed" in caption and "unchecked" in caption.lower() and "checkbox" in caption.replace(" ", "").lower()
-                check(bool(ax.wait_for(loaded_speech, "VoiceOver did not speak the arriving final-cell value", timeout=20)), "VoiceOver reads the loaded distant checkbox without another navigation command")
+                try:
+                    spoke_loaded_value = bool(ax.wait_for(loaded_speech, "VoiceOver did not speak the arriving final-cell value", timeout=20))
+                except AssertionError as error:
+                    if str(error) != "VoiceOver did not speak the arriving final-cell value":
+                        raise
+                    spoke_loaded_value = False
+                # Retain this failure while checking recovery and the remaining
+                # navigation. A known failure must still make the driver fail.
+                check(spoke_loaded_value, "VoiceOver reads the loaded distant checkbox without another navigation command", fatal=False)
+                vo.key("left")
+                recovered = vo.key("right")
+                check("Mixed" in recovered and "unchecked" in recovered.lower() and "checkbox" in recovered.replace(" ", "").lower(), "VoiceOver reads the loaded distant checkbox after returning to its cell")
                 vo.key("home")
                 for _ in range(3):
                     popup_again = vo.key("right")
@@ -219,7 +231,8 @@ def main():
                     if "Original note" in ordinary:
                         break
                 check("Original note" in ordinary, "VoiceOver leaves widget cells for the ordinary editor")
-                report["passed"] = True
+                report["passed"] = all(item["passed"] for item in checks)
+                assert report["passed"], "VoiceOver checks failed: " + "; ".join(item["name"] for item in checks if not item["passed"])
             finally:
                 vo.stop()
             return

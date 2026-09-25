@@ -1,7 +1,7 @@
 {
   "version": "0.19.4",
   "scope": "Production native provider with synthetic AppKit and compiled 4D 20.8 hosts, actual VoiceOver captions on macOS 26.6.2/Apple Silicon",
-  "passed": true,
+  "passed": false,
   "originalProvider": {
     "scope": "Synthetic native host using production grid/session/provider sources and actual VoiceOver captions; no 4D host",
     "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
@@ -1849,5 +1849,377 @@
       ]
     },
     "correction": "The table layout notification identifies the stable structural cell rather than its replaceable content child. No host hooks or keyboard-focus changes were added."
+  },
+  "status": "Known failure in final compiled 4D release-kit recheck; earlier passes below are historical.",
+  "releaseKitRecheck": {
+    "passed": false,
+    "compiled": true,
+    "mode": "voiceover",
+    "architecture": "ARM64",
+    "native_sha256": "d69bb9be4f8429662cf56dd44adf116237df44bba256de653373a42a3a870e67",
+    "component_sha256": "a82ffe958caf48af03a85f088fc8eb74f0da7f07b60658fece53c7c6bafa8d61",
+    "test_sha256": "dc4db3c9383a9e0770493b8b306ed43560b934f458ebf2880d0257e8971143f0",
+    "checks": [
+      {
+        "passed": true,
+        "name": "actual compiled 4D starts the prepared widget fixture"
+      },
+      {
+        "passed": true,
+        "name": "owned fixture accepts foreground activation"
+      },
+      {
+        "passed": true,
+        "name": "all logical rows and widget columns are available"
+      },
+      {
+        "passed": true,
+        "name": "identical keys and control names have distinct subform identities"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver enters the first logical row"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the real checkbox role and caption"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver checkbox activation reaches native validation"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver announces the confirmed checkbox state"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the popup's selected label and role"
+      },
+      {
+        "passed": true,
+        "name": "the native menu belongs to its exact accessible popup cell"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver chooses through the actual native popup menu"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver stays in the grid after choosing a popup item"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reaches the final logical row across widget columns"
+      },
+      {
+        "passed": true,
+        "name": "the final logical checkbox exposes its loaded state"
+      }
+    ],
+    "error": "VoiceOver did not speak the arriving final-cell value",
+    "delayed_value_captions": [
+      "X Loading, row 599 of 599",
+      "X Loading, row 599 of 599",
+      "X Loading, row 599 of 599",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+    ],
+    "sourceCommit": "36d0db4c8b6aaccbd57c220283b2d5580db4c2c7",
+    "finding": "AX exposes the correct final checkbox state. VoiceOver can keep saying Loading after a jump from a native popup to the distant row. The successful AppKit cases and earlier compiled 4D pass do not establish reliable automatic speech in this workflow."
+  },
+  "recoveryRecheck": {
+    "passed": false,
+    "compiled": true,
+    "mode": "voiceover",
+    "architecture": "ARM64",
+    "native_sha256": "d69bb9be4f8429662cf56dd44adf116237df44bba256de653373a42a3a870e67",
+    "component_sha256": "a82ffe958caf48af03a85f088fc8eb74f0da7f07b60658fece53c7c6bafa8d61",
+    "test_sha256": "e02db493d2d19a1842fa63ae2fddaeb73b7b816375d5bdae1f3194c9961df946",
+    "checks": [
+      {
+        "passed": true,
+        "name": "actual compiled 4D starts the prepared widget fixture"
+      },
+      {
+        "passed": true,
+        "name": "owned fixture accepts foreground activation"
+      },
+      {
+        "passed": true,
+        "name": "all logical rows and widget columns are available"
+      },
+      {
+        "passed": true,
+        "name": "identical keys and control names have distinct subform identities"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts independent cell focus"
+      },
+      {
+        "passed": true,
+        "name": "global focus resolves the owning grid after both retain cell positions"
+      },
+      {
+        "passed": true,
+        "name": "repeated grid accepts native checkbox activation"
+      },
+      {
+        "passed": true,
+        "name": "ordinary editor accepts keyboard focus"
+      },
+      {
+        "passed": true,
+        "name": "repeated activation changes only the owning form binding"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver enters the first logical row"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the real checkbox role and caption"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver checkbox activation reaches native validation"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver announces the confirmed checkbox state"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the popup's selected label and role"
+      },
+      {
+        "passed": true,
+        "name": "the native menu belongs to its exact accessible popup cell"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver chooses through the actual native popup menu"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver stays in the grid after choosing a popup item"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reaches the final logical row across widget columns"
+      },
+      {
+        "passed": true,
+        "name": "the final logical checkbox exposes its loaded state"
+      },
+      {
+        "passed": false,
+        "name": "VoiceOver reads the loaded distant checkbox without another navigation command"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the loaded distant checkbox after returning to its cell"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver returns to the same popup with its new value"
+      },
+      {
+        "passed": true,
+        "name": "cancelling the popup preserves its value and VoiceOver's table context"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver leaves widget cells for the ordinary editor"
+      }
+    ],
+    "error": "VoiceOver checks failed: VoiceOver reads the loaded distant checkbox without another navigation command",
+    "delayed_value_captions": [
+      "X Loading, row 599 of 599",
+      "X Loading, row 599 of 599",
+      "X Loading, row 599 of 599",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right",
+      "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+    ]
   }
 }
