@@ -1,0 +1,116 @@
+{
+  "date": "2026-09-25",
+  "platform": "macOS 26.7, Apple Silicon",
+  "fourD": "20.8 build 20.102009",
+  "scope": "Timed ordinary text input; no native binary or component change",
+  "reproduction": "600-control form; 150 ms scope callback; On After Keystroke resets the existing one-second form timer; AX replacement requests 1050",
+  "before": {
+    "passed": false,
+    "compiled": false,
+    "checks": [
+      {
+        "name": "Timed search starts in the requested execution mode",
+        "passed": true
+      },
+      {
+        "name": "Search focus is requested",
+        "passed": true
+      },
+      {
+        "name": "AX replacement is delivered",
+        "passed": true
+      },
+      {
+        "name": "One-second search timer receives the complete requested value",
+        "passed": false
+      }
+    ],
+    "submitted": "1",
+    "beforeCount": 1,
+    "receipt": "Waiting for the application to complete the action",
+    "helper_sha256": "cf7500a181d536cb78bb394517be973d37890395754fb21cc81ee6c49f1b6ca6",
+    "source_manifest_sha256": "7964b05dbd8e26e88bbaa1f2c0dbb12b0990ed28f4afed5d279fe6c7dadb53ce"
+  },
+  "after": [
+    {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "name": "Timed search starts in the requested execution mode",
+          "passed": true
+        },
+        {
+          "name": "Search focus is requested",
+          "passed": true
+        },
+        {
+          "name": "AX replacement is delivered",
+          "passed": true
+        },
+        {
+          "name": "One-second search timer receives the complete requested value",
+          "passed": true
+        }
+      ],
+      "submitted": "1050",
+      "beforeCount": 4,
+      "receipt": "Text entered in the editor; normal validation runs when editing ends",
+      "helper_sha256": "1707c5ea7f0749e1485a6a1bdefc93f7ad7f47780621f0a9c689bb69b3ae3817",
+      "source_manifest_sha256": "80e845faacf5a1da0260f9642c151eed3ccdabee24dffb1434c4cbfc85bc9287"
+    },
+    {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "name": "Timed search starts in the requested execution mode",
+          "passed": true
+        },
+        {
+          "name": "Search focus is requested",
+          "passed": true
+        },
+        {
+          "name": "AX replacement is delivered",
+          "passed": true
+        },
+        {
+          "name": "One-second search timer receives the complete requested value",
+          "passed": true
+        }
+      ],
+      "submitted": "1050",
+      "beforeCount": 4,
+      "receipt": "Text entered in the editor; normal validation runs when editing ends",
+      "helper_sha256": "1707c5ea7f0749e1485a6a1bdefc93f7ad7f47780621f0a9c689bb69b3ae3817",
+      "source_manifest_sha256": "80e845faacf5a1da0260f9642c151eed3ccdabee24dffb1434c4cbfc85bc9287"
+    }
+  ],
+  "ordinaryRegression": {
+    "passed": true,
+    "cases": [
+      {
+        "case": "ordinary-interpreted",
+        "checks": 69,
+        "passed": true
+      },
+      {
+        "case": "ordinary-compiled",
+        "checks": 69,
+        "passed": true
+      },
+      {
+        "case": "dynamic-interpreted",
+        "checks": 69,
+        "passed": true
+      },
+      {
+        "case": "dynamic-compiled",
+        "checks": 69,
+        "passed": true
+      }
+    ],
+    "checks": 276
+  }
+}

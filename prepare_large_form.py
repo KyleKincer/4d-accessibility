@@ -29,6 +29,7 @@ NOTE = ("Readable note text. " * 4000)[:65536] + "END-OF-NOTE"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", required=True, type=Path)
+    parser.add_argument("--debounced", action="store_true", help="Exercise a search that submits after one second without a keystroke")
     args = parser.parse_args()
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
         parser.error("Close 4D before preparing the disposable fixture")
@@ -121,6 +122,34 @@ Case of
   $reply:=AXB_Form("stop"; New object)
 End case
 """)
+    if args.debounced:
+        (methods / "Compiler_Large.4dm").write_text("C_TEXT(LargeScope; $0)\n")
+        # Model application callbacks that make an idle poll costly enough to
+        # reach the adaptive one-second delay. Pending edits must bypass it.
+        (methods / "LargeScope.4dm").write_text('''#DECLARE() -> $scope : Text
+var $until : Integer
+$until:=Milliseconds+150
+While (Milliseconds<$until)
+End while
+$scope:="search"
+''')
+        path = methods / "LargeInput.4dm"
+        path.write_text(path.read_text().replace('Case of\n', '''Case of
+ : (Form event code=On After Keystroke)
+  Form.searchAt:=Milliseconds+1000
+  Form.observedText:=Get edited text
+  SET TIMER(60)
+''', 1))
+        path = methods / "LargeForm.4dm"
+        path.write_text(path.read_text().replace('"label"; "Large form";', '"label"; "Large form"; "scope"; Formula(LargeScope);').replace('  Form.ticks:=Form.ticks+1', '''  If ((Form.searchAt#Null) && (Milliseconds>=Form.searchAt))
+   Form.submitted:=Form.observedText
+   OB REMOVE(Form; "searchAt")
+   GOTO OBJECT(*; "Close")
+   SET TIMER(6)
+  End if
+  Form.ticks:=Form.ticks+1''').replace('  $state.compiled:=Is compiled mode', '''  $state.submitted:=Form.submitted
+  $state.observedText:=Form.observedText
+  $state.compiled:=Is compiled mode'''))
     objects = {}
     for index in range(600):
         objects[f"Item{index:03}"] = {
@@ -143,7 +172,7 @@ End case
         "width": 750,
         "height": 120,
         "method": "LargeInput",
-        "events": ["onBeforeKeystroke", "onDataChange"],
+        "events": ["onBeforeKeystroke", "onDataChange"] + (["onAfterKeystroke"] if args.debounced else []),
     }
     objects["Close"] = {
         "type": "button",
@@ -172,7 +201,7 @@ End case
         )
         + "\n"
     )
-    (FIXTURE / "Resources/note.txt").write_text(NOTE)
+    (FIXTURE / "Resources/note.txt").write_text("" if args.debounced else NOTE)
     hashes = {
         str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()
     }
@@ -199,6 +228,7 @@ End case
             / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"
         ),
         "component_sha256": sha(PACKAGE / "AccessibilityBridge.4DZ"),
+        "debounced": args.debounced,
     }
     (BUILD / "large-form-compile-report.json").write_text(
         json.dumps(report, indent=2) + "\n"

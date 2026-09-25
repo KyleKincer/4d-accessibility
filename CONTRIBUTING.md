@@ -62,6 +62,16 @@ python3 test_large_form.py --run --compiled --voiceover
 
 The VoiceOver mode reads the beginning and end of the complete form before the normal editing/validation suite. It rejects unresponsive speech and refuses to take over an existing VoiceOver session.
 
+For a search field that submits after one second without a keystroke:
+
+```sh
+python3 prepare_large_form.py --server /path/to/4D\ Server.app --debounced
+python3 test_debounced_input.py --run
+python3 test_debounced_input.py --run --compiled
+```
+
+This variant uses an empty field, the application's own timer and a deliberately costly scope callback. It checks that an AX value replacement reaches the search intact. The regression submitted only the first character because the first editor step retained the worker's idle delay. Subsequent steps already used fast polling. Prepare the ordinary large form again before running its long-note suite.
+
 Read each script's `--help` before choosing a case. Fixture preparers create disposable projects under ignored `build/`; run one 4D desktop fixture at a time. Synthetic AreaList tests accept `--area-list-plugin /path/to/ALP.bundle`. Use `--license-file /path/to/protected/alp.license` for an existing license file with mode 0600, or keep it in ignored `fixture/Resources/alp.license`. Add `--key-type integer` or `--key-type longint` to exercise existing numeric key arrays; `test_alp_grid_fixture.py --run --text bmp` tests supported text, while the default supplementary case remains a failing requirement. The vendor's license and redistribution terms remain separate.
 
 For the independent AreaList supplementary Unicode crash, see the [bridge-free reproduction](tests/AREA-LIST-UNICODE.md). The adapter rejects these requests before mutation; ordinary native 4D text editing has separate Unicode coverage.
