@@ -38,12 +38,16 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_NOTARY_API_KEY_BASE64: ${{ secrets.APPLE_NOTARY_API_KEY_BASE64 }}
+          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+          APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
           PLUGIN_ID_REGISTERED: ${{ vars.PLUGIN_ID_REGISTERED }}
         run: python3 ci/signing_keychain.py
       - name: Build and test matching packages
         run: |
           python3 ci/check_repository.py
           python3 test_install_host_methods.py
+          python3 test_signing_keychain.py
           python3 test.py
           python3 test_grids.py
           python3 build.py

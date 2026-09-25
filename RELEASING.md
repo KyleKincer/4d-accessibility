@@ -23,9 +23,11 @@ Configure these repository secrets for release jobs:
 | `APPLE_DEVELOPER_ID_CERTIFICATE` | Base64-encoded Developer ID Application `.p12` |
 | `APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD` | Password for that certificate |
 | `APPLE_SIGNING_IDENTITY` | Exact Developer ID Application signing identity |
-| `APPLE_ID` | Apple account used by notarization |
-| `APPLE_TEAM_ID` | Developer team ID |
-| `APPLE_APP_PASSWORD` | App-specific password for notarization |
+| `APPLE_NOTARY_API_KEY_BASE64` | Base64-encoded App Store Connect team API key `.p8` |
+| `APPLE_NOTARY_KEY_ID` | Key ID for that API key |
+| `APPLE_NOTARY_ISSUER_ID` | Issuer ID for that API key |
+
+The three API-key secrets are the preferred notarization path. Alternatively, set `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` for app-specific-password notarization. The signing certificate, its password and the identity are required in either case. [Apple documents both notarytool credential methods](https://developer.apple.com/documentation/technotes/tn3147-migrating-to-the-latest-notarization-tool).
 
 Set repository variable `PLUGIN_ID_REGISTERED` to `true` after registering the ID with 4D and updating both `manifest.json` and the lookup in `host/OptionalMethods/AXB_Host.4dm`. The workflow checks these prerequisites before building a release. Credentials are used only in a temporary runner keychain and removed in an unconditional cleanup step. Pull-request jobs have no signing credentials and cannot publish releases.
 
