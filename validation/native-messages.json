@@ -1,0 +1,178 @@
+{
+  "passed": false,
+  "date": "2026-09-25",
+  "scope": "Original CONFIRM and ALERT in a standalone project without any plugin, component or replacement form",
+  "runs": {
+    "arm64": {
+      "passed": false,
+      "plugin_free": true,
+      "architecture": "arm64",
+      "version": "20.8 build 20.102009",
+      "build": "20.0.8",
+      "macOS": "26.7",
+      "dialogs": [
+        {
+          "command": "CONFIRM",
+          "passed": false,
+          "message_readable": false,
+          "expected_buttons": [
+            "Continue",
+            "Cancel"
+          ],
+          "named_buttons": [],
+          "nodes": [
+            {
+              "role": "AXWindow",
+              "text": [
+                "",
+                null,
+                null
+              ],
+              "actions": [
+                "AXRaise"
+              ]
+            },
+            {
+              "role": "AXStaticText",
+              "text": [
+                null,
+                null,
+                ""
+              ],
+              "actions": []
+            }
+          ],
+          "size": [
+            480.0,
+            159.0
+          ]
+        },
+        {
+          "command": "ALERT",
+          "passed": false,
+          "message_readable": false,
+          "expected_buttons": [
+            "Close"
+          ],
+          "named_buttons": [],
+          "nodes": [
+            {
+              "role": "AXWindow",
+              "text": [
+                "",
+                null,
+                null
+              ],
+              "actions": [
+                "AXRaise"
+              ]
+            },
+            {
+              "role": "AXStaticText",
+              "text": [
+                null,
+                null,
+                ""
+              ],
+              "actions": []
+            }
+          ],
+          "size": [
+            480.0,
+            159.0
+          ]
+        }
+      ],
+      "cleanup": "Normal native acceptance; guarded Return used only where accessible buttons were absent."
+    },
+    "x86_64": {
+      "passed": false,
+      "plugin_free": true,
+      "architecture": "x86_64",
+      "version": "20.8 build 20.102009",
+      "build": "20.0.8",
+      "macOS": "26.7",
+      "dialogs": [
+        {
+          "command": "CONFIRM",
+          "passed": false,
+          "message_readable": false,
+          "expected_buttons": [
+            "Continue",
+            "Cancel"
+          ],
+          "named_buttons": [],
+          "nodes": [
+            {
+              "role": "AXWindow",
+              "text": [
+                "",
+                null,
+                null
+              ],
+              "actions": [
+                "AXRaise"
+              ]
+            },
+            {
+              "role": "AXStaticText",
+              "text": [
+                null,
+                null,
+                ""
+              ],
+              "actions": []
+            }
+          ],
+          "size": [
+            480.0,
+            159.0
+          ]
+        },
+        {
+          "command": "ALERT",
+          "passed": false,
+          "message_readable": false,
+          "expected_buttons": [
+            "Close"
+          ],
+          "named_buttons": [],
+          "nodes": [
+            {
+              "role": "AXWindow",
+              "text": [
+                "",
+                null,
+                null
+              ],
+              "actions": [
+                "AXRaise"
+              ]
+            },
+            {
+              "role": "AXStaticText",
+              "text": [
+                null,
+                null,
+                ""
+              ],
+              "actions": []
+            }
+          ],
+          "size": [
+            480.0,
+            159.0
+          ]
+        }
+      ],
+      "cleanup": "Normal native acceptance; guarded Return used only where accessible buttons were absent."
+    }
+  },
+  "source_sha256": {
+    "tests/native-messages/Project/NativeMessages.4DProject": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+    "tests/native-messages/Project/Sources/catalog.4DCatalog": "492085650ef7cc66ab3d1a0052c0dba7df1f40c2f8ebece25d193f899bcb9a0b",
+    "tests/native-messages/Project/Sources/DatabaseMethods/onStartup.4dm": "8c487e3b34181d9f3d23d02073a07a217a5fefb1a6d4d27c1bf615d479d0fc2f"
+  },
+  "reproduce": "Open tests/native-messages/Project/NativeMessages.4DProject in 4D on macOS and inspect both dialogs. See the adjacent README.",
+  "status": "Unresolved native 4D accessibility boundary; no visual replacement shipped."
+}
