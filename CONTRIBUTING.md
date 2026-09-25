@@ -54,6 +54,16 @@ python3 test_auto_subforms.py --run --launch --compiled
 
 The launcher verifies the project and window before sending input and closes only its disposable process. Compiled desktop execution needs the appropriate local 4D license.
 
+For existing controls drawn over a background button:
+
+```sh
+python3 prepare_layered_fixture.py --server /path/to/4D\ Server.app
+python3 test_layered_fixture.py --run
+python3 test_layered_fixture.py --run --compiled
+```
+
+This checks foreground activation, complete and partial obstruction, and a background action using a free region. The fixture retains its original buttons and layout. It describes their existing layers through `controls.<name>.layer`. The ordinary discovery suite separately covers checkbox, radio and popup behavior. Wait for both the handler result and final action receipt before submitting another action.
+
 For a large form with 600 ordinary buttons and a 65,546-character field:
 
 ```sh

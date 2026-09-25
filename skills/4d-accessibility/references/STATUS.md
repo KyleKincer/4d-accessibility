@@ -4,6 +4,8 @@ This is a development preview. The goal is complete access to the UI through sta
 
 ## Current development check
 
+Existing background buttons can declare their actual layer through `controls.<name>.layer`, defaulting to zero. Foreground actions no longer mistake a known background button for an obstruction. Button activation uses a free visible region; complete obstruction still rejects. Fourteen interpreted/compiled layer checks and 138 ordinary-control checks pass without changing the form layout, native plugin or component. [Evidence and limits](../../../validation/layered-controls.json). The 0.19.5 release packages predate this helper correction.
+
 Direct AreaList cell transitions now commit the complete active editor before opening another cell. Previously, the editor displayed the requested text but the vendor's direct cell-navigation call could save an incomplete cached value. Explicit vendor exit preserves existing validation; the bridge rechecks scope, binding, permissions and the target value before continuing. Six interpreted/compiled runs pass 216 checks, including Undo/Redo, rejected text, correction, text-to-checkbox activation and a scope change inside the exit handler. A separate compiled VoiceOver run passes 37 checks. This adds no application hooks and changes no native binary or component. [Before/after evidence](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/arealist-cell-transitions.json). The 0.19.5 release packages predate this correction.
 
 Calculated AreaList columns now avoid the vendor's invalid source-name query. The provider compares the actual array pointers, and calculated values reuse the application's existing display function through a `value` Formula. This also covers uncached rows, which AreaList Pro 11.4.2 cannot read directly. A missing description disables the grid before the invalid query. Interpreted and compiled fixtures verify distant values, ordinary editing/validation and retirement of stale cells after a column rebind with unchanged keys and scope. [Exact evidence](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/calculated-arealist.json). The 0.19.5 release packages predate this helper correction.
@@ -38,6 +40,7 @@ Automatic array grids also accept legacy Boolean hidden-row arrays directly. The
 
 ## Work required before full accessibility
 
+- Standard 4D `CONFIRM` and `ALERT` dialogs still need accessible text and actions. In 4D 20.8, the original dialog is a drawn canvas with no AppKit button children, and a `CALL FORM` probe did not run inside it. Preserve the original rendering; a visually different replacement does not close this gap.
 - Tabs, dials, editable pictures, hierarchical lists and standard-action-generated menus need implementation or further validation.
 - Classic current/named-selection grids, native hierarchy, custom/styled/protected editors and further AreaList layouts remain open.
 - Native grid headers pass array, collection and entity tests in interpreted and compiled modes. An earlier intermittent compiled entity activation reported delivery without a handler event. A fresh full run passes; its cause remains unresolved and is retained in the validation record.

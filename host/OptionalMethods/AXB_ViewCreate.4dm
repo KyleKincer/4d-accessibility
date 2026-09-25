@@ -38,6 +38,14 @@ If ($options.controls#Null)
    return New object("ok"; False; "error"; "invalidControlMetadata")
   End if
   $metadata:=$options.controls[$name]
+  If (OB Is defined($metadata; "layer"))
+   If (New collection(Is real; Is integer; Is longint).indexOf(Value type($metadata.layer))<0)
+    return New object("ok"; False; "error"; "invalidControlLayer")
+   End if
+   If (($metadata.layer#Int($metadata.layer)) | (Abs($metadata.layer)>32767))
+    return New object("ok"; False; "error"; "invalidControlLayer")
+   End if
+  End if
   If (OB Is defined($metadata; "adjust"))
    If (($metadata.adjust=Null) || (Value type($metadata.adjust)#Is object))
     return New object("ok"; False; "error"; "invalidControlAdjustment")

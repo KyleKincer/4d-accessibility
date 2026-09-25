@@ -4,6 +4,7 @@ var $description; $node; $target; $metadata : Object
 var $ignored; $value : Variant
 var $valueType : Integer
 var $left; $top; $right; $bottom; $x; $y : Integer
+var $point : Collection
 $result:=New object("status"; "rejected"; "message"; "Control is unavailable")
 $description:=AXB_Discover($options)
 For each ($node; $description.nodes)
@@ -104,16 +105,18 @@ Case of
     return
    End if
   End if
-  // Do not click through an overlapping control. A custom adapter can provide
-  // an unambiguous semantic operation for an intentionally layered control.
-  For each ($node; $description.nodes)
-   If (($node.id#$target.id) & (New collection("text"; "group").indexOf($node.role)<0))
-    If (($x>=$node.frame[0]) & ($x<($node.frame[0]+$node.frame[2])) & ($y>=$node.frame[1]) & ($y<($node.frame[1]+$node.frame[3])))
-     $result.message:="Control is overlapped"
-     return
-    End if
-   End if
-  End for each
+  If ($target.role="button")
+   $point:=AXB_ControlPoint($target; $description.nodes; $options; New collection($left; $top; $right; $bottom))
+  Else
+   // Checkboxes/radios must still hit their indicator, not a free caption.
+   $point:=AXB_ControlPoint($target; $description.nodes; $options; New collection($x-1; $y-1; $x+1; $y+1))
+  End if
+  If ($point.length#2)
+   $result.message:="Control is overlapped"
+   return
+  End if
+  $x:=$point[0]
+  $y:=$point[1]
   CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
   POST CLICK($x; $y; Current process)
   If ($target.role="button")
