@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Create or remove a temporary release keychain without logging credentials."""
 import base64
+import hashlib
 import os
 from pathlib import Path
 import secrets
@@ -8,8 +9,18 @@ import subprocess
 import sys
 
 
+APPLE_DEVELOPER_ID_G1 = Path(__file__).with_name("DeveloperIDCA.cer")
+APPLE_DEVELOPER_ID_G1_SHA256 = "7afc9d01a62f03a2de9637936d4afe68090d2de18d03f29c88cfb0b1ba63587f"
+
+
 def run(*args):
     subprocess.run(list(args), check=True, stdout=subprocess.DEVNULL)
+
+
+def identity_available(keychain, name):
+    result = subprocess.run(["security", "find-identity", "-v", "-p", "codesigning", str(keychain)],
+                            check=True, capture_output=True, text=True)
+    return name in result.stdout
 
 
 def main():
@@ -40,8 +51,13 @@ def main():
     run("security", "create-keychain", "-p", password, str(keychain))
     run("security", "set-keychain-settings", "-lut", "3600", str(keychain))
     run("security", "unlock-keychain", "-p", password, str(keychain))
+    if hashlib.sha256(APPLE_DEVELOPER_ID_G1.read_bytes()).hexdigest() != APPLE_DEVELOPER_ID_G1_SHA256:
+        raise SystemExit("Apple Developer ID intermediate certificate hash mismatch")
+    run("security", "import", str(APPLE_DEVELOPER_ID_G1), "-k", str(keychain))
     run("security", "import", str(certificate), "-P", os.environ[names[1]], "-k", str(keychain), "-T", "/usr/bin/codesign")
     run("security", "set-key-partition-list", "-S", "apple-tool:,apple:,codesign:", "-s", "-k", password, str(keychain))
+    if not identity_available(keychain, os.environ[names[2]]):
+        raise SystemExit("Imported Developer ID identity is unavailable for code signing")
     if notarization == api_names:
         with notary_key.open("wb") as out:
             os.chmod(notary_key, 0o600)
