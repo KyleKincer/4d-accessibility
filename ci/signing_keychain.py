@@ -50,6 +50,8 @@ def main():
         out.write(base64.b64decode(os.environ[names[0]], validate=True))
     run("security", "create-keychain", "-p", password, str(keychain))
     run("security", "set-keychain-settings", "-lut", "3600", str(keychain))
+    run("security", "list-keychains", "-d", "user", "-s", str(keychain))
+    run("security", "default-keychain", "-d", "user", "-s", str(keychain))
     run("security", "unlock-keychain", "-p", password, str(keychain))
     if hashlib.sha256(APPLE_DEVELOPER_ID_G1.read_bytes()).hexdigest() != APPLE_DEVELOPER_ID_G1_SHA256:
         raise SystemExit("Apple Developer ID intermediate certificate hash mismatch")

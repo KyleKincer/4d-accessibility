@@ -35,6 +35,7 @@ class SigningKeychainTests(unittest.TestCase):
             }
             calls = self.execute(environment)
             imports = [call for call in calls if call[:2] == ("security", "import")]
+            self.assertIn(("security", "default-keychain", "-d", "user", "-s", str(directory / "accessibility-release.keychain-db")), calls)
             self.assertEqual(imports[0][2], str(signing_keychain.APPLE_DEVELOPER_ID_G1))
             self.assertEqual(imports[1][2], str(directory / "accessibility-release.p12"))
             notary = next(call for call in calls if call[:3] == ("xcrun", "notarytool", "store-credentials"))
