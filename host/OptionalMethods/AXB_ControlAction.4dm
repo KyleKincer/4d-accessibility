@@ -106,10 +106,10 @@ Case of
    End if
   End if
   If ($target.role="button")
-   $point:=AXB_ControlPoint($target; $description.nodes; $options; New collection($left; $top; $right; $bottom))
+   $point:=AXB_ControlPoint($target; $description; $options; New collection($left; $top; $right; $bottom))
   Else
    // Checkboxes/radios must still hit their indicator, not a free caption.
-   $point:=AXB_ControlPoint($target; $description.nodes; $options; New collection($x-1; $y-1; $x+1; $y+1))
+   $point:=AXB_ControlPoint($target; $description; $options; New collection($x-1; $y-1; $x+1; $y+1))
   End if
   If ($point.length#2)
    $result.message:="Control is overlapped"

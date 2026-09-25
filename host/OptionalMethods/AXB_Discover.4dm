@@ -271,6 +271,7 @@ For ($i; 1; Size of array($names))
 End for
 // Infer only a close, vertically aligned static label to the left. Ambiguous
 // names remain diagnosable and can be supplied once in declarative metadata.
+$result.nodes:=AXB_ControlLayers($result.nodes; $options)
 $labels:=New collection
 For each ($node; $result.nodes)
  If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))

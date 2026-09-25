@@ -1,10 +1,34 @@
 // Find a point in the revealed control which no equal/higher layer covers.
 // Layers are explicit host metadata; FORM GET OBJECTS does not return z-order.
-#DECLARE($target : Object; $nodes : Collection; $options : Object; $bounds : Collection) -> $point : Collection
+#DECLARE($target : Object; $description : Object; $options : Object; $bounds : Collection) -> $point : Collection
 var $regions; $next; $rect; $best : Collection
-var $node; $metadata : Object
+var $nodes; $names : Collection
+var $node; $metadata; $known; $issue : Object
+var $name : Text
+var $coverLeft; $coverTop; $coverRight; $coverBottom : Integer
 var $layer; $otherLayer; $left; $top; $right; $bottom; $area; $bestArea : Real
 $point:=New collection
+$nodes:=$description.nodes.copy()
+$known:=New object
+For each ($node; $nodes)
+ $known[$node.objectName]:=True
+End for each
+$names:=$description.subforms.copy()
+For each ($issue; $description.unsupported)
+ $names.push($issue.object)
+End for each
+// A grid, subform or opaque vendor control still intercepts native mouse input,
+// even if it has a separate provider or no accessibility provider yet.
+For each ($name; $names)
+ If (Not(OB Is defined($known; $name)))
+  $known[$name]:=True
+  OBJECT GET COORDINATES(*; $name; $coverLeft; $coverTop; $coverRight; $coverBottom)
+  If (($coverRight>$coverLeft) & ($coverBottom>$coverTop))
+   $nodes.push(New object("id"; "obstacle."+$name; "objectName"; $name; "role"; "opaque"; \
+    "frame"; New collection($coverLeft; $coverTop; $coverRight-$coverLeft; $coverBottom-$coverTop)))
+  End if
+ End if
+End for each
 $layer:=0
 If (($options#Null) && ($options.controls#Null) && ($options.controls[$target.objectName]#Null))
  $metadata:=$options.controls[$target.objectName]

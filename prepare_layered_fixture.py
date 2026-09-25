@@ -38,7 +38,10 @@ def main():
     (sources / 'DatabaseMethods/onStartup.4dm').write_text('''ON ERR CALL("LayerError")
 var $window : Integer
 var $data : Object
-$data:=New object("ticks"; 0; "backgroundClicks"; 0; "coveredClicks"; 0; "partialClicks"; 0; "foregroundClicks"; 0)
+ARRAY BOOLEAN(LayerOpaqueSelection; 3)
+ARRAY TEXT(LayerOpaqueRows; 3)
+LayerOpaqueRows{1}:="Do not click through this grid"
+$data:=New object("ticks"; 0; "backgroundClicks"; 0; "coveredClicks"; 0; "partialClicks"; 0; "foregroundClicks"; 0; "frontClicks"; 0; "backClicks"; 0; "opaqueClicks"; 0)
 $window:=Open form window("Probe"; Plain form window)
 DIALOG("Probe"; $data)
 CLOSE WINDOW($window)
@@ -46,6 +49,14 @@ QUIT 4D
 ''')
     (methods / 'LayerError.4dm').write_text('File("/RESOURCES/status.json").setText(JSON Stringify(New object("error"; Error; "method"; Error method; "line"; Error line)))\nQUIT 4D\nABORT\n')
     (methods / 'LayerClick.4dm').write_text('''Case of
+ : (OBJECT Get name(Object current)="OpaqueGrid")
+  Form.opaqueClicks:=Form.opaqueClicks+1
+ : (OBJECT Get name(Object current)="StackFront")
+  Form.frontClicks:=Form.frontClicks+1
+  OBJECT SET VISIBLE(*; "StackFront"; False)
+ : (OBJECT Get name(Object current)="StackBack")
+  Form.backClicks:=Form.backClicks+1
+  OBJECT SET VISIBLE(*; "StackFront"; True)
  : (OBJECT Get name(Object current)="Background")
   Form.backgroundClicks:=Form.backgroundClicks+1
  : (OBJECT Get name(Object current)="Covered")
@@ -59,11 +70,11 @@ End case
     (methods / 'LayerForm.4dm').write_text('''var $reply : Object
 Case of
  : (Form event code=On Load)
-  Form.start:=AXB_Form("start"; New object("label"; "Layer test"; "controls"; New object("Background"; New object("label"; "Background action"; "layer"; -1))))
+  Form.start:=AXB_Form("start"; New object("label"; "Layer test"; "controls"; New object("Background"; New object("label"; "Background action"; "layer"; -1); "StackFront"; New object("layer"; 1))))
   SET TIMER(6)
  : (Form event code=On Timer)
   Form.ticks:=Form.ticks+1
-  File("/RESOURCES/status.json").setText(JSON Stringify(New object("ready"; True; "compiled"; Is compiled mode; "start"; Form.start; "ticks"; Form.ticks; "failure"; Form.axbFailure; "backgroundClicks"; Form.backgroundClicks; "coveredClicks"; Form.coveredClicks; "partialClicks"; Form.partialClicks; "foregroundClicks"; Form.foregroundClicks)))
+  File("/RESOURCES/status.json").setText(JSON Stringify(New object("ready"; True; "compiled"; Is compiled mode; "start"; Form.start; "ticks"; Form.ticks; "failure"; Form.axbFailure; "backgroundClicks"; Form.backgroundClicks; "coveredClicks"; Form.coveredClicks; "partialClicks"; Form.partialClicks; "foregroundClicks"; Form.foregroundClicks; "frontClicks"; Form.frontClicks; "backClicks"; Form.backClicks; "opaqueClicks"; Form.opaqueClicks)))
  : (Form event code=On Unload)
   $reply:=AXB_Form("stop"; New object)
 End case
@@ -74,6 +85,10 @@ End case
         objects[name].update({'action': 'cancel'} if name == 'Close' else {'method': 'LayerClick'})
     for name, left, top, width in [('Covered', 320, 20, 150), ('Cover', 320, 20, 150), ('Partial', 320, 100, 150), ('PartialCover', 400, 100, 70)]:
         objects[name] = {'type': 'button', 'text': name, 'left': left, 'top': top, 'width': width, 'height': 28, 'events': ['onClick'], 'method': 'LayerClick'}
+    for name in ['StackBack', 'StackFront']:
+        objects[name] = {'type': 'button', 'text': 'Stacked action', 'left': 320, 'top': 60, 'width': 150, 'height': 28, 'events': ['onClick'], 'method': 'LayerClick'}
+    (methods / 'Compiler_Layer.4dm').write_text('ARRAY BOOLEAN(LayerOpaqueSelection; 0)\nARRAY TEXT(LayerOpaqueRows; 0)\n')
+    objects['OpaqueGrid'] = {'type': 'listbox', 'dataSource': 'LayerOpaqueSelection', 'left': 0, 'top': 150, 'width': 500, 'height': 40, 'showHeaders': False, 'showFooters': False, 'events': ['onClick'], 'method': 'LayerClick', 'columns': [{'name': 'OpaqueColumn', 'dataSource': 'LayerOpaqueRows', 'width': 490, 'header': {'name': 'OpaqueHeader', 'text': 'Opaque'}, 'footer': {'name': 'OpaqueFooter'}}]}
     form = sources / 'Forms/Probe'
     form.mkdir(parents=True)
     (form / 'form.4DForm').write_text(json.dumps({'windowTitle': TITLE, 'width': 500, 'height': 200, 'method': 'LayerForm', 'events': ['onLoad', 'onTimer', 'onUnload'], 'pages': [None, {'objects': objects}]}, indent=2)+'\n')

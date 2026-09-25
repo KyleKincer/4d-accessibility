@@ -140,6 +140,8 @@ Replace `BackgroundDismiss` with the actual object name. `layer` is an integer f
 
 Button activation uses an uncovered part of the visible button. Equal or higher layers remain obstacles; a completely covered button rejects activation. A background button can still perform its existing action in a free area. Checkboxes and radio buttons retain their native indicator hit area. Mark purely decorative images with the existing `decorative: True` option, while keeping interactive pictures and background actions accessible.
 
+If one control on a declared higher layer completely covers a button, that button leaves the tree until the covering control moves or hides. This handles an application's default button moving over another button without publishing two indistinguishable actions. With equal layers, the bridge keeps the conservative overlap check because their actual order is unknown.
+
 Completion: activate foreground and background actions through AX and check which application handler ran. Confirm that a covered control cannot accidentally activate its neighbor. Invalid layer metadata returns `invalidControlLayer` during configuration.
 
 ### Child forms
