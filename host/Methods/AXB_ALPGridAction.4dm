@@ -101,10 +101,21 @@ If (New collection("gridReveal"; "gridEdit"; "gridPress"; "gridSetValue"; "gridS
     return
    End if
    $data.widget:=$value
+   If (Not($value.active) & (AL_GetAreaLongProperty($area; ALP_Area_EntryInProgress)=1))
+    AL_SetAreaLongProperty($area; ALP_Area_EntryExit; 1)
+    If (AL_GetAreaLongProperty($area; ALP_Area_EntryInProgress)=1)
+     $result.message:="AreaList rejected leaving the current editor"
+     return
+    End if
+    $data.resumeAfterExit:=True
+    return New object("status"; "pending"; "confirm"; Formula(AXB_ALPGridConfirm($1)); "data"; $data)
+   End if
    // A non-focusable checkbox toggles immediately through this vendor call.
    // A focusable checkbox only opens its editor. Never change the host's mode.
    If (Not($value.active) | Not(AXB_ControlFocus($options.objectName)))
-    GOTO OBJECT(*; $options.objectName)
+    If (Not(AXB_ControlFocus($options.objectName)))
+     GOTO OBJECT(*; $options.objectName)
+    End if
     AL_SetAreaTextProperty($area; ALP_Area_EntryGotoCell; String($position)+","+String($column.gridCell))
    End if
    return New object("status"; "pending"; "confirm"; Formula(AXB_ALPGridConfirm($1)); "data"; $data)
@@ -144,7 +155,20 @@ If (New collection("gridReveal"; "gridEdit"; "gridPress"; "gridSetValue"; "gridS
      return
     End if
    End if
-   GOTO OBJECT(*; $options.objectName)
+   If (AL_GetAreaLongProperty($area; ALP_Area_EntryInProgress)=1)
+    // EntryGotoCell can commit a stale cached value. Explicit exit flushes
+    // the native editor and invokes the application's normal validation.
+    AL_SetAreaLongProperty($area; ALP_Area_EntryExit; 1)
+    If (AL_GetAreaLongProperty($area; ALP_Area_EntryInProgress)=1)
+     $result.message:="AreaList rejected leaving the current editor"
+     return
+    End if
+    $data.resumeAfterExit:=True
+    return New object("status"; "pending"; "confirm"; Formula(AXB_ALPGridConfirm($1)); "data"; $data)
+   End if
+   If (Not(AXB_ControlFocus($options.objectName)))
+    GOTO OBJECT(*; $options.objectName)
+   End if
    AL_SetAreaTextProperty($area; ALP_Area_EntryGotoCell; String($position)+","+String($column.gridCell))
   End if
  End if

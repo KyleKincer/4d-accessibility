@@ -19,5 +19,8 @@ If (($area=AXBP_LeftData.area) & ($cause#AL Esc key action))
    aLeftDescription{$row}:=aLeftDescription{0}
    $accepted:=False
   End if
+  If (aLeftDescription{$row}="CHANGE SCOPE")
+   $data.scope:=Generate UUID
+  End if
  End if
 End if

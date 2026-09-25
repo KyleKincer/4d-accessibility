@@ -80,6 +80,8 @@ For AreaList checkboxes, add `--controls` when preparing the AreaList fixture, t
 
 For calculated AreaList columns, add `--calculated` when preparing, then run `test_alp_grid_fixture.py --run --text bmp` in interpreted and `--compiled` modes. The vendor callback and the accessibility value formula share one display function. The test reads a distant calculated cell, exercises ordinary editing and sorting, then replaces a column's array binding while retaining the row keys and scope. Retained cells must retire and the new cells must read the replacement array. Vendor errors fail the test.
 
+For direct moves between edited AreaList cells, add `--cell-transitions` to `test_alp_grid_fixture.py`. This shorter case verifies complete text commits, rejection by the existing exit handler, correction and a scope change during exit. The ordinary text suite also tests cell transitions after Undo/Redo. The checkbox suite checks transitions from a text editor into a checkbox, including rejected text. These tests assert committed values, not just text visible in the native editor.
+
 ## Source ownership
 
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.

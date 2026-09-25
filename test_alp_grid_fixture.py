@@ -21,6 +21,7 @@ def main():
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--compiled", action="store_true")
     parser.add_argument("--voiceover", action="store_true", help="Read the entire vendor grid and return to an ordinary field using VoiceOver")
+    parser.add_argument("--cell-transitions", action="store_true", help="Run only direct cell transitions and exit validation")
     parser.add_argument("--text", choices=["ascii", "bmp", "supplementary"], default="supplementary", help="Editor character coverage; supplementary remains a required failing gate")
     args = parser.parse_args()
     initial_edit = {"ascii": "Edited far row", "bmp": "Edited café row", "supplementary": "Edited far row 😀"}[args.text]
@@ -139,6 +140,48 @@ def main():
         check(len(left.read("AXVisibleRows")) < 20, "logical rows are separate from the actual viewport")
         editors = [e for e in group.read("AXChildren") or [] if e.read("AXRole") == "AXTextField"]
         check(sorted(e.read("AXValue") for e in editors) == ["Left note", "Right note"], "ordinary fields coexist with repeated grids without child bridge methods")
+        if args.cell_transitions:
+            first, second = left.cell(1, 598), left.cell(1, 597)
+            def enter(cell, value):
+                ax.wait_for(lambda: cell.read("AXValue") is not None, "Cell did not load", timeout=15)
+                check(cell.set_text(value) == 0, "direct cell edit request accepted")
+                ax.wait_for(lambda: any(e.read("AXValue") == value for e in cell.read("AXChildren") or []), "Complete text not entered", timeout=20)
+                settle()
+            enter(first, "First complete edit")
+            enter(second, "Second complete edit")
+            check(state()["leftValue"] == "First complete edit", "direct transition commits the complete first value")
+            ordinary = next(e for e in editors if e.read("AXValue") == "Left note")
+            assert ordinary.set_boolean("AXFocused", True) == 0
+            ax.wait_for(lambda: not state().get("editor") and second.read("AXValue") == "Second complete edit", "Second edit did not commit", timeout=15)
+            settle()
+            ax.wait_for(lambda: first.read("AXValue") == "First complete edit", "First committed value did not refresh", timeout=15)
+            enter(first, "REJECT")
+            rejections = state()["leftRejections"]
+            assert second.set_text("Must not apply") == 0
+            ax.wait_for(lambda: state()["leftRejections"] > rejections, "Exit validation did not run", timeout=15)
+            settle()
+            check(state().get("editor", {}).get("text") == "REJECT" and second.read("AXValue") == "Second complete edit", "rejected transition preserves both cells")
+            enter(first, "Corrected complete edit")
+            enter(second, "Final second edit")
+            check(state()["leftValue"] == "Corrected complete edit", "corrected value permits the next cell transition")
+            assert ordinary.set_boolean("AXFocused", True) == 0
+            ax.wait_for(lambda: not state().get("editor") and second.read("AXValue") == "Final second edit", "Corrected second edit did not commit", timeout=15)
+            settle()
+            enter(first, "CHANGE SCOPE")
+            old_id = second.read("AXIdentifier")
+            assert second.set_text("Stale continuation") == 0
+            ax.wait_for(lambda: find("Left lines") and find("Left lines").cell(1, 597).read("AXIdentifier") != old_id, "Exit handler did not replace scope", timeout=15)
+            settle()
+            current = find("Left lines").cell(1, 597)
+            ax.wait_for(lambda: current.read("AXValue") == "Final second edit", "New scope value did not load", timeout=15)
+            check(not state().get("editor") and second.set_text("STALE") != 0, "scope change during exit rejects the stale continuation")
+            check(state()["leftError"] == state()["rightError"] == 0, "transitions leave vendor errors clear")
+            assert close.press() == 0
+            process.wait(timeout=15)
+            check(process.returncode == 0 and json.loads(closed.read_text(encoding="utf-8-sig"))["accepted"] is True, "normal close accepted")
+            report["passed"] = True
+            report["cellTransitionsOnly"] = True
+            return
         # Registered compiled startup can finish On Load before the vendor
         # lays out its first viewport. Measure reads against the live viewport.
         initial_viewport = ax.wait_for(lambda: state() if state().get("leftTop", 0) > 0 and state().get("rightTop", 0) > 0 else None, "AreaList initial viewport did not finish layout")
@@ -253,16 +296,29 @@ def main():
         press_key(process, project, TITLE, editor.read("AXIdentifier"), 6, modifiers=(1 << 20) | (1 << 17))
         ax.wait_for(lambda: editor.read("AXValue") == edited, "Normal vendor Redo did not restore the editor", timeout=15)
         check(True, "the vendor's normal Redo shortcut restores the edit")
+        neighbor = left.cell(1, 597)
+        ax.wait_for(lambda: neighbor.read("AXValue") == "Left line 0599", "Neighbor did not load", timeout=15)
+        check(neighbor.set_text("Neighbor edit") == 0, "a second cell accepts a direct edit request")
+        ax.wait_for(lambda: any(e.read("AXValue") == "Neighbor edit" for e in neighbor.read("AXChildren") or []), "Second cell editor did not open", timeout=20)
+        settle()
+        check(state()["leftValue"] == edited, "moving directly between cells commits the first edit")
         ordinary = next(e for e in editors if e.read("AXValue") == "Left note")
         check(ordinary.set_boolean("AXFocused", True) == 0, "ordinary field accepts focus after vendor editing")
         ax.wait_for(lambda: state().get("leftValue") == edited and not state().get("editor"), "Normal vendor exit did not commit the value", timeout=15)
         settle()
         check(state()["rightValue"] == "Right line 0600", "editing preserves the other repeated grid's data")
+        ax.wait_for(lambda: neighbor.read("AXValue") == "Neighbor edit", "Second edit did not commit", timeout=15)
+        check(True, "leaving the second cell commits its own edit")
         check(state()["leftStarts"] > 0 and state()["leftEnds"] > 0, "the existing vendor entry and exit callbacks run")
         ax.wait_for(lambda: far.read("AXValue") == edited, "Committed value did not refresh", timeout=15)
         check(far.set_text("REJECT") == 0, "normal application validation receives accessibility edits")
         ax.wait_for(lambda: state().get("editor", {}).get("text") == "REJECT", "Rejected test value did not reach the editor", timeout=15)
         settle()
+        rejections = state()["leftRejections"]
+        check(neighbor.set_text("Must not apply") == 0, "another cell request reaches existing exit validation")
+        ax.wait_for(lambda: state()["leftRejections"] > rejections, "Cell transition did not call exit validation", timeout=15)
+        settle()
+        check(state().get("editor", {}).get("text") == "REJECT" and neighbor.read("AXValue") == "Neighbor edit", "rejected cell transition preserves both editors' data")
         ordinary.set_boolean("AXFocused", True)
         ax.wait_for(lambda: state()["leftRejections"] > 0, "Existing vendor exit validation did not run", timeout=15)
         settle()
