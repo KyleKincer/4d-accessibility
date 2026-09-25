@@ -18,6 +18,9 @@ windows = [w for w in app.slice("AXWindows", 0, 100)
            if w.read("AXTitle") == window_title]
 assert len(windows) == 1, "Window title must identify exactly one window"
 window = windows[0]
+assert app.read("AXFrontmost") is True, "Bring the selected application forward"
+focused = app.read("AXFocusedWindow")
+assert focused is not None and focused.same_as(window), "Focus the selected window"
 
 
 def find(identifier):
@@ -42,6 +45,8 @@ def find(identifier):
 
 
 root = find(root_id)
+ax.wait_for(lambda: root.read("AXEnabled") is True,
+            "Selected form is not ready for actions", timeout=15)
 field = find(field_id)
 assert field.read("AXRole") == "AXTextField"
 assert field.read("AXEnabled") is True
