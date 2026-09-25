@@ -14,7 +14,6 @@ class SigningKeychainTests(unittest.TestCase):
     def setup(self, directory):
         return {
             "RUNNER_TEMP": str(directory),
-            "PLUGIN_ID_REGISTERED": "true",
             "APPLE_DEVELOPER_ID_CERTIFICATE": base64.b64encode(b"certificate").decode(),
             "APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD": "certificate-password",
             "APPLE_SIGNING_IDENTITY": "Developer ID Application: Example",

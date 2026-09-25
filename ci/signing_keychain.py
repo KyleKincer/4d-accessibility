@@ -33,8 +33,6 @@ def main():
     for name in notarization:
         if not os.environ.get(name):
             raise SystemExit(f"Missing release secret: {name}")
-    if os.environ.get("PLUGIN_ID_REGISTERED") != "true":
-        raise SystemExit("Register the native plugin ID and set PLUGIN_ID_REGISTERED=true before publishing")
     password = secrets.token_urlsafe(32)
     with certificate.open("wb") as out:
         os.chmod(certificate, 0o600)

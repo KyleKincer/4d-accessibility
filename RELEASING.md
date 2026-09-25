@@ -2,7 +2,7 @@
 
 CI builds the native plugin and component from the same checkout. A passing build produces development artifacts, not a production-readiness claim. Production releases require Developer ID signing and Apple notarization.
 
-The signed release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such as `v0.19.5-rc.1`. The numeric portion must match `VERSION`. Allocate a permanent 4D plugin ID before production distribution. Coverage remains defined by [status](skills/4d-accessibility/references/STATUS.md), independently of signing.
+The signed release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such as `v0.19.5-rc.1`. The numeric portion must match `VERSION`. Keep the plug-in manifest ID consistent with its host lookup and check for a conflicting ID in each target application's other plug-ins. [4D's plug-in SDK](https://github.com/4d/4D-Plugin-SDK/blob/master/4D%20Plugin%20Wizard/Readme.md#manifestjson) defines the numeric manifest ID but does not describe an external registration step. No registration process was identified; a previous release gate requiring one has been removed. Coverage remains defined by [status](skills/4d-accessibility/references/STATUS.md), independently of signing.
 
 ## Development release candidates
 
@@ -10,7 +10,7 @@ Run the **Build and test** workflow on `main` with `preview_tag` set to `vVERSIO
 
 Download that draft's kit, verify `SHA256SUMS`, and run the live host checks with its packages. Record the exact results, then publish the same assets with `gh release edit vVERSION-rc.N --draft=false --prerelease --latest=false`. This final check covers the downloadable binaries, including their component/plugin pairing; CI itself has no licensed graphical 4D host. A preview with a known failure must name it in the release notes and attach the failing result alongside the successful checks. Stable publication requires all selected acceptance checks to pass.
 
-These candidates are ad hoc signed and not notarized. They are for local integration and evaluation on the documented test platform. The plugin ID is provisional. State both facts in the release notes, along with unresolved runtime limitations. A candidate is not a claim that every 4D form is accessible.
+These candidates are ad hoc signed and not notarized. They are for local integration and evaluation on the documented test platform. State those facts in the release notes, along with unresolved runtime limitations. A candidate is not a claim that every 4D form is accessible.
 
 Use this workflow to publish a candidate; pushing a tag directly invokes the signed workflow and requires its credentials. Production signing gates remain in that separate workflow.
 
@@ -29,7 +29,7 @@ Configure these repository secrets for release jobs:
 
 The three API-key secrets are the preferred notarization path. Alternatively, set `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` for app-specific-password notarization. The signing certificate, its password and the identity are required in either case. [Apple documents both notarytool credential methods](https://developer.apple.com/documentation/technotes/tn3147-migrating-to-the-latest-notarization-tool).
 
-Set repository variable `PLUGIN_ID_REGISTERED` to `true` after registering the ID with 4D and updating both `manifest.json` and the lookup in `host/OptionalMethods/AXB_Host.4dm`. The workflow checks these prerequisites before building a release. Credentials are used only in a temporary runner keychain and removed in an unconditional cleanup step. Pull-request jobs have no signing credentials and cannot publish releases.
+The repository check verifies that `manifest.json` and the lookup in `host/OptionalMethods/AXB_Host.4dm` use the same ID. Before adopting this kit in another host, inspect that host's other plug-in manifests for a conflicting ID. Credentials are used only in a temporary runner keychain and removed in an unconditional cleanup step. Pull-request jobs have no signing credentials and cannot publish releases.
 
 ## Artifacts
 

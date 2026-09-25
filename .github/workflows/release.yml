@@ -41,7 +41,6 @@ jobs:
           APPLE_NOTARY_API_KEY_BASE64: ${{ secrets.APPLE_NOTARY_API_KEY_BASE64 }}
           APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
           APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
-          PLUGIN_ID_REGISTERED: ${{ vars.PLUGIN_ID_REGISTERED }}
         run: python3 ci/signing_keychain.py
       - name: Build and test matching packages
         run: |

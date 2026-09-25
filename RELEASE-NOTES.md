@@ -1,4 +1,4 @@
-This is a development release candidate of 4D Accessibility for macOS and 4D 20.8. The downloads are ad hoc signed and not notarized. The 4D plugin ID remains provisional. Use this candidate for local integration and evaluation; it is not a production distribution.
+This is a development release candidate of 4D Accessibility for macOS and 4D 20.8. The downloads are ad hoc signed and not notarized. Use this candidate for local integration and evaluation; it is not a production distribution.
 
 VoiceOver now speaks the loaded state of a distant native grid checkbox without another navigation command after a popup interaction. The downloaded CI-built plugin and component pass 39 checks in native ARM compiled 4D, including repeated subforms, checkbox and popup actions, and return to an ordinary editor. Nine synthetic AppKit VoiceOver cases pass 135 checks, including leaving a delayed checkbox before its value arrives. [Exact downloaded asset hashes and checks](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/grid-value-speech-0.19.5-download.json).
 
