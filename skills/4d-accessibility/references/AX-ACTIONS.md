@@ -45,12 +45,11 @@ def find(identifier):
 
 
 root = find(root_id)
-ax.wait_for(lambda: root.read("AXEnabled") is True,
-            "Selected form is not ready for actions", timeout=15)
 field = find(field_id)
 assert field.read("AXRole") == "AXTextField"
 assert field.read("AXEnabled") is True
-assert field.is_settable("AXValue")
+ax.wait_for(lambda: field.is_settable("AXValue"),
+            "Selected field is not ready for editing", timeout=15)
 assert field.set_text("Accessibility test") == 0  # Transport accepted only.
 ax.wait_for(lambda: field.read("AXValue") == "Accessibility test",
             "Editor did not expose the requested text", timeout=15)
