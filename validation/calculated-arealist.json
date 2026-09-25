@@ -1,0 +1,561 @@
+{
+  "scope": "AreaList Pro calculated array columns in repeated subforms; 4D 20.8 on macOS 26, native ARM desktop. Before used no custom description and failed on the source-name query. After shares one display function between the vendor callback and the value Formula.",
+  "passed": true,
+  "reports": {
+    "before": {
+      "passed": false,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": false,
+          "name": "initial provider discovery leaves the vendor error clear"
+        }
+      ],
+      "areaListVersion": "11.4.2",
+      "areaListSha256": "b9721fc968ecfb3d0f9b59a5598315f6641e3dde2506192cce1393e980e0f1c2",
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69",
+      "vendorErrors": {
+        "leftError": 5,
+        "rightError": 5
+      }
+    },
+    "interpreted": {
+      "passed": true,
+      "compiled": false,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "column rebind retires stale editors with unchanged keys and scope"
+        },
+        {
+          "passed": true,
+          "name": "column rebind publishes its actual new source"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "areaListVersion": "11.4.2",
+      "areaListSha256": "b9721fc968ecfb3d0f9b59a5598315f6641e3dde2506192cce1393e980e0f1c2",
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69",
+      "vendorErrors": {
+        "leftError": 0,
+        "rightError": 0
+      }
+    },
+    "compiled": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "same stable row keys in repeated subforms retain separate identities and values"
+        },
+        {
+          "passed": true,
+          "name": "formatted numeric values retain the vendor's read-only behavior"
+        },
+        {
+          "passed": true,
+          "name": "styled text retains readable content without exposing vendor markup"
+        },
+        {
+          "passed": true,
+          "name": "picture indicators use application descriptions in each repeated form"
+        },
+        {
+          "passed": true,
+          "name": "vendor-invisible cell contents and actions remain unavailable"
+        },
+        {
+          "passed": true,
+          "name": "offscreen reads do not scroll or select the vendor area"
+        },
+        {
+          "passed": true,
+          "name": "protected vendor cells do not advertise an unsafe text editor"
+        },
+        {
+          "passed": true,
+          "name": "directly focused protected editor never publishes its plaintext"
+        },
+        {
+          "passed": true,
+          "name": "offscreen AreaList cell accepts the standard reveal action"
+        },
+        {
+          "passed": true,
+          "name": "reveal preserves selection and the other repeated viewport"
+        },
+        {
+          "passed": true,
+          "name": "complete AreaList selection accepts its logical row"
+        },
+        {
+          "passed": true,
+          "name": "only the owning AreaList and its existing shared handler receive selection"
+        },
+        {
+          "passed": true,
+          "name": "enterable AreaList cells advertise the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "transport accepts a request the vendor cannot safely implement"
+        },
+        {
+          "passed": true,
+          "name": "unsupported input is rejected before opening or changing the editor"
+        },
+        {
+          "passed": true,
+          "name": "standard AXValue starts vendor text entry"
+        },
+        {
+          "passed": true,
+          "name": "vendor focus identifies the correct repeated grid cell"
+        },
+        {
+          "passed": true,
+          "name": "standard selected range reaches the vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "active-editor replacement reaches host validation"
+        },
+        {
+          "passed": true,
+          "name": "rejected replacement preserves editor text and selection"
+        },
+        {
+          "passed": true,
+          "name": "partial replacement uses the existing vendor editor"
+        },
+        {
+          "passed": true,
+          "name": "vendor editor publishes its actual UTF-16 insertion position"
+        },
+        {
+          "passed": true,
+          "name": "selection after replacement maps to the vendor's byte offsets"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Undo shortcut accepts accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "the vendor's normal Redo shortcut restores the edit"
+        },
+        {
+          "passed": true,
+          "name": "ordinary field accepts focus after vendor editing"
+        },
+        {
+          "passed": true,
+          "name": "editing preserves the other repeated grid's data"
+        },
+        {
+          "passed": true,
+          "name": "the existing vendor entry and exit callbacks run"
+        },
+        {
+          "passed": true,
+          "name": "normal application validation receives accessibility edits"
+        },
+        {
+          "passed": true,
+          "name": "rejected exit preserves committed data and keeps the vendor editor open"
+        },
+        {
+          "passed": true,
+          "name": "the same editor can correct the rejected value"
+        },
+        {
+          "passed": true,
+          "name": "vendor sorting preserves logical cell identity at its new position"
+        },
+        {
+          "passed": true,
+          "name": "readiness disables only the loading repeated grid"
+        },
+        {
+          "passed": true,
+          "name": "readiness transition retires the prior grid generation"
+        },
+        {
+          "passed": true,
+          "name": "old invoice cell has no active geometry after scope change"
+        },
+        {
+          "passed": true,
+          "name": "existing form timer continues during grid actions"
+        },
+        {
+          "passed": true,
+          "name": "column rebind retires stale editors with unchanged keys and scope"
+        },
+        {
+          "passed": true,
+          "name": "column rebind publishes its actual new source"
+        },
+        {
+          "passed": true,
+          "name": "all provider calls leave the sticky vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "normal standard-action close is accepted by the actual host"
+        }
+      ],
+      "areaListVersion": "11.4.2",
+      "areaListSha256": "b9721fc968ecfb3d0f9b59a5598315f6641e3dde2506192cce1393e980e0f1c2",
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69",
+      "vendorErrors": {
+        "leftError": 0,
+        "rightError": 0
+      }
+    },
+    "compiledVoiceOver": {
+      "passed": true,
+      "compiled": true,
+      "checks": [
+        {
+          "passed": true,
+          "name": "one automatic root starts around the existing repeated AreaList forms"
+        },
+        {
+          "passed": true,
+          "name": "AreaList confirms the existing partner license with AL_Register result zero"
+        },
+        {
+          "passed": true,
+          "name": "actual native ARM desktop execution"
+        },
+        {
+          "passed": true,
+          "name": "both AreaLists expose all non-hidden logical rows"
+        },
+        {
+          "passed": true,
+          "name": "readable columns include pictures and styled text while excluding hidden keys and decorative spacers"
+        },
+        {
+          "passed": true,
+          "name": "initial provider discovery leaves the vendor error clear"
+        },
+        {
+          "passed": true,
+          "name": "calculated columns reuse the display function for uncached rows"
+        },
+        {
+          "passed": true,
+          "name": "logical rows are separate from the actual viewport"
+        },
+        {
+          "passed": true,
+          "name": "ordinary fields coexist with repeated grids without child bridge methods"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the first repeated AreaList from ordinary form controls"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the first AreaList cell without a loading placeholder"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reaches the final logical AreaList row"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reads the final picture column's text description"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver reading reveals the final row without moving the other instance"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver selects and reveals the real row without moving the other instance"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver returns to the beginning of the complete AreaList"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver leaves the vendor grid and reaches the ordinary editor"
+        },
+        {
+          "passed": true,
+          "name": "VoiceOver leaves the vendor error state clear"
+        }
+      ],
+      "areaListVersion": "11.4.2",
+      "areaListSha256": "b9721fc968ecfb3d0f9b59a5598315f6641e3dde2506192cce1393e980e0f1c2",
+      "architecture": "ARM64",
+      "native_sha256": "060750c1a86cd9a800ab30d6c410137bd3d903f105e68e5854cbb89c8bac09dc",
+      "component_sha256": "ee74c9ab0c184478f13312aa8d460ba5d76d9198df2a022c19403ad8c7907b69"
+    }
+  },
+  "before_provider_sha256": "23084ba39d5bd3059661742c80fa1a01bf146746040d2cead4b4b5752490b697",
+  "provider_sha256": "95eafda24fe5331d3877dbc5682aac56e74d5efe9e76fcf40f7e48ef15e4ed08",
+  "driver_sha256": "83be914c058064742ace706b5cde3fb7c8813871e50216e711214381c1d1ddd0",
+  "preparer_sha256": "bea1b0816732b9cdf63bed25a5e6a9658ba2bf93ab1dcd234c0d913185fdad27",
+  "getterProbe": {
+    "scope": "Separate interpreted fixture probe with vendor tracing disabled only for the probe. LastError cleared before each call. No product trace suppression.",
+    "calculatedFormattedVisibleRowError": 0,
+    "calculatedFormattedUncachedRowError": 4,
+    "ordinaryFormattedUncachedRowError": 0
+  },
+  "limitations": "Calculated values require a read-only application display Formula. This does not add custom calculated editors or further AreaList layouts."
+}

@@ -24,6 +24,7 @@ def main():
     parser.add_argument("--area-list-plugin", type=Path, default=ROOT / "fixture/Plugins/ALP.bundle", help="Vendor bundle to validate in this isolated fixture")
     parser.add_argument("--key-type", choices=["text", "integer", "longint"], default="text", help="Keep stable IDs in the vendor's original bound array type")
     parser.add_argument("--controls", action="store_true", help="Add Boolean and integer checkbox columns to the repeated form fixture")
+    parser.add_argument("--calculated", action="store_true", help="Use a vendor calculation callback and exercise a live column rebind")
     parser.add_argument("--license-file", type=Path, help="Existing protected vendor license file; contents are never printed")
     args = parser.parse_args()
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
@@ -102,7 +103,35 @@ def main():
     (FIXTURE / "Resources/launch.json").write_text(json.dumps(config) + "\n")
     config["keyType"] = args.key_type
     config["controls"] = args.controls
+    config["calculated"] = args.calculated
     (FIXTURE / "Resources/launch.json").write_text(json.dumps(config) + "\n")
+    if args.calculated:
+        method = methods / "AXBP_Child.4dm"
+        content = method.read_text().replace(' AL_SetHeaders(Form.area; 1; 1; "Item")',
+            ' AL_SetColumnLongProperty(Form.area; 1; ALP_Column_Calculated; 1)\n'
+            ' AL_SetColumnTextProperty(Form.area; 1; ALP_Column_Callback; "AXBP_Calculate"; 1)\n'
+            ' AL_SetHeaders(Form.area; 1; 1; "Item")')
+        method.write_text(content)
+        (methods / "AXBP_Calculate.4dm").write_text('''#DECLARE($area : Integer; $column : Integer; $kind : Integer; $values : Pointer; $first : Integer; $count : Integer)
+var $row : Integer
+For ($row; $first; $first+$count-1)
+ $values->{$row}:=AXBP_Item($row)
+End for
+''')
+        (methods / "AXBP_Item.4dm").write_text('#DECLARE($row : Integer) -> $text : Text\n$text:="SKU "+String($row; "0000")\n')
+        method = methods / "Compiler_AXBP.4dm"
+        method.write_text(method.read_text() + 'C_LONGINT(AXBP_Calculate; $1; $2; $3; $5; $6)\nC_POINTER(AXBP_Calculate; $4)\nC_LONGINT(AXBP_Item; $1)\nC_TEXT(AXBP_Item; $0)\n')
+        method = methods / "AXBP_Form.4dm"
+        method.write_text(method.read_text().replace('$child.grids.Items.columns:=New object(', '$child.grids.Items.columns:=New object("1"; New object("value"; Formula(AXBP_Item($1.row))); '))
+        form = sources / "Forms/Grid/form.4DForm"
+        content = json.loads(form.read_text())
+        content["pages"][1]["objects"]["Rebind"] = {"type": "button", "text": "Rebind", "left": 10, "top": 337, "width": 92, "height": 24, "method": "AXBP_Click", "events": ["onClick"]}
+        form.write_text(json.dumps(content, indent=2) + "\n")
+        method = methods / "AXBP_Click.4dm"
+        method.write_text(method.read_text().replace('End case',
+            ' : ($name="Rebind")\n'
+            '  Form.rebindError:=AL_SetArraysNam(Form.left.area; 2; 1; "aRightDescription")\n'
+            'End case'))
     if args.key_type != "text":
         command = "ARRAY INTEGER" if args.key_type == "integer" else "ARRAY LONGINT"
         for method in [methods / "Compiler_AXBP.4dm", methods / "AXBP_Open.4dm"]:
@@ -160,8 +189,8 @@ def main():
         line = diagnostic.get("lineInFile", 0)
         path = methods / (method + ".4dm")
         lines = path.read_text().splitlines() if path.exists() else []
-        known_call = 0 < line <= len(lines) and lines[line - 1].strip().removeprefix("$error:=").startswith(("AL_SetArraysNam(", "AL_SetHeaders(", "AL_SetWidths(", "AL_SetColumnLongProperty("))
-        if not (diagnostic.get("isError") is False and method == "AXBP_Child" and known_call
+        known_call = 0 < line <= len(lines) and lines[line - 1].strip().removeprefix("$error:=").removeprefix("Form.rebindError:=").startswith(("AL_SetArraysNam(", "AL_SetHeaders(", "AL_SetWidths(", "AL_SetColumnLongProperty("))
+        if not (diagnostic.get("isError") is False and method in ("AXBP_Child", "AXBP_Click") and known_call
                 and diagnostic.get("message") == "Missing parameter in the plug-in procedure call. (533.4)"):
             unexpected.append(diagnostic)
     passed = compiled.get("success") is True and not unexpected

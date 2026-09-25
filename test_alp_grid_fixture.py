@@ -131,6 +131,11 @@ def main():
         right = ax.wait_for(lambda: find("Right lines"), "Right logical AreaList missing", timeout=15)
         check(left.count("AXRows") == right.count("AXRows") == 599, "both AreaLists expose all non-hidden logical rows")
         check(left.count("AXColumns") == right.count("AXColumns") == 5, "readable columns include pictures and styled text while excluding hidden keys and decorative spacers")
+        check(state()["leftError"] == state()["rightError"] == 0, "initial provider discovery leaves the vendor error clear")
+        if config.get("calculated"):
+            calculated = left.cell(0, 598)
+            ax.wait_for(lambda: calculated.read("AXValue") == "SKU 0600", "Calculated offscreen value did not load", timeout=15)
+            check(True, "calculated columns reuse the display function for uncached rows")
         check(len(left.read("AXVisibleRows")) < 20, "logical rows are separate from the actual viewport")
         editors = [e for e in group.read("AXChildren") or [] if e.read("AXRole") == "AXTextField"]
         check(sorted(e.read("AXValue") for e in editors) == ["Left note", "Right note"], "ordinary fields coexist with repeated grids without child bridge methods")
@@ -285,6 +290,15 @@ def main():
         ax.wait_for(lambda: (current := first_cell_identifier()) is not None and current != identifier, "New invoice scope did not retire old cells", timeout=15)
         check(new.read("AXSize") in (None, (0, 0)), "old invoice cell has no active geometry after scope change")
         check(state()["timerTicks"] > ticks, "existing form timer continues during grid actions")
+        if config.get("calculated"):
+            old = find("Left lines").cell(1, 0)
+            identifier = old.read("AXIdentifier")
+            press("Rebind")
+            ax.wait_for(lambda: (current := first_cell_identifier()) is not None and current != identifier, "Column rebind did not retire old cells", timeout=15)
+            rebound = find("Left lines").cell(1, 0)
+            ax.wait_for(lambda: rebound.read("AXValue") == "Right line 0001", "Rebound column did not publish its new source", timeout=15)
+            check(old.read("AXSize") in (None, (0, 0)) and old.set_text("STALE") != 0, "column rebind retires stale editors with unchanged keys and scope")
+            check(True, "column rebind publishes its actual new source")
         check(state()["leftError"] == state()["rightError"] == 0, "all provider calls leave the sticky vendor error clear")
         close.press()
         process.wait(timeout=15)

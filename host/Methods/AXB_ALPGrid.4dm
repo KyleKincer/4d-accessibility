@@ -6,7 +6,7 @@ var $rows; $columns; $selected; $visible; $rowLayout; $columnLayout; $bindings; 
 var $handle; $keys; $previous : Pointer
 var $area; $error; $count; $columnCount; $row; $i; $number; $originX; $originY; $locked; $keyColumn; $entryRow; $entryColumn; $display; $entry; $kind : Integer
 var $left; $top; $width; $height; $scrollTop; $scrollLeft; $offset; $columnLeft; $columnWidth; $rowTop; $rowHeight; $headerHeight; $lockedRight; $x; $y; $right; $bottom : Real
-var $name; $key; $id; $label; $signature; $orderState : Text
+var $name; $key; $id; $label; $orderState : Text
 var $rebound; $typed; $editable; $checkbox; $focusable : Boolean
 ARRAY LONGINT($grid; 0)
 ARRAY LONGINT($selection; 0)
@@ -101,20 +101,25 @@ $error:=AL_GetObjects($area; ALP_Object_Selection; $selection)
 If ($error#0)
  return
 End if
-$bindings:=New collection
-For ($i; 1; $columnCount)
- $bindings.push(AL_GetColumnTextProperty($area; $i; ALP_Column_Source))
-End for
-$signature:=JSON Stringify(New collection($area; $bindings))
+// Source text is unavailable for calculated columns. Compare the actual
+// pointers already returned by the vendor, retaining them only in the host.
 $rebound:=False
 If ($state.binding#Null)
  $previous:=$state.keyPointer
- $rebound:=(Compare strings($signature; $state.binding; sk char codes)#0) | ($previous#$keys)
+ $rebound:=($state.area#$area) | ($state.binding.length#$columnCount) | ($previous#$keys)
 End if
+$bindings:=New collection
+For ($i; 1; $columnCount)
+ $bindings.push($sources{$i})
+ If (($state.binding#Null) && Not($rebound))
+  $previous:=$state.binding[$i-1]
+  $rebound:=($previous#$sources{$i})
+ End if
+End for
 If ($rebound)
  $state.generation:=Generate UUID
 End if
-$state.binding:=$signature
+$state.binding:=$bindings
 $state.keyPointer:=$keys
 $state.area:=$area
 $originX:=0
@@ -176,6 +181,12 @@ For ($i; 1; Size of array($grid))
    return
   End if
   If ($metadata.value=Null)
+   // The vendor cannot read an uncached calculated cell by logical row.
+   // Reuse the application's display function through a value Formula.
+   If (AL_GetColumnLongProperty($area; $number; ALP_Column_Calculated)#0)
+    $node.label:=$options.label+": calculated column "+String($number)+" needs a text description"
+    return
+   End if
    If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array).indexOf(Type($sources{$number}->))<0)
     $node.label:=$options.label+": column "+String($number)+" needs a text description"
     return

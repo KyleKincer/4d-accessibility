@@ -78,6 +78,8 @@ For the independent AreaList supplementary Unicode crash, see the [bridge-free r
 
 For AreaList checkboxes, add `--controls` when preparing the AreaList fixture, then run `test_alp_controls_fixture.py --run` in interpreted and `--compiled` modes. Add `--voiceover` for spoken navigation and activation. The fixture keeps normal vendor initialization and entry/exit callbacks in the child forms; the root uses the same grid configuration as other AreaList forms.
 
+For calculated AreaList columns, add `--calculated` when preparing, then run `test_alp_grid_fixture.py --run --text bmp` in interpreted and `--compiled` modes. The vendor callback and the accessibility value formula share one display function. The test reads a distant calculated cell, exercises ordinary editing and sorting, then replaces a column's array binding while retaining the row keys and scope. Retained cells must retire and the new cells must read the replacement array. Vendor errors fail the test.
+
 ## Source ownership
 
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.
