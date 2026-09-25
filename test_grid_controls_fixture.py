@@ -179,8 +179,15 @@ def main():
                 ax.wait_for(lambda: row_state()["approved"] is True, "VoiceOver did not activate the checkbox")
                 report["checkbox_receipt"] = settle()
                 check({41, 20}.issubset({event["event"] for event in state()["widgets"]["events"][before:]}), "VoiceOver checkbox activation reaches native validation")
-                time.sleep(.5)
-                report["checkbox_feedback"] = vo.read_caption()
+                # Speech is asynchronous even after the application confirms its value.
+                # Observe without moving focus or replaying the activation.
+                report["checkbox_feedback_samples"] = []
+                speech_started = time.monotonic()
+                def confirmed_checkbox_speech():
+                    caption = vo.read_caption()
+                    report["checkbox_feedback_samples"].append({"seconds": round(time.monotonic() - speech_started, 3), "caption": caption})
+                    return caption if "checked" in caption.lower() and "unchecked" not in caption.lower() else None
+                report["checkbox_feedback"] = ax.wait_for(confirmed_checkbox_speech, "VoiceOver did not announce the confirmed checkbox state", timeout=5)
                 check("checked" in report["checkbox_feedback"].lower() and "unchecked" not in report["checkbox_feedback"].lower(), "VoiceOver announces the confirmed checkbox state")
                 popup = vo.key("right")
                 check("Denied" in popup and "pop" in popup.lower(), "VoiceOver reads the popup's selected label and role")
