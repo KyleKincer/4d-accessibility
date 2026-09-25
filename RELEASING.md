@@ -2,7 +2,7 @@
 
 CI builds the native plugin and component from the same checkout. A passing build produces development artifacts, not a production-readiness claim. Production releases require Developer ID signing and Apple notarization.
 
-The signed release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such as `v0.19.4-rc.1`. The numeric portion must match `VERSION`. Allocate a permanent 4D plugin ID before production distribution. Coverage remains defined by [status](skills/4d-accessibility/references/STATUS.md), independently of signing.
+The signed release workflow runs on `vMAJOR.MINOR.PATCH` or prerelease tags such as `v0.19.5-rc.1`. The numeric portion must match `VERSION`. Allocate a permanent 4D plugin ID before production distribution. Coverage remains defined by [status](skills/4d-accessibility/references/STATUS.md), independently of signing.
 
 ## Development release candidates
 

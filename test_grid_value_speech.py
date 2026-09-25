@@ -17,7 +17,7 @@ import mac_ax as ax
 from voiceover import VoiceOver
 import doctor
 
-CASES = ("single", "forward", "back", "leave", "inspection", "reload", "checkbox", "popup")
+CASES = ("single", "forward", "back", "leave", "inspection", "reload", "checkbox", "checkbox_leave", "popup")
 SOURCES = (
     "src/Session.mm", "src/Session.h", "src/Grid.mm", "src/Grid.h",
     "src/Bridge.mm", "src/Bridge.h", "src/BridgePrivate.h", "src/GridNative.mm", "src/Limits.h",
@@ -36,7 +36,7 @@ def run_case(case, binary, ocr, output):
         print(f"PASS ({case}): {description}", flush=True)
 
     def spoken_column(caption, column):
-        if column == 0 and case == "checkbox":
+        if column == 0 and case in ("checkbox", "checkbox_leave"):
             return "Approved" in caption and "checked" in caption.lower() and "unchecked" not in caption.lower() and "checkbox" in caption.replace(" ", "").lower()
         if column == 0 and case == "popup":
             return "Decision" in caption and "Allowed" in caption and "pop" in caption.lower()
@@ -47,7 +47,7 @@ def run_case(case, binary, ocr, output):
     with tempfile.TemporaryDirectory(prefix="axb-grid-speech-") as directory:
         directory = Path(directory)
         with (output / f"{case}-host.log").open("w") as log:
-            mode = "--deferred-" + case if case in ("checkbox", "popup") else "--deferred-values"
+            mode = "--deferred-checkbox" if case == "checkbox_leave" else "--deferred-" + case if case in ("checkbox", "popup") else "--deferred-values"
             process = subprocess.Popen([str(binary), str(directory), mode], stdout=log, stderr=log)
         sequence, vo = 0, None
 
@@ -77,9 +77,9 @@ def run_case(case, binary, ocr, output):
             cell = table.cell(column, 0)
             ax.wait_for(lambda: cell.read("AXValue") == expected, "Asynchronous value did not arrive", timeout=20)
             check(True, "external AX reads the provider's actual value")
-            if case in ("checkbox", "popup"):
+            if case in ("checkbox", "checkbox_leave", "popup"):
                 content = cell.read("AXChildren")[0]
-                role, value = ("AXCheckBox", 1) if case == "checkbox" else ("AXPopUpButton", "Allowed")
+                role, value = ("AXCheckBox", 1) if case in ("checkbox", "checkbox_leave") else ("AXPopUpButton", "Allowed")
                 check(content.read("AXRole") == role and content.read("AXValue") == value, "loaded content exposes its actual control role and state")
                 check(content.read("AXEnabled") is False and "AXPress" not in content.actions(), "read-only control does not acquire a mutation action")
             observation = {"column": column, "leftGrid": leave, "captions": []}
@@ -151,9 +151,9 @@ def run_case(case, binary, ocr, output):
                 column = 0
             if case == "inspection":
                 check(table.cell(2, 0).read("AXValue") == "Loading", "an unrelated AX client inspects another cold cell")
-            if case == "leave":
+            if case in ("leave", "checkbox_leave"):
                 check("close button" in vo.key("home", command=True).lower().replace(",", ""), "VoiceOver leaves both cold cells for native window controls")
-            observe(column, leave=case == "leave")
+            observe(column, leave=case in ("leave", "checkbox_leave"))
             if case == "reload":
                 identity = cell.read("AXIdentifier")
                 command("reloadPages")
@@ -189,7 +189,7 @@ def run_case(case, binary, ocr, output):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true", help="Run the owned VoiceOver session on an unlocked desktop")
-    parser.add_argument("--case", choices=CASES, action="append", help="Run selected cases; default is all eight")
+    parser.add_argument("--case", choices=CASES, action="append", help="Run selected cases; default is all nine")
     parser.add_argument("--output", type=Path, default=ROOT / "build/grid-value-speech")
     args = parser.parse_args()
     output = args.output.resolve()
