@@ -16,6 +16,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', action='store_true')
     parser.add_argument('--compiled', action='store_true')
+    parser.add_argument('--voiceover', action='store_true')
     parser.add_argument('--keep-open', action='store_true')
     args = parser.parse_args()
     if not args.run or not ax.trusted() or not doctor.desktop_session()['unlocked']:
@@ -35,11 +36,12 @@ def main():
         report['checks'].append({'passed': bool(ok), 'name': name})
         print(('PASS: ' if ok else 'FAIL: ') + name, flush=True)
         assert ok, name
-    def state():
+    def state(check_errors=True):
         if not status.exists(): return {}
         try: value = json.loads(status.read_text(encoding='utf-8-sig'))
         except (ValueError, OSError): return {}
-        assert not value.get('error') and not value.get('failure'), value
+        if check_errors:
+            assert not value.get('error') and not value.get('failure'), value
         return value
     project = FIXTURE / 'Project/Layers.4DProject'
     with (BUILD / 'layered-desktop.log').open('w') as log:
@@ -68,15 +70,54 @@ def main():
         assert find(parent, 'Background action').press() == 0
         ax.wait_for(lambda:state().get('backgroundClicks') == 1, 'Background action did not find a free region', timeout=15)
         settle()
-        check(state()['coveredClicks'] == 0 and state()['partialClicks'] == 1, 'background action uses a free region without hitting a foreground control')
+        check(state()['coveredClicks'] == 0 and state()['partialClicks'] == 1 and state()['opaqueClicks'] == 0, 'background action avoids foreground controls and the grid without its own accessibility provider')
+        stacked = [e for e in parent.read('AXChildren') or [] if e.read('AXDescription') == 'Stacked action']
+        check(len(stacked) == 1, 'coincident buttons expose only the declared front button')
+        front = stacked[0]
+        assert front.press() == 0
+        ax.wait_for(lambda:state().get('frontClicks') == 1, 'Front button did not run', timeout=15)
+        settle()
+        back = ax.wait_for(lambda:find(parent, 'Stacked action') if find(parent, 'Stacked action') and not find(parent, 'Stacked action').same_as(front) else None, 'Covered button did not reappear', timeout=15)
+        check(front.read('AXEnabled') is not True and state()['backClicks'] == 0, 'hiding the front button exposes the original back button and retires the front action')
+        assert back.press() == 0
+        ax.wait_for(lambda:state().get('backClicks') == 1, 'Revealed button did not run', timeout=15)
+        settle()
+        restored = ax.wait_for(lambda:find(parent, 'Stacked action') if find(parent, 'Stacked action') and not find(parent, 'Stacked action').same_as(back) else None, 'Restored front button did not cover the back button', timeout=15)
+        check(restored.read('AXEnabled') is True and back.read('AXEnabled') is not True and front.read('AXEnabled') is not True and state()['frontClicks'] == 1, 'restoring the front button republishes it while retained hidden actions remain retired')
+        if args.voiceover:
+            from voiceover import VoiceOver
+            vo = VoiceOver(process, project, TITLE, BUILD / 'layered-voiceover', BUILD / 'read-fixture-screen')
+            try:
+                vo.start()
+                for counter in ['frontClicks', 'backClicks']:
+                    caption = vo.key('home', command=True)
+                    entered = False
+                    for _ in range(30):
+                        assert 'not responding' not in caption.lower(), caption
+                        if 'Stacked action' in caption and 'button' in caption.lower():
+                            vo.key('space')
+                            ax.wait_for(lambda:state().get(counter) == 2, 'VoiceOver did not invoke the exposed button', timeout=15)
+                            settle()
+                            check(True, 'VoiceOver reads and activates the exposed ' + counter + ' button')
+                            break
+                        if not entered and 'Layer test' in caption and 'group' in caption.lower():
+                            entered = True
+                            caption = vo.key('down', shift=True)
+                        else:
+                            caption = vo.key('right')
+                    else:
+                        raise AssertionError('VoiceOver did not reach the exposed stacked button')
+            finally:
+                vo.stop()
         assert find(parent, 'Close fixture').press() == 0
         process.wait(timeout=15)
         check(process.returncode == 0, 'ordinary close exits the fixture')
         report['passed'] = True
     finally:
         if 'parent' in locals(): report['lastReceipt'] = parent.read('AXHelp')
-        report['lastState'] = state()
-        (BUILD / ('layered-runtime-compiled.json' if args.compiled else 'layered-runtime-interpreted.json')).write_text(json.dumps(report, indent=2)+'\n')
+        report['lastState'] = state(check_errors=False)
+        mode = 'compiled' if args.compiled else 'interpreted'
+        (BUILD / ('layered-runtime-' + mode + ('-voiceover' if args.voiceover else '') + '.json')).write_text(json.dumps(report, indent=2)+'\n')
         if process.poll() is None:
             ax.capture_window(process.pid, BUILD / 'layered-last.png')
             if not args.keep_open:

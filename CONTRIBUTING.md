@@ -62,7 +62,9 @@ python3 test_layered_fixture.py --run
 python3 test_layered_fixture.py --run --compiled
 ```
 
-This checks foreground activation, complete and partial obstruction, and a background action using a free region. The fixture retains its original buttons and layout. It describes their existing layers through `controls.<name>.layer`. The ordinary discovery suite separately covers checkbox, radio and popup behavior. Wait for both the handler result and final action receipt before submitting another action.
+This checks foreground activation, complete and partial obstruction, a background action using a free region, and coincident buttons that cover/reveal each other through their existing handlers. The fixture describes their existing layers through `controls.<name>.layer`. The ordinary discovery suite separately covers checkbox, radio and popup behavior. Wait for both the handler result and final action receipt before submitting another action.
+
+Add `--voiceover` to the compiled invocation to read and activate each exposed stacked button as its handler hides or restores the other. A grid without a provider also verifies that background activation cannot click through opaque controls.
 
 For a large form with 600 ordinary buttons and a 65,546-character field:
 
