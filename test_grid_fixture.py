@@ -167,6 +167,27 @@ def main():
             check(process.returncode == 0, "normal host close succeeds after delayed confirmation")
             report["passed"] = True
             return
+        if config.get("slowDistantSelection"):
+            row = table.slice("AXRows", table.count("AXRows")-1, 1)[0]
+            identifier = row.read("AXIdentifier")
+            check(identifier not in [r.read("AXIdentifier") for r in table.read("AXVisibleRows") or []], "selection target begins outside the viewport")
+            check(row.press() == 0, "distant selection request reaches the native list box")
+            ax.wait_for(lambda: state().get("selected") == ["line-0600"], "Distant selection did not reach 4D", timeout=15)
+            settle()
+            report["selectionReceipt"] = group.read("AXHelp")
+            check(report["selectionReceipt"] == "List box selection confirmed", "slow application controller still confirms and reveals the selected row")
+            check(identifier in [r.read("AXIdentifier") for r in table.read("AXVisibleRows") or []], "confirmed distant selection is actually visible")
+            check(state()["hooks"] == 1 and state()["hookSelection"] == ["line-0600"], "selection controller runs exactly once with the intended selection")
+            check(find("Reject selection").press() == 0, "enable the application's normal selection rejection")
+            ax.wait_for(lambda: state().get("rejectSelection") is True and group.read("AXHelp") == "Activation dispatched through the control's normal event path", "Selection rejection control did not settle")
+            check(table.slice("AXRows", 0, 1)[0].press() == 0, "submit another selection to the slow rejecting controller")
+            ax.wait_for(lambda: group.read("AXHelp") == "Application changed the requested selection", "Slow controller rejection was not preserved", timeout=20)
+            check(state()["selected"] == [] and state()["hooks"] == 2, "slow controller rejection is reported without replaying its handler")
+            close.press()
+            process.wait(timeout=15)
+            check(process.returncode == 0, "normal close succeeds after slow selection")
+            report["passed"] = True
+            return
         if args.voiceover_probe or args.voiceover:
             from voiceover import VoiceOver
             vo = VoiceOver(process, project, TITLE, BUILD / "logical-grid-voiceover", BUILD / "read-fixture-screen")

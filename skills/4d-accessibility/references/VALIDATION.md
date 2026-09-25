@@ -8,6 +8,12 @@ The exact published [v0.19.5-rc.5](https://github.com/KyleKincer/4d-accessibilit
 
 The 0.19.5 provider passes 135 checks across nine synthetic AppKit VoiceOver cases, including leaving a delayed checkbox before it loads. The exact plugin and component extracted from both the local candidate ZIP and the downloaded CI candidate pass 39 checks each in an isolated native ARM compiled 4D 20.8 host on macOS 26.7. VoiceOver hears the loaded state of a distant checkbox without another navigation command, uses a native popup, and returns to an ordinary editor. The tests also verify repeated subform identity and checkbox actions. [Local package checks](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/grid-value-speech-0.19.5.json) and [downloaded asset hashes and checks](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/grid-value-speech-0.19.5-download.json) record the two builds separately. This resolves the specific 0.19.4 failure described below; it does not establish remote-client delivery, every control family, or production signing.
 
+## Slow selection controllers, September 25
+
+A native array-grid fixture selects a row outside the viewport and runs an existing selection controller that takes 150 ticks. The previous helper applies the selection, then rejects confirmation because the controller has consumed the two-second deadline. The corrected helper starts a new two-second observation period after the controller returns and after the requested scroll. It still checks identity, current form, selection and visibility, and never repeats either step. A controller that rejects the selection still produces a rejected receipt.
+
+The controlled regression passes 12 checks in interpreted 4D 20.8 and 12 in compiled ARM execution. This is a bounded delay test, not an unlimited latency guarantee. [Reports and reproduction](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/slow-selection.json).
+
 ## Visible selection confirmation, September 24
 
 The native array-grid fixture selects an already visible row while its application scope callback takes 70 ticks whenever an action is pending. The original helper changes the actual selection correctly, then reports `Application did not confirm the requested selection`. It spends another form callback on a scroll that does not change the viewport. The corrected helper completes after verifying the visible selection, avoiding that redundant cycle. The timeout and all identity, permission and application-handler checks remain unchanged.
