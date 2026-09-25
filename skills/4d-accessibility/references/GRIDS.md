@@ -133,6 +133,8 @@ The matching native build requires the `rowStates 1` capability. Array, collecti
 
 Programmatic row selection does not run the list box's ordinary object method. If that method refreshes dependent UI, put that work in one shared application method and call it from both the existing selection event and `onSelection`. The callback receives no arguments and runs later in the owning form. Event-dependent values such as `Form event code`, `Self` and `Object current` do not identify a user selection event there. Read the actual selection binding. Do not open another window from this refresh callback; completion requires the original form window to remain frontmost.
 
+Keyboard focus may still belong to a search field or another grid. Pass the grid's object name to a controller that needs it, for example `Formula(RefreshCategory("Categories"))`. Carry that name through the called methods instead of rediscovering it with `Object with focus`. Test selection after editing another field as well as immediately after opening the form.
+
 For automatic native grids, the bridge changes the native selection, waits for the binding, and calls `onSelection` once. It checks the binding again, reveals the last selected row, and confirms completion. A handler that changes the selection produces a rejected result without replay. Confirmation has a two-second deadline, so a slow handler can already have run when the bridge reports rejection. A rejected request does not imply rollback. AreaList uses its own selection readback path. The older explicit summary recipe below has a separate confirmation contract.
 
 ## Native checkbox and popup cells
