@@ -2,26 +2,11 @@
 
 Build the host helpers, component and native plugin from the same source commit. The version number alone does not identify the working capabilities. See the [current support status](../STATUS.md) before opting a form in; full accessibility implementation is still underway.
 
-For an ordinary form, keep its existing initialization and object methods. Start the bridge after initialization and stop it when the form unloads:
+For an ordinary form, [add a lifecycle area automatically](../AREA-INTEGRATION.md). Keep its existing initialization and object methods. Put labels and child metadata in the optional `AXB_Configure` callback.
 
-```4d
-var $accessibility : Object
-Case of
- : (Form event code=On Load)
-  // Keep the form's existing initialization here.
-  $accessibility:=AXB_Form("start"; New object("label"; "Contact details"; \
-   "onError"; Formula(ReportAccessibilityFailure($1))))
-  If (Not($accessibility.ok=True) & ($accessibility.error#"dependencyUnavailable"))
-   ReportAccessibilityFailure($accessibility)
-  End if
- : (Form event code=On Unload)
-  $accessibility:=AXB_Form("stop"; New object)
-End case
-```
+For example, run the installer with `--form Contact`. For a clear ordinary form, that is the only source change. If labels or providers are needed, create the central [configuration callback](../AREA-INTEGRATION.md#one-optional-configuration-method). Keep initialization in the existing form method. The area starts discovery after initialization and retires it when destroyed, with no new form events.
 
-`ReportAccessibilityFailure` is a placeholder for the existing application error reporter, accepting the failure object. Substitute its name and reuse its compiler declaration. Startup failures come from the returned object; later polling failures go to `onError`. The example works without adding properties to entity, class-instance or shared roots.
-
-Enable the form's `On Load` and `On Unload` events. Add these calls to the existing event branches; do not replace the form method. Check the start result and send errors through the application's existing diagnostic handling. `dependencyUnavailable` is expected when the optional packages are absent. An incompatible package returns an error before starting. The current source supports an object passed to `DIALOG` and the implicit `Form` object when that argument is omitted.
+The [manual interface](../MANUAL-LIFECYCLE.md) remains for 0.19.7 or deliberately application-owned registrations. Both paths support the existing `DIALOG` data and implicit `Form` object.
 
 This provider needs no `describe` or `apply` callback. It enumerates visible controls, reads their current geometry and state, and routes accessibility actions through the real controls. Buttons retain their object method and standard action. Text edits use the editor, keystroke handlers, undo, and normal validation when editing ends. A request being accepted does not mean the application's validation accepted the resulting value.
 
@@ -30,12 +15,12 @@ This provider needs no `describe` or `apply` callback. It enumerates visible con
 Buttons use their displayed titles. An untitled button, checkbox, radio button or popup can use its current 4D help tip. Inputs can use a nearby, vertically aligned static label to their left. Explicit labels take precedence over these defaults. An object name is a diagnostic fallback, so inspect the resulting names before shipping. A help tip can describe a temporary error instead of the action, or be too wordy to make a useful name. Supply a concise explicit label in those cases, for an icon button without a useful tip, or for an input whose visible label is arranged differently:
 
 ```4d
-var $controls; $options; $accessibility : Object
+// Configuration returned by the Contact case of AXB_Configure:
+var $controls : Object
 $controls:=New object
 $controls.SaveIcon:=New object("label"; "Save contact")
 $controls.AccountNumber:=New object("label"; "Account number")
 $options:=New object("label"; "Contact details"; "controls"; $controls)
-$accessibility:=AXB_Form("start"; $options)
 ```
 
 Keys in `controls` are the form's existing object names. Labels should describe the user-visible purpose, in the application's language. They are not method names or expressions to execute.
@@ -46,18 +31,17 @@ Masked inputs using 4D's `%password` font are detected before their value is rea
 
 ## Repeated and nested page subforms
 
-The current source discovers ordinary controls inside visible page subforms recursively. Keep the same start/stop calls on the root. The child forms need no bridge calls or extra events. Their existing data bindings and object methods continue to run in the child context. Offscreen controls remain discoverable; see [scrolling and reading order](../INTEGRATION.md#scrolling-and-reading-order) for reveal behavior and root-window requirements.
+The current source discovers ordinary controls inside visible page subforms recursively. Keep one lifecycle owner on the root: its area, or the manual start/stop calls. The child forms need no bridge calls or extra events. Their existing data bindings and object methods continue to run in the child context. Offscreen controls remain discoverable; see [scrolling and reading order](../INTEGRATION.md#scrolling-and-reading-order) for reveal behavior and root-window requirements.
 
 For example, an order form contains `ShippingAddress` and `BillingAddress`, both instances of the same address form. Name the two instances in the root's options:
 
 ```4d
-var $options; $accessibility : Object
+// Configuration returned by the Order case of AXB_Configure:
 $options:=New object("label"; "Order details")
 $options.children:=New object(\
  "ShippingAddress"; New object("label"; "Shipping address"); \
  "BillingAddress"; New object("label"; "Billing address"))
 $options.scope:=Formula(String(Form.orderID))
-$accessibility:=AXB_Form("start"; $options)
 ```
 
 The resulting fields are named `Shipping address: Name` and `Billing address: Name`. Each has its own accessibility identity and frame, even when both children intentionally bind the same business object. Child labels default to container object names; supply readable labels where those names would be confusing. A child's options can contain another `children` object for nested instances and `controls` for missing control labels.
@@ -85,4 +69,4 @@ The external tests check existing handlers, Unicode editing, partial replacement
 
 To expose all logical rows and columns of flat native array, collection, entity-selection and AreaList grids, add [`options.grids`](../GRIDS.md#add-a-native-array-list-box-without-replacing-discovery) alongside ordinary discovery. Other grid families, additional ordinary control families, text glyph geometry and whole-workflow assistive-technology validation remain required work. Existing explicit `describe`/`apply` integrations continue to use their callbacks. Installing the new provider does not silently combine those descriptions with automatic discovery.
 
-The integration goal is one shared form lifecycle hook plus declarative labels and special-control adapters where needed. These adapters belong in the reusable bridge. An application should not have to reproduce its validation, business actions, or ordinary control descriptions to become accessible.
+The integration goal is an installer-added area plus declarative labels and special-control adapters where needed. These adapters belong in the reusable bridge. An application should not have to reproduce its validation, business actions, or ordinary control descriptions to become accessible.

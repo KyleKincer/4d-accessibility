@@ -20,6 +20,7 @@ TITLE = "AXB complete 4D grid fixture"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", required=True, type=Path)
+    parser.add_argument("--area", action="store_true", help="Use area-owned root lifecycle")
     family = parser.add_mutually_exclusive_group()
     family.add_argument("--entity", action="store_true", help="Use a local synthetic entity selection and automatic primary-key identity")
     family.add_argument("--collection", action="store_true", help="Use the complete collection-backed provider with the same editor/action suite")
@@ -530,6 +531,23 @@ $scope:=Form.scope
         seed_report = json.loads((FIXTURE / "Resources/seed.json").read_text(encoding="utf-8-sig"))
         if seeded.returncode or seed_report.get("passed") is not True:
             raise RuntimeError("Synthetic entity seeding failed: " + str(seed_report))
+    if args.area:
+        from tests.area_integration import integrate
+        integrate(sources, {"AXBG_Root" if args.subform else "AXBG_Form": "Root" if args.subform else "Grid"})
+        if args.subform:
+            # The child exports its actual parent's startup result. Looking up
+            # AXB_FormContext inside a child correctly returns no root owner.
+            state_method.write_text(state_method.read_text().replace('"start"; AreaTestStart', '"start"; Form.startResult'))
+            root_method = methods / "AXBG_Root.4dm"
+            source = root_method.read_text()
+            source = source.replace('   Form.bridgeStarted:=False', '   $reply:=AXB_Form("start"; AXB_Configure(Current form name))')
+            source = source.replace('   Form.grid.startResult:=$reply', '   Form.grid.startResult:=AreaTestStart')
+            source = source.replace('   Form.peer.providerOptions.label:="Peer"\n', '')
+            source = source.replace('  If (Form.bridgeStarted=True)', '  Form.grid.startResult:=AreaTestStart\n  If (Form.bridgeStarted=True)')
+            root_method.write_text(source)
+            if args.repeated:
+                configuration = methods / "AXB_Configure.4dm"
+                configuration.write_text(configuration.read_text().replace(' : ($formName="Root")', ' : ($formName="Root")\n  Form.peer.providerOptions.label:="Peer"'))
     hashes = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     with tempfile.TemporaryDirectory(prefix="logical-grid-compile-", dir=BUILD) as temporary:
         driver = Path(temporary)
@@ -540,7 +558,7 @@ $scope:=Form.scope
             f'$options.components:=New collection(File({literal(FIXTURE / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ")}))\n'
             f'$result:=Compile project(File({literal(project)}); $options)', 90)
     passed = compiled.get("success") is True and not compiled.get("errors")
-    (BUILD / "logical-grid-compile-report.json").write_text(json.dumps({"passed": passed, "compiler": compiled, "sources_sha256": hashes,
+    (BUILD / "logical-grid-compile-report.json").write_text(json.dumps({"passed": passed, "area": args.area, "compiler": compiled, "sources_sha256": hashes,
         "native_sha256": sha(FIXTURE / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
         "component_sha256": sha(PACKAGE / "AccessibilityBridge.4DZ")}, indent=2) + "\n")
     print(f"{'PASS' if passed else 'FAIL'}: logical-grid fixture compilation")

@@ -1,10 +1,11 @@
 // Drive the existing editor. Never assign its backing variable or invoke a
 // second validation implementation. One Unicode character is posted per step
 // so a handler moving focus cannot send the rest of the text to another field.
-#DECLARE($action : Object; $node : Object; $options : Object) -> $result : Object
-var $data; $editor : Object
+#DECLARE($action : Object; $node : Object; $options : Object; $selectionReady : Boolean) -> $result : Object
+var $data; $editor; $control : Object
 var $text; $before; $insert : Text
 var $start; $end; $i; $code : Integer
+var $sameNames : Integer
 $result:=New object("status"; "rejected"; "message"; "Text operation is unavailable")
 If ($node.protected & ($action.operation#"setValue"))
  return
@@ -72,7 +73,23 @@ If (Not($node.protected))
   End if
  End for each
 End if
-$editor:=AXB_TextEditor($node; "select"; New collection($start; $end))
+If (Not($selectionReady) & ($node.gridCell=Null))
+ For each ($control; AXB_FormRoots[String(Current form window)].controls)
+  If (Compare strings($control.objectName; $node.objectName; sk char codes)=0)
+   $sameNames:=$sameNames+1
+  End if
+ End for each
+ If ($sameNames>1)
+  // 4D 20.8 can select a parent's identically named editor even from a child
+  // context. Navigate the already-confirmed editor instead; never post text
+  // until the exact instance and selection have survived another event cycle.
+  $data:=New object("action"; $action; "node"; $node; "options"; $options; "text"; $before; "start"; $start; "end"; $end; "deadline"; Milliseconds+120000; "selecting"; False; "selectAll"; $action.operation="setValue")
+  return AXB_TextSelect($data)
+ End if
+End if
+If (Not($selectionReady))
+ $editor:=AXB_TextEditor($node; "select"; New collection($start; $end))
+End if
 If (Not($editor.active))
  return
 End if

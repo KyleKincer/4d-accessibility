@@ -13,7 +13,7 @@ If (Not($reply.ok=True))
  return
 End if
 $token:=New shared object("active"; True; "pending"; False; "window"; Current form window; "owner"; Current process; "session"; $reply.session)
-$context:=New object("token"; $token; "poll"; $poll)
+$context:=New object("token"; $token; "poll"; $poll; "data"; Form)
 AXB_CoreWindows[String(Current form window)]:=$context
 // Compatibility alias for low-level integrations. Window ownership lives in
 // the process registry, since two dialogs can share the same business object.

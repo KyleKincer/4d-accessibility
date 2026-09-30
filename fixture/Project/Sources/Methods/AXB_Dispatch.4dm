@@ -3,11 +3,12 @@
 #DECLARE($operation : Text; $request : Object) -> $result : Object
 var $status : Text
 var $token : Object
+var $window : Integer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
-If (New collection("info"; "start"; "stop"; "node"; "exchange").indexOf($operation)<0)
+If (New collection("info"; "start"; "stop"; "node"; "exchange"; "focus").indexOf($operation)<0)
  return
 End if
 If ((Value type($request)#Is object) | ($request=Null))
@@ -15,7 +16,7 @@ If ((Value type($request)#Is object) | ($request=Null))
  return
 End if
 $status:=AXB Status
-If ((Position("Accessibility Bridge "; $status)#1) | (Position("; protocol 1;"; $status)=0))
+If ((Position("Accessibility Bridge "; $status)#1) | (Position("; protocol 1;"; $status)=0) | (Position("; sessions 2;"; $status)=0))
  $result.error:="incompatibleNativePlugin"
  return
 End if
@@ -23,8 +24,29 @@ If ($operation="info")
  $result:=New object("ok"; True; "hostAPI"; 1; "nativeStatus"; $status)
  return
 End if
+If ($operation="stop")
+ $window:=Current form window
+ If (OB Is defined($request; "window"))
+  If (New collection(Is real; Is integer; Is longint).indexOf(Value type($request.window))<0)
+   return New object("ok"; False; "error"; "invalidWindow")
+  End if
+  $window:=$request.window
+ End if
+ $token:=AXB_CoreWindows[String($window)].token
+ If (($token=Null) || (OB Is defined($request; "session") && ($request.session#$token.session)))
+  return New object("ok"; False; "error"; "inactiveSession")
+ End if
+ AXB_Stop($window; $token.session)
+ return New object("ok"; True)
+End if
 If (Current form window=0)
  $result.error:="noFormContext"
+ return
+End if
+If ($operation="focus")
+ If (Position("; focus 1;"; $status)>0)
+  $result:=JSON Parse(AXB Native focus(Current form window))
+ End if
  return
 End if
 If ((Value type(Form)#Is object) | (Form=Null))
@@ -41,11 +63,12 @@ Case of
    $result.error:="invalidPoll"
    return
   End if
-  AXB_Start($request.poll)
-  $result:=New object("ok"; True; "session"; Form.axb.token.session)
- : ($operation="stop")
-  AXB_Stop
-  $result:=New object("ok"; True)
+  $token:=AXB_Start($request.poll)
+  If (Not($token.active=True))
+   $result:=New object("ok"; False; "error"; $token.error)
+   return
+  End if
+  $result:=New object("ok"; True; "session"; $token.session; "token"; $token)
  : ($operation="node")
   If ((Value type($request.objectName)#Is text) | (Value type($request.id)#Is text) | (Value type($request.role)#Is text) | (Value type($request.label)#Is text) | (Value type($request.enabled)#Is Boolean))
    $result.error:="invalidNode"
@@ -59,10 +82,10 @@ Case of
   $result:=New object("ok"; True; "node"; AXB_ControlNode($request.objectName; $request.id; $request.role; $request.label; $request.value; $request.enabled))
  : ($operation="exchange")
   $result.error:="inactiveSession"
-  If (Value type(Form.axb)#Is object)
+  If (AXB_CoreWindows[String(Current form window)]=Null)
    return
   End if
-  $token:=Form.axb.token
+  $token:=AXB_CoreWindows[String(Current form window)].token
   If (Not($token.active) | ($token.session#$request.session) | ($token.window#Current form window) | ($token.owner#Current process))
    return
   End if

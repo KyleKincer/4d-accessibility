@@ -17,6 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--launch", action="store_true", help="Launch and close only this disposable fixture")
+    parser.add_argument("--modal-only", action="store_true", help="Run only the shared-data modal lifecycle regression")
     parser.add_argument("--compiled", action="store_true", help="With --launch, require compiled desktop execution")
     args = parser.parse_args()
     if not args.run or not trusted():
@@ -45,7 +46,7 @@ def main():
                 if ready.get("compiled") is not args.compiled:
                     raise RuntimeError("Fixture did not start in the requested execution mode")
                 activate_fixture(process, project, TITLE)
-                subprocess.run([sys.executable, str(ROOT / "test_auto_subforms.py"), "--run"], check=True)
+                subprocess.run([sys.executable, str(ROOT / "test_auto_subforms.py"), "--run", *(["--modal-only"] if args.modal_only else [])], check=True)
             finally:
                 if process.poll() is None:
                     process.terminate()
@@ -68,7 +69,7 @@ def main():
         if sha(FIXTURE / path) != compiled[key]:
             parser.error("Package changed after compilation")
     config = json.loads((FIXTURE / "Resources/launch.json").read_text())
-    report = {"passed": False, **config, "checks": [], "process_architecture": process_architecture(pid),
+    report = {"passed": False, **config, "modalOnly": args.modal_only, "checks": [], "process_architecture": process_architecture(pid),
               "compile_report_sha256": sha(BUILD / "auto-subforms-compile-report.json")}
 
     def check(value, name):
@@ -77,14 +78,18 @@ def main():
         if not value:
             raise AssertionError(name)
 
+    last_state = {}
     def state():
+        nonlocal last_state
         try:
             data = json.loads((FIXTURE / "Resources/runtime-status.json").read_text(encoding="utf-8-sig"))
         except (OSError, ValueError):
-            return {}
+            return last_state
         if data.get("phase") == "failed" or data.get("failure"):
             raise AssertionError(str(data))
-        return data if data.get("runId") == config["runId"] else {}
+        if data.get("runId") == config["runId"]:
+            last_state = data
+        return last_state
 
     try:
         ready = wait_for(lambda: state() if state().get("phase") == "ready" else None, "No current runtime state", 20)
@@ -109,158 +114,159 @@ def main():
             wait_for(lambda: group.read("AXHelp") not in (None, "Action queued", "Waiting for the application to complete the action"), "Action did not receive a receipt")
             state()
 
-        names = ["Shipping", "Billing", "Scalar", "Unbound", "Nested"]
-        if config.get("sharedFocus"):
-            check(all(child["sharedButtonBinding"] for child in state()["children"].values()),
-                  "all repeated buttons intentionally share the same process binding")
-        wait_for(lambda: all(field(name) for name in names), "All five input children were not published")
-        check(len([e for e in elements() if e.read("AXRole") == "AXTextField"]) == 5, "shared, scalar, unbound and nested inputs are exposed once")
-        check(len({field(name).read("AXIdentifier") for name in names}) == 5, "shared business data does not merge instance identities")
-        check(all(not child["hasProviderState"] for child in state()["children"].values()), "automatic child discovery does not write provider state into child business data")
-        check(field("Shipping").read("AXValue") == field("Billing").read("AXValue") == "Shared", "repeated children preserve their intentional shared binding")
-        check(field("Scalar").read("AXValue") == "Implicit", "scalar-bound child retains its implicit Form object")
-        check(field("Unbound").read("AXValue") == "Unbound" and state()["children"]["Unbound"]["nullForm"], "a child with Null Form still exposes its process-bound controls")
-        check(field("Nested").read("AXValue") == "Nested", "nested child reads its own data")
-        check(abs(field("Billing").read("AXPosition")[0] - field("Shipping").read("AXPosition")[0] - 320) <= 3, "repeated child frames use their own coordinate origin")
-        def at_center(element):
-            x, y = element.read("AXPosition")
-            width, height = element.read("AXSize")
-            return app.at_position(x + width / 2, y + height / 2)
-
-        for name in names:
-            if config.get("scrollFocus"):
-                check(field(name).perform("AXScrollToVisible") == 0, name + " field can be revealed without taking focus")
-                settle()
-            check(at_center(field(name)).read("AXIdentifier") == field(name).read("AXIdentifier"),
-                  name + " child is discoverable by external screen-position lookup")
-        for name in (("Billing", "Shipping", "Nested", "Scalar", "Unbound") if config.get("sharedFocus") else ("Billing", "Shipping", "Nested")):
-            button = find(name + ": Remember")
-            if not config.get("scrollFocus"):
-                check(at_center(button).read("AXIdentifier") == button.read("AXIdentifier"),
-                      name + " button is discoverable by external screen-position lookup")
-            check(button.set_boolean("AXFocused", True) == 0, name + " repeated button accepts a focus request")
-            if not config.get("focusObserver", True):
-                wait_for(lambda: any(issue["reason"] == "ambiguousFocus" for issue in state().get("diagnostics", {}).get("issues", [])), "Unobserved shared binding did not report ambiguous focus")
-                check(not any(e.read("AXFocused") is True for e in elements() if (e.read("AXDescription") or "").endswith(": Remember")),
-                      "without the observer no repeated button claims ambiguous native focus")
-                paths = {tuple(issue["path"]) for issue in state()["diagnostics"]["issues"] if issue["reason"] == "ambiguousFocus"}
-                check(paths == {("Left",), ("Right",), ("Scalar",), ("Unbound",), ("Panel", "Nested")},
-                      "ambiguous focus diagnostics identify every affected form path")
-                find("Close fixture").press()
-                wait_for(lambda: str(pid) not in subprocess.run(["pgrep", "-x", "4D"], capture_output=True, text=True).stdout.split(), "Negative-control fixture did not close", 10)
-                report["passed"] = True
-                return
-            wait_for(lambda: button.read("AXFocused") is True, name + " repeated button focus was not identified")
-            settle()
-            check(app.read("AXFocusedUIElement").read("AXIdentifier") == button.read("AXIdentifier")
-                  and sum(e.read("AXFocused") is True for e in elements()) == 1,
-                  name + " button focus identifies exactly one instance")
+        if not args.modal_only:
+            names = ["Shipping", "Billing", "Scalar", "Unbound", "Nested"]
             if config.get("sharedFocus"):
-                check(not any(issue["reason"] == "ambiguousFocus" for issue in state().get("diagnostics", {}).get("issues", [])),
-                      name + " observed focus has no ambiguous-focus diagnostic")
-            if config.get("scrollFocus"):
-                check(at_center(button).read("AXIdentifier") == button.read("AXIdentifier"),
-                      name + " focused button is revealed at its current position")
-        shipping, billing = field("Shipping"), field("Billing")
-        check(billing.set_text("Billing edit 🎸") == 0, "edit requested in the second shared-data child")
-        wait_for(lambda: billing.read("AXValue") == "Billing edit 🎸", "Shared child editor did not accept text")
-        settle()
-        focus = app.read("AXFocusedUIElement")
-        check(focus and focus.read("AXIdentifier") == billing.read("AXIdentifier"), "keyboard and application AX focus identify the actual repeated child")
-        check(sum(e.read("AXFocused") is True for e in elements()) == 1, "only one repeated child claims keyboard focus")
-        check(shipping.read("AXValue") == "Shared" and field("Scalar").read("AXValue") == "Implicit"
-              and field("Unbound").read("AXValue") == "Unbound" and field("Nested").read("AXValue") == "Nested",
-              "uncommitted text stays on the actual editor instead of every same-named child")
-        check(billing.set_range("AXSelectedTextRange", 0, 7) == 0, "selection requested inside the second shared-data child")
-        wait_for(lambda: billing.read("AXSelectedTextRange") == (0, 7), "Repeated child selection did not change")
-        settle()
-        check(billing.read("AXSelectedText") == "Billing", "selected text belongs to the actual repeated-child editor")
-        check(billing.set_string("AXSelectedText", "Office") == 0, "selected text replacement requested inside the child")
-        wait_for(lambda: billing.read("AXValue") == "Office edit 🎸", "Repeated child selection was not replaced")
-        settle()
-        check(shipping.read("AXValue") == "Shared", "selection replacement does not publish the other child's uncommitted buffer")
-        billing.set_text("Billing edit 🎸")
-        wait_for(lambda: billing.read("AXValue") == "Billing edit 🎸", "Repeated child text did not restore")
-        settle()
-        check(find("Billing: Remember").press() == 0, "button requested inside the second child")
-        wait_for(lambda: state()["children"]["Right"]["clicked"] == 1, "Child's ordinary button method did not run")
-        settle()
-        check(state()["children"]["Left"]["name"] == state()["children"]["Right"]["name"] == "Billing edit 🎸", "normal commit updates the shared business value in both children")
-        right_origin = state()["children"]["Right"]["origin"]
-        check(any(e["object"] == "Name" and e["origin"] == right_origin for e in state()["events"]), "normal validation runs in the targeted child context")
-        check(field("Nested").set_text("Nested edit") == 0, "edit requested two levels deep")
-        wait_for(lambda: field("Nested").read("AXValue") == "Nested edit", "Nested editor did not change")
-        settle()
-        find("Nested: Remember").press()
-        wait_for(lambda: state()["children"]["Nested"]["clicked"] == 1, "Nested button did not run")
-        settle()
-        check(state()["children"]["Nested"]["name"] == "Nested edit", "nested input commits through its normal editor")
-        for name in ("Scalar", "Unbound"):
-            value = name + " edit 🎹"
-            check(field(name).set_text(value) == 0, name + " child accepts an editor action")
-            wait_for(lambda: field(name).read("AXValue") == value, name + " editor did not receive text")
+                check(all(child["sharedButtonBinding"] for child in state()["children"].values()),
+                      "all repeated buttons intentionally share the same process binding")
+            wait_for(lambda: all(field(name) for name in names), "All five input children were not published")
+            check(len([e for e in elements() if e.read("AXRole") == "AXTextField"]) == 5, "shared, scalar, unbound and nested inputs are exposed once")
+            check(len({field(name).read("AXIdentifier") for name in names}) == 5, "shared business data does not merge instance identities")
+            check(all(not child["hasProviderState"] for child in state()["children"].values()), "automatic child discovery does not write provider state into child business data")
+            check(field("Shipping").read("AXValue") == field("Billing").read("AXValue") == "Shared", "repeated children preserve their intentional shared binding")
+            check(field("Scalar").read("AXValue") == "Implicit", "scalar-bound child retains its implicit Form object")
+            check(field("Unbound").read("AXValue") == "Unbound" and state()["children"]["Unbound"]["nullForm"], "a child with Null Form still exposes its process-bound controls")
+            check(field("Nested").read("AXValue") == "Nested", "nested child reads its own data")
+            check(abs(field("Billing").read("AXPosition")[0] - field("Shipping").read("AXPosition")[0] - 320) <= 3, "repeated child frames use their own coordinate origin")
+            def at_center(element):
+                x, y = element.read("AXPosition")
+                width, height = element.read("AXSize")
+                return app.at_position(x + width / 2, y + height / 2)
+
+            for name in names:
+                if config.get("scrollFocus"):
+                    check(field(name).perform("AXScrollToVisible") == 0, name + " field can be revealed without taking focus")
+                    settle()
+                check(at_center(field(name)).read("AXIdentifier") == field(name).read("AXIdentifier"),
+                      name + " child is discoverable by external screen-position lookup")
+            for name in (("Billing", "Shipping", "Nested", "Scalar", "Unbound") if config.get("sharedFocus") else ("Billing", "Shipping", "Nested")):
+                button = find(name + ": Remember")
+                if not config.get("scrollFocus"):
+                    check(at_center(button).read("AXIdentifier") == button.read("AXIdentifier"),
+                          name + " button is discoverable by external screen-position lookup")
+                check(button.set_boolean("AXFocused", True) == 0, name + " repeated button accepts a focus request")
+                if not config.get("focusObserver", True):
+                    wait_for(lambda: any(issue["reason"] == "ambiguousFocus" for issue in state().get("diagnostics", {}).get("issues", [])), "Unobserved shared binding did not report ambiguous focus")
+                    check(not any(e.read("AXFocused") is True for e in elements() if (e.read("AXDescription") or "").endswith(": Remember")),
+                          "without the observer no repeated button claims ambiguous native focus")
+                    paths = {tuple(issue["path"]) for issue in state()["diagnostics"]["issues"] if issue["reason"] == "ambiguousFocus"}
+                    check(paths == {("Left",), ("Right",), ("Scalar",), ("Unbound",), ("Panel", "Nested")},
+                          "ambiguous focus diagnostics identify every affected form path")
+                    find("Close fixture").press()
+                    wait_for(lambda: str(pid) not in subprocess.run(["pgrep", "-x", "4D"], capture_output=True, text=True).stdout.split(), "Negative-control fixture did not close", 10)
+                    report["passed"] = True
+                    return
+                wait_for(lambda: button.read("AXFocused") is True, name + " repeated button focus was not identified")
+                settle()
+                check(app.read("AXFocusedUIElement").read("AXIdentifier") == button.read("AXIdentifier")
+                      and sum(e.read("AXFocused") is True for e in elements()) == 1,
+                      name + " button focus identifies exactly one instance")
+                if config.get("sharedFocus"):
+                    check(not any(issue["reason"] == "ambiguousFocus" for issue in state().get("diagnostics", {}).get("issues", [])),
+                          name + " observed focus has no ambiguous-focus diagnostic")
+                if config.get("scrollFocus"):
+                    check(at_center(button).read("AXIdentifier") == button.read("AXIdentifier"),
+                          name + " focused button is revealed at its current position")
+            shipping, billing = field("Shipping"), field("Billing")
+            check(billing.set_text("Billing edit 🎸") == 0, "edit requested in the second shared-data child")
+            wait_for(lambda: billing.read("AXValue") == "Billing edit 🎸", "Shared child editor did not accept text")
             settle()
-            check(app.read("AXFocusedUIElement").read("AXIdentifier") == field(name).read("AXIdentifier"),
-                  name + " child owns application accessibility focus")
-            find(name + ": Remember").press()
-            wait_for(lambda: state()["children"][name]["clicked"] == 1, name + " ordinary button did not run")
+            focus = app.read("AXFocusedUIElement")
+            check(focus and focus.read("AXIdentifier") == billing.read("AXIdentifier"), "keyboard and application AX focus identify the actual repeated child")
+            check(sum(e.read("AXFocused") is True for e in elements()) == 1, "only one repeated child claims keyboard focus")
+            check(shipping.read("AXValue") == "Shared" and field("Scalar").read("AXValue") == "Implicit"
+                  and field("Unbound").read("AXValue") == "Unbound" and field("Nested").read("AXValue") == "Nested",
+                  "uncommitted text stays on the actual editor instead of every same-named child")
+            check(billing.set_range("AXSelectedTextRange", 0, 7) == 0, "selection requested inside the second shared-data child")
+            wait_for(lambda: billing.read("AXSelectedTextRange") == (0, 7), "Repeated child selection did not change")
             settle()
-            check(state()["children"][name]["name"] == value, name + " edit commits through the normal binding")
-        old_left, right_id = field("Shipping"), field("Billing").read("AXIdentifier")
-        old_button = find("Shipping: Remember")
-        old_id = old_left.read("AXIdentifier")
-        find("Replace left").press()
-        wait_for(lambda: (current := field("Shipping")) and current.read("AXIdentifier") != old_id, "Same-form/data replacement kept old identity")
-        settle()
-        wait_for(lambda: state().get("invalidated"), "Replacement result was not published by the host timer")
-        check(state()["invalidated"]["matchedParents"] == 1, "replacement boundary finds the owning parent")
-        check(field("Billing").read("AXIdentifier") == right_id, "replacing one child preserves its sibling identity")
-        old_left.set_text("Stale replacement edit")
-        time.sleep(.3)
-        check(field("Shipping").read("AXValue") == "Billing edit 🎸", "retained control cannot edit its same-data replacement")
-        def check_observed_lifetime(previous, boundary):
-            current = find("Shipping: Remember")
-            check(current.read("AXIdentifier") != previous.read("AXIdentifier"), boundary + " gives the button a new identity")
-            current.set_boolean("AXFocused", True)
-            wait_for(lambda: current.read("AXFocused") is True, boundary + " did not observe the new button's focus")
+            check(billing.read("AXSelectedText") == "Billing", "selected text belongs to the actual repeated-child editor")
+            check(billing.set_string("AXSelectedText", "Office") == 0, "selected text replacement requested inside the child")
+            wait_for(lambda: billing.read("AXValue") == "Office edit 🎸", "Repeated child selection was not replaced")
             settle()
-            previous.set_boolean("AXFocused", True)
-            time.sleep(.2)
-            check(current.read("AXFocused") is True and previous.read("AXFocused") is not True,
-                  boundary + " cannot transfer observed focus back to a retired button")
-        if config.get("sharedFocus"):
-            check_observed_lifetime(old_button, "replacement")
-        hidden = field("Shipping")
-        find("Hide left").press()
-        wait_for(lambda: field("Shipping") is None, "Hidden child remains published")
-        hidden.set_text("Hidden edit")
-        time.sleep(.3)
-        check(state()["children"]["Left"]["name"] == "Billing edit 🎸", "hidden ancestor blocks retained child actions")
-        find("Hide left").press()
-        wait_for(lambda: field("Shipping"), "Child did not return")
-        settle()
-        find("Disable right").press()
-        wait_for(lambda: field("Billing").read("AXEnabled") is False, "Disabled ancestor is not reflected")
-        field("Billing").set_text("Disabled edit")
-        time.sleep(.3)
-        check(state()["children"]["Right"]["name"] == "Billing edit 🎸", "disabled ancestor blocks child edits")
-        find("Disable right").press()
-        wait_for(lambda: field("Billing").read("AXEnabled") is True, "Child did not re-enable")
-        settle()
-        old_nested, old_id = field("Nested"), field("Nested").read("AXIdentifier")
-        old_button = find("Shipping: Remember")
-        find("Change record").press()
-        wait_for(lambda: (current := field("Nested")) and current.read("AXIdentifier") != old_id,
-                 "Root scope did not invalidate descendants")
-        settle()
-        check(group.read("AXHelp") == "Activation dispatched through the control's normal event path",
-              "a normal button that changes record scope acknowledges activation without claiming a business result")
-        old_nested.set_text("Previous record")
-        time.sleep(.3)
-        check(field("Nested").read("AXValue") == "Nested edit", "declarative record scope rejects retained descendant actions")
-        if config.get("sharedFocus"):
-            check_observed_lifetime(old_button, "record change")
-        check(state()["ticks"] > 5, "ordinary parent timer remains active")
+            check(shipping.read("AXValue") == "Shared", "selection replacement does not publish the other child's uncommitted buffer")
+            billing.set_text("Billing edit 🎸")
+            wait_for(lambda: billing.read("AXValue") == "Billing edit 🎸", "Repeated child text did not restore")
+            settle()
+            check(find("Billing: Remember").press() == 0, "button requested inside the second child")
+            wait_for(lambda: state()["children"]["Right"]["clicked"] == 1, "Child's ordinary button method did not run")
+            settle()
+            check(state()["children"]["Left"]["name"] == state()["children"]["Right"]["name"] == "Billing edit 🎸", "normal commit updates the shared business value in both children")
+            right_origin = state()["children"]["Right"]["origin"]
+            check(any(e["object"] == "Name" and e["origin"] == right_origin for e in state()["events"]), "normal validation runs in the targeted child context")
+            check(field("Nested").set_text("Nested edit") == 0, "edit requested two levels deep")
+            wait_for(lambda: field("Nested").read("AXValue") == "Nested edit", "Nested editor did not change")
+            settle()
+            find("Nested: Remember").press()
+            wait_for(lambda: state()["children"]["Nested"]["clicked"] == 1, "Nested button did not run")
+            settle()
+            check(state()["children"]["Nested"]["name"] == "Nested edit", "nested input commits through its normal editor")
+            for name in ("Scalar", "Unbound"):
+                value = name + " edit 🎹"
+                check(field(name).set_text(value) == 0, name + " child accepts an editor action")
+                wait_for(lambda: field(name).read("AXValue") == value, name + " editor did not receive text")
+                settle()
+                check(app.read("AXFocusedUIElement").read("AXIdentifier") == field(name).read("AXIdentifier"),
+                      name + " child owns application accessibility focus")
+                find(name + ": Remember").press()
+                wait_for(lambda: state()["children"][name]["clicked"] == 1, name + " ordinary button did not run")
+                settle()
+                check(state()["children"][name]["name"] == value, name + " edit commits through the normal binding")
+            old_left, right_id = field("Shipping"), field("Billing").read("AXIdentifier")
+            old_button = find("Shipping: Remember")
+            old_id = old_left.read("AXIdentifier")
+            find("Replace left").press()
+            wait_for(lambda: (current := field("Shipping")) and current.read("AXIdentifier") != old_id, "Same-form/data replacement kept old identity")
+            settle()
+            wait_for(lambda: state().get("invalidated"), "Replacement result was not published by the host timer")
+            check(state()["invalidated"]["matchedParents"] == 1, "replacement boundary finds the owning parent")
+            check(field("Billing").read("AXIdentifier") == right_id, "replacing one child preserves its sibling identity")
+            old_left.set_text("Stale replacement edit")
+            time.sleep(.3)
+            check(field("Shipping").read("AXValue") == "Billing edit 🎸", "retained control cannot edit its same-data replacement")
+            def check_observed_lifetime(previous, boundary):
+                current = find("Shipping: Remember")
+                check(current.read("AXIdentifier") != previous.read("AXIdentifier"), boundary + " gives the button a new identity")
+                current.set_boolean("AXFocused", True)
+                wait_for(lambda: current.read("AXFocused") is True, boundary + " did not observe the new button's focus")
+                settle()
+                previous.set_boolean("AXFocused", True)
+                time.sleep(.2)
+                check(current.read("AXFocused") is True and previous.read("AXFocused") is not True,
+                      boundary + " cannot transfer observed focus back to a retired button")
+            if config.get("sharedFocus"):
+                check_observed_lifetime(old_button, "replacement")
+            hidden = field("Shipping")
+            find("Hide left").press()
+            wait_for(lambda: field("Shipping") is None, "Hidden child remains published")
+            hidden.set_text("Hidden edit")
+            time.sleep(.3)
+            check(state()["children"]["Left"]["name"] == "Billing edit 🎸", "hidden ancestor blocks retained child actions")
+            find("Hide left").press()
+            wait_for(lambda: field("Shipping"), "Child did not return")
+            settle()
+            find("Disable right").press()
+            wait_for(lambda: field("Billing").read("AXEnabled") is False, "Disabled ancestor is not reflected")
+            field("Billing").set_text("Disabled edit")
+            time.sleep(.3)
+            check(state()["children"]["Right"]["name"] == "Billing edit 🎸", "disabled ancestor blocks child edits")
+            find("Disable right").press()
+            wait_for(lambda: field("Billing").read("AXEnabled") is True, "Child did not re-enable")
+            settle()
+            old_nested, old_id = field("Nested"), field("Nested").read("AXIdentifier")
+            old_button = find("Shipping: Remember")
+            find("Change record").press()
+            wait_for(lambda: (current := field("Nested")) and current.read("AXIdentifier") != old_id,
+                     "Root scope did not invalidate descendants")
+            settle()
+            check(group.read("AXHelp") == "Activation dispatched through the control's normal event path",
+                  "a normal button that changes record scope acknowledges activation without claiming a business result")
+            old_nested.set_text("Previous record")
+            time.sleep(.3)
+            check(field("Nested").read("AXValue") == "Nested edit", "declarative record scope rejects retained descendant actions")
+            if config.get("sharedFocus"):
+                check_observed_lifetime(old_button, "record change")
+            check(state()["ticks"] > 5, "ordinary parent timer remains active")
         parent_id = group.read("AXIdentifier")
         parent_field = field("Billing")
         find("Open shared-data window").press()
@@ -271,10 +277,12 @@ def main():
         check(other_group.read("AXIdentifier") != parent_id, "two roots sharing business data have independent sessions")
         check(parent_field.read("AXEnabled") is False, "modal shared-data window blocks parent actions")
         other_field = next(e for e in other_group.read("AXChildren") or [] if e.read("AXRole") == "AXTextField")
+        check(other_field.set_boolean("AXFocused", True) == 0, "shared-data root accepts explicit native focus")
+        wait_for(lambda: other_field.read("AXFocused") is True and "focus confirmed" in (other_group.read("AXHelp") or "").lower(), "Shared root focus was not confirmed")
         check(other_field.set_text("Other root 🎻") == 0, "shared-data root editor accepts normal input")
         wait_for(lambda: other_field.read("AXValue") == "Other root 🎻", "Shared-data root editor did not change")
-        wait_for(lambda: other_group.read("AXHelp") not in (None, "Action queued", "Waiting for the application to complete the action"), "Shared root edit has no receipt")
-        next(e for e in other_group.read("AXChildren") or [] if e.read("AXDescription") == "Remember shared value").press()
+        wait_for(lambda: other_group.read("AXHelp") == "Text entered in the editor; normal validation runs when editing ends", "Shared root edit has no completion receipt")
+        check(next(e for e in other_group.read("AXChildren") or [] if e.read("AXDescription") == "Remember shared value").press() == 0, "shared root accepts its normal commit button")
         def shared_state():
             try:
                 return json.loads((FIXTURE / "Resources/shared-root.json").read_text(encoding="utf-8-sig"))
@@ -282,7 +290,7 @@ def main():
                 return {}
         wait_for(lambda: shared_state().get("remembered") == "Other root 🎻", "Shared-data root did not commit through its handler")
         check(shared_state()["start"]["ok"], "second root started without detaching its parent")
-        next(e for e in other_group.read("AXChildren") or [] if e.read("AXDescription") == "Close shared window").press()
+        check(next(e for e in other_group.read("AXChildren") or [] if e.read("AXDescription") == "Close shared window").press() == 0, "shared-data window accepts its ordinary close action")
         wait_for(lambda: all(w.read("AXTitle") != "AX bridge shared-data root" for w in app.read("AXWindows") or []), "Shared-data window did not close")
         wait_for(lambda: (current := field("Billing")) and current.read("AXValue") == "Other root 🎻"
                  and current.read("AXEnabled") is True, "Parent provider did not resume after the shared-data dialog closed")
@@ -312,6 +320,9 @@ def main():
             report["finalStateError"] = str(state_error)
         if "group" in locals():
             report["finalReceipt"] = group.read("AXHelp")
+            if "other_group" in locals():
+                report["sharedRootReceipt"] = other_group.read("AXHelp")
+                report["windows"] = [w.read("AXTitle") for w in app.read("AXWindows") or []]
             focused = app.read("AXFocusedUIElement")
             report["focusedIdentifier"] = focused.read("AXIdentifier") if focused else None
             close = find("Close fixture")
@@ -329,6 +340,8 @@ def main():
             suffix += "-scroll"
         if not config.get("focusObserver", True):
             suffix += "-unobserved"
+        if args.modal_only:
+            suffix += "-modal"
         (BUILD / f"auto-subforms-{suffix}-report.json").write_text(json.dumps(report, indent=2) + "\n")
 
 

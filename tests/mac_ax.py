@@ -273,7 +273,7 @@ def system():
     return Element(create())
 
 
-def capture_window(pid, destination):
+def capture_window(pid, destination, *, include_shadow=True):
     """Capture only the frontmost onscreen window belonging to the fixture PID."""
     graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
     window_list = signature(graphics, "CGWindowListCopyWindowInfo", c.c_void_p, c.c_uint32, c.c_uint32)
@@ -295,7 +295,7 @@ def capture_window(pid, destination):
             window = array_value(windows, index)
             if property_value(window, "kCGWindowOwnerPID") == pid:
                 number = int(property_value(window, "kCGWindowNumber"))
-                subprocess.run(["/usr/sbin/screencapture", "-x", "-l", str(number), str(destination)], check=True, timeout=10)
+                subprocess.run(["/usr/sbin/screencapture", "-x", *([] if include_shadow else ["-o"]), "-l", str(number), str(destination)], check=True, timeout=10)
                 return
     finally:
         release(windows)

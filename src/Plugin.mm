@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #include "4DPluginAPI.h"
 #import "Bridge.h"
+#include "Area.h"
 #include "Limits.h"
 #include <vector>
 
@@ -36,7 +37,8 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
     @autoreleasepool {
         switch (selector) {
             case kInitPlugin: break;
-            case kDeinitPlugin: AXBShutdown(); break;
+            case kDeinitPlugin: AXBAreaShutdown();
+                AXBShutdown(); break;
             case 1: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
                 NSInteger processID = PA_GetCurrentProcessNumber();
@@ -48,7 +50,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 break;
             }
             case 2: AXBDetach(TextParameter(parameters, 1, 128), PA_GetCurrentProcessNumber()); break;
-            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; macOS", AXB_VERSION]); break;
+            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; macOS", AXB_VERSION]); break;
             case 4: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
                 sLONG_PTR native = PA_GetWindowPtr(reinterpret_cast<PA_WindowRef>(static_cast<intptr_t>(windowID)));
@@ -75,6 +77,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 ReturnText(parameters, AXBOpen(windowID, PA_GetCurrentProcessNumber(), reinterpret_cast<void *>(native)));
                 break;
             }
+            case 6: AXBArea(parameters); break;
             default: break;
         }
     }

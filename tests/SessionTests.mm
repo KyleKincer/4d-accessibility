@@ -119,6 +119,25 @@ int main(void) {
         backgroundUpdate = MutableCopy(Envelope(2)); backgroundUpdate[@"snapshot"][@"nodes"][1][@"value"] = @"Updated";
         Check([s exchange:backgroundUpdate now:5][@"action"] == nil, "unrelated updates do not extend action expiry");
 
+        s = Fresh(); Check(Press(s, 1), "button queued for guarded native delivery");
+        NSDictionary *buttonAction = [s exchange:Envelope(1) now:1][@"action"];
+        NSDictionary *buttonInput = @{@"action": buttonAction[@"id"], @"point": @[@70, @35]};
+        Check(![[s exchange:@{@"snapshot": Envelope(1)[@"snapshot"], @"controlInput": @{@"action": buttonAction[@"id"]}} now:1][@"ok"] boolValue], "native button requires an explicit point");
+        Check(![[s exchange:@{@"snapshot": Envelope(1)[@"snapshot"], @"controlInput": @{@"action": buttonAction[@"id"], @"point": @[@70, @75]}} now:1][@"ok"] boolValue], "native button cannot click another control");
+        NSDictionary *buttonEnvelope = @{@"snapshot": Envelope(1)[@"snapshot"], @"controlInput": buttonInput};
+        Check([[s exchange:buttonEnvelope now:1][@"controlInput"] isEqual:buttonInput], "native button dispatches its checked point once");
+        Check([s controlInputNode:buttonInput] != nil && ![s exchange:buttonEnvelope now:1][@"controlInput"], "native button replay cannot duplicate dispatch");
+        [s finishControlInput:buttonInput accepted:YES];
+        Check([[s exchange:Envelope(1) now:1][@"controlInputResult"][@"accepted"] boolValue] && ![s controlInputNode:buttonInput], "native button acknowledges once and cannot be reinjected");
+        s = Fresh(); Check(Press(s, 1), "button queued before native target changes");
+        buttonAction = [s exchange:Envelope(1) now:1][@"action"];
+        buttonInput = @{@"action": buttonAction[@"id"], @"point": @[@70, @35]};
+        [s exchange:@{@"snapshot": Envelope(1)[@"snapshot"], @"controlInput": buttonInput} now:1];
+        NSMutableDictionary *movedButton = MutableCopy(Envelope(2));
+        movedButton[@"snapshot"][@"nodes"][0][@"frame"] = @[@150, @20, @120, @30];
+        [s exchange:movedButton now:1];
+        Check(![s controlInputNode:buttonInput], "moving a button before delivery cancels its captured native hit");
+
         s = Fresh();
         Check(![s enqueueNode:@"missing" revision:@1 operation:@"press" value:nil now:1], "unknown target rejected");
         Check(![s enqueueNode:@"field" revision:@1 operation:@"press" value:nil now:1], "wrong role action rejected");

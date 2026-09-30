@@ -3,27 +3,36 @@
 #DECLARE($data : Object) -> $result : Object
 var $node; $editor : Object
 var $start; $end; $position; $units; $code; $key; $modifiers : Integer
+var $protected : Boolean
 $result:=New object("status"; "rejected"; "message"; "Editor selection interrupted by the application")
 $node:=$data.node
 $editor:=AXB_TextEditor($node; "read"; Null)
 If ((Milliseconds>$data.deadline) | Not($editor.active))
  return
 End if
-If (OBJECT Get font(*; $node.objectName)="%password")
+$protected:=$node.protected=True
+If ($protected & Not($data.selectAll=True))
  return
 End if
-If (Compare strings($editor.text; $data.text; sk char codes)#0)
+If (Not($protected) && (Compare strings($editor.text; $data.text; sk char codes)#0))
  return
 End if
 $start:=$editor.start
 $end:=$editor.end
 If ($data.awaitSelection=True)
- If (($start#$data.expectedStart) | ($end#$data.expectedEnd))
+ If (($start#$data.expectedStart) | (Not($protected) & ($end#$data.expectedEnd)))
   return
  End if
 End if
-If (($start=$data.start) & ($end=$data.end))
- return AXB_TextAction($data.action; $node; $data.options)
+If ((($start=$data.start) & ($end=$data.end)) | ($protected & ($data.awaitSelection=True)))
+ return AXB_TextAction($data.action; $node; $data.options; True)
+End if
+If ($data.selectAll=True)
+ $data.expectedStart:=1
+ $data.expectedEnd:=Length($data.text)+1
+ $data.awaitSelection:=True
+ POST KEY(Character code("a"); Command key mask; Current process)
+ return New object("status"; "pending"; "confirm"; Formula(AXB_TextSelect($1)); "data"; $data)
 End if
 $modifiers:=0
 If ($data.selecting=True)

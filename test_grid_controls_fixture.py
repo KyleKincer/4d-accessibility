@@ -70,7 +70,7 @@ def main():
     group = None
     try:
         ready, report["application_mode_notice_acknowledged"] = wait_for_start(
-            process, project, lambda: state() if state().get("runId") == config["runId"] else None, BUILD)
+            process, project, lambda: state() if state().get("runId") == config["runId"] and state().get("start", {}).get("ok") else None, BUILD)
         check(ready.get("start", {}).get("ok") is True and ready["compiled"] is args.compiled, "actual " + ("compiled" if args.compiled else "interpreted") + " 4D starts the prepared widget fixture")
         app = ax.application(process.pid)
         report["architecture"] = ax.process_architecture(process.pid)

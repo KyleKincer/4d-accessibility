@@ -34,34 +34,25 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project
 
 Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download the [release kit](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Signed releases use Sweetwater's Developer ID and Apple notarization; each release's notes define its tested scope. Older ad hoc candidates remain separately labeled.
 
-At the end of an ordinary form's successful On Load initialization:
+On this integration branch, add the lifecycle area automatically:
 
-```4d
-var $bridge : Object
-$bridge:=AXB_Form("start"; New object("label"; "Customer details"))
-If (Not($bridge.ok=True) & ($bridge.error#"dependencyUnavailable"))
- Form.axbError:=$bridge.error
-End if
+```sh
+python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Customer
 ```
 
-In On Unload and the form's existing fatal-error cleanup:
+Use `--all-forms` for named project and table forms, or repeat `--form` for selected forms. `--dry-run` lists proposed changes. The area draws nothing and starts after the existing initialization. Its destruction retires that window's bridge. Ordinary forms need no startup or shutdown calls in their business methods.
 
-```4d
-var $bridge : Object
-$bridge:=AXB_Form("stop"; New object)
-```
-
-Enable those form events if needed. Existing buttons, fields, object methods and timers stay in place. Add missing labels through configuration, then inspect the [coverage report](skills/4d-accessibility/references/INTEGRATION.md#check-the-forms-coverage) and test the live form. A successful start does not establish complete accessibility.
+Complex forms return their existing provider configuration from one optional application-owned `AXB_Configure` method. The [area integration guide](skills/4d-accessibility/references/AREA-INTEGRATION.md) gives the complete installation, configuration, generated-form and migration contract. This branch requires matching source builds; the released 0.19.7 kit retains the [manual lifecycle](skills/4d-accessibility/references/MANUAL-LIFECYCLE.md).
 
 ## More complex forms
 
 | Your form | Integration |
 | --- | --- |
-| Ordinary controls, repeated or nested page subforms | Start/stop the root. Configure child labels under `children`. Invalidate a child before replacing its form or data binding. [Example](skills/4d-accessibility/references/examples/AUTOMATIC-FORM.md). |
+| Ordinary controls, repeated or nested page subforms | Add an area to the root. Configure child labels under `children`. Invalidate a child before replacing its form or data binding. [Example](skills/4d-accessibility/references/examples/AUTOMATIC-FORM.md). |
 | Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery). |
 | Invoice-style form with AreaList Pro | Add its area reference, stable line keys, record scope, readiness and meaningful descriptions for custom columns. Configure repeated grids within their owning child. [Assembled example](skills/4d-accessibility/references/GRIDS.md#put-the-invoice-like-form-together). |
-| JSON-generated forms | Wrap the shared builder with `AXB_Dynamic`, preserving the original method and events. Use private form data and explicit cleanup before child replacement. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
-| Existing application alert and confirmation forms | Add the ordinary lifecycle and labels. Route inaccessible built-in prompts through the application's existing dialog methods when their appearance is acceptable. Preserve returned choices and validation. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
+| JSON-generated forms | Add `AXB_AreaForm` at the shared builder; the original method, events and data stay in place. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
+| Existing application alert and confirmation forms | Add the area and labels. Route inaccessible built-in prompts through the application's existing dialog methods when their appearance is acceptable. Preserve returned choices and validation. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
 | Custom controls or existing native/web content | Preserve a usable native provider. Use the explicit provider contract for application-specific controls; account for every interactive element. [Extension contract](skills/4d-accessibility/references/FORM-SUPPORT.md). |
 
 The modern grid adapters expose logical rows beyond the viewport and reveal them for supported actions. The older explicit row-summary adapters are retained for compatibility and expose only a subset. They are not the default for new integrations.

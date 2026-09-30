@@ -23,6 +23,24 @@ python3 ci/check_repository.py
 
 `test_native.py` compiles the AppKit provider tests. Add `--run` only in an unlocked graphical session. Live fixture scripts also require 4D desktop and appropriate Accessibility permission. Screen recording is needed for visual/VoiceOver probes.
 
+## Area-owned integration
+
+The development branch adds a lifecycle area to ordinary forms without changing their business methods or event masks. Build both packages first, then run the smallest end-to-end case:
+
+```sh
+python3 prepare_area_fixture.py --server /path/to/4D\ Server.app
+python3 test_area_fixture.py --run
+python3 test_area_fixture.py --run --compiled
+```
+
+The test edits duplicate-named root/child fields, observes their original handlers, deliberately restarts registration, closes without an `On Unload` bridge hook, and reopens the form. Prepare with `--inherited` to exercise a shared base, `--yield-load` to yield during business initialization, or `--configuration absent` to use automatic defaults. `--no-component`, `--no-plugin`, `--configuration invalid` and `--configuration error` exercise dependency and configuration failures while the ordinary form remains usable.
+
+`test_area_pixels.py --server /path/to/4D\ Server.app --run` compares the complete rendered synthetic window with and without the area. It requires Pillow and accepts no changed pixels, masks or tolerance.
+
+For persisted entities, shared objects and class instances, run `test_root_data.py --server /path/to/4D\ Server.app --kind entity --area --generated --no-error-callback --run`, then add `--compiled`. Replace `entity` with `shared`, `instance` or `plain`. This checks unchanged data ownership, failure diagnostics without an application callback, deliberate recovery and cleanup of the replacement registration.
+
+Add `--area` to the ordinary discovery, automatic-subform, native-grid and AreaList fixture preparers below to exercise the same adapters with area-owned startup and teardown. These fixture migrations remove only their known test lifecycle code. The public installer never rewrites application methods. The manual lifecycle suites remain useful compatibility checks.
+
 For delayed grid values, without a 4D installation:
 
 ```sh
