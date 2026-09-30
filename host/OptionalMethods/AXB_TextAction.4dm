@@ -115,7 +115,7 @@ If ($action.operation="setSelection")
 End if
 $data:=New object("objectName"; $node.objectName; "protected"; $node.protected; "text"; $insert; "next"; 1; "prefix"; Substring($before; 1; $start-1); "suffix"; Substring($before; $end); "deadline"; Milliseconds+120000; "first"; True)
 $data.editorNode:=$node
-$data.insert:=(Length($insert)>4096) & ($node.gridCell=Null) & Not($node.protected) & (AXB_PollGuard.context.nativeInsertion=True)
+$data.insert:=(Length($insert)>4096) & ($node.gridCell=Null) & Not($node.protected) & Not($node.styled=True) & (AXB_PollGuard.context.nativeInsertion=True)
 If ($data.insert)
  $data.insertLength:=Length($insert)
  // The native 4D input-method client drops trailing Returns. Preserve those

@@ -73,6 +73,8 @@ C_COLLECTION(AXB_TextEditor; $3)
 C_LONGINT(AXB_TextIndex; $0; $2)
 C_TEXT(AXB_TextIndex; $1)
 C_BOOLEAN(AXB_TextIndex; $3)
+C_TEXT(AXB_StyledText; $1)
+C_OBJECT(AXB_StyledText; $0)
 
 C_PICTURE(AXB_PictureEquals; $1; $2)
 C_BOOLEAN(AXB_PictureEquals; $0)
