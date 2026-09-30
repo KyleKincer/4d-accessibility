@@ -7,10 +7,10 @@ Install matching packages and add the root [lifecycle area](AREA-INTEGRATION.md)
 In `AXB_Configure`, add the list box's object name and its stable row-key column to the returned options:
 
 ```4d
-$options:=New object("label"; "Invoice"; "scope"; Formula(String(Form.invoiceID)); \
+$options:=New object("label"; "Record details"; "scope"; Formula(String(Form.recordID)); \
  "onError"; Formula(ReportAccessibilityFailure($1)))
 $options.grids:=New object("Items"; New object(\
- "kind"; "array"; "keyColumn"; "LineID"; "label"; "Invoice lines"))
+ "kind"; "array"; "keyColumn"; "LineID"; "label"; "Record rows"))
 ```
 
 `Items` is the list box's form-object name. `LineID` is a column bound to the existing Text, Integer or LongInt identity array, with one unique key per source row. Text keys must be nonempty and at most 256 UTF-16 units. Negative integer keys and zero are valid. The column can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`.
@@ -21,7 +21,7 @@ Keep the existing row-control array too. Automatic grids accept both LongInt fla
 
 If several new rows have ID `0` until saved, those IDs cannot identify them yet. Assign a UI UUID once when each row is inserted, keep it through editing and saving, and move or delete it with that row in every array operation. Bind this key array to a hidden column so native sorting moves it too. Retire its keys when reloading the display arrays. These keys need no database field and must not replace business IDs. The same rule applies to AreaList: append its hidden key column after the existing columns to preserve their numbers. Never generate new keys during accessibility reads or use a repeated product number instead.
 
-If rows load after On Load or the loader calls `IDLE`, add `"ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID))` to the grid options. Initialize `linesReady` to false at the start of On Load, before any code that can run the line loader. In the existing loader, set it false before touching arrays and capture the record ID when loading begins. When the arrays are complete, store that captured ID in `linesLoadedID`, then set `linesReady` true. The ID comparison also closes the interval between switching records and starting the loader. Changing `scope` alone would publish old rows under the new record identity during that interval. While false, the table is disabled and previous cell references stop working. Use a Formula for changing readiness; a literal Boolean stays fixed.
+If rows load after On Load or the loader calls `IDLE`, add `"ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID))` to the grid options. Initialize `linesReady` to false at the start of On Load, before any code that can run the line loader. In the existing loader, set it false before touching arrays and capture the record ID when loading begins. When the arrays are complete, store that captured ID in `linesLoadedID`, then set `linesReady` true. The ID comparison also closes the interval between switching records and starting the loader. Changing `scope` alone would publish old rows under the new record identity during that interval. While false, the table is disabled and previous cell references stop working. Use a Formula for changing readiness; a literal Boolean stays fixed.
 
 The provider discovers the displayed columns, reads their existing scalar formats, and exposes every non-hidden row. Cell values load as accessibility tools request them. It retains keyed cell identities after sorting, scrolls through the native control, and uses the existing editor for supported enterable cells. It does not assign backing arrays during text entry. A completed text action means the text reached the editor; normal validation and commit still happen when editing ends. Keystroke filters can reject the action.
 
@@ -36,7 +36,7 @@ Keep the lifecycle area and ordinary controls. Configure the actual list box, wi
 ```4d
 $options.grids:=New object("Items"; New object(\
  "kind"; "collection"; "keyProperty"; "lineID"; \
- "selection"; Formula(Form.selectedLines); "label"; "Invoice lines"))
+ "selection"; Formula(Form.selectedLines); "label"; "Record rows"))
 ```
 
 Each object in `Form.lines` must already have a unique, stable `lineID`. Keys can be nonempty Text of at most 254 UTF-16 units or integers from -2,147,483,648 through 2,147,483,647. Text keys are case- and accent-sensitive. Do not use the current row position as a key. Sorting or filtering a collection of those same objects preserves their accessible identities. If any key now refers to a different object, every retained cell in that grid is retired. Reuse existing objects when refreshing their values.
@@ -46,7 +46,7 @@ For an entity-selection list box, change the kind and omit `keyProperty` to use 
 ```4d
 $options.grids:=New object("Items"; New object(\
  "kind"; "entity"; "selection"; Formula(Form.selectedLines); \
- "label"; "Invoice lines"))
+ "label"; "Record rows"))
 ```
 
 Here `Form.selectedLines` is the list box's existing selected entity selection. The bridge reads the bound entity selection, discovers the primary-key attribute and loads displayed cell values on demand. Sorting and filtering preserve identities within the same dataclass and datastore. Switching dataclasses retires old cells even when their primary keys match. An optional `keyProperty` selects another stored unique identity attribute. Keep the form's `scope` and loading `ready` guard from the array example when a record change reuses the grid.
@@ -112,13 +112,13 @@ Configure metadata before `start`; changing it afterwards is not a supported upd
 A native array grid reads its existing LongInt row-control array automatically. It must have one entry per source row. Hidden rows are omitted; other row states follow the rules below. A `meta` option is invalid for array and AreaList grids. Collection/entity grids can also use the existing Meta Info Expression. A direct `This.<property>` expression, such as `This.meta`, needs no additional configuration. For a method or other expression, pass one Formula that calls the same application code:
 
 ```4d
-// The list box's existing Meta Info Expression is InvoiceLineMeta.
-$options.grids.Items.meta:=Formula(InvoiceLineMeta)
+// The list box's existing Meta Info Expression is RowMeta.
+$options.grids.Items.meta:=Formula(RowMeta)
 ```
 
 Keep this in the same grid options as `selection` and `columns`. For a child grid, put it under `options.children.<container>.grids.<listbox>`. Configure it before starting discovery. The Formula runs with the original collection object/entity as `This` and the owning form as `Form`. It receives one optional argument with `key`, one-based source `row`, and original `item`, using the same types as the column-description table above. Reuse the existing renderer's `disabled` and `unselectable` decisions; do not maintain a second set of permissions.
 
-If the existing method takes an item parameter, use `Formula(InvoiceLineMeta($1.item))`. An existing item method can use `Formula(This.rowMetadata())`. The request has no `column` property. Existing methods keep their compiler declarations; a new object-returning method needs `C_OBJECT(MethodName; $0)` plus declarations for its parameters. The callback runs outside a native cell event: `Self`, `Object current` and `Form event code` do not identify its row.
+If the existing method takes an item parameter, use `Formula(RowMeta($1.item))`. An existing item method can use `Formula(This.rowMetadata())`. The request has no `column` property. Existing methods keep their compiler declarations; a new object-returning method needs `C_OBJECT(MethodName; $0)` plus declarations for its parameters. The callback runs outside a native cell event: `Self`, `Object current` and `Form event code` do not identify its row.
 
 Return the existing metadata object or Null. A Null object, an absent flag, or a Null flag means no additional restriction. Other defined `disabled` and `unselectable` values must be Boolean. Cell-level versions of those flags are ignored, matching 4D. Formatting properties do not change accessibility permission. A color that communicates business meaning still needs a text value or description.
 
@@ -169,14 +169,14 @@ Use the existing Text, Integer or LongInt identity array. Integer IDs are normal
 Identify the area's existing compatible key array:
 
 ```4d
-$options:=New object("label"; "Invoice"; "scope"; Formula(String(Form.invoiceID)); \
+$options:=New object("label"; "Record details"; "scope"; Formula(String(Form.recordID)); \
  "onError"; Formula(ReportAccessibilityFailure($1)))
-$lines:=New object("kind"; "areaList"; "label"; "Invoice lines"; \
- "keys"; ->aLineID; "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID)))
+$lines:=New object("kind"; "areaList"; "label"; "Record rows"; \
+ "keys"; ->aLineID; "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
 $options.grids:=New object("Items"; $lines)
 ```
 
-`Items` is the form object's name. The provider finds the key array in the area's actual column bindings; it must occur exactly once. An optional `keyColumn` asserts a particular physical column if your application needs that additional check. Initialize `Form.linesReady` to false at the start of On Load, before any line loading. In the existing loader, clear readiness and capture the invoice ID before replacing or refreshing arrays. When that load completes, store its captured ID in `Form.linesLoadedID` before setting readiness true. The formula checks that loaded ID against the displayed invoice, including any delay before loading begins. Change the scope when the record changes; scope alone does not prove which record the arrays contain. The provider reads current vendor bindings and formatting, exposes every non-hidden row and displayed column, and resolves retained cells by their keys after sorting. The other fields and buttons remain automatically discovered.
+`Items` is the form object's name. The provider finds the key array in the area's actual column bindings; it must occur exactly once. An optional `keyColumn` asserts a particular physical column if your application needs that additional check. Initialize `Form.linesReady` to false at the start of On Load, before any line loading. In the existing loader, clear readiness and capture the record ID before replacing or refreshing arrays. When that load completes, store its captured ID in `Form.linesLoadedID` before setting readiness true. The formula checks that loaded ID against the displayed record, including any delay before loading begins. Change the scope when the record changes; scope alone does not prove which record the arrays contain. The provider reads current vendor bindings and formatting, exposes every non-hidden row and displayed column, and resolves retained cells by their keys after sorting. The other fields and buttons remain automatically discovered.
 
 Ordinary scalar text, numeric, date, time and Boolean columns need no description configuration. Supported Boolean/integer checkbox displays also retain their existing editing behavior; see [checkbox cells](#arealist-checkbox-cells). Every displayed picture, calculated or custom column requires a text description or an explicit decorative declaration; otherwise the grid is disabled with a “needs a text description” label. Add metadata only where the existing UI does not describe its meaning. For example, an image indicator and a decorative spacer:
 
@@ -211,12 +211,12 @@ For example, independently changing records in repeated children can use:
 // Root context. These are separate, existing process arrays bound in each area.
 // The other bound arrays must also belong to their respective instance.
 $leftLines:=New object("kind"; "areaList"; "label"; "Pending lines"; "keys"; ->aLeftLineID; \
- "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID)))
+ "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
 $rightLines:=New object("kind"; "areaList"; "label"; "Posted lines"; "keys"; ->aRightLineID; \
- "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID)))
+ "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
 $options.children:=New object
-$options.children.Left:=New object("label"; "Pending invoice"; "scope"; Formula(String(Form.invoiceID)); "grids"; New object("Items"; $leftLines))
-$options.children.Right:=New object("label"; "Posted invoice"; "scope"; Formula(String(Form.invoiceID)); "grids"; New object("Items"; $rightLines))
+$options.children.Left:=New object("label"; "Pending record"; "scope"; Formula(String(Form.recordID)); "grids"; New object("Items"; $leftLines))
+$options.children.Right:=New object("label"; "Posted record"; "scope"; Formula(String(Form.recordID)); "grids"; New object("Items"; $rightLines))
 ```
 
 Each grid's `ready` Formula reads that child's data. A completion delivered to the root with `CALL FORM` has the root's `Form`; update the actual child data captured when the load began, rather than assuming `Form.linesReady` refers to that child. Carry the captured record ID with the load. Before marking it ready, verify the current container still owns that data and represents that record. Repeated automatic children sharing a plain business object need distinct per-instance readiness/loaded-ID properties if their loaders differ. Separate AreaList areas and bound arrays remain required for independent grid contents.
@@ -237,7 +237,9 @@ Area, column and cell entry permissions remain authoritative. Hidden and passwor
 
 Install matching plugin, component and host helpers. Startup requires `cellFocus 1` so an older plugin cannot advertise a focus operation on a control that activates immediately. The synthetic fixture exercises normal, small and mini checkbox display modes. Formatted Boolean editors, vendor radio/popup choices and custom-picture checkbox rendering need separate validation or implementation.
 
-## Put the invoice-like form together
+## Configure a record editor with editable grids
+
+This example combines ordinary fields and buttons with an editable grid and optional nested or repeated subforms. The additional configuration identifies rows across sorting, distinguishes the current record from previously loaded data, and reuses existing formatters and selection controllers. `RecordEditor`, `recordID` and the other application names below are placeholders for the host's existing form and bindings.
 
 For a native list box, use the array, collection or entity grid options above in place of the AreaList `$lines` configuration. Keep the same scope, readiness and loader ordering.
 
@@ -249,55 +251,55 @@ Form.linesReady:=False
 
 // Existing line loader: before changing arrays or starting asynchronous work.
 // Match this declaration to the actual record ID type. This example uses Integer.
-var $loadingInvoiceID : Integer
+var $loadingRecordID : Integer
 Form.linesReady:=False
-$loadingInvoiceID:=Form.invoiceID
-// Existing code loads this invoice's arrays.
+$loadingRecordID:=Form.recordID
+// Existing code loads this record's arrays.
 // When that work finishes, record the ID the data actually belongs to:
-Form.linesLoadedID:=$loadingInvoiceID
+Form.linesLoadedID:=$loadingRecordID
 Form.linesReady:=True
 
 ```
 
-The installer adds the lifecycle area to `Invoice`. Keep configuration in an application method called by `AXB_Configure`:
+The installer adds the lifecycle area to `RecordEditor`. Keep configuration in an application method called by `AXB_Configure`:
 
 ```4d
-// Application method: InvoiceAccessibilityOptions
+// Application method: RecordEditorAccessibilityOptions
 #DECLARE() -> $options : Object
 var $lines : Object
-$options:=New object("label"; "Invoice"; "scope"; Formula(String(Form.invoiceID)); \
+$options:=New object("label"; "Record details"; "scope"; Formula(String(Form.recordID)); \
  "onError"; Formula(ReportAccessibilityFailure($1)))
-$lines:=New object("kind"; "areaList"; "label"; "Invoice lines"; \
- "keys"; ->aLineID; "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.invoiceID)))
+$lines:=New object("kind"; "areaList"; "label"; "Record rows"; \
+ "keys"; ->aLineID; "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
 $options.grids:=New object("Items"; $lines)
 ```
 
-If loading finishes asynchronously, retain its captured invoice ID with that load and use it at completion. Do not substitute the currently displayed ID. Add the picture/custom-column descriptions shown above to `$lines.columns`. If selection needs a dependent-UI refresh, set `$lines.onSelection` to the existing shared selection handler before returning the options. Add `C_OBJECT(InvoiceAccessibilityOptions; $0)` to the application's compiler method, outside the installer-owned declarations. The area handles startup, startup failure reporting and shutdown.
+If loading finishes asynchronously, retain its captured record ID with that load and use it at completion. Do not substitute the currently displayed ID. Add the picture/custom-column descriptions shown above to `$lines.columns`. If selection needs a dependent-UI refresh, set `$lines.onSelection` to the existing shared selection handler before returning the options. Add `C_OBJECT(RecordEditorAccessibilityOptions; $0)` to the application's compiler method, outside the installer-owned declarations. The area handles startup, startup failure reporting and shutdown.
 
 ### Entity, class and shared root data
 
-Use the application's existing editor state instead of assigning the plain-data properties above. For example, an invoice process may already own a mutable `InvoiceEditorState` object independently of its persisted invoice entity. Initialize that state before the first load, and update it in the existing loader:
+Use the application's existing editor state instead of assigning the plain-data properties above. For example, a record-editor process may already own a mutable `RecordEditorState` object independently of its persisted record entity. Initialize that state before the first load, and update it in the existing loader:
 
 ```4d
 // Existing process-owned editor state, before its first load:
-InvoiceEditorState.linesReady:=False
+RecordEditorState.linesReady:=False
 // Before refreshing the bound arrays:
-var $loadingInvoiceID : Integer
-InvoiceEditorState.linesReady:=False
-$loadingInvoiceID:=Form.invoiceID
+var $loadingRecordID : Integer
+RecordEditorState.linesReady:=False
+$loadingRecordID:=Form.recordID
 // Existing loader fills the arrays, preserving its normal locking/validation.
-InvoiceEditorState.linesLoadedID:=$loadingInvoiceID
-InvoiceEditorState.linesReady:=True
+RecordEditorState.linesLoadedID:=$loadingRecordID
+RecordEditorState.linesReady:=True
 ```
 
-The configuration reads that state while the actual invoice remains `Form`:
+The configuration reads that state while the actual record remains `Form`:
 
 ```4d
-$options.scope:=Formula(String(Form.invoiceID))
-$lines.ready:=Formula(InvoiceEditorState.linesReady && \
- (InvoiceEditorState.linesLoadedID=Form.invoiceID))
+$options.scope:=Formula(String(Form.recordID))
+$lines.ready:=Formula(RecordEditorState.linesReady && \
+ (RecordEditorState.linesLoadedID=Form.recordID))
 ```
 
-This example assumes one invoice editor per process. If the application keeps several editors in one process, use its existing per-window state lookup instead. Repeated children need their existing per-instance state too. An asynchronous completion must verify that its captured state and record still belong to the current editor before marking them ready. Declare the actual process variable and method types in the application's compiler method. Do not add UI attributes to an entity or bypass a shared object's `Use...End use` rules.
+This example assumes one record editor per process. If the application keeps several editors in one process, use its existing per-window state lookup instead. Repeated children need their existing per-instance state too. An asynchronous completion must verify that its captured state and record still belong to the current editor before marking them ready. Declare the actual process variable and method types in the application's compiler method. Do not add UI attributes to an entity or bypass a shared object's `Use...End use` rules.
 
 Fields, buttons and page subforms remain automatically discovered. Save, return and print keep their existing buttons, menus and business handlers. There is no accessibility-specific copy of those operations.

@@ -50,10 +50,12 @@ Complex forms return their existing provider configuration from one optional app
 | --- | --- |
 | Ordinary controls, repeated or nested page subforms | Add an area to the root. Configure child labels under `children`. Invalidate a child before replacing its form or data binding. [Example](skills/4d-accessibility/references/examples/AUTOMATIC-FORM.md). |
 | Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery). |
-| Invoice-style form with AreaList Pro | Add its area reference, stable line keys, record scope, readiness and meaningful descriptions for custom columns. Configure repeated grids within their owning child. [Assembled example](skills/4d-accessibility/references/GRIDS.md#put-the-invoice-like-form-together). |
+| AreaList Pro grids | Add stable row keys, record scope, loading readiness and descriptions for custom columns. Configure repeated grids within their owning child. [AreaList configuration](skills/4d-accessibility/references/GRIDS.md#add-an-arealist-grid-to-the-same-form). |
 | JSON-generated forms | Add `AXB_AreaForm` at the shared builder; the original method, events and data stay in place. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
 | Existing application alert and confirmation forms | Add the area and labels. Route inaccessible built-in prompts through the application's existing dialog methods when their appearance is acceptable. Preserve returned choices and validation. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
 | Custom controls or existing native/web content | Preserve a usable native provider. Use the explicit provider contract for application-specific controls; account for every interactive element. [Extension contract](skills/4d-accessibility/references/FORM-SUPPORT.md). |
+
+For a form combining ordinary fields, editable grids and subforms, follow the [assembled record-editor example](skills/4d-accessibility/references/GRIDS.md#configure-a-record-editor-with-editable-grids).
 
 The modern grid adapters expose logical rows beyond the viewport and reveal them for supported actions. The older explicit row-summary adapters are retained for compatibility and expose only a subset. They are not the default for new integrations.
 
