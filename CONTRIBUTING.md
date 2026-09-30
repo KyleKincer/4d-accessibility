@@ -118,6 +118,8 @@ For direct moves between edited AreaList cells, add `--cell-transitions` to `tes
 
 ## Source ownership
 
+For styled native text, prepare the ordinary discovery fixture with `--area --styled` and the required `--server`. Run `test_styled_text.py --server /path/to/4D\ Server.app` for command-level reading and side-effect checks. Run `test_styled_fixture.py --run` and then `--run --compiled` for native selection, style-preserving edits, original validation and stale-element checks. Desktop tests require an unlocked graphical session; compilation alone does not cover them. The [family checklist](skills/4d-accessibility/references/FULL-FORMS.md) tracks the remaining full-form work.
+
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.
 
 The full integration reference and examples live under `skills/4d-accessibility/references` so the agent skill can be installed as a self-contained folder. Update that source once. Build checks validate local links and the skill's required files.
