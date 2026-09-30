@@ -4,6 +4,19 @@ var $native; $description; $node; $target : Object
 var $unchanged : Boolean
 var $valueType : Integer
 $result:=New object("status"; "completed"; "message"; "Activation dispatched through the control's normal event path")
+If ($request.nativeButton=True)
+ $native:=AXB_PollGuard.context.controlInputResult
+ If (($native=Null) || ($native.action#$request.actionID))
+  If ((Milliseconds<$request.deadline) | (AXB_PollGuard.context.controlInputReadAt<$request.deadline))
+   return New object("status"; "pending"; "confirm"; Formula(AXB_ControlConfirm($1)); "data"; $request)
+  End if
+  return New object("status"; "rejected"; "message"; "Native button input timed out")
+ End if
+ If (Not($native.accepted=True))
+  return New object("status"; "rejected"; "message"; "Control changed before native input delivery")
+ End if
+ return
+End if
 If (New collection("increment"; "decrement").indexOf($request.operation)>=0)
  If ($request.awaitNative=True)
   $native:=AXB_PollGuard.context.controlInputResult

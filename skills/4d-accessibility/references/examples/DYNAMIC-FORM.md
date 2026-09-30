@@ -1,10 +1,23 @@
 # Generated forms
 
+Prefer [area-owned generated forms](../AREA-INTEGRATION.md#generated-json-forms). Add `AXB_AreaForm` at the shared builder and open its returned `.form`. It preserves the original definition, method, events and data, and needs no event wrapper. Automatic children are discovered by the root.
+
+## Automatic area-owned children
+
+Keep the root's existing data, including entities, class instances and shared objects. Automatic children need no wrapper or private copy of that data. Put their metadata under `options.children.<container>` in central configuration. Invalidate the container in its owning parent immediately before replacing its JSON or rebinding its data, then run the existing replacement. See [automatic children](AUTOMATIC-FORM.md#repeated-and-nested-page-subforms).
+
+If metadata must change, an area-owned root can deliberately restart with the complete new options through `AXB_Form("start"; newOptions)` in the root context. The area owns the replacement session's teardown. Do not restart from a child context. Keep normal business cleanup, loading guards and focus observation.
+
+## Advanced per-instance provider lifecycle
+
+The following `AXB_Dynamic` contract remains available for explicit per-instance configuration and child registration. Its private-data and cleanup rules apply to that wrapper, rather than to `AXB_AreaForm`.
+
+
 Generated JSON forms use the same `AXB_Form` options as named forms. With matching packages, ordinary controls need a label and any missing control labels. Existing explicit providers can still supply `describe` and `apply`. Add the bridge where the application opens the form, after generating its JSON and before calling `DIALOG`. Keep the generator's existing object methods and standard actions.
 
 `AXB_Dynamic` prepares one form instance. It copies the JSON template, adds load/unload events, and wraps its form method. The wrapper runs the application's original On Load before starting the bridge. On Unload, it stops the bridge before calling the original method. Programmatic subform replacement needs the explicit close sequence below because it does not deliver that event in the tested runtime. Other subscribed events, including the existing timer, still reach that method. If the template did not subscribe to load or unload, the wrapper does not deliver those newly added events to the application method.
 
-## Add one generated dialog
+### Add one wrapped generated dialog
 
 Install the [host helpers](../INTEGRATION.md). Leave initialization in the application's original form method. Use the wrapper below instead of adding manual `AXB_Form("start")` and `AXB_Form("stop")` calls to that method. The [ordinary-control example](AUTOMATIC-FORM.md) explains automatic discovery and its current coverage.
 
@@ -30,7 +43,7 @@ Keep the application's existing modal window type. For a nonblocking `DIALOG(...
 
 `Form.axbError` and `Form.axbDynamic.startResult` record a failed start, including missing packages. If provided, `onError` also receives this failure with `phase: "start"`; connect it to the application's existing logger. The form and human handlers continue working when packages are absent. Unexpected describe/apply failures use the same `onError` callback after detaching, as described in the integration guide.
 
-## Generated subforms
+### Wrapped generated subforms
 
 Choose the path that matches the parent.
 
@@ -38,7 +51,7 @@ Choose the path that matches the parent.
 
 **Registered child:** when a reusable child carries its own options or uses an explicit provider, prepare it with `"register"` and the same private data object used by its container. An automatic parent discovers that registration without a `subforms` list. An explicit-provider parent must list the container in its description's `subforms`, with registration at each explicit intermediate parent. Use label/controls/grids alone for an automatic child; add describe/apply only for an intentionally explicit provider.
 
-The sequence below is for registered children. A changed registration retires the old child, so this path does not need a second invalidation call. The root window alone uses `"start"`.
+Everything in this wrapped-subform section applies to `AXB_Dynamic`, whose captured session and private-data contract differ from the area path. The sequence below is for registered children. A changed registration retires the old child, so this path does not need a second invalidation call. The root window alone uses `"start"`.
 
 When replacing a child, call its shared cleanup method inside the old subform **before** changing the container's data binding. In the 4D 20.8 fixture, `OBJECT SET SUBFORM` replaces generated content without delivering the old form's On Unload event. Do not rely on that event to clean up a programmatic replacement.
 

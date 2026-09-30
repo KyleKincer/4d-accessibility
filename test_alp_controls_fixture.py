@@ -65,7 +65,8 @@ def main():
         return ax.wait_for(ready, message, timeout=15)
 
     try:
-        ready, report['application_mode_notice_acknowledged'] = wait_for_start(process, project, lambda: state() or None, BUILD)
+        ready, report['application_mode_notice_acknowledged'] = wait_for_start(process, project,
+            lambda: state() if state().get('startResult', {}).get('ok') else None, BUILD)
         check(ready['startResult']['ok'] and ready['compiled'] is args.compiled, 'one root adapter starts around repeated existing vendor forms')
         check(ready['registration'] == 0, 'vendor registration succeeds')
         app, window = activate_fixture(process, project, TITLE)

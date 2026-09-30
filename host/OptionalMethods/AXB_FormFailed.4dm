@@ -8,6 +8,7 @@ End if
 If ($current.session#$context.session)
  return
 End if
+$context.failure:=OB Copy($failure)
 If ((New collection(4D.Object).indexOf(OB Class(Form))=0) && Not(OB Is shared(Form)))
  Form.axbError:=$failure.error
  Form.axbFailure:=$failure

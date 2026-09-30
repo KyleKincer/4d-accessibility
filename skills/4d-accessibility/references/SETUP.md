@@ -2,7 +2,7 @@
 
 The source repository is https://github.com/KyleKincer/4d-accessibility. The skill works when copied on its own, but its installer and binaries come from a matching checkout or release.
 
-For a published release, download the complete versioned macOS kit from that repository's Releases page and verify `SHA256SUMS`. The component-only `4d-accessibility.zip` is for Dependency Manager; it still needs the plugin and host methods from the same release. Check current status before selecting a version. At this development checkpoint, there is no production release.
+For a published release, download the complete versioned macOS kit from that repository's Releases page and verify `SHA256SUMS`. The component-only `4d-accessibility.zip` is for Dependency Manager; it still needs the plugin and host methods from the same release. Check current status before selecting a version. Version 0.19.7 is the published stable kit. Area-owned integration requires the matching builds from the current feature branch until its own kit is released.
 
 For source development:
 
@@ -25,7 +25,7 @@ var $info : Object
 $info:=AXB_Host("info"; New object)
 ```
 
-Require `ok=True`. See [the optional host API](OPTIONAL-HOST.md) when debugging dependency detection or dispatch. Compare `$info.componentInfo.version` and the version at the beginning of `$info.nativeStatus` with the kit's `VERSION`. `$info.componentInfo.compiled` must be True. Then start the actual form: startup checks the capabilities needed by the installed helpers. Matching version text alone is insufficient.
+Require `ok=True`. See [the optional host API](OPTIONAL-HOST.md) when debugging dependency detection or dispatch. Compare `$info.componentInfo.version` and the version at the beginning of `$info.nativeStatus` with the kit's `VERSION`. `$info.componentInfo.compiled` must be True. Area integration also requires native `areaLifecycle 1`, native `buttonInput 1` and component `capturedStop: 1`. Then open the actual form and inspect area registration and published coverage. Startup checks the capabilities needed by the installed helpers. Matching version text alone is insufficient.
 
 Host methods have a generated body-SHA marker. Run the matching installer again with the same options and compiler target to refresh/verify those sources. It refuses to overwrite unmarked or locally edited files. Keep application configuration outside generated helpers.
 

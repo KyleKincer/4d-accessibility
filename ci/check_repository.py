@@ -10,7 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
-    files = [p for p in ROOT.rglob("*") if p.is_file() and not any(part in {".git", "build", "dist", "__pycache__", ".venv", ".ruff_cache"} for part in p.relative_to(ROOT).parts)]
+    # Check repository source, including new work, rather than ignored local
+    # fixture licenses, vendor bundles and build artifacts.
+    names = subprocess.check_output(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard"], cwd=ROOT, text=True).split("\0")
+    files = [ROOT / name for name in names if name and ((ROOT / name).is_file() or (ROOT / name).is_symlink())]
     failures = []
     headings = {}
     for p in files:

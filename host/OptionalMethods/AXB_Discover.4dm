@@ -21,6 +21,10 @@ FORM GET OBJECTS($names; $pointers; $pages; Form current page+Form inherited)
 FORM GET ENTRY ORDER($entry; *)
 For ($i; 1; Size of array($names))
  $name:=$names{$i}
+ // The lifecycle area is infrastructure, with no visible content or action.
+ If ((($name="__AXB_Bridge") | (Position("__AXB_Bridge."; $name)=1)) && (OBJECT Get type(*; $name)=Object type plugin area))
+  continue
+ End if
  If (OBJECT Get visible(*; $name))
   $type:=OBJECT Get type(*; $name)
   $role:=""

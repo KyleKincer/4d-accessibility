@@ -3,6 +3,7 @@
 import hashlib
 import json
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
@@ -39,18 +40,40 @@ class ReleaseTests(unittest.TestCase):
             self.assertEqual(manifest["files"], actual)
             self.assertTrue(all(not name.endswith((".license", ".p12", ".key", ".4dd")) for name in actual))
             self.assertFalse(any("ALP.bundle" in name or name.startswith("fixture/") for name in actual))
-            for name in ["Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge", "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ", "skills/4d-accessibility/SKILL.md", "inspect_ax.py", "tests/mac_ax.py", "inventory_forms.py", "LICENSE", "4D-SDK-LICENSE.md"]:
+            for name in ["Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge", "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ", "skills/4d-accessibility/SKILL.md", "inspect_ax.py", "tests/mac_ax.py", "inventory_forms.py", "LICENSE", "4D-SDK-LICENSE.md", "validation/area-owned-integration.json", "validation/area-form.png", "tests/native-messages/README.md", "tests/native-messages/Project/NativeMessages.4DProject"]:
                 self.assertIn(name, actual)
+            for doc in [*kit.joinpath("skills").rglob("*.md"), *kit.joinpath("tests/native-messages").rglob("*.md")]:
+                for link in re.findall(r"\]\(([^)]+)\)", doc.read_text()):
+                    if re.match(r"\w+://", link) or link.startswith("mailto:"):
+                        continue
+                    target = link.partition("#")[0]
+                    if target:
+                        resolved = (doc.parent / target).resolve()
+                        self.assertTrue(resolved.is_relative_to(kit.resolve()), f"Nonportable kit link: {doc.name} -> {link}")
+                        self.assertTrue(resolved.exists(), f"Missing kit document: {doc.name} -> {link}")
             project = base / "host/Project"
             methods = project / "Sources/Methods"
             methods.mkdir(parents=True)
             owned = methods / "SaveRecord.4dm"
             owned.write_text("// Existing application behavior\n")
-            command = [sys.executable, str(kit / "install_host_methods.py"), "--project-dir", str(project), "--area-list"]
+            form_path = project / "Sources/Forms/Customer/form.4DForm"
+            form_path.parent.mkdir(parents=True)
+            form = {"method": "SaveRecord", "events": ["onLoad", "onTimer"], "width": 300, "height": 100,
+                    "pages": [None, {"objects": {"Save": {"type": "button", "text": "Save", "method": "SaveRecord", "events": ["onClick"], "left": 20, "top": 20, "width": 80, "height": 24}}}]}
+            form_path.write_text(json.dumps(form))
+            command = [sys.executable, str(kit / "install_host_methods.py"), "--project-dir", str(project), "--area-list", "--form", "Customer"]
+            subprocess.run([*command, "--dry-run"], check=True, capture_output=True)
+            self.assertEqual(json.loads(form_path.read_text()), form)
             subprocess.run(command, check=True, capture_output=True)
             first = {p.name: p.read_bytes() for p in methods.iterdir()}
+            installed_form = form_path.read_bytes()
             subprocess.run(command, check=True, capture_output=True)
             self.assertEqual(first, {p.name: p.read_bytes() for p in methods.iterdir()})
+            self.assertEqual(form_path.read_bytes(), installed_form)
+            integrated = json.loads(installed_form)
+            self.assertEqual(integrated["pages"][0]["objects"]["__AXB_Bridge"]["pluginAreaKind"], "%AXB Area")
+            integrated["pages"][0] = None
+            self.assertEqual(integrated, form)
             self.assertEqual(owned.read_text(), "// Existing application behavior\n")
             self.assertEqual((methods / "AXB_Form.4dm").read_text().split("\n", 1)[1], (kit / "host/OptionalMethods/AXB_Form.4dm").read_text())
 

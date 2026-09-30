@@ -130,6 +130,34 @@ static void GridRefreshDelayTest(void) {
     if (self.menu) [NSNotificationCenter.defaultCenter postNotificationName:NSMenuDidBeginTrackingNotification object:self.menu]; }
 - (void)mouseUp:(NSEvent *)event { (void)event; self.releases++; }
 @end
+static void ButtonInputTest(void) {
+    NSWindow *window = Window(@"AXB guarded button delivery");
+    AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
+    [window.contentView addSubview:canvas];
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9025);
+    NSMutableDictionary *button = [@{@"id": @"remember", @"role": @"button", @"label": @"Remember",
+        @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@20, @20, @120, @30]} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Button input", @"enabled": @YES, @"nodes": @[button]} mutableCopy];
+    Exchange(window, 9025, 1, session, snapshot); Pump();
+    AXBNode *node = Provider(window).accessibilityChildren.firstObject;
+    Check([node accessibilityPerformPress], "ordinary button accepts an accessibility activation");
+    NSDictionary *action = Exchange(window, 9025, 1, session, snapshot)[@"action"];
+    NSDictionary *input = @{@"action": action[@"id"], @"point": @[@50, @35]};
+    Exchange(window, 9025, 1, session, snapshot, nil, nil, input); Pump(); Pump();
+    Check(canvas.presses == 1 && canvas.releases == 1 && canvas.lastPoint.x == 50 && canvas.lastPoint.y == 35, "ordinary button receives one complete native mouse pair at the verified point");
+    Check([Exchange(window, 9025, 1, session, snapshot, nil, nil, input)[@"controlInputResult"][@"accepted"] boolValue], "ordinary button dispatch has an exact acknowledgement"); Pump();
+    Check(canvas.presses == 1, "replaying an ordinary button request cannot repeat its handler");
+    Exchange(window, 9025, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"dispatched"}); Pump();
+    Check([node accessibilityPerformPress], "ordinary button can request a subsequent activation");
+    action = Exchange(window, 9025, 1, session, snapshot)[@"action"];
+    input = @{@"action": action[@"id"], @"point": @[@50, @35]};
+    Exchange(window, 9025, 1, session, snapshot, nil, nil, input);
+    button[@"enabled"] = @NO; snapshot[@"revision"] = @2;
+    Exchange(window, 9025, 1, session, snapshot); Pump();
+    Check(canvas.presses == 1 && ![Exchange(window, 9025, 1, session, snapshot)[@"controlInputResult"][@"accepted"] boolValue], "disabling a button before native dispatch prevents its handler");
+    [window close]; Pump();
+}
 static void GridControlsTest(void) {
     NSWindow *window = Window(@"AXB typed grid controls");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -520,6 +548,7 @@ int main(void) {
         GridHeaderTest();
         CheckboxFeedbackTest();
         AdjustableTest();
+        ButtonInputTest();
         ComboPopupTest();
         NSWindow *first = Window(@"AXB native test 1");
         NSString *session = Open(first, 101);

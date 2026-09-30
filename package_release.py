@@ -45,6 +45,22 @@ def archive(folder, target):
                 output.write(path, path.relative_to(folder))
 
 
+def copy_source_folders(kit, folders):
+    # Include new source while excluding ignored fixture data and local caches.
+    names = subprocess.check_output(
+        ["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", *folders],
+        cwd=ROOT, text=True).split("\0")
+    for name in sorted(set(names) - {""}):
+        source = ROOT / name
+        if source.is_symlink():
+            raise ValueError(f"Unexpected source symlink: {name}")
+        if not source.is_file():
+            continue
+        target = kit / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+
+
 def verify_inputs():
     version = (ROOT / "VERSION").read_text().strip()
     if not re.fullmatch(r"\d+\.\d+\.\d+", version):
@@ -91,11 +107,10 @@ def main():
         kit.mkdir()
         shutil.copytree(plugin, kit / "Plugins/AccessibilityBridge.bundle")
         shutil.copytree(component, kit / "Components/AccessibilityBridge.4dbase")
-        for folder in ["host", "skills"]:
-            shutil.copytree(ROOT / folder, kit / folder, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+        copy_source_folders(kit, ["host", "skills", "validation", "tests/native-messages"])
         for name in ["install_host_methods.py", "inspect_ax.py", "inventory_forms.py", "LICENSE", "VERSION"]:
             shutil.copy2(ROOT / name, kit / name)
-        (kit / "tests").mkdir()
+        (kit / "tests").mkdir(exist_ok=True)
         shutil.copy2(ROOT / "tests/mac_ax.py", kit / "tests/mac_ax.py")
         notices = kit / "Components/AccessibilityBridge.4dbase/Resources"
         notices.mkdir(exist_ok=True)
@@ -106,9 +121,9 @@ def main():
             "Read `skills/4d-accessibility/references/STATUS.md` for supported form families, tested platforms and known limits.\n\n"
             "1. Close the entire 4D host. Copy the included `Plugins/AccessibilityBridge.bundle` and "
             "`Components/AccessibilityBridge.4dbase` beside your application's `Project` folder.\n"
-            "2. Run `python3 install_host_methods.py --project-dir /path/to/MyApp/Project`. Add `--area-list` for AreaList Pro. "
+            "2. Run `python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Customer --dry-run`, then repeat without `--dry-run`. Add `--area-list` for AreaList Pro. "
             "Use the same `--compiler-method` as earlier installations.\n"
-            "3. Reopen 4D and follow `skills/4d-accessibility/references/INTEGRATION.md` for form hooks and live validation.\n\n"
+            "3. Reopen 4D and follow `skills/4d-accessibility/references/AREA-INTEGRATION.md` for optional central configuration and live validation. Existing form methods need no startup/shutdown hooks.\n\n"
             + ("Developer ID signed and submitted for notarization by the release workflow.\n" if args.sign else
                "Development build: ad hoc signed, not notarized. Do not treat this artifact as a production release.\n"))
         if args.sign:

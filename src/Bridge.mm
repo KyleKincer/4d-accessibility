@@ -919,6 +919,8 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     if (![target isAccessibilityElement] || ![target isAccessibilityEnabled]) return;
                     local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 }
+                BOOL button = [data[@"operation"] isEqual:@"press"] && [data[@"role"] isEqual:@"button"];
+                if (button) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 NSPoint point = [view convertPoint:local toView:nil];
                 NSPoint screen = [view.window convertPointToScreen:point];
                 if (!NSPointInRect(screen, [target accessibilityFrame]) || DeepestHit(view.element, screen) != target) return;
@@ -940,6 +942,10 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                 // release first, then synchronously dispatch to this exact window.
                 // This keeps the control's normal focus behavior and On Clicked handler.
                 [NSApp postEvent:up atStart:YES];
+                // A button can enter a modal loop or retire its route before
+                // sendEvent returns. Acknowledge verified dispatch, not its
+                // business result, before entering that normal event path.
+                if (button) [session finishControlInput:controlInput accepted:YES];
                 [NSApp sendEvent:down];
                 accepted = YES;
             } @finally {
