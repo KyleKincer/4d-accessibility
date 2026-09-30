@@ -58,7 +58,7 @@ Completion: the application compiles. If packages are optional in this host, ver
 
 [Add the lifecycle area](AREA-INTEGRATION.md#ordinary-named-form) with `--form Customer`. Existing form and object methods need no startup or shutdown calls. Clear existing names need no callback. When metadata is needed, return it from one application-owned [`AXB_Configure`](AREA-INTEGRATION.md#one-optional-configuration-method).
 
-For an invoice-like form, add `grids` configuration to that callback. Use existing stable line keys, record `scope` and loader `ready` state. Describe visual-only columns and map an existing selection controller only when selection must refresh other UI. The [assembled example](GRIDS.md#put-the-invoice-like-form-together) shows the application changes.
+For a record editor with editable grids, add `grids` configuration to that callback. Use existing stable line keys, record `scope` and loader `ready` state. Describe visual-only columns and map an existing selection controller only when selection must refresh other UI. The [assembled example](GRIDS.md#configure-a-record-editor-with-editable-grids) shows the application changes.
 
 The [manual lifecycle](MANUAL-LIFECYCLE.md) remains available for application-owned registrations. The configuration contracts below are shared by both paths. Automatic buttons run their ordinary actions; text goes through native editors, keystroke handlers, Undo and validation. Protected inputs remain write-only.
 
@@ -97,7 +97,7 @@ Every automatic form requires the full automatic-control capability set, even if
 
 The current native plugin advertises `sessions 2`; its component advertises `sessionAllocation: 1`. A `sessionLifecycleUnavailable` result means these packages do not match the installed helpers. Application code does not allocate or exchange native IDs.
 
-For a screen that changes records without closing, set `options.scope` to Text or a Formula returning Text, such as `Formula(String(Form.invoiceID))`. Explicit providers instead return this string as `scope` from `describe`. Changing the scope invalidates retained controls for that record and its descendants. Stable row keys identify records within that scope. Neither a row index nor a product number is a record identity. Use `String()` for numeric record IDs.
+For a screen that changes records without closing, set `options.scope` to Text or a Formula returning Text, such as `Formula(String(Form.recordID))`. Explicit providers instead return this string as `scope` from `describe`. Changing the scope invalidates retained controls for that record and its descendants. Stable row keys identify records within that scope. Neither a row index nor a product number is a record identity. Use `String()` for numeric record IDs.
 
 Formula results are checked during polling. A `scope` or `controls.<object>.description` formula returning a non-Text value stops the bridge with `invalidScope` or `invalidControlDescription`, reported through `options.onError` and the plain-data compatibility properties. A successful start does not prevalidate later formula results.
 
@@ -269,7 +269,7 @@ Determinate progress exposes its actual range and supports numeric, date and tim
 
 ### Configure data grids
 
-Use [the grid recipe](GRIDS.md) for native array, collection or entity-selection list boxes and AreaList Pro. It covers stable keys, loading, selection controllers, cell descriptions, row metadata and an [assembled invoice-style example](GRIDS.md#put-the-invoice-like-form-together). Keep the root area and return grid options from `AXB_Configure`.
+Use [the grid recipe](GRIDS.md) for native array, collection or entity-selection list boxes and AreaList Pro. It covers stable keys, loading, selection controllers, cell descriptions, row metadata and an [assembled record-editor example](GRIDS.md#configure-a-record-editor-with-editable-grids). Keep the root area and return grid options from `AXB_Configure`.
 
 ### Explicit providers for existing integrations
 

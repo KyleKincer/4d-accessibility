@@ -10,7 +10,7 @@ Install matching plugin, compiled component and host methods as described in [se
 python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Customer
 ```
 
-Repeat `--form` for selected forms, or use `--all-forms` for detail-screen and unspecified-destination forms. Bulk installation reports and skips list and print forms. A table form is addressed as `--form TableForms/1/Invoice`. Add `--area-list` for AreaList Pro. Run with `--dry-run` first to list proposed files. Repeating the command is idempotent. A conflicting object, edited generated helper or conflicting area stops preflight before any source is written.
+Repeat `--form` for selected forms, or use `--all-forms` for detail-screen and unspecified-destination forms. Bulk installation reports and skips list and print forms. A table form is addressed as `--form TableForms/1/RecordEditor`. Add `--area-list` for AreaList Pro. Run with `--dry-run` first to list proposed files. Repeating the command is idempotent. A conflicting object, edited generated helper or conflicting area stops preflight before any source is written.
 
 For named inheritance, the installer adds the area once in the shared base, leaving derived definitions unchanged. It resolves project forms and table forms by number or catalog name. Cycles, unresolved external/inline bases, and a local area in a derived form stop preflight. Preflight lists every known form inheriting an affected base, including unselected list/print forms.
 
@@ -34,14 +34,14 @@ Case of
  : ($formName="Customer")
   $options.label:="Customer details"
   $options.controls:=New object("AccountNumber"; New object("label"; "Account number"))
- : ($formName="Invoice")
-  $options:=InvoiceAccessibilityOptions
+ : ($formName="RecordEditor")
+  $options:=RecordEditorAccessibilityOptions
 End case
 ```
 
-`InvoiceAccessibilityOptions` is an application method returning the configuration built in the [invoice example](GRIDS.md#put-the-invoice-like-form-together). Use existing object names, stable IDs, formatters, readiness flags and controllers. This callback returns configuration; it does not start a second bridge. Other forms get automatic discovery with the default reporter. `ReportAccessibilityFailure` represents the application's existing logger, not a shipped method; omit that option if no reporter is needed. With no callback at all, startup and later adapter failures remain inspectable in area diagnostics. Production applications that need active reporting can use this one central default.
+`RecordEditorAccessibilityOptions` is an application method returning the configuration built in the [record-editor example](GRIDS.md#configure-a-record-editor-with-editable-grids). Use existing object names, stable IDs, formatters, readiness flags and controllers. This callback returns configuration; it does not start a second bridge. Other forms get automatic discovery with the default reporter. `ReportAccessibilityFailure` represents the application's existing logger, not a shipped method; omit that option if no reporter is needed. With no callback at all, startup and later adapter failures remain inspectable in area diagnostics. Production applications that need active reporting can use this one central default.
 
-Distinguish identically named table forms by their actual table context. For a table form called `Input` owned by the existing `Invoices` table, a configuration case can test `($formName="Input") && (Current form table=->[Invoices])`. Project forms have a nil table pointer. [4D table-context contract](https://developer.4d.com/docs/commands/current-form-table).
+Distinguish identically named table forms by their actual table context. For a table form called `Input` owned by the existing `Records` table, a configuration case can test `($formName="Input") && (Current form table=->[Records])`. Project forms have a nil table pointer. [4D table-context contract](https://developer.4d.com/docs/commands/current-form-table).
 
 For 4D's explicit-type compiler mode, add these application declarations to the application's compiler method, outside the generated block:
 
@@ -67,7 +67,7 @@ var $prepared; $form; $existingData : Object
 var $window : Integer
 // At the shared builder, $form already contains generated JSON.
 // $existingData is the same application data the existing opener uses.
-$prepared:=AXB_AreaForm($form; "InvoiceEditor")
+$prepared:=AXB_AreaForm($form; "RecordEditor")
 // Report $prepared.error through existing diagnostics if ok is False.
 $form:=$prepared.form
 $window:=Open form window($form; Plain form window)
@@ -77,7 +77,7 @@ CLOSE WINDOW($window)
 
 `AXB_AreaForm` copies the definition and adds the same area. It leaves the original definition, method, events, object methods and data untouched. The optional key starts with an ASCII letter and contains at most 64 ASCII letters, digits, underscores or hyphens. It is stored in the area's object name, not the business data. Repeated preparation accepts the same canonical area and key. On failure it returns `ok: False`, `error` and the original `form`, so the application's normal dialog can still open.
 
-Generated roots use the existing `DIALOG` data, including implicit, entity, class-instance or shared data. In the example, `AXB_Configure` receives `InvoiceEditor`. Without a key it receives `Current form name`, which is not a useful stable selector for a generated definition. Prefer an explicit key when configuration is needed. A central callback that returns Null or an empty object for an unrecognized form leaves that form on automatic defaults. Ordinary generated children are discovered from the root.
+Generated roots use the existing `DIALOG` data, including implicit, entity, class-instance or shared data. In the example, `AXB_Configure` receives `RecordEditor`. Without a key it receives `Current form name`, which is not a useful stable selector for a generated definition. Prefer an explicit key when configuration is needed. A central callback that returns Null or an empty object for an unrecognized form leaves that form on automatic defaults. Ordinary generated children are discovered from the root.
 
 For generated definitions inheriting a named form, install the area in that named base and open the original generated definition unchanged. Do not add another area with `AXB_AreaForm`; it returns `inheritedAreaForm` before mutation because it cannot inspect an external base safely. Inline/external JSON inheritance needs an explicitly prepared base or the [manual interface](MANUAL-LIFECYCLE.md). List and print destinations return `unsupportedAreaDestination`. The advanced `AXB_Dynamic` wrapper remains for explicit per-instance provider registration and its private-data contract; it is not needed for ordinary automatic generated forms.
 
