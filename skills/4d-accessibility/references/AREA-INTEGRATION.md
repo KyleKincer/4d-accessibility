@@ -12,9 +12,9 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Cust
 
 Repeat `--form` for selected forms, or use `--all-forms` for detail-screen and unspecified-destination forms. Bulk installation reports and skips list and print forms. A table form is addressed as `--form TableForms/1/Invoice`. Add `--area-list` for AreaList Pro. Run with `--dry-run` first to list proposed files. Repeating the command is idempotent. A conflicting object, edited generated helper or conflicting area stops preflight before any source is written.
 
-For named inheritance, the installer adds the area once in the shared base, leaving derived definitions unchanged. It resolves project forms and table forms by number or catalog name. Cycles, unresolved external/inline bases, and a local area in a derived form stop preflight. Preflight lists every known form inheriting an affected base, including unselected list/print forms. 
+For named inheritance, the installer adds the area once in the shared base, leaving derived definitions unchanged. It resolves project forms and table forms by number or catalog name. Cycles, unresolved external/inline bases, and a local area in a derived form stop preflight. Preflight lists every known form inheriting an affected base, including unselected list/print forms.
 
-Review those other uses too; use central opt-out where another inherited form should remain unregistered. List-screen uses inherited from that base must return `New object("enabled"; False)` from `AXB_Configure`, identified by `Current form name` and, for table forms, `Current form table`. Do not claim their accessibility through this detail-form path. 
+Review those other uses too; use central opt-out where another inherited form should remain unregistered. List-screen uses inherited from that base must return `New object("enabled"; False)` from `AXB_Configure`, identified by `Current form name` and, for table forms, `Current form table`. Do not claim their accessibility through this detail-form path.
 
 Printing creates no registration because native area initialization ignores printing and the area is non-printable. Remove only the exact installer-owned area from a previously instrumented derived form before retrying. Never delete an application object to resolve a name conflict.
 
