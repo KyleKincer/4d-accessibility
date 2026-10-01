@@ -9,6 +9,7 @@ import mac_ax as ax
 
 def press_key(process, project, title, expected_focus, key_code, modifiers=0):
     """Send a test key only to the still-focused editor of the owned fixture."""
+    ax.require_unlocked()
     assert process.poll() is None, "Owned fixture has exited"
     command = subprocess.check_output(["ps", "-p", str(process.pid), "-o", "command="], text=True)
     assert f"--project {Path(project).resolve()}" in command and "/4D.app/Contents/MacOS/4D" in command, "Owned fixture identity changed"
@@ -31,6 +32,7 @@ def press_key(process, project, title, expected_focus, key_code, modifiers=0):
 
 def activate_fixture(process, project, title):
     """Activate an already-open owned fixture after its real window exists."""
+    ax.require_unlocked()
     project = Path(project).resolve()
     command = subprocess.check_output(["ps", "-p", str(process.pid), "-o", "command="], text=True)
     assert f"--project {project}" in command and "/4D.app/Contents/MacOS/4D" in command
@@ -58,6 +60,7 @@ def wait_for_start(process, project, ready, build, timeout=40, area_list_demo=Fa
         subprocess.run(["/usr/bin/xcrun", "swiftc", str(source), "-o", str(executable)], check=True, timeout=30)
     expected = "No license has been found. The application will be started in application mode."
     while time.monotonic() < deadline:
+        ax.require_unlocked()
         if process.poll() is not None:
             raise AssertionError(f"Owned 4D process exited before form startup: {process.returncode}")
         value = ready()
