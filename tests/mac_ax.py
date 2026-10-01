@@ -302,9 +302,32 @@ def capture_window(pid, destination, *, include_shadow=True):
     raise RuntimeError("The fixture has no onscreen window to capture")
 
 
+def session_locked():
+    """Read login-session state without changing authentication or focus."""
+    graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+    copy_session = signature(graphics, "CGSessionCopyCurrentDictionary", c.c_void_p)
+    dictionary_value = signature(CF, "CFDictionaryGetValue", c.c_void_p, c.c_void_p, c.c_void_p)
+    session = copy_session()
+    if not session:
+        raise RuntimeError("No graphical login session is available for live AX tests")
+    key = make_string(None, b"CGSSessionScreenIsLocked", UTF8)
+    try:
+        value = dictionary_value(session, key)
+        return bool(convert(value)) if value else False
+    finally:
+        release(key)
+        release(session)
+
+
+def require_unlocked():
+    if session_locked():
+        raise RuntimeError("Graphical session is locked; live AX tests cannot receive input. Unlock the Mac before resuming.")
+
+
 def wait_for(predicate, message, timeout=5):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
+        require_unlocked()
         value = predicate()
         if value:
             return value
