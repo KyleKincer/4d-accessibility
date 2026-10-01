@@ -464,11 +464,21 @@ static id DeepestHit(id element, NSPoint point) {
     NSRect frame = [element isKindOfClass:AXBNode.class] ? [(AXBNode *)element hitFrame] : [element accessibilityFrame];
     if (![element isAccessibilityElement] || !NSPointInRect(point, frame)) return nil;
     if ([element isKindOfClass:AXBGridNode.class]) return [element accessibilityHitTest:point];
+    id caption = nil;
     for (id child in [[element accessibilityChildren] reverseObjectEnumerator]) {
         id found = DeepestHit(child, point);
-        if (found) return found;
+        if (!found) continue;
+        // Static captions and grouping boxes do not intercept 4D mouse input.
+        // Match the host's overlap check, while retaining these reading stops
+        // when no control occupies the point. Other controls remain obstacles.
+        if ([found isKindOfClass:AXBNode.class] &&
+            [@[@"text", @"group"] containsObject:((AXBNode *)found).data[@"role"]]) {
+            if (!caption) caption = found;
+            continue;
+        }
+        return found;
     }
-    return element;
+    return caption ?: element;
 }
 
 static BOOL IsNativeControl(NSView *view) {
