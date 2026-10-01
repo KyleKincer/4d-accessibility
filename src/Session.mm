@@ -291,6 +291,14 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         ![snapshot[@"enabled"] boolValue]) return nil;
     for (NSDictionary *node in snapshot[@"nodes"]) if ([node[@"id"] isEqual:_pending[@"node"]]) {
         if (![node[@"enabled"] boolValue] || ![node[@"visible"] boolValue]) return nil;
+        if ([_pending[@"operation"] isEqual:@"press"] && [node[@"role"] isEqual:@"button"]) {
+            NSArray *point = input[@"point"], *frame = node[@"frame"];
+            if (!point) return nil;
+            double x = [point[0] doubleValue], y = [point[1] doubleValue];
+            return x >= [frame[0] doubleValue] && y >= [frame[1] doubleValue] &&
+                x < [frame[0] doubleValue] + [frame[2] doubleValue] &&
+                y < [frame[1] doubleValue] + [frame[3] doubleValue] ? node : nil;
+        }
         if ([_pending[@"operation"] isEqual:@"gridHeaderPress"]) {
             NSDictionary *target = _pending[@"value"], *grid = node[@"grid"];
             NSArray *point = input[@"point"], *frame = grid[@"headers"][target[@"column"]];

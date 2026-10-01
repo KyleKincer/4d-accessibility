@@ -23,6 +23,24 @@ python3 ci/check_repository.py
 
 `test_native.py` compiles the AppKit provider tests. Add `--run` only in an unlocked graphical session. Live fixture scripts also require 4D desktop and appropriate Accessibility permission. Screen recording is needed for visual/VoiceOver probes.
 
+## Area-owned integration
+
+Version 0.20.0 adds a lifecycle area to ordinary forms without changing their business methods or event masks. Build both packages first, then run the smallest end-to-end case:
+
+```sh
+python3 prepare_area_fixture.py --server /path/to/4D\ Server.app
+python3 test_area_fixture.py --run
+python3 test_area_fixture.py --run --compiled
+```
+
+The test edits duplicate-named root/child fields, observes their original handlers, deliberately restarts registration, closes without an `On Unload` bridge hook, and reopens the form. Prepare with `--inherited` to exercise a shared base, `--yield-load` to yield during business initialization, or `--configuration absent` to use automatic defaults. `--no-component`, `--no-plugin`, `--configuration invalid` and `--configuration error` exercise dependency and configuration failures while the ordinary form remains usable.
+
+`test_area_pixels.py --server /path/to/4D\ Server.app --run` compares the complete rendered synthetic window with and without the area. It requires Pillow and accepts no changed pixels, masks or tolerance.
+
+For persisted entities, shared objects and class instances, run `test_root_data.py --server /path/to/4D\ Server.app --kind entity --area --generated --no-error-callback --run`, then add `--compiled`. Replace `entity` with `shared`, `instance` or `plain`. This checks unchanged data ownership, failure diagnostics without an application callback, deliberate recovery and cleanup of the replacement registration.
+
+Add `--area` to the ordinary discovery, automatic-subform, native-grid and AreaList fixture preparers below to exercise the same adapters with area-owned startup and teardown. These fixture migrations remove only their known test lifecycle code. The public installer never rewrites application methods. The manual lifecycle suites remain useful compatibility checks.
+
 For delayed grid values, without a 4D installation:
 
 ```sh
@@ -100,6 +118,8 @@ For direct moves between edited AreaList cells, add `--cell-transitions` to `tes
 
 ## Source ownership
 
+Live AX polling and fixture startup stop immediately if the graphical session locks. For unattended runs, keep a login-session sleep assertion alive for the whole run. A timed `caffeinate` process exits when its timeout expires; a persistent LaunchAgent needs `RunAtLoad` and `KeepAlive` so it renews and survives terminal/session-host exits. Verify `PreventUserIdleDisplaySleep`, `PreventUserIdleSystemSleep` and `UserIsActive` with `pmset -g assertions`. Keep normal authentication enabled. An explicit lock or logout still requires an unlock before testing resumes.
+
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.
 
 The full integration reference and examples live under `skills/4d-accessibility/references` so the agent skill can be installed as a self-contained folder. Update that source once. Build checks validate local links and the skill's required files.
@@ -109,3 +129,7 @@ When changing a control, test observable behavior against its ordinary native UI
 ## Application instrumentation
 
 An application-specific installer can import `install_host_methods.main` and pass a trusted `transform(body, method_name)` callback. This lets a host apply its existing instrumentation while sharing upstream overwrite, hash and compiler-declaration checks. The ordinary CLI installs source unchanged. Transformations finish before any destination is written; an exception leaves the installation untouched. Keep application-specific wrappers in the host repository.
+
+Live fixture startup and key injection also check for held Shift, Control, Option or Command keys. Release those keys, including on a screen-sharing client, before running tests. The check reports interference without changing key state. VoiceOver can still send its own modifier combinations during a test.
+
+To test database reopening in one 4D process, prepare the discovery fixture with `--area --reopen`, then run `test_discovery_fixture.py --run --launch` and repeat with `--compiled`. The fixture performs `OPEN DATABASE` once, verifies two startup executions, and uses external AX to complete the ordinary controls workflow after plugin reinitialization.

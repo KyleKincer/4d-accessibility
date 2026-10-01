@@ -118,13 +118,13 @@ Case of
   $x:=$point[0]
   $y:=$point[1]
   CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
-  POST CLICK($x; $y; Current process)
   If ($target.role="button")
-   // A button's normal handler may navigate, replace a child or close a form.
-   // Acknowledge posting that activation while its verified route still exists.
-   // This receipt does not confirm the application's business result.
-   return New object("status"; "completed"; "message"; "Activation dispatched through the control's normal event path")
+   // Reuse guarded native delivery so nested dialogs receive a complete
+   // mouse-down/up pair in their actual AppKit window.
+   AXB_PollGuard.context.controlInput:=New object("action"; $action.id; "point"; New collection($x; $y))
+   return New object("status"; "pending"; "confirm"; Formula(AXB_ControlConfirm($1)); "data"; New object("nativeButton"; True; "actionID"; $action.id; "deadline"; Milliseconds+2000))
   End if
+  POST CLICK($x; $y; Current process)
  Else
   $result.message:="Operation is unavailable"
   return

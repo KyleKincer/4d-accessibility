@@ -78,7 +78,7 @@ def main():
     close = None
     try:
         ready, report["application_mode_notice_acknowledged"] = wait_for_start(process, project,
-            lambda: state() if state().get("runId") == config["runId"] else None, BUILD, area_list_demo=config["licenseMode"] == "demo", area_list_title=config["areaListTitle"])
+            lambda: state() if state().get("runId") == config["runId"] and state().get("startResult", {}).get("ok") else None, BUILD, area_list_demo=config["licenseMode"] == "demo", area_list_title=config["areaListTitle"])
         check(ready["startResult"].get("ok") is True and ready["compiled"] is args.compiled, "one automatic root starts around the existing repeated AreaList forms")
         report["registration"] = ready.get("registration")
         if config["licenseMode"] == "registered":

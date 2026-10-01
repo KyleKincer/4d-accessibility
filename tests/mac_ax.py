@@ -273,7 +273,7 @@ def system():
     return Element(create())
 
 
-def capture_window(pid, destination):
+def capture_window(pid, destination, *, include_shadow=True):
     """Capture only the frontmost onscreen window belonging to the fixture PID."""
     graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
     window_list = signature(graphics, "CGWindowListCopyWindowInfo", c.c_void_p, c.c_uint32, c.c_uint32)
@@ -295,16 +295,56 @@ def capture_window(pid, destination):
             window = array_value(windows, index)
             if property_value(window, "kCGWindowOwnerPID") == pid:
                 number = int(property_value(window, "kCGWindowNumber"))
-                subprocess.run(["/usr/sbin/screencapture", "-x", "-l", str(number), str(destination)], check=True, timeout=10)
+                subprocess.run(["/usr/sbin/screencapture", "-x", *([] if include_shadow else ["-o"]), "-l", str(number), str(destination)], check=True, timeout=10)
                 return
     finally:
         release(windows)
     raise RuntimeError("The fixture has no onscreen window to capture")
 
 
+def session_locked():
+    """Read login-session state without changing authentication or focus."""
+    graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+    copy_session = signature(graphics, "CGSessionCopyCurrentDictionary", c.c_void_p)
+    dictionary_value = signature(CF, "CFDictionaryGetValue", c.c_void_p, c.c_void_p, c.c_void_p)
+    session = copy_session()
+    if not session:
+        raise RuntimeError("No graphical login session is available for live AX tests")
+    key = make_string(None, b"CGSSessionScreenIsLocked", UTF8)
+    try:
+        value = dictionary_value(session, key)
+        return bool(convert(value)) if value else False
+    finally:
+        release(key)
+        release(session)
+
+
+def require_unlocked():
+    if session_locked():
+        raise RuntimeError("Graphical session is locked; live AX tests cannot receive input. Unlock the Mac before resuming.")
+
+
+def held_modifiers():
+    """Read combined session key state, including keys held by remote input."""
+    graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+    flags_state = signature(graphics, "CGEventSourceFlagsState", c.c_uint64, c.c_int)
+    flags = flags_state(0)
+    return [name for name, bit in (("Shift", 17), ("Control", 18), ("Option", 19), ("Command", 20))
+            if flags & (1 << bit)]
+
+
+def require_test_input():
+    """Check the desktop before startup or input, never alter the user's keys."""
+    require_unlocked()
+    modifiers = held_modifiers()
+    if modifiers:
+        raise RuntimeError("Release held modifier keys before live tests: " + ", ".join(modifiers))
+
+
 def wait_for(predicate, message, timeout=5):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
+        require_unlocked()
         value = predicate()
         if value:
             return value

@@ -6,7 +6,7 @@ On the tested 4D 20.8/macOS 26.7 installation, both built-in commands expose an 
 
 ## Use an existing application dialog
 
-If the application already has suitable alert and confirmation forms, integrate those forms through the [ordinary lifecycle](examples/AUTOMATIC-FORM.md). This keeps their layout, message bindings, button titles, standard actions and keyboard shortcuts. Add On Unload if needed, and start discovery after the existing On Load code has set titles and resized the form. One integration in a shared dialog form covers its existing callers.
+If the application already has suitable alert and confirmation forms, integrate those forms through the [ordinary lifecycle](examples/AUTOMATIC-FORM.md). This keeps their layout, message bindings, button titles, standard actions and keyboard shortcuts. Add a [lifecycle area](AREA-INTEGRATION.md) to the shared dialog form. Startup runs after its existing code has set titles and resized the form. One integration in a shared dialog form covers its existing callers.
 
 Identify message fields with labels such as `Message` and `Help`. Static text with a variable reference must expose its resolved message; verify the actual AX value. A warning picture may be decorative when the same meaning is already conveyed by the message. Preserve any meaningful severity description.
 

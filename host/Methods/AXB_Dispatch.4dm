@@ -3,6 +3,7 @@
 #DECLARE($operation : Text; $request : Object) -> $result : Object
 var $status : Text
 var $token : Object
+var $window : Integer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
@@ -22,6 +23,21 @@ End if
 If ($operation="info")
  $result:=New object("ok"; True; "hostAPI"; 1; "nativeStatus"; $status)
  return
+End if
+If ($operation="stop")
+ $window:=Current form window
+ If (OB Is defined($request; "window"))
+  If (New collection(Is real; Is integer; Is longint).indexOf(Value type($request.window))<0)
+   return New object("ok"; False; "error"; "invalidWindow")
+  End if
+  $window:=$request.window
+ End if
+ $token:=AXB_CoreWindows[String($window)].token
+ If (($token=Null) || (OB Is defined($request; "session") && ($request.session#$token.session)))
+  return New object("ok"; False; "error"; "inactiveSession")
+ End if
+ AXB_Stop($window; $token.session)
+ return New object("ok"; True)
 End if
 If (Current form window=0)
  $result.error:="noFormContext"
@@ -53,15 +69,6 @@ Case of
    return
   End if
   $result:=New object("ok"; True; "session"; $token.session; "token"; $token)
- : ($operation="stop")
-  If (OB Is defined($request; "session"))
-   If ($request.session#AXB_CoreWindows[String(Current form window)].token.session)
-    $result.error:="inactiveSession"
-    return
-   End if
-  End if
-  AXB_Stop
-  $result:=New object("ok"; True)
  : ($operation="node")
   If ((Value type($request.objectName)#Is text) | (Value type($request.id)#Is text) | (Value type($request.role)#Is text) | (Value type($request.label)#Is text) | (Value type($request.enabled)#Is Boolean))
    $result.error:="invalidNode"

@@ -6,7 +6,17 @@ Version 0.19.7 packages the helper corrections below together with the plugin an
 
 The signed 0.19.6 draft passed 39 compiled native-grid VoiceOver checks and 37 compiled AreaList checks. Recording exposed an early checkbox-caption sample in the test; eleven repeated activations confirmed asynchronous speech, eight after an initially stale caption. The driver now observes for up to five seconds without replaying input or moving focus. [Evidence](../../../validation/checkbox-speech-observation.json). Version 0.19.7 changes packaged wording and this test, with no provider behavior change.
 
+## Area-owned integration in 0.20.0
+
+Version 0.20.0 is on `main` with development artifacts from passing CI runs; a signed release is not yet published. An installer-added area owns initial registration and captured cleanup. One optional central configuration method supplies labels and existing providers; ordinary business methods need no one-shot start/stop calls. Generated definitions use a copied area preparation without replacing their methods, events or application data. The published 0.19.7 kit retains the manual lifecycle.
+
+The area integration passes 1846 checks across 53 live runs in native ARM 4D 20.8/macOS 26.7. Coverage includes ordinary and generated controls, repeated/shared/generated children, nested modal dialogs, named inheritance, intentional restart, optional dependencies, and failure recovery on plain/entity/shared/class roots. Native array, collection and entity grids and repeated AreaList grids retain their tested behavior. Compiled VoiceOver checks cover native grids, AreaList checkboxes and layered buttons. Each run records its execution mode and source/report hashes in [the evidence](../../../validation/area-owned-integration.json).
+
+The complete synthetic window is pixel-identical with and without the area, with zero tolerance or masking. A Form Editor save adds only 4D editor metadata; all original definitions and the canonical area remain unchanged, and reinstalling changes no bytes. Opus 5.5 rated the agent skill 9/10; Fable 5.1 reviewed minimal host changes and its corrections passed the relevant live suites. See [the integration guide](AREA-INTEGRATION.md). These results establish the integration path for the exercised families, not new control-family coverage, Intel runtime, client/server delivery or a signed downloadable 0.20.0 release.
+
 ## Current development check
+
+Static captions and grouping boxes no longer block hit testing of an overlapping control. The native provider uses the same nonblocking roles as the host overlap check; captions remain reading stops where no control occupies the point. A regression reproduces rejected native button delivery before the fix and verifies one complete mouse pair afterwards. Interactive controls and native views still obstruct delivery. Real application workflow acceptance is separate.
 
 Existing background buttons can declare their actual layer through `controls.<name>.layer`, defaulting to zero. Foreground actions no longer mistake a known background button for an obstruction. Button activation uses a free visible region; complete obstruction still rejects. A completely covered button leaves the tree while a declared higher control covers it, and background activation avoids opaque grids and subforms. Twenty-two interpreted/compiled checks, including VoiceOver activation of both stacked buttons, pass without changing the form layout, native plugin or component. [Evidence and limits](../../../validation/layered-controls.json). The 0.19.5 release packages predate this helper correction.
 
@@ -30,7 +40,7 @@ The 0.19 AreaList checkbox adapter passes 30 checks in interpreted 4D and 30 in 
 
 The 0.18 editor-cache correction passes the six interpreted/compiled AreaList suites and a compiled Guard Malloc case. AreaList Pro 11.4.2 corrupts memory when reading, copying or committing long supplementary Unicode text in a bridge-free one-cell project. The 11.4.3b5 preview fails at the same conversion in the complete fixture. The adapter continues to reject supplementary input before mutation. The experimental clipboard workaround was removed because it did not resolve that defect. See the [reproduction](https://github.com/KyleKincer/4d-accessibility/blob/main/tests/AREA-LIST-UNICODE.md).
 
-Generated wrappers opened with different plain/shared/entity/class data now preserve original lifecycle events without adding attributes to incompatible data. All eight interpreted/compiled wrong-data cases pass, 56 checks. Preparing a wrapper on non-plain data remains unsupported.
+Generated wrappers opened with different plain/shared/entity/class data now preserve original lifecycle events without adding attributes to incompatible data. All eight interpreted/compiled wrong-data cases pass, 56 checks. Preparing an advanced `AXB_Dynamic` wrapper on non-plain data remains unsupported; generated forms using `AXB_AreaForm` support all four root data types.
 
 ## Implemented and exercised
 
@@ -49,7 +59,7 @@ Automatic array grids also accept legacy Boolean hidden-row arrays directly. The
 - Classic current/named-selection grids, native hierarchy, custom/styled/protected editors and further AreaList layouts remain open.
 - Native grid headers pass array, collection and entity tests in interpreted and compiled modes. An earlier intermittent compiled entity activation reported delivery without a handler event. A fresh full run passes; its cause remains unresolved and is retained in the validation record.
 - IME/grapheme behavior, wrapped text geometry, errors/status speech and complete reading order need further work.
-- Generated wrappers and explicit child registration still require private plain data.
+- Advanced `AXB_Dynamic` wrappers and explicit child registration still require private plain data. Automatic area preparation and child discovery do not have this restriction.
 - Voice Control/Switch Control, overlapping providers, multiple displays, older macOS reveal, root forms larger than their window, Intel runtime and remote entity performance need validation.
 - Broader compiled desktop coverage, client/server delivery and complete real application workflows remain open.
 - The plug-in manifest ID must not conflict with another plug-in in a target host. The current ID matches the optional host lookup. Developer ID signing and notarization pass for the 0.19.5 signed candidate; full-UI coverage remains unfinished.

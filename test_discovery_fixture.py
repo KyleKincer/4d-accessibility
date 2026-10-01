@@ -6,27 +6,28 @@ import json
 import subprocess
 import sys
 import time
+import xml.etree.ElementTree as ET
 
 from build_component import sha
 from prepare_discovery_fixture import BUILD, FIXTURE, ROOT, TITLE
 
 sys.path.insert(0, str(ROOT / "tests"))
 from mac_ax import CF, Element, UTF8, application, make_string, process_architecture, release, set_attribute, trusted, wait_for as wait_external
+from fixture_desktop import activate_fixture, wait_for_start
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--launch", action="store_true", help="Launch and close only the compiled disposable fixture")
+    parser.add_argument("--compiled", action="store_true", help="With --launch, use compiled ARM desktop execution")
     args = parser.parse_args()
     if not args.run or not trusted():
         parser.error("--run and Accessibility permission are required")
-    pids = subprocess.run(["pgrep", "-x", "4D"], capture_output=True, text=True).stdout.split()
-    if len(pids) != 1:
-        parser.error("Launch the disposable Discovery project")
-    pid = int(pids[0])
-    command = subprocess.check_output(["ps", "-p", str(pid), "-o", "command="], text=True)
-    if "--project " + str(FIXTURE / "Project/Discovery.4DProject") not in command:
-        parser.error("Refusing another 4D project")
+    process = None
+    log = None
+    if args.compiled and not args.launch:
+        parser.error("--compiled requires --launch")
     compiled = json.loads((BUILD / "discovery-compile-report.json").read_text())
     if not compiled.get("passed") or compiled["baseline"]:
         parser.error("Prepare the automatic discovery fixture first")
@@ -37,6 +38,43 @@ def main():
                           ("native_sha256", "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")):
         if sha(FIXTURE / relative) != compiled[key]:
             parser.error("Package changed after compilation")
+    if args.launch:
+        if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
+            parser.error("Close 4D before launching the owned fixture")
+        project = FIXTURE / "Project/Discovery.4DProject"
+        (FIXTURE / "Resources/runtime-status.json").unlink(missing_ok=True)
+        (FIXTURE / "Resources/closed.json").unlink(missing_ok=True)
+        (FIXTURE / "Resources/reopen-starts.txt").unlink(missing_ok=True)
+        log = (BUILD / "discovery-desktop.log").open("w")
+        launch_config = json.loads((FIXTURE / "Resources/launch.json").read_text())
+        if launch_config.get("reopen"):
+            link = ET.Element("database_shortcut", is_remote="false",
+                              structure_opening_mode="2" if args.compiled else "1",
+                              structure_file=str(project), data_file=str(FIXTURE / "Resources/reopen.4DD"))
+            ET.ElementTree(link).write(FIXTURE / "Resources/reopen.4dlink", encoding="utf-8", xml_declaration=True)
+        data_args = ["--data", str(FIXTURE / "Resources/reopen.4DD"), "--create-data"] if launch_config.get("reopen") else ["--dataless"]
+        process = subprocess.Popen(["/Applications/4D/4D.app/Contents/MacOS/4D", "--project", str(project), *data_args, "--opening-mode", "compiled" if args.compiled else "interpreted", "--webadmin-auto-start", "false"], stdout=log, stderr=log)
+        def started():
+            try:
+                return json.loads((FIXTURE / "Resources/runtime-status.json").read_text(encoding="utf-8-sig"))
+            except (OSError, ValueError):
+                return {}
+        try:
+            ready, _ = wait_for_start(process, project, started, BUILD)
+            assert ready["compiled"] is args.compiled, "Wrong fixture desktop mode"
+            activate_fixture(process, project, TITLE)
+        except BaseException:
+            process.terminate()
+            process.wait(timeout=10)
+            log.close()
+            raise
+    pids = subprocess.run(["pgrep", "-x", "4D"], capture_output=True, text=True).stdout.split()
+    if len(pids) != 1:
+        parser.error("Launch the disposable Discovery project")
+    pid = int(pids[0])
+    command = subprocess.check_output(["ps", "-p", str(pid), "-o", "command="], text=True)
+    if "--project " + str(FIXTURE / "Project/Discovery.4DProject") not in command:
+        parser.error("Refusing another 4D project")
     config = json.loads((FIXTURE / "Resources/launch.json").read_text())
     report = {"passed": False, "runId": config["runId"], "checks": [],
               "dynamic": config.get("dynamic", False), "process_architecture": process_architecture(pid),
@@ -64,9 +102,11 @@ def main():
         return wait_external(checked, message, timeout)
 
     try:
-        ready = wait_for(lambda: state() if state().get("phase") == "ready" else None, "No current fixture state", 15)
+        ready = wait_for(lambda: state() if state().get("phase") == "ready" and state().get("start", {}).get("ok") else None, "No current registered fixture state", 15)
         report["compiled"] = ready["compiled"]
-        check(ready["start"]["ok"], "one start call registers a form without describe/apply callbacks")
+        if config.get("reopen"):
+            check((FIXTURE / "Resources/reopen-starts.txt").read_text(encoding="utf-8-sig").strip() == "2", "4D reopened the database in the same owned process")
+        check(ready["start"]["ok"], "the root lifecycle registers automatic discovery without describe/apply callbacks")
         app = application(pid)
         window = next(w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE)
         group = wait_for(lambda: next((e for e in window.read("AXChildren") or [] if (e.read("AXIdentifier") or "").startswith("axb.window.")), None), "No automatic tree")
@@ -210,6 +250,11 @@ def main():
         report["passed"] = True
     finally:
         (BUILD / "discovery-runtime-report.json").write_text(json.dumps(report, indent=2) + "\n")
+        if process is not None:
+            if process.poll() is None:
+                process.terminate()
+            process.wait(timeout=10)
+            log.close()
 
 
 if __name__ == "__main__":

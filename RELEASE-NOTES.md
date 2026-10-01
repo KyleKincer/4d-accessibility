@@ -1,3 +1,17 @@
+# 0.20.0 on main
+
+The new integration path adds an invisible, non-focusable plug-in area to each form. The area starts the existing accessibility adapters after ordinary initialization and releases its captured session when the form closes. Most ordinary forms need no bridge code in their form method. One optional `AXB_Configure` method supplies names, grid providers and other application-specific metadata.
+
+The installer adds the area to page zero, resolves shared named bases, reports affected descendants, and protects existing methods and conflicting areas before writing anything. Generated forms use `AXB_AreaForm`, which returns a prepared copy without wrapping application events or changing form data. Root registration supports plain data, entities, class instances and shared objects. Existing manual lifecycle APIs remain available for integrations that need them.
+
+This branch also fixes duplicate-named root/child text selection and ordinary button dispatch into nested modal loops. Actions still use native editors and existing handlers. An AX receipt acknowledges dispatch; the application must confirm its business result.
+
+Database close/reopen now reinitializes the native bridge through 4D's plugin callbacks. Sessions from the closed database remain retired; newly opened forms get fresh identities. The regression fixture exercises the complete controls workflow after a real reopen in interpreted and compiled mode.
+
+Version 0.20.0 is merged to main but is not a published signed release. Download the matching development kit from a passing Build and test workflow run, or build the exact revision. Its native plug-in, component and helpers must be installed together. See [area integration](skills/4d-accessibility/references/AREA-INTEGRATION.md) for setup and migration. The supported control families and vendor restrictions are unchanged.
+
+# 0.19.7 published release
+
 4D Accessibility 0.19.7 is the initial release for integrating supported 4D forms with macOS accessibility. The plugin, compiled component, host helpers and agent skill ship together under the MIT license. Download the versioned macOS kit; the smaller `4d-accessibility.zip` contains only the component.
 
 The ZIP and DMG are Developer ID signed by Sweetwater and notarized by Apple. The DMG includes a stapled notarization ticket. Check `SHA256SUMS` before installation. Install both runtime packages and the matching host helpers, then restart 4D.
