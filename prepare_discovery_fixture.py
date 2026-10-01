@@ -20,8 +20,11 @@ def main():
     parser.add_argument("--server", required=True, type=Path)
     parser.add_argument("--area", action="store_true", help="Use area-owned lifecycle, also for generated JSON")
     parser.add_argument("--baseline", action="store_true")
+    parser.add_argument("--reopen", action="store_true", help="Reopen the same database once before area startup")
     parser.add_argument("--dynamic", action="store_true", help="Open generated JSON through the generic lifecycle wrapper")
     args = parser.parse_args()
+    if args.reopen and not args.area:
+        parser.error("--reopen requires area-owned lifecycle")
     if args.baseline and args.dynamic:
         parser.error("--baseline and --dynamic are separate fixture configurations")
     if args.baseline and args.area:
@@ -50,6 +53,18 @@ def main():
 var $window : Integer
 var $data; $form : Object
 $data:=New object("config"; JSON Parse(File("/RESOURCES/launch.json").getText()))
+If ($data.config.reopen)
+ var $starts : Integer
+ $starts:=1
+ If (File("/RESOURCES/reopen-starts.txt").exists)
+  $starts:=Num(File("/RESOURCES/reopen-starts.txt").getText())+1
+ End if
+ File("/RESOURCES/reopen-starts.txt").setText(String($starts))
+ If ($starts=1)
+  OPEN DATABASE(File("/RESOURCES/reopen.4dlink").platformPath)
+  ABORT
+ End if
+End if
 If ($data.config.dynamic)
  $form:=JSON Parse(File("/RESOURCES/discovery.json").getText())
  $form:=AXB_Dynamic($form; $data; New object("label"; "Contact details"); "start").form
@@ -63,7 +78,7 @@ File("/RESOURCES/closed.json").setText(JSON Stringify(New object("runId"; $data.
 CLOSE WINDOW($window)
 QUIT 4D
 ''')
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "baseline": args.baseline, "dynamic": args.dynamic}) + "\n")
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "baseline": args.baseline, "dynamic": args.dynamic, "reopen": args.reopen}) + "\n")
     objects = {
         "Heading": {"type": "text", "text": "Contact details", "left": 20, "top": 15, "width": 250, "height": 24},
         "NameLabel": {"type": "text", "text": "Name", "left": 20, "top": 52, "width": 100, "height": 24},

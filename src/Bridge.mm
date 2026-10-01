@@ -1018,6 +1018,13 @@ void AXBDetach(NSString *sessionID, NSInteger processID) {
     if (NSThread.isMainThread) cleanup(); else dispatch_async(dispatch_get_main_queue(), cleanup);
 }
 
+void AXBInitialize(void) {
+    Init();
+    // 4D can close and reopen a database while this bundle remains loaded.
+    // Shutdown has retired old sessions and completed native-view cleanup.
+    @synchronized(registryLock) { stopped = NO; }
+}
+
 void AXBShutdown(void) {
     Init();
     @synchronized(registryLock) {

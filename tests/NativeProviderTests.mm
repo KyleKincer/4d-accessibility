@@ -722,6 +722,18 @@ int main(void) {
         Check([Focus((__bridge void *)editorWindow)[@"error"] isEqual:@"inactiveWindow"], "native focus rejects a window that no longer owns keyboard input");
         [focusCover close]; [editorWindow close]; Pump();
         AXBShutdown();
+        NSWindow *reopenedWindow = Window(@"AXB reopened database");
+        Check([OpenResult(reopenedWindow, 103, 1)[@"error"] isEqual:@"plugin stopped"], "shutdown rejects sessions until plugin initialization");
+        Check(![inputElement isAccessibilityEnabled], "database close leaves old native elements disabled");
+        AXBInitialize();
+        NSDictionary *reopened = OpenResult(reopenedWindow, 103, 1);
+        Check([reopened[@"ok"] boolValue], "plugin initialization allows the next database to create sessions");
+        Check(![reopened[@"session"] isEqual:inputSession], "reopened database receives a new session identity");
+        Check([Exchange(reopenedWindow, 103, 1, inputSession, inputSnapshot)[@"ok"] isEqual:@NO], "old database session cannot dispatch in the new database");
+        AXBInitialize();
+        Check([OpenResult(reopenedWindow, 103, 1)[@"error"] isEqual:@"window already has another session"], "repeated initialization preserves the active session owner");
+        AXBShutdown();
+        [reopenedWindow close]; Pump();
         puts("PASS: native provider lifecycle tests");
     }
 }
