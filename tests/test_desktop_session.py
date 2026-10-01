@@ -6,6 +6,21 @@ import mac_ax as ax
 
 
 class DesktopSessionTests(unittest.TestCase):
+    def test_held_option_stops_before_test_input(self):
+        with patch.object(ax, "session_locked", return_value=False), patch.object(ax, "held_modifiers", return_value=["Option"]):
+            with self.assertRaisesRegex(RuntimeError, "Release held modifier keys.*Option"):
+                ax.require_test_input()
+
+    def test_released_modifiers_allow_input(self):
+        with patch.object(ax, "session_locked", return_value=False), patch.object(ax, "held_modifiers", return_value=[]):
+            ax.require_test_input()
+
+    def test_locked_session_does_not_probe_keys(self):
+        with patch.object(ax, "session_locked", return_value=True), patch.object(ax, "held_modifiers") as keys:
+            with self.assertRaisesRegex(RuntimeError, "Graphical session is locked"):
+                ax.require_test_input()
+        keys.assert_not_called()
+
     def test_locked_session_stops_before_predicate(self):
         predicate = Mock()
         with patch.object(ax, "session_locked", return_value=True):
