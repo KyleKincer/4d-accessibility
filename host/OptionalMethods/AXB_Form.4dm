@@ -1,6 +1,6 @@
 // Application-facing lifecycle. Application formulas stay in their owning host.
 #DECLARE($operation : Text; $options : Object) -> $result : Object
-var $reply; $view; $context; $registry : Object
+var $reply; $view; $context; $registry; $area; $candidate : Object
 var $x; $y : Integer
 var $aliases : Boolean
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
@@ -89,6 +89,10 @@ If (($result.componentInfo.sessionAllocation#1) | (Position("; sessions 2;"; $re
  return
 End if
 If ($view.automatic)
+ If (Position("; buttonInput 1;"; $result.nativeStatus)=0)
+  $result:=New object("ok"; False; "error"; "nativeButtonInputUnavailable")
+  return
+ End if
  If (Position("; scrolling 1;"; $result.nativeStatus)=0)
   $result:=New object("ok"; False; "error"; "scrollableControlsUnavailable")
   return
@@ -138,6 +142,15 @@ If ($view.automatic)
   return
  End if
 End if
+// A deliberate restart inside the same area lifetime keeps its automatic
+// teardown owner, even after a prior adapter failure detached registration.
+If (($operation="start") & (AXB_Areas#Null))
+ For each ($candidate; OB Values(AXB_Areas))
+  If (($candidate.context#Null) && ($candidate.window=Current form window) && ($candidate.pointer=OBJECT Get pointer(Object named; $candidate.name)))
+   $area:=$candidate
+  End if
+ End for each
+End if
 $reply:=AXB_Form("stop"; New object)
 If ($aliases)
  OB REMOVE(Form; "axbError")
@@ -146,7 +159,7 @@ If ($aliases)
 End if
 If ($operation="start")
  $view.root:=True
- $context:=New object("active"; True; "revision"; 0; "state"; ""; "label"; $options.label; "view"; $view)
+ $context:=New object("active"; True; "window"; Current form window; "revision"; 0; "state"; ""; "label"; $options.label; "view"; $view)
  $context.nativeInsertion:=Position("; input 2;"; $result.nativeStatus)>0
  $context.aliases:=$aliases
  If ($aliases)
@@ -164,6 +177,12 @@ If ($operation="start")
  If ($result.ok=True)
   $context.session:=$result.session
   $context.token:=$result.token
+  If ($area#Null)
+   $context.areaID:=$area.context.areaID
+   $area.context:=$context
+   $area.state:="active"
+   OB REMOVE($area; "failure")
+  End if
   OB REMOVE($result; "token")
  Else
   AXB_FormStop($context)

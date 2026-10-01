@@ -1,17 +1,22 @@
 // Retire only this captured window lifetime, including after data rebinding.
 #DECLARE($context : Object)
 var $registry; $data; $reply : Object
+var $window : Integer
 If ($context=Null)
  return
 End if
 $context.active:=False
-$registry:=AXB_FormRoots[String(Current form window)]
+$window:=$context.window
+If ($window=0)
+ $window:=Current form window
+End if
+$registry:=AXB_FormRoots[String($window)]
 If (($registry=Null) || (New collection($registry.context).indexOf($context)#0))
  return
 End if
 $data:=$registry.data
-$reply:=AXB_Host("stop"; New object("session"; $context.session))
-OB REMOVE(AXB_FormRoots; String(Current form window))
+$reply:=AXB_Host("stop"; New object("window"; $window; "session"; $context.session))
+OB REMOVE(AXB_FormRoots; String($window))
 If (Not($context.aliases=True))
  return
 End if

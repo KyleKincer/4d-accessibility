@@ -20,7 +20,7 @@ from fixture_desktop import activate_fixture, wait_for_start
 TITLE = "AXB root data ownership fixture"
 
 
-def prepare(server, kind, dynamic_mismatch=False):
+def prepare(server, kind, dynamic_mismatch=False, area=False, generated=False, no_error_callback=False):
     verify_package(PACKAGE)
     fixture = BUILD / ("root-data-" + uuid.uuid4().hex)
     project = project_at(fixture, "RootData")
@@ -161,6 +161,58 @@ QUIT 4D
             '$window:=Open form window($form; Plain form window)\nDIALOG($form; AXBR_Data)')
         text = text.replace('"name"; AXBR_Data.name)', '"name"; AXBR_Data.name; "originalUnload"; AXBR_Status.originalUnload)')
         startup.write_text(text)
+    if area:
+        from install_host_methods import area_form
+        form = json.loads((folder / "form.4DForm").read_text())
+        (folder / "form.4DForm").write_text(json.dumps(area_form(form)))
+        form_method = methods / "AXBR_Form.4dm"
+        text = form_method.read_text().replace('   AXBR_Start\n', '')
+        text = text.replace('  If (Not(AXBR_Status.dynamicMismatch=True))\n  End if\n', '')
+        text = text.replace('  $reply:=AXB_Form("stop"; New object)\n', '')
+        text = text.replace('  AXBR_Status.ticks:=', '  $context:=AXB_FormContext\n  AXBR_Status.start:=New object("ok"; (($context#Null) && ($context.active=True)); "session"; $context.session)\n  AXBR_Status.ticks:=')
+        text = text.replace('  $context:=AXB_FormContext\n', '''  If (File("/RESOURCES/restart.json").exists)
+   File("/RESOURCES/restart.json").delete()
+   AXBR_Status.triggerFailure:=False
+   AXBR_Start
+  End if
+  $context:=AXB_FormContext
+''', 1)
+        text = text.replace('  AXBR_Status.diagnostics:=', '  AXBR_Status.areaDiagnostics:=AXB_Area("diagnostics"; ""; "")\n  AXBR_Status.diagnostics:=')
+        if no_error_callback:
+            text = text.replace('  File("/RESOURCES/state.json")', '''  If (AXBR_Status.areaDiagnostics.areas.length>0)
+   If (AXBR_Status.areaDiagnostics.areas[0].failure#Null)
+    AXBR_Status.failure:=AXBR_Status.areaDiagnostics.areas[0].failure
+    AXBR_Status.handlerRestored:=Method called on error(ek local)="AXBR_Error"
+    AXBR_Status.detached:=$context=Null
+   End if
+  End if
+  File("/RESOURCES/state.json")''')
+        form_method.write_text(text)
+        click_method = methods / "AXBR_Click.4dm"
+        click_method.write_text(click_method.read_text().replace('  $reply:=AXB_Form("stop"; New object)\n', ''))
+        config = code["AXBR_Start"].replace('var $options : Object', '#DECLARE($formName : Text) -> $options : Object')
+        config = config.replace('AXBR_Status.start:=AXB_Form("start"; $options)\n', '')
+        config = config.replace('$options:=New object', 'AXBR_Status.configuration:=$formName\n$options:=New object', 1)
+        if no_error_callback:
+            config = config.replace('; "onError"; Formula(AXBR_Failed($1))', '')
+            start_method = methods / "AXBR_Start.4dm"
+            start_method.write_text(start_method.read_text().replace('; "onError"; Formula(AXBR_Failed($1))', ''))
+            (methods / "AXBR_Failed.4dm").unlink()
+            compiler_method = methods / "Compiler_AXBR.4dm"
+            compiler_method.write_text(compiler_method.read_text().replace('C_OBJECT(AXBR_Failed; $1)\n', ''))
+        (methods / "AXB_Configure.4dm").write_text(config)
+        with (methods / "Compiler_AXBR.4dm").open('a') as stream:
+            stream.write('C_TEXT(AXB_Configure; $1)\nC_OBJECT(AXB_Configure; $0)\n')
+        if generated:
+            (fixture / "Resources/root-form.json").write_text(json.dumps(form))
+            startup = database / "onStartup.4dm"
+            text = startup.read_text().replace('var $window : Integer', 'var $window : Integer\nvar $prepared; $form : Object')
+            text = text.replace('$window:=Open form window("Root"; Plain form window)\nDIALOG("Root"; AXBR_Data)',
+                '$prepared:=AXB_AreaForm(JSON Parse(File("/RESOURCES/root-form.json").getText()); "GeneratedRoot")\n'
+                '$form:=$prepared.form\n$window:=Open form window($form; Plain form window)\nDIALOG($form; AXBR_Data)')
+            startup.write_text(text)
+        startup = database / "onStartup.4dm"
+        startup.write_text(startup.read_text().replace('"name"; AXBR_Data.name)))', '"name"; AXBR_Data.name; "areaCount"; OB Keys(AXB_Areas).length; "rootCount"; OB Keys(AXB_FormRoots).length)))'))
     info = plistlib.loads((server / "Contents/Info.plist").read_bytes())
     executable = server / "Contents/MacOS" / info["CFBundleExecutable"]
     with (fixture / "seed.log").open("w") as log:
@@ -184,16 +236,21 @@ def main():
     parser.add_argument("--server", type=Path, required=True)
     parser.add_argument("--kind", choices=["entity", "shared", "plain", "instance"], required=True)
     parser.add_argument("--compiled", action="store_true")
+    parser.add_argument("--area", action="store_true", help="Use area-owned initial lifecycle; retain the intentional business restart")
+    parser.add_argument("--generated", action="store_true", help="With --area, open the root as generated JSON")
+    parser.add_argument("--no-error-callback", action="store_true", help="With --area, diagnose failure without an application onError hook, then recover")
     parser.add_argument("--dynamic-mismatch", action="store_true", help="Open a generated wrapper with data other than its prepared plain object")
     parser.add_argument("--run", action="store_true")
     args = parser.parse_args()
+    if (args.area and args.dynamic_mismatch) or ((args.generated or args.no_error_callback) and not args.area):
+        parser.error("--generated and --no-error-callback require --area; --area conflicts with --dynamic-mismatch")
     if not args.run or not ax.trusted() or not doctor.desktop_session()["unlocked"]:
         parser.error("--run, existing AX permission and an unlocked desktop are required")
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
         parser.error("Close 4D before testing the owned fixture")
-    fixture, project = prepare(args.server.expanduser().resolve(), args.kind, args.dynamic_mismatch)
-    report = {"passed": False, "kind": args.kind, "compiled": args.compiled, "dynamicMismatch": args.dynamic_mismatch, "checks": [],
-              "fixture": str(fixture), "nativeSHA256": sha(fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
+    fixture, project = prepare(args.server.expanduser().resolve(), args.kind, args.dynamic_mismatch, args.area, args.generated, args.no_error_callback)
+    report = {"passed": False, "kind": args.kind, "compiled": args.compiled, "dynamicMismatch": args.dynamic_mismatch, "area": args.area, "generated": args.generated, "checks": [],
+              "noErrorCallback": args.no_error_callback, "fixture": str(fixture), "nativeSHA256": sha(fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
               "componentSHA256": sha(PACKAGE / "AccessibilityBridge.4DZ"),
               "sourcesSHA256": {str(p.relative_to(fixture)): sha(p) for p in (fixture / "Project/Sources").rglob("*") if p.is_file()}}
     last = {}
@@ -232,8 +289,11 @@ def main():
             check(process.returncode == 0 and closed.get("originalUnload") is True, "wrong-data fallback forwards unload and closes normally")
             report["passed"] = True
             return
+        ax.wait_for(lambda: state().get("start", {}).get("ok"), "Initial bridge did not start")
         check(state()["start"].get("ok") is True, "root starts directly on its existing data")
         check(state()["compiled"] is args.compiled, "requested execution mode is running")
+        if args.area:
+            check(state().get("configuration") == ("GeneratedRoot" if args.generated else "Root"), "central configuration identifies the form without modifying its data")
         app, window = activate_fixture(process, project, TITLE)
         def group():
             pending = [window]
@@ -243,6 +303,9 @@ def main():
                     return node
                 pending.extend(node.read("AXChildren") or [])
         root = ax.wait_for(group, "Root tree missing")
+        def replacement(previous):
+            current = group()
+            return current if current and current.read("AXIdentifier") != previous and current.read("AXChildren") else None
         def control(name):
             return ax.wait_for(lambda: next((n for n in root.read("AXChildren") or []
                 if name in [n.read("AXTitle"), n.read("AXDescription")]), None), name + " missing")
@@ -268,7 +331,7 @@ def main():
         ax.wait_for(lambda: root.read("AXHelp") == "Activation dispatched through the control's normal event path", "Business button did not finish")
         previous = root.read("AXIdentifier")
         check(control("Restart").press() == 0, "lifecycle restart uses the existing root")
-        root = ax.wait_for(lambda: group() if group() and group().read("AXIdentifier") != previous else None, "Replacement root missing")
+        root = ax.wait_for(lambda: replacement(previous), "Replacement root missing")
         check(field.set_text("stale") != 0 or not field.actions(), "retired field cannot edit the replacement root")
         check(control("Fail").press() == 0, "callback failure trigger is accessible")
         ax.wait_for(lambda: state().get("failure"), "Failure callback missing")
@@ -277,12 +340,23 @@ def main():
         ticks = state()["ticks"]
         ax.wait_for(lambda: state()["ticks"] > ticks, "Application timer stopped after bridge failure")
         check(state()["name"] == "Handler changed" and state()["clicks"] == 1, "failure and stale access preserve business state")
-        (fixture / "Resources/close.json").write_text("{}")
+        if args.no_error_callback:
+            check(state()["areaDiagnostics"]["areas"][0]["failure"]["error"] == "callbackError", "area diagnostics retain the failure without an application callback")
+            previous = root.read("AXIdentifier")
+            (fixture / "Resources/restart.json").write_text("{}")
+            root = ax.wait_for(lambda: replacement(previous), "Recovery root missing")
+            ax.wait_for(lambda: state().get("active") and state()["areaDiagnostics"]["areas"][0]["registered"], "Recovered session did not retain area ownership")
+            check(state()["areaDiagnostics"]["areas"][0].get("failure") is None, "successful recovery clears the retired session's failure")
+            check(control("Close").press() == 0, "recovered form closes through its ordinary accessible button")
+        else:
+            (fixture / "Resources/close.json").write_text("{}")
         process.wait(timeout=10)
         check(process.returncode == 0, "application closes normally after bridge failure")
         closed = json.loads((fixture / "Resources/closed.json").read_text(encoding="utf-8-sig"))
         if args.kind != "plain":
             check(sorted(closed["keys"]) == ["id", "name"], "unload leaves host data unchanged")
+        if args.area:
+            check(closed["areaCount"] == 0 and closed["rootCount"] == 0, "area destruction removes the latest captured root without an unload hook")
         report["passed"] = True
     except Exception as error:
         report["error"] = str(error)
@@ -296,7 +370,9 @@ def main():
         raise
     finally:
         report["finalState"] = last
-        suffix = "-dynamic-mismatch" if args.dynamic_mismatch else ""
+        suffix = "-dynamic-mismatch" if args.dynamic_mismatch else ("-area-generated" if args.generated else "-area" if args.area else "")
+        if args.no_error_callback:
+            suffix += "-no-error-callback"
         (BUILD / f"root-data-{args.kind}{suffix}-{'compiled' if args.compiled else 'interpreted'}.json").write_text(json.dumps(report, indent=2) + "\n")
         if process.poll() is None:
             (fixture / "Resources/close.json").write_text("{}")

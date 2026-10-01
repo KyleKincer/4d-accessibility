@@ -21,6 +21,7 @@ TITLE = "AXB complete AreaList grids"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", type=Path, required=True)
+    parser.add_argument("--area", action="store_true", help="Use area-owned lifecycle for the complete repeated grids")
     parser.add_argument("--area-list-plugin", type=Path, default=ROOT / "fixture/Plugins/ALP.bundle", help="Vendor bundle to validate in this isolated fixture")
     parser.add_argument("--key-type", choices=["text", "integer", "longint"], default="text", help="Keep stable IDs in the vendor's original bound array type")
     parser.add_argument("--controls", action="store_true", help="Add Boolean and integer checkbox columns to the repeated form fixture")
@@ -174,6 +175,9 @@ End for
  End if
 ''' + marker)
         method.write_text(content)
+    if args.area:
+        from tests.area_integration import integrate
+        integrate(sources, {"AXBP_Form": "Grid"})
     hashes = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     with tempfile.TemporaryDirectory(prefix="alp-grid-compile-", dir=BUILD) as temporary:
         driver = Path(temporary)
@@ -194,7 +198,7 @@ End for
                 and diagnostic.get("message") == "Missing parameter in the plug-in procedure call. (533.4)"):
             unexpected.append(diagnostic)
     passed = compiled.get("success") is True and not unexpected
-    report = {"passed": passed, "compiler": compiled, "sources_sha256": hashes, **config,
+    report = {"passed": passed, "area": args.area, "compiler": compiled, "sources_sha256": hashes, **config,
               "unexpectedDiagnostics": unexpected,
               "native_sha256": sha(FIXTURE / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
               "component_sha256": sha(PACKAGE / "AccessibilityBridge.4DZ")}

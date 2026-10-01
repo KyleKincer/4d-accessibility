@@ -36,7 +36,7 @@ OBJECT SET VALUE("ShippingAddress"; Form.shipping)
 OBJECT SET SUBFORM(*; "ShippingAddress"; "AlternateAddress")
 ```
 
-If the child has application cleanup in On Unload, extract that cleanup into a shared child method and call it through `EXECUTE METHOD IN SUBFORM` before assigning the new data. The tested generated-form replacement does not deliver the old On Unload event. [The generated-form recipe](examples/DYNAMIC-FORM.md#generated-subforms) shows the complete sequence.
+If the child has application cleanup in On Unload, extract that cleanup into a shared child method and call it through `EXECUTE METHOD IN SUBFORM` before assigning the new data. The tested generated-form replacement does not deliver the old On Unload event. [The generated-form recipe](examples/DYNAMIC-FORM.md#wrapped-generated-subforms) shows the complete sequence.
 
 The replacement registers during its own load. Reuse of the container name does not authorize an old accessibility element to act on the replacement. If the parent changes records, return its new record ID in `description.scope`; that invalidates descendants too.
 

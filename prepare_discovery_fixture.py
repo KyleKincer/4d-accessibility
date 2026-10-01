@@ -18,11 +18,17 @@ TITLE = "AX bridge automatic discovery"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", required=True, type=Path)
+    parser.add_argument("--area", action="store_true", help="Use area-owned lifecycle, also for generated JSON")
     parser.add_argument("--baseline", action="store_true")
+    parser.add_argument("--reopen", action="store_true", help="Reopen the same database once before area startup")
     parser.add_argument("--dynamic", action="store_true", help="Open generated JSON through the generic lifecycle wrapper")
     args = parser.parse_args()
+    if args.reopen and not args.area:
+        parser.error("--reopen requires area-owned lifecycle")
     if args.baseline and args.dynamic:
         parser.error("--baseline and --dynamic are separate fixture configurations")
+    if args.baseline and args.area:
+        parser.error("The baseline intentionally has no area")
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
         parser.error("Close 4D before preparing the disposable fixture")
     server = args.server.expanduser().resolve()
@@ -47,6 +53,18 @@ def main():
 var $window : Integer
 var $data; $form : Object
 $data:=New object("config"; JSON Parse(File("/RESOURCES/launch.json").getText()))
+If ($data.config.reopen)
+ var $starts : Integer
+ $starts:=1
+ If (File("/RESOURCES/reopen-starts.txt").exists)
+  $starts:=Num(File("/RESOURCES/reopen-starts.txt").getText())+1
+ End if
+ File("/RESOURCES/reopen-starts.txt").setText(String($starts))
+ If ($starts=1)
+  OPEN DATABASE(File("/RESOURCES/reopen.4dlink").platformPath)
+  ABORT
+ End if
+End if
 If ($data.config.dynamic)
  $form:=JSON Parse(File("/RESOURCES/discovery.json").getText())
  $form:=AXB_Dynamic($form; $data; New object("label"; "Contact details"); "start").form
@@ -60,7 +78,7 @@ File("/RESOURCES/closed.json").setText(JSON Stringify(New object("runId"; $data.
 CLOSE WINDOW($window)
 QUIT 4D
 ''')
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "baseline": args.baseline, "dynamic": args.dynamic}) + "\n")
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "baseline": args.baseline, "dynamic": args.dynamic, "reopen": args.reopen}) + "\n")
     objects = {
         "Heading": {"type": "text", "text": "Contact details", "left": 20, "top": 15, "width": 250, "height": 24},
         "NameLabel": {"type": "text", "text": "Name", "left": 20, "top": 52, "width": 100, "height": 24},
@@ -105,6 +123,15 @@ QUIT 4D
         if obj.get("events"):
             obj["method"] = "AXBF_Event"
     (FIXTURE / "Resources/discovery.json").write_text(json.dumps(form, indent=2) + "\n")
+    if args.area:
+        from tests.area_integration import integrate
+        # A stable generated key selects the same centralized configuration,
+        # independent of the current runtime form-name convention.
+        integrate(sources, {"AXBF_Form": "GeneratedProbe" if args.dynamic else "Probe"})
+        state_method = methods / "AXBF_State.4dm"
+        state_method.write_text(state_method.read_text().replace("Form.axbDynamic.startResult", "AreaTestStart"))
+        startup = sources / "DatabaseMethods/onStartup.4dm"
+        startup.write_text(startup.read_text().replace('AXB_Dynamic($form; $data; New object("label"; "Contact details"); "start")', 'AXB_AreaForm($form; "GeneratedProbe")'))
     before = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     before["Resources/discovery.json"] = sha(FIXTURE / "Resources/discovery.json")
     with tempfile.TemporaryDirectory(prefix="discovery-compile-", dir=BUILD) as temporary:
@@ -124,6 +151,7 @@ QUIT 4D
         "native_sha256": sha(BUILD / "AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
         "baseline": args.baseline,
         "dynamic": args.dynamic,
+        "area": args.area,
     }, indent=2) + "\n")
     print(f"{'PASS' if passed else 'FAIL'}: discovery fixture compilation; {FIXTURE}")
     raise SystemExit(0 if passed else 1)

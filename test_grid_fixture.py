@@ -82,7 +82,7 @@ def main():
     close = None
     try:
         ready, report["application_mode_notice_acknowledged"] = wait_for_start(
-            process, project, lambda: state() if state().get("runId") == config["runId"] else None, BUILD)
+            process, project, lambda: state() if state().get("runId") == config["runId"] and state().get("start", {}).get("ok") else None, BUILD)
         check(ready.get("start", {}).get("ok") is True and ready["compiled"] is args.compiled, "automatic form starts in the requested desktop mode")
         report["architecture"] = ax.process_architecture(process.pid)
         check(report["architecture"].replace("-", "").startswith("ARM64"), "actual native ARM execution")
@@ -584,8 +584,9 @@ def main():
 
         ax.wait_for(replacement_ready, "Record change did not retire prior identities", timeout=15)
         check(far.read("AXSize") in (None, (0.0, 0.0)), "retained prior-record cell has no active geometry")
+        settle()
         close = find("Close")
-        close.press()
+        check(close.press() == 0, "normal standard-action close accepts AX transport")
         process.wait(timeout=15)
         check(process.returncode == 0, "normal standard-action close exits the owned 4D host")
         check(json.loads(closed.read_text(encoding="utf-8-sig"))["accepted"] is True, "4D confirms normal acceptance separately from cancellation")

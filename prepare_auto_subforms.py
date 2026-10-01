@@ -18,6 +18,7 @@ TITLE = "AX bridge automatic child forms"
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", type=Path, required=True)
+    parser.add_argument("--area", action="store_true", help="Use area-owned lifecycle and central configuration")
     parser.add_argument("--implicit", action="store_true", help="Open the root dialog without a data argument")
     parser.add_argument("--shared-focus", action="store_true", help="Share non-text bindings and observe focus in the reusable child form")
     parser.add_argument("--scroll-focus", action="store_true", help="Place shared controls outside scrolling child viewports")
@@ -65,7 +66,7 @@ End if
 End if
 ''')
         (methods / "AXBC_FocusName.4dm").write_text('GOTO OBJECT(*; "Name")\n')
-    (methods / "AXBC_Error.4dm").write_text('File("/RESOURCES/runtime-status.json").setText(JSON Stringify(New object("phase"; "failed"; "error"; Error; "method"; Error method; "line"; Error line)))\nQUIT 4D\nABORT\n')
+    (methods / "AXBC_Error.4dm").write_text('File("/RESOURCES/runtime-status.json").setText(JSON Stringify(New object("phase"; "failed"; "error"; Error; "method"; Error method; "line"; Error line; "formula"; Error formula)))\nQUIT 4D\nABORT\n')
     (sources / "DatabaseMethods").mkdir()
     (sources / "DatabaseMethods/onStartup.4dm").write_text('''ON ERR CALL("AXBC_Error")
 var $window : Integer
@@ -142,7 +143,15 @@ QUIT 4D
         (methods / "AXBC_GenerateNested.4dm").write_text('var $generated : Object\n$generated:=JSON Parse(File("/RESOURCES/Child.json").getText())\nOBJECT SET SUBFORM(*; "Nested"; $generated)\n')
         event = methods / "AXBC_Event.4dm"
         event.write_text(event.read_text().replace('var $reply : Object', 'var $reply; $generated : Object').replace('OBJECT SET SUBFORM(*; "Left"; "Child")', '$generated:=JSON Parse(File("/RESOURCES/Child.json").getText())\n  OBJECT SET SUBFORM(*; "Left"; $generated)'))
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "implicit": args.implicit, "sharedFocus": args.shared_focus, "scrollFocus": args.scroll_focus, "focusObserver": not args.no_focus_observer, "generatedChildren": args.generated_children}) + "\n")
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "implicit": args.implicit, "sharedFocus": args.shared_focus, "scrollFocus": args.scroll_focus, "focusObserver": not args.no_focus_observer, "generatedChildren": args.generated_children, "area": args.area}) + "\n")
+    if args.area:
+        from tests.area_integration import integrate
+        integrate(sources, {"AXBC_Parent": "Parent", "AXBC_RootForm": "SharedRoot"})
+        if args.generated_children:
+            from install_host_methods import area_form
+            for name in ("Child", "ChildProcess", "Panel"):
+                path = FIXTURE / f"Resources/{name}.json"
+                path.write_text(json.dumps(area_form(json.loads(path.read_text())), indent=2) + "\n")
     before = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     with tempfile.TemporaryDirectory(prefix="auto-child-compile-", dir=BUILD) as temporary:
         driver = Path(temporary)
@@ -154,7 +163,7 @@ QUIT 4D
             f'$result:=Compile project(File({literal(project)}); $options)', 90)
     after = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     passed = compiled.get("success") is True and not compiled.get("errors") and before == after
-    (BUILD / "auto-subforms-compile-report.json").write_text(json.dumps({"passed": passed, "sources_sha256": before, "compiler": compiled,
+    (BUILD / "auto-subforms-compile-report.json").write_text(json.dumps({"passed": passed, "area": args.area, "sources_sha256": before, "compiler": compiled,
         "component_sha256": sha(PACKAGE / "AccessibilityBridge.4DZ"), "native_sha256": sha(BUILD / "AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")}, indent=2) + "\n")
     print("PASS" if passed else "FAIL", "automatic child fixture compilation")
     raise SystemExit(0 if passed else 1)

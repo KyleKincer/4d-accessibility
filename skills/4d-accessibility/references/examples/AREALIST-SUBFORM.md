@@ -15,8 +15,8 @@ Create an input form named `LinePicker`. Add an AreaList plugin object named `Gr
 Add two input-subform objects named `Left` and `Right` to the parent. Both use `LinePicker`. Bind their Variable or Expression properties to `Form.left` and `Form.right`. Before displaying the parent, allocate two private data objects:
 
 ```4d
-$data.left:=New object("side"; "Left"; "recordID"; "invoice-left"; "loadedRecordID"; ""; "gridReady"; False)
-$data.right:=New object("side"; "Right"; "recordID"; "invoice-right"; "loadedRecordID"; ""; "gridReady"; False)
+$data.left:=New object("side"; "Left"; "recordID"; "record-left"; "loadedRecordID"; ""; "gridReady"; False)
+$data.right:=New object("side"; "Right"; "recordID"; "record-right"; "loadedRecordID"; ""; "gridReady"; False)
 ```
 
 Here `$data` is the object passed to the parent's `DIALOG`. The parent lists `New collection("Left"; "Right")` in its description and calls `AXB_Form("start"; options)` after its own initialization. Each child only calls `register`.

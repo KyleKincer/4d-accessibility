@@ -23,9 +23,15 @@ If ((Value type($context.pending)=Is object) & ($context.pending#Null))
  OB REMOVE($context; "pending")
  $result:=New object("status"; "rejected"; "message"; "Form changed before action confirmation")
  $route:=$tree.routes[$pending.node]
- If (($route#Null) & (Value type($route)=Is object))
-  If ((Current form window=Frontmost window) & $route.node.enabled & $route.node.visible)
-   $result:=AXB_View($pending.packet)
+ If ($pending.packet.data.nativeButton=True)
+  // Native delivery already checked the captured node and physical hit target.
+  // Its normal handler may change scope or open a modal window.
+  $result:=AXB_ControlConfirm($pending.packet.data)
+ Else
+  If (($route#Null) & (Value type($route)=Is object))
+   If ((Current form window=Frontmost window) & $route.node.enabled & $route.node.visible)
+    $result:=AXB_View($pending.packet)
+   End if
   End if
  End if
  If (Not($context.active))

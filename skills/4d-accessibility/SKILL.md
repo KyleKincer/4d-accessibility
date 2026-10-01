@@ -5,13 +5,13 @@ description: Integrate or extend the 4D Accessibility bridge in 4D projects, inc
 
 # Integrate 4D accessibility
 
-Use the host's existing form lifecycle and business handlers. Prefer automatic discovery plus configuration; add a shared controller mapping only where the adapter needs application intent that it cannot infer.
+Prefer an installer-added lifecycle area and automatic discovery. Keep business methods and timers. Return labels and provider configuration from application-owned `AXB_Configure`; map a shared controller only where the adapter needs application intent it cannot infer. Read the [area contract](references/AREA-INTEGRATION.md) before migrating lifecycle ownership.
 
 ## 1. Establish the integration boundary
 
-Locate the matching bridge source checkout or release package and the host's `Project/Sources`. If this skill was installed separately, follow [acquisition and version checks](references/SETUP.md). Its directory contains documentation, not the installer or binaries.
+Locate the matching bridge source checkout or release package and the host's `Project/Sources`. If this skill was installed separately, follow [acquisition and version checks](references/SETUP.md). Its directory contains documentation. Obtain the installer and binaries separately.
 
-Read [current status](references/STATUS.md) and [installation and ordinary forms](references/INTEGRATION.md#1-install-once). Inspect the target form definition, form method, object methods, loader, shared opener and replacement/close paths. Identify the host's supported 4D/macOS versions and execution modes.
+Read [current status](references/STATUS.md), [area installation](references/AREA-INTEGRATION.md) and [matching packages](references/INTEGRATION.md#1-install-once). Inspect the target form definition, form method, object methods, loader, shared opener and replacement/close paths. Identify the host's supported 4D/macOS versions and execution modes.
 
 Use `inventory_forms.py --project-dir /path/to/Project --output /host-local/ignored/form-inventory.json` from the checkout or complete release kit. Keep this static inventory in an ignored host-local directory; it does not establish runtime coverage. Search shared openers, `OBJECT SET SUBFORM`, asynchronous loaders, `CALL FORM`, `CALL WORKER`, `EXECUTE METHOD IN SUBFORM`, nonblocking `DIALOG`, `FORM GOTO PAGE`, AreaList entry/sort callbacks and `DontSortArrays` setters. Inspect runtime pages and generated controls too.
 
@@ -25,27 +25,35 @@ Use `install_host_methods.py --help` from the checkout or complete kit, then ins
 
 Add `--area-list` only for AreaList hosts. Keep the same `--compiler-method` target on refresh. Generated methods and their marked compiler block are installer-owned; application configuration methods remain application-owned. If an existing generated method was edited, inspect the change and reconcile it with canonical source before refreshing.
 
-Check [`AXB_Host("info")` in setup](references/SETUP.md): component/plugin versions must match the kit, `compiled` must be True, and form startup must accept the installed capabilities. Complete when those checks and the host compiler pass and the selected existing ordinary form starts successfully. If packages are intentionally optional, also verify normal form behavior without them. Treat `dependencyUnavailable` as optional absence; surface other startup failures through the application's existing diagnostics.
+Verify the installed parts from the root form:
+
+- [`AXB_Host("info"; New object)`](references/SETUP.md) must report matching kit versions and a compiled component.
+- Require native `areaLifecycle 1`, native `buttonInput 1` for automatic controls, and component `capturedStop: 1`.
+- `AXB_Area("diagnostics"; ""; "")` must show an active registration. Require `configured: True` when the application supplies a configuration callback. An empty area list is not success.
+
+Complete when these checks and the host compiler pass and the selected existing ordinary form starts successfully. If packages are intentionally optional, also verify normal behavior without them. Treat `dependencyUnavailable` as optional absence; surface other startup failures through existing application diagnostics.
 
 ## 3. Choose the smallest form integration
 
-For ordinary named forms, add `AXB_Form("start"; options)` after successful On Load initialization and `AXB_Form("stop"; New object)` to On Unload and existing fatal cleanup. Preserve the timer. Read [the automatic example](references/examples/AUTOMATIC-FORM.md) for labels and child configuration.
+For named forms, use the installer with `--form` for selected forms or `--all-forms`, preflight with `--dry-run`, and review the form diff. Bulk installation skips list/print forms and instruments named inheritance once in the base. Resolve preflight conflicts before writes. Existing objects, layout, methods and events must remain equivalent. The page-zero area owns startup/shutdown. Ordinary forms need no business-method hooks. Add optional `AXB_Configure` for missing labels, `scope`, grids or existing providers, including its application compiler declarations.
+
+When migrating a manual registration, preserve it until area configuration covers the same providers and failure handling. Follow the [migration ordering and ownership rules](references/AREA-INTEGRATION.md#migrate-and-verify), then remove validated one-shot start/stop calls. Keep intentional restart, explicit child registration, invalidation and focus observation where their lifecycle reason remains. The [manual interface](references/MANUAL-LIFECYCLE.md) remains for deliberately application-owned registrations.
 
 Read only the references for the branches present in the host:
 
 | Branch | Read and apply |
 | --- | --- |
-| Repeated/nested page subforms | [Child ownership and replacement](references/INTEGRATION.md#child-forms). Start only the root; put child metadata under its container. Invalidate before replacing the child or its data binding. If exercising repeated shared bindings produces `ambiguousFocus`, inspect catch-all or event-agnostic form code before adding the [form-level focus observer](references/INTEGRATION.md#repeated-controls-with-ambiguous-focus). |
+| Repeated/nested page subforms | [Child ownership and replacement](references/INTEGRATION.md#child-forms). Let the root area own the tree; put child metadata under its container. Reusable child areas do not start a second root. Invalidate before replacing the child or its data binding. If exercising repeated shared bindings produces `ambiguousFocus`, inspect catch-all or event-agnostic form code before adding the [form-level focus observer](references/INTEGRATION.md#repeated-controls-with-ambiguous-focus). |
 | Native array/collection/entity grids | [Native grids](references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery), including stable keys, selection, column descriptions and native cell controls. Use exact native bindings and preserve validation and selection handlers. |
-| AreaList Pro, including repeated child grids | [AreaList configuration and assembled invoice-style example](references/GRIDS.md#add-an-arealist-grid-to-the-same-form). Follow the preflight for layout, sorting, stable keys and independent instance data before adding hooks. Preserve existing vendor semantics. Use the full grid adapter for new work; legacy row summaries do not provide complete navigation. |
-| JSON-generated forms | [Generated lifecycle](references/examples/DYNAMIC-FORM.md). Integrate at the shared builder, pass the wrapper's returned JSON, preserve original method/events and use fresh private data. For automatic children, invalidate at replacement. For registered children, close wrapped descendants deepest-first and close the old instance before rebinding. |
+| AreaList Pro, including repeated child grids | [AreaList configuration and assembled record-editor example](references/GRIDS.md#add-an-arealist-grid-to-the-same-form). Follow the preflight for layout, sorting, stable keys and independent instance data before adding hooks. Preserve existing vendor semantics. Use the full grid adapter for new work; legacy row summaries do not provide complete navigation. |
+| JSON-generated forms | [Generated lifecycle](references/examples/DYNAMIC-FORM.md). Use `AXB_AreaForm(json; "LogicalKey")` at the shared builder and open its returned `.form`. The key selects central configuration without writing to business data; preserve the original method, events and data. Use the advanced `AXB_Dynamic` wrapper only when explicit per-instance provider registration needs its private-data contract. For automatic children, invalidate at replacement. For registered children, close wrapped descendants deepest-first and close the old instance before rebinding. |
 | Alerts and confirmations | [Message dialogs](references/MESSAGES.md). Inspect the actual opener, integrate existing application forms, preserve choice/return contracts, and validate the real workflow. Direct built-in calls require migration or a vendor fix. |
 | Editable progress | Map `controls.<name>.adjust` to the existing [shared adjustment controller](references/INTEGRATION.md#map-editable-progress-bars-to-a-controller). Read-only progress needs no controller. |
 | Custom semantics | Use narrow `controls` metadata such as `label`, `description`, `decorative`, `protected`, `group` and `adjust`, or grid `columns`, `meta` and `onSelection`. See [configuration](references/INTEGRATION.md). A custom `apply` alone replaces all automatic action routing. Use [explicit providers](references/FORM-SUPPORT.md) only for an intentionally owned description/action contract. |
 | Tabs, list subforms, classic-selection/hierarchical grids or other unsupported controls | Compare [status](references/STATUS.md) and diagnostics with the live tree. For an entire-UI request, follow [extending the bridge](references/EXTENDING.md); a text description does not implement an interactive control. |
 | Web areas and other plugins | Inspect their existing AX children, navigation and actions first. Preserve a complete native provider. An opaque interactive area requires a tested adapter or upstream fix. |
 
-For grids, initialize readiness false at the start of On Load, before any loader; publish the captured loaded record ID before setting readiness true. Follow the binding-specific [identity and loading rules](references/GRIDS.md).
+For grids, initialize readiness false before any loader; publish the captured loaded record ID before setting readiness true. Use existing editor state for entity/class/shared roots, as shown in the record-editor example. Never add UI attributes to persisted entities or bypass shared-object locks. Follow the binding-specific [identity and loading rules](references/GRIDS.md).
 
 Complete when every owned hook has a lifecycle reason and every custom callback maps to existing application behavior. Keep ordinary editors, validation, Undo/Redo, menus and business commands as the authority for mutations. A text description is sufficient for a visual-only value; it does not replace an interactive custom editor.
 

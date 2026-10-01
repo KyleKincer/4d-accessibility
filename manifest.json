@@ -26,6 +26,11 @@
       "theme": "Accessibility Bridge",
       "syntax": "AXB Open(&L):T",
       "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "%AXB Area",
+      "threadSafe": false
     }
   ]
 }

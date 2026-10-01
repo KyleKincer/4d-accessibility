@@ -464,11 +464,21 @@ static id DeepestHit(id element, NSPoint point) {
     NSRect frame = [element isKindOfClass:AXBNode.class] ? [(AXBNode *)element hitFrame] : [element accessibilityFrame];
     if (![element isAccessibilityElement] || !NSPointInRect(point, frame)) return nil;
     if ([element isKindOfClass:AXBGridNode.class]) return [element accessibilityHitTest:point];
+    id caption = nil;
     for (id child in [[element accessibilityChildren] reverseObjectEnumerator]) {
         id found = DeepestHit(child, point);
-        if (found) return found;
+        if (!found) continue;
+        // Static captions and grouping boxes do not intercept 4D mouse input.
+        // Match the host's overlap check, while retaining these reading stops
+        // when no control occupies the point. Other controls remain obstacles.
+        if ([found isKindOfClass:AXBNode.class] &&
+            [@[@"text", @"group"] containsObject:((AXBNode *)found).data[@"role"]]) {
+            if (!caption) caption = found;
+            continue;
+        }
+        return found;
     }
-    return element;
+    return caption ?: element;
 }
 
 static BOOL IsNativeControl(NSView *view) {
@@ -919,6 +929,8 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     if (![target isAccessibilityElement] || ![target isAccessibilityEnabled]) return;
                     local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 }
+                BOOL button = [data[@"operation"] isEqual:@"press"] && [data[@"role"] isEqual:@"button"];
+                if (button) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 NSPoint point = [view convertPoint:local toView:nil];
                 NSPoint screen = [view.window convertPointToScreen:point];
                 if (!NSPointInRect(screen, [target accessibilityFrame]) || DeepestHit(view.element, screen) != target) return;
@@ -940,6 +952,10 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                 // release first, then synchronously dispatch to this exact window.
                 // This keeps the control's normal focus behavior and On Clicked handler.
                 [NSApp postEvent:up atStart:YES];
+                // A button can enter a modal loop or retire its route before
+                // sendEvent returns. Acknowledge verified dispatch, not its
+                // business result, before entering that normal event path.
+                if (button) [session finishControlInput:controlInput accepted:YES];
                 [NSApp sendEvent:down];
                 accepted = YES;
             } @finally {
@@ -1010,6 +1026,13 @@ void AXBDetach(NSString *sessionID, NSInteger processID) {
     }
     dispatch_block_t cleanup = ^{ [views[sessionID] invalidate]; [views removeObjectForKey:sessionID]; };
     if (NSThread.isMainThread) cleanup(); else dispatch_async(dispatch_get_main_queue(), cleanup);
+}
+
+void AXBInitialize(void) {
+    Init();
+    // 4D can close and reopen a database while this bundle remains loaded.
+    // Shutdown has retired old sessions and completed native-view cleanup.
+    @synchronized(registryLock) { stopped = NO; }
 }
 
 void AXBShutdown(void) {
