@@ -25,7 +25,7 @@ python3 ci/check_repository.py
 
 ## Area-owned integration
 
-The development branch adds a lifecycle area to ordinary forms without changing their business methods or event masks. Build both packages first, then run the smallest end-to-end case:
+Version 0.20.0 adds a lifecycle area to ordinary forms without changing their business methods or event masks. Build both packages first, then run the smallest end-to-end case:
 
 ```sh
 python3 prepare_area_fixture.py --server /path/to/4D\ Server.app

@@ -34,7 +34,7 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project
 
 Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download the [release kit](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Signed releases use Sweetwater's Developer ID and Apple notarization; each release's notes define its tested scope. Older ad hoc candidates remain separately labeled.
 
-On this integration branch, add the lifecycle area automatically:
+With the matching 0.20.0 kit, add the lifecycle area automatically:
 
 ```sh
 python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Customer
@@ -42,7 +42,7 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Cust
 
 Use `--all-forms` for named project and table forms, or repeat `--form` for selected forms. `--dry-run` lists proposed changes. The area draws nothing and starts after the existing initialization. Its destruction retires that window's bridge. Ordinary forms need no startup or shutdown calls in their business methods.
 
-Complex forms return their existing provider configuration from one optional application-owned `AXB_Configure` method. The [area integration guide](skills/4d-accessibility/references/AREA-INTEGRATION.md) gives the complete installation, configuration, generated-form and migration contract. This branch requires matching source builds; the released 0.19.7 kit retains the [manual lifecycle](skills/4d-accessibility/references/MANUAL-LIFECYCLE.md).
+Complex forms return their existing provider configuration from one optional application-owned `AXB_Configure` method. The [area integration guide](skills/4d-accessibility/references/AREA-INTEGRATION.md) gives the complete installation, configuration, generated-form and migration contract. Version 0.20.0 is on `main`. Use its matching [Build and test workflow artifact](https://github.com/KyleKincer/4d-accessibility/actions/workflows/ci.yml) or build the exact source revision. It is not yet a signed published release. The released 0.19.7 kit retains the [manual lifecycle](skills/4d-accessibility/references/MANUAL-LIFECYCLE.md). Do not mix that kit with 0.20.0 helpers.
 
 ## More complex forms
 
