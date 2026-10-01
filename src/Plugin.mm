@@ -36,8 +36,10 @@ static void ReadNativeFocus(void *parameter) {
 extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
     @autoreleasepool {
         switch (selector) {
-            case kInitPlugin: break;
-            case kDeinitPlugin: AXBAreaShutdown();
+            case kInitPlugin:
+            case kServerInitPlugin: AXBInitialize(); break;
+            case kDeinitPlugin:
+            case kServerDeinitPlugin: AXBAreaShutdown();
                 AXBShutdown(); break;
             case 1: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
