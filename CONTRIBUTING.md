@@ -131,3 +131,5 @@ When changing a control, test observable behavior against its ordinary native UI
 ## Application instrumentation
 
 An application-specific installer can import `install_host_methods.main` and pass a trusted `transform(body, method_name)` callback. This lets a host apply its existing instrumentation while sharing upstream overwrite, hash and compiler-declaration checks. The ordinary CLI installs source unchanged. Transformations finish before any destination is written; an exception leaves the installation untouched. Keep application-specific wrappers in the host repository.
+
+Live fixture startup and key injection also check for held Shift, Control, Option or Command keys. Release those keys, including on a screen-sharing client, before running tests. The check reports interference without changing key state. VoiceOver can still send its own modifier combinations during a test.

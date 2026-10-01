@@ -324,6 +324,23 @@ def require_unlocked():
         raise RuntimeError("Graphical session is locked; live AX tests cannot receive input. Unlock the Mac before resuming.")
 
 
+def held_modifiers():
+    """Read combined session key state, including keys held by remote input."""
+    graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+    flags_state = signature(graphics, "CGEventSourceFlagsState", c.c_uint64, c.c_int)
+    flags = flags_state(0)
+    return [name for name, bit in (("Shift", 17), ("Control", 18), ("Option", 19), ("Command", 20))
+            if flags & (1 << bit)]
+
+
+def require_test_input():
+    """Check the desktop before startup or input, never alter the user's keys."""
+    require_unlocked()
+    modifiers = held_modifiers()
+    if modifiers:
+        raise RuntimeError("Release held modifier keys before live tests: " + ", ".join(modifiers))
+
+
 def wait_for(predicate, message, timeout=5):
     deadline = time.monotonic() + timeout
     while time.monotonic() < deadline:
