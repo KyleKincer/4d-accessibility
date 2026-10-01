@@ -138,9 +138,13 @@ static void ButtonInputTest(void) {
     NSString *session = Open(window, 9025);
     NSMutableDictionary *button = [@{@"id": @"remember", @"role": @"button", @"label": @"Remember",
         @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@20, @20, @120, @30]} mutableCopy];
-    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Button input", @"enabled": @YES, @"nodes": @[button]} mutableCopy];
+    NSDictionary *caption = @{@"id": @"caption", @"role": @"text", @"label": @"Remember caption",
+        @"value": @"Remember", @"enabled": @YES, @"visible": @YES, @"frame": @[@20, @25, @100, @20]};
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Button input", @"enabled": @YES, @"nodes": @[button, caption]} mutableCopy];
     Exchange(window, 9025, 1, session, snapshot); Pump();
     AXBNode *node = Provider(window).accessibilityChildren.firstObject;
+    NSPoint middle = NSMakePoint(NSMidX([node accessibilityFrame]), NSMidY([node accessibilityFrame]));
+    Check([Provider(window) accessibilityHitTest:middle] == node, "static caption hit resolves to its overlapping button");
     Check([node accessibilityPerformPress], "ordinary button accepts an accessibility activation");
     NSDictionary *action = Exchange(window, 9025, 1, session, snapshot)[@"action"];
     NSDictionary *input = @{@"action": action[@"id"], @"point": @[@50, @35]};
