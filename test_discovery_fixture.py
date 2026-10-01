@@ -6,6 +6,7 @@ import json
 import subprocess
 import sys
 import time
+import xml.etree.ElementTree as ET
 
 from build_component import sha
 from prepare_discovery_fixture import BUILD, FIXTURE, ROOT, TITLE
@@ -43,8 +44,16 @@ def main():
         project = FIXTURE / "Project/Discovery.4DProject"
         (FIXTURE / "Resources/runtime-status.json").unlink(missing_ok=True)
         (FIXTURE / "Resources/closed.json").unlink(missing_ok=True)
+        (FIXTURE / "Resources/reopen-starts.txt").unlink(missing_ok=True)
         log = (BUILD / "discovery-desktop.log").open("w")
-        process = subprocess.Popen(["/Applications/4D/4D.app/Contents/MacOS/4D", "--project", str(project), "--dataless", "--opening-mode", "compiled" if args.compiled else "interpreted", "--webadmin-auto-start", "false"], stdout=log, stderr=log)
+        launch_config = json.loads((FIXTURE / "Resources/launch.json").read_text())
+        if launch_config.get("reopen"):
+            link = ET.Element("database_shortcut", is_remote="false",
+                              structure_opening_mode="2" if args.compiled else "1",
+                              structure_file=str(project), data_file=str(FIXTURE / "Resources/reopen.4DD"))
+            ET.ElementTree(link).write(FIXTURE / "Resources/reopen.4dlink", encoding="utf-8", xml_declaration=True)
+        data_args = ["--data", str(FIXTURE / "Resources/reopen.4DD"), "--create-data"] if launch_config.get("reopen") else ["--dataless"]
+        process = subprocess.Popen(["/Applications/4D/4D.app/Contents/MacOS/4D", "--project", str(project), *data_args, "--opening-mode", "compiled" if args.compiled else "interpreted", "--webadmin-auto-start", "false"], stdout=log, stderr=log)
         def started():
             try:
                 return json.loads((FIXTURE / "Resources/runtime-status.json").read_text(encoding="utf-8-sig"))
@@ -95,6 +104,8 @@ def main():
     try:
         ready = wait_for(lambda: state() if state().get("phase") == "ready" and state().get("start", {}).get("ok") else None, "No current registered fixture state", 15)
         report["compiled"] = ready["compiled"]
+        if config.get("reopen"):
+            check((FIXTURE / "Resources/reopen-starts.txt").read_text(encoding="utf-8-sig").strip() == "2", "4D reopened the database in the same owned process")
         check(ready["start"]["ok"], "the root lifecycle registers automatic discovery without describe/apply callbacks")
         app = application(pid)
         window = next(w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE)

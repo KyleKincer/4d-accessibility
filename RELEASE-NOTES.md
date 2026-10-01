@@ -6,6 +6,8 @@ The installer adds the area to page zero, resolves shared named bases, reports a
 
 This branch also fixes duplicate-named root/child text selection and ordinary button dispatch into nested modal loops. Actions still use native editors and existing handlers. An AX receipt acknowledges dispatch; the application must confirm its business result.
 
+Database close/reopen now reinitializes the native bridge through 4D's plugin callbacks. Sessions from the closed database remain retired; newly opened forms get fresh identities. The regression fixture exercises the complete controls workflow after a real reopen in interpreted and compiled mode.
+
 Version 0.20.0 is not published. Its native plug-in, component and helpers must be built and installed together. See [area integration](skills/4d-accessibility/references/AREA-INTEGRATION.md) for setup and migration. The supported control families and vendor restrictions are unchanged.
 
 # 0.19.7 published release
