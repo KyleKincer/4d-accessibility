@@ -118,6 +118,8 @@ For direct moves between edited AreaList cells, add `--cell-transitions` to `tes
 
 ## Source ownership
 
+Live AX polling and fixture startup stop immediately if the graphical session locks. For unattended runs, keep a login-session sleep assertion alive for the whole run. A timed `caffeinate` process exits when its timeout expires; a persistent LaunchAgent needs `RunAtLoad` and `KeepAlive` so it renews and survives terminal/session-host exits. Verify `PreventUserIdleDisplaySleep`, `PreventUserIdleSystemSleep` and `UserIsActive` with `pmset -g assertions`. Keep normal authentication enabled. An explicit lock or logout still requires an unlock before testing resumes.
+
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.
 
 The full integration reference and examples live under `skills/4d-accessibility/references` so the agent skill can be installed as a self-contained folder. Update that source once. Build checks validate local links and the skill's required files.
