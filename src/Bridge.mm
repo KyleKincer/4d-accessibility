@@ -703,7 +703,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     for (AXBNode *node in self.nodes) {
         old[node.data[@"id"]] = node;
         if ([node.data[@"role"] isEqual:@"tabgroup"])
-            oldTabs[node.data[@"id"]] = [node.accessibilitySelectedChildren valueForKey:@"accessibilityIdentifier"];
+            oldTabs[node.data[@"id"]] = [node.accessibilitySelectedChildren valueForKeyPath:@"data.id"];
     }
     NSMutableArray *next = [NSMutableArray new];
     NSMutableArray<AXBNode *> *retired = [NSMutableArray new];
@@ -775,7 +775,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     for (AXBNode *node in changedSelections) if (node.accessibilityParent) [tables addObject:node.accessibilityParent];
     for (id table in tables) NSAccessibilityPostNotification(table, NSAccessibilitySelectedRowsChangedNotification);
     for (AXBNode *node in self.nodes) if ([node.data[@"role"] isEqual:@"tabgroup"] && oldTabs[node.data[@"id"]] &&
-        ![oldTabs[node.data[@"id"]] isEqual:[node.accessibilitySelectedChildren valueForKey:@"accessibilityIdentifier"]]) {
+        ![oldTabs[node.data[@"id"]] isEqual:[node.accessibilitySelectedChildren valueForKeyPath:@"data.id"]]) {
         NSAccessibilityPostNotification(node, NSAccessibilitySelectedChildrenChangedNotification);
         NSAccessibilityPostNotification(node, NSAccessibilityValueChangedNotification);
     }

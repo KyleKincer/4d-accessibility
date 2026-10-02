@@ -89,7 +89,7 @@ def main():
             pending = [window]
             while pending:
                 node = pending.pop()
-                if (node.read("AXIdentifier") or "").startswith("axb.window."):
+                if (node.read("AXIdentifier") or "").startswith("axb/"):
                     group = node
                     return node
                 if node.read("AXRole") != "AXTable":
@@ -421,7 +421,7 @@ def main():
             check((receipt == "Cell checkbox state confirmed") == (flag == "redirect"), "completion respects native rejection and scope retirement: " + flag)
             if flag == "rebind":
                 table = ax.wait_for(lambda: find("Invoice lines"), "Replacement grid missing")
-                ax.wait_for(lambda: content(2, 0, "AXCheckBox").read("AXIdentifier") != old_identifier, "Form replacement retained an old widget")
+                ax.wait_for(lambda: not content(2, 0, "AXCheckBox").same_as(previous), "Form replacement retained an old widget")
                 check(previous.read("AXSize") in (None, (0.0, 0.0)) and previous.press() != 0, "retained widget cannot act on a replacement form")
             configure()
         close = find("Close")

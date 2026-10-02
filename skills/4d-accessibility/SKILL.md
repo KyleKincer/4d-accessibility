@@ -1,6 +1,6 @@
 ---
 name: 4d-accessibility
-description: Integrate or extend the 4D Accessibility bridge in 4D projects, including ordinary forms, tabs, native or AreaList Pro grids, repeated subforms and generated forms. Use when adding accessibility or diagnosing bridge coverage and integration failures.
+description: Integrate or extend the 4D Accessibility bridge in 4D projects, including ordinary forms, tabs, native or AreaList Pro grids, repeated subforms, generated forms and automation identifiers. Use when adding accessibility or diagnosing bridge coverage and integration failures.
 ---
 
 # Integrate 4D accessibility
@@ -30,7 +30,7 @@ Add `--area-list` only for AreaList hosts. Keep the same `--compiler-method` tar
 Verify the installed parts from any host method:
 
 - [`AXB_Host("info"; New object)`](references/SETUP.md) must report matching kit versions and a compiled component.
-- In `.nativeStatus`, require `areaLifecycle 1`, plus `buttonInput 1` for automatic controls and `tabs 1` for tabs. In `.componentInfo`, require `capturedStop: 1` and `compiled: True`.
+- In `.nativeStatus`, require `areaLifecycle 1`, plus `buttonInput 1` for automatic controls and `tabs 1` for tabs. Version 0.21.0 or later also requires `stableIdentifiers 1`; its helpers return `stableIdentifiersUnavailable` when the plugin lacks this capability. See [stable locators](references/IDENTIFIERS.md) when recording or updating automation. In `.componentInfo`, require `capturedStop: 1` and `compiled: True`.
 
 Complete when the installed package checks and host compiler pass. The next step adds the area and verifies registration.
 
@@ -65,7 +65,7 @@ Complete when registration succeeds, every owned hook has a lifecycle reason and
 
 Follow the [host AX inspection and scenario checks](references/VERIFY.md), [coverage diagnostics](references/INTEGRATION.md#check-the-forms-coverage) and [acceptance requirements](references/REQUIREMENTS.md). From the root, inspect `AXB_Form("diagnostics"; New object)` after the first snapshot. Exercise each page, loading and error state, child replacement, record switch, sort, filter and supported window size.
 
-Use an external AX client and VoiceOver against the real running form. Verify meaningful content, logical navigation, enabled/read-only behavior, offscreen reveal, editing, validation, cancellation and stale-reference rejection. Compare action results and persisted business state with the ordinary UI. Run interpreted and compiled tests for the modes being claimed; compilation alone proves neither.
+For recorded automation, follow [stable identifiers and window scoping](references/IDENTIFIERS.md). Use an external AX client and VoiceOver against the real running form. Verify meaningful content, logical navigation, enabled/read-only behavior, offscreen reveal, editing, validation, cancellation and stale-reference rejection. Compare action results and persisted business state with the ordinary UI. Run interpreted and compiled tests for the modes being claimed; compilation alone proves neither.
 
 An AX action return confirms transport, not application completion. Read the bridge root's `AXHelp` receipt and verify the resulting UI state. A rejected or missing receipt does not prove rollback. Inspect the result before considering any retry of a mutating action.
 

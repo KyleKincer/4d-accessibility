@@ -60,7 +60,7 @@ def main():
             if compiled.get("noPlugin"):
                 check(state()["areas"]["areas"] == [], "absent native plugin delivers no area callbacks")
                 check(state()["dependencies"].get("error") == "dependencyUnavailable" and not state()["dependencies"]["native"], "dependency check identifies missing native plugin")
-                check(not any((x.read("AXIdentifier") or "").startswith("axb.window.") for x in window.read("AXChildren") or []), "absent native plugin exposes no false provider")
+                check(not any((x.read("AXIdentifier") or "").startswith("axb/") for x in window.read("AXChildren") or []), "absent native plugin exposes no false provider")
                 ticks = state()["ticks"]
                 ax.wait_for(lambda: state().get("ticks", 0) > ticks, "Business timer stopped without the native plugin")
                 close_request.write_text("{}")
@@ -72,7 +72,7 @@ def main():
                 expected = "disabled" if compiled.get("configuration") == "disabled" else "failed"
                 record = ax.wait_for(lambda: next((x for x in state().get("areas", {}).get("areas", []) if x["state"] == expected), None), "Startup did not expose its failure/opt-out state")
                 check(not record["registered"], "failed or disabled startup creates no active registration")
-                check(not any((x.read("AXIdentifier") or "").startswith("axb.window.") for x in window.read("AXChildren") or []), "failed or disabled startup exposes no false accessibility provider")
+                check(not any((x.read("AXIdentifier") or "").startswith("axb/") for x in window.read("AXChildren") or []), "failed or disabled startup exposes no false accessibility provider")
                 error = "dependencyUnavailable" if compiled.get("noComponent") else "areaCallbackError" if compiled["configuration"] == "error" else "invalidLabel"
                 check(expected == "disabled" or record.get("failure", {}).get("error") == error, "diagnostics identify the actual startup failure")
                 if error == "areaCallbackError":
@@ -88,7 +88,7 @@ def main():
                 report["passed"] = True
                 return
             ax.wait_for(lambda: state().get("diagnostics", {}).get("ready"), "Bridge did not start: " + str(state()), timeout=15)
-            group = ax.wait_for(lambda: next((x for x in window.read("AXChildren") or [] if (x.read("AXIdentifier") or "").startswith("axb.window.")), None), "No area-owned provider")
+            group = ax.wait_for(lambda: next((x for x in window.read("AXChildren") or [] if (x.read("AXIdentifier") or "").startswith("axb/")), None), "No area-owned provider")
             def find(label, role=None):
                 return ax.wait_for(lambda: next((x for x in group.read("AXChildren") or [] if x.read("AXDescription") == label and (role is None or x.read("AXRole") == role)), None), "Missing " + label)
             def receipt():
@@ -131,9 +131,9 @@ def main():
             first_id = root_name.read("AXIdentifier")
             previous_group_id = group.read("AXIdentifier")
             check(find("Restart", "AXButton").perform("AXPress") == 0, "intentional application restart accepts AX request")
-            group = ax.wait_for(lambda: next((x for x in window.read("AXChildren") or [] if (x.read("AXIdentifier") or "").startswith("axb.window.") and x.read("AXIdentifier") != previous_group_id and any(n.read("AXDescription") == root_label for n in x.read("AXChildren") or [])), None), "Restart did not publish the replacement root provider", timeout=15)
+            group = ax.wait_for(lambda: next((x for x in window.read("AXChildren") or [] if (x.read("AXIdentifier") or "").startswith("axb/") and not x.same_as(group) and any(n.read("AXDescription") == root_label for n in x.read("AXChildren") or [])), None), "Restart did not publish the replacement root provider", timeout=15)
             restarted = find(root_label, "AXTextField")
-            check(restarted.read("AXIdentifier") != first_id and root_name.read("AXEnabled") is not True, "intentional restart retires the previous lifetime")
+            check(restarted.read("AXIdentifier") == first_id and root_name.read("AXEnabled") is not True, "intentional restart retires the previous lifetime")
             root_name = restarted
             first_id = root_name.read("AXIdentifier")
             ax.wait_for(lambda: state().get("diagnostics", {}).get("ready"), "Restart did not publish diagnostics")
@@ -142,9 +142,9 @@ def main():
             closure = json.loads(closed.read_text(encoding="utf-8-sig"))
             check(closure["areas"] == 0 and closure["roots"] == 0, "area deinitialization retires host ownership without On Unload hooks")
             window = ax.wait_for(lambda: next((x for x in app.read("AXWindows") or [] if x.read("AXTitle") == TITLE), None), "Dialog did not reopen")
-            group = ax.wait_for(lambda: next((x for x in window.read("AXChildren") or [] if (x.read("AXIdentifier") or "").startswith("axb.window.")), None), "Reopened dialog has no provider")
+            group = ax.wait_for(lambda: next((x for x in window.read("AXChildren") or [] if (x.read("AXIdentifier") or "").startswith("axb/")), None), "Reopened dialog has no provider")
             fresh = find(root_label, "AXTextField")
-            check(fresh.read("AXIdentifier") != first_id and root_name.read("AXEnabled") is not True, "reopening creates a new lifetime and retires retained AX references")
+            check(fresh.read("AXIdentifier") == first_id and root_name.read("AXEnabled") is not True, "reopening creates a new lifetime and retires retained AX references")
             check(find("Close", "AXButton").perform("AXPress") == 0, "reopened dialog closes through AX")
             process.wait(timeout=15)
             check(process.returncode == 0, "ordinary application exits cleanly")

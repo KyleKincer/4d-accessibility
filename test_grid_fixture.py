@@ -92,7 +92,7 @@ def main():
         while pending:
             item = pending.pop()
             identifier = item.read("AXIdentifier")
-            if isinstance(identifier, str) and identifier.startswith("axb.window."):
+            if isinstance(identifier, str) and identifier.startswith("axb/"):
                 group = item
                 break
             if item.read("AXRole") != "AXTable":
@@ -110,7 +110,7 @@ def main():
             while pending:
                 candidate = pending.pop()
                 identifier = candidate.read("AXIdentifier")
-                if isinstance(identifier, str) and identifier.startswith("axb.window."):
+                if isinstance(identifier, str) and identifier.startswith("axb/"):
                     group = candidate
                     break
                 if candidate.read("AXRole") != "AXTable":
@@ -269,7 +269,7 @@ def main():
             old_description = described
             old_id = described.read("AXIdentifier")
             check(find("Descriptions").press() == 0, "replace the application description with an invalid result")
-            ax.wait_for(lambda: (identity := current_cell_attribute(2, 598, "AXIdentifier")) is not None and identity != old_id, "Changed renderer did not retire prior cells")
+            ax.wait_for(lambda: old_description.read("AXSize") in (None, (0.0, 0.0)) and current_cell_attribute(2, 598, "AXIdentifier") == old_id, "Changed renderer did not retire prior cells")
             table = find("Invoice lines")
             described = table.cell(2, 598)
             ax.wait_for(lambda: described.read("AXValue") == "Cell description required", "Invalid description was serialized or ignored")
@@ -419,7 +419,7 @@ def main():
             if config.get("storedMeta"):
                 prior_cell = far
                 check(find("Swap stored metadata").press() == 0, "switch the native stored metadata property without a bridge restart")
-                ax.wait_for(lambda: state().get("swappedMeta") is True and (t := find("Invoice lines")) is not None and t.cell(0, 598).read("AXIdentifier") != far_identity, "Direct metadata-source replacement did not retire prior cells")
+                ax.wait_for(lambda: state().get("swappedMeta") is True and (t := find("Invoice lines")) is not None and not t.cell(0, 598).same_as(prior_cell), "Direct metadata-source replacement did not retire prior cells")
                 check(prior_cell.read("AXSize") in (None, (0.0, 0.0)), "retained cells cannot target a replacement stored metadata source")
                 table = find("Invoice lines")
                 far = table.cell(0, 598)
@@ -566,7 +566,7 @@ def main():
         if config.get("kind") == "collection":
             old_identifier = far.read("AXIdentifier")
             check(find("Rebind").press() == 0, "replace collection objects while retaining their keys")
-            ax.wait_for(lambda: (replacement := find("Invoice lines")) is not None and replacement.cell(0, 0).read("AXIdentifier") != old_identifier, "Reused keys did not retire replaced object bindings")
+            ax.wait_for(lambda: (replacement := find("Invoice lines")) is not None and not replacement.cell(0, 0).same_as(far), "Reused keys did not retire replaced object bindings")
             settle()
             check(far.read("AXSize") in (None, (0.0, 0.0)), "a retained cell cannot target a replacement object with the same key")
             table = find("Invoice lines")
@@ -575,7 +575,7 @@ def main():
         if config.get("kind") == "entity":
             old_identifier = far.read("AXIdentifier")
             check(find("Rebind").press() == 0, "switch dataclasses with identical primary keys")
-            ax.wait_for(lambda: (replacement := find("Invoice lines")) is not None and replacement.cell(0, 0).read("AXIdentifier") != old_identifier, "Dataclass replacement did not retire prior entities")
+            ax.wait_for(lambda: (replacement := find("Invoice lines")) is not None and not replacement.cell(0, 0).same_as(far), "Dataclass replacement did not retire prior entities")
             settle()
             check(far.read("AXSize") in (None, (0.0, 0.0)), "identical keys in another dataclass cannot reuse an old accessible cell")
             table = find("Invoice lines")
@@ -585,7 +585,7 @@ def main():
         check(find("Scope").press() == 0, "ordinary record-change handler runs")
         def replacement_ready():
             replacement = find("Invoice lines")
-            return replacement is not None and replacement.cell(0, 0).read("AXIdentifier") != old_identifier
+            return replacement is not None and not replacement.cell(0, 0).same_as(far)
 
         ax.wait_for(replacement_ready, "Record change did not retire prior identities", timeout=15)
         check(far.read("AXSize") in (None, (0.0, 0.0)), "retained prior-record cell has no active geometry")

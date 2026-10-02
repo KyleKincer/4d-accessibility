@@ -3,10 +3,10 @@
 #DECLARE($name : Text; $pointer : Pointer; $options : Object; $state : Object; $paintOffset : Collection) -> $result : Object
 var $value : Variant
 var $items; $nodes : Collection
-var $group; $node; $layout; $segment; $metadata; $previous : Object
+var $group; $node; $layout; $segment; $metadata; $previous; $keyCounts : Object
 var $i; $index; $list; $position; $reference; $sublist; $end : Integer
 var $left; $top; $right; $bottom; $originX; $originY : Integer
-var $label; $signature; $id; $text : Text
+var $label; $signature; $id; $text; $key : Text
 var $expanded : Boolean
 $result:=New object("ok"; False; "error"; "tabSourceTypePending"; "nodes"; New collection)
 $items:=New collection
@@ -143,6 +143,13 @@ If ($layout.kind="popup")
  $result.ok:=True
  return
 End if
+$keyCounts:=New object
+For each ($node; $items)
+ If ($keyCounts[$node.key]=Null)
+  $keyCounts[$node.key]:=0
+ End if
+ $keyCounts[$node.key]:=$keyCounts[$node.key]+1
+End for each
 For ($i; 0; $items.length-1)
  $segment:=$layout.segments[$i]
  If (($index>=0) & ($index<$items.length))
@@ -159,7 +166,13 @@ For ($i; 0; $items.length-1)
   $label:=Substring($label; 1; $end)
  End if
  $node:=New object("id"; $id+"."+$signature+"."+String($i); "parent"; $id; "objectName"; $name; "role"; "tab"; "label"; $label; "value"; $segment.selected; "enabled"; $group.enabled & $segment.enabled; "visible"; True; "focusable"; False; "editable"; False; "frame"; New collection($segment.frame[0]-$originX; $segment.frame[1]-$originY; $segment.frame[2]; $segment.frame[3]))
- $node.automationChild:=New collection("tab"; $items[$i].key)
+ // Static tab labels can all have reference zero. Use a source reference
+ // only when unique; arrays and duplicate references use choice position.
+ $key:=String($i+1)
+ If (($list#0) & ($keyCounts[$items[$i].key]=1))
+  $key:="ref-"+$items[$i].key
+ End if
+ $node.automationChild:=New collection("tab"; $key)
  $result.nodes.push($node)
 End for
 $result.ok:=True

@@ -79,7 +79,7 @@ def main():
                 break
             element = pending.pop()
             identifier = element.read("AXIdentifier")
-            if isinstance(identifier, str) and identifier.startswith("axb.window."):
+            if isinstance(identifier, str) and identifier.startswith("axb/"):
                 group = element
                 break
             pending.extend(e for e in (element.read("AXChildren") or []) if isinstance(e, Element))
@@ -101,7 +101,7 @@ def main():
             return result
 
         def find(suffix):
-            return window.find("." + suffix)
+            return window.find("/" + suffix)
 
         def rows(kind):
             table = find(kind)

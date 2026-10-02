@@ -117,7 +117,7 @@ def main():
             pending = [window]
             while pending:
                 item = pending.pop()
-                if (item.read("AXIdentifier") or "").startswith("axb.window."):
+                if (item.read("AXIdentifier") or "").startswith("axb/"):
                     return item
                 pending.extend(item.read("AXChildren") or [])
             return None

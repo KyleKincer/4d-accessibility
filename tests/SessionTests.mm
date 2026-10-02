@@ -1,4 +1,5 @@
 #import "Session.h"
+#import "Identifiers.h"
 #include <atomic>
 #include <cstdio>
 #include <cstdlib>
@@ -30,6 +31,30 @@ static NSMutableDictionary *MutableCopy(id object) {
 }
 int main(void) {
     @autoreleasepool {
+        NSMutableDictionary *stable = MutableCopy(Envelope(1));
+        stable[@"snapshot"][@"automationKey"] = @"records.main";
+        stable[@"snapshot"][@"nodes"][0][@"automationPath"] = @[@"LeftChild", @"Search/É%"];
+        stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"RightChild", @"Search/É%"];
+        Check(AXBValidateEnvelope(stable) == nil, "repeated child names have distinct valid public paths");
+        Check([AXBNodeIdentifier(stable[@"snapshot"], stable[@"snapshot"][@"nodes"][0]) isEqual:@"axb/records.main/LeftChild/Search%2F%C3%89%25"], "locator segments use unambiguous UTF-8 percent encoding");
+        stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"LeftChild", @"Search/É%"];
+        Check(AXBValidateEnvelope(stable) != nil, "duplicate public paths reject the complete snapshot");
+        stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"LeftChild", @"Search", @"É%"];
+        Check(AXBValidateEnvelope(stable) == nil, "a slash in one name cannot collide with nested names");
+        for (id bad in @[@"", @1, NSNull.null, [@"x" stringByPaddingToLength:129 withString:@"x" startingAtIndex:0]]) {
+            NSMutableDictionary *invalid = MutableCopy(stable); invalid[@"snapshot"][@"automationKey"] = bad;
+            Check(AXBValidateEnvelope(invalid) != nil, "invalid screen automation key is rejected");
+        }
+        for (id bad in @[@[], @"Search", @[@""], @[@1], @[NSNull.null], @[[ @"x" stringByPaddingToLength:257 withString:@"x" startingAtIndex:0]]]) {
+            NSMutableDictionary *invalid = MutableCopy(stable); invalid[@"snapshot"][@"nodes"][0][@"automationPath"] = bad;
+            Check(AXBValidateEnvelope(invalid) != nil, "invalid automation path is rejected");
+        }
+        AXBSession *stableSession = [[AXBSession alloc] initWithIdentifier:@"stable-session" windowID:1];
+        Check([[stableSession exchange:stable now:0][@"ok"] boolValue], "stable locator snapshot publishes");
+        NSDictionary *stableObserved = stableSession.snapshot;
+        stable[@"snapshot"][@"automationKey"] = @"renamed"; stable[@"snapshot"][@"revision"] = @2;
+        [stableSession exchange:stable now:0];
+        Check(![stableSession enqueueNode:@"button" revision:@1 operation:@"press" value:nil observedSnapshot:stableObserved now:1], "renaming a logical screen rejects an observed old action route");
         NSDictionary *tabGroup = @{@"id": @"pages", @"role": @"tabgroup", @"label": @"Pages", @"value": @"",
             @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @20, @200, @24]};
         NSDictionary *tab = @{@"id": @"details", @"parent": @"pages", @"role": @"tab", @"label": @"Details", @"value": @YES,

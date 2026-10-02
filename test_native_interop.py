@@ -137,15 +137,15 @@ def main():
                 check(hit(web).press() == 0 and int(command("read")["webPresses"]) == expected_web,
                       f"{phase}: web action works")
                 if phase != "baseline":
-                    proxy = app.find(".proxy")
+                    proxy = app.find("/proxy")
                     check(not proxy.is_settable("AXFocused"), f"{phase}: non-focusable bridge button does not advertise a focus setter")
                     target = hit(proxy)
                     check(same(target, proxy), f"{phase}: external hit finds bridge control")
                     group = proxy.read("AXParent")
-                    check((group.read("AXIdentifier") or "").startswith("axb.window.") and
+                    check((group.read("AXIdentifier") or "").startswith("axb/") and
                           any(same(child, proxy) for child in group.read("AXChildren") or []),
                           f"{phase}: virtual group and control agree on parentage")
-                    table = app.find(".table")
+                    table = app.find("/table")
                     row = (table.read("AXRows") or [])[0]
                     check(table.is_settable("AXSelectedRows"), f"{phase}: legacy table selection advertises its setter without recursion")
                     check(row.is_settable("AXSelected"), f"{phase}: legacy row selection advertises its setter without recursion")
@@ -156,7 +156,7 @@ def main():
             check(same(hit(late), late), "native children added after attachment remain hittable")
             check(first.set_boolean("AXFocused", True) == 0, "native editor accepts focus")
             command("focusProxy")
-            check((app.read("AXFocusedUIElement").read("AXIdentifier") or "").endswith(".editor"), "bridge focus is exposed")
+            check((app.read("AXFocusedUIElement").read("AXIdentifier") or "").endswith("/editor"), "bridge focus is exposed")
             error = ax.signature(ax.AX, "AXObserverCreate", c.c_int, c.c_int, callback_type, c.POINTER(c.c_void_p))(
                 process.pid, notified, c.byref(observer))
             if error:
@@ -164,7 +164,7 @@ def main():
             source = ax.signature(ax.AX, "AXObserverGetRunLoopSource", c.c_void_p, c.c_void_p)(observer)
             ax.signature(ax.CF, "CFRunLoopAddSource", None, c.c_void_p, c.c_void_p, c.c_void_p)(run_loop, source, default_mode)
             window = app.read("AXWindows")[0]
-            proxy_editor = app.find(".editor")
+            proxy_editor = app.find("/editor")
             observe(window, "AXLayoutChanged")
             observe(proxy_editor, "AXValueChanged")
             observe(proxy_editor, "AXSelectedTextChanged")

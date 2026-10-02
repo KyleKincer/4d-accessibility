@@ -51,7 +51,7 @@ C_TEXT(AXB_Configure; $1)
 C_OBJECT(AXB_Configure; $0)
 ```
 
-Declare any application configuration method's return type there too. `AXB_Configure` is the application-owned exception to the reserved `AXB_` helper prefix. The installer never creates or overwrites it. Return `New object("enabled"; False)` to opt a form out. All other options use the existing [configuration contract](INTEGRATION.md): `controls`, `children`, `grids`, `scope`, `describe`, `apply` and `onError`.
+Declare any application configuration method's return type there too. `AXB_Configure` is the application-owned exception to the reserved `AXB_` helper prefix. The installer never creates or overwrites it. Return `New object("enabled"; False)` to opt a form out. All other options use the existing [configuration contract](INTEGRATION.md): `controls`, `children`, `grids`, `scope`, `describe`, `apply` and `onError`. An optional root `automationKey` supplies a [logical screen locator](IDENTIFIERS.md) in supporting kits.
 
 ## Repeated and nested children
 
@@ -78,7 +78,7 @@ CLOSE WINDOW($window)
 
 `AXB_AreaForm` copies the definition and adds the same area. It leaves the original definition, method, events, object methods and data untouched. The optional key starts with an ASCII letter and contains at most 64 ASCII letters, digits, underscores or hyphens. It is stored in the area's object name, not the business data. Repeated preparation accepts the same canonical area and key. On failure it returns `ok: False`, `error` and the original `form`, so the application's normal dialog can still open.
 
-Generated roots use the existing `DIALOG` data, including implicit, entity, class-instance or shared data. In the example, `AXB_Configure` receives `RecordEditor`. Without a key it receives `Current form name`, which is not a useful stable selector for a generated definition. Prefer an explicit key when configuration is needed. A central callback that returns Null or an empty object for an unrecognized form leaves that form on automatic defaults. Ordinary generated children are discovered from the root.
+Generated roots use the existing `DIALOG` data, including implicit, entity, class-instance or shared data. In the example, `AXB_Configure` receives `RecordEditor`, which also becomes the screen key unless the returned options override `automationKey`. Without a key the callback receives `Current form name`, which is not a useful stable selector for a generated definition. Prefer an explicit key when configuration is needed. A central callback that returns Null or an empty object for an unrecognized form leaves that form on automatic defaults. Ordinary generated children are discovered from the root.
 
 For generated definitions inheriting a named form, install the area in that named base and open the original generated definition unchanged. Do not add another area with `AXB_AreaForm`; it returns `inheritedAreaForm` before mutation because it cannot inspect an external base safely. Inline/external JSON inheritance needs an explicitly prepared base or the [manual interface](MANUAL-LIFECYCLE.md). List and print destinations return `unsupportedAreaDestination`. The advanced `AXB_Dynamic` wrapper remains for explicit per-instance provider registration and its private-data contract; it is not needed for ordinary automatic generated forms.
 

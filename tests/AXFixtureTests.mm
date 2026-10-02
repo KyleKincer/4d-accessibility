@@ -19,7 +19,7 @@ static id Find(AXUIElementRef root, NSString *suffix) {
     for (NSUInteger inspected = 0; pending.count && inspected < 2000; ++inspected) {
         id node = pending.lastObject; [pending removeLastObject];
         NSString *identifier = Read((__bridge AXUIElementRef)node, kAXIdentifierAttribute);
-        if ([identifier hasPrefix:@"axb."] && [identifier hasSuffix:suffix]) return node;
+        if ([identifier hasPrefix:@"axb/"] && [identifier hasSuffix:suffix]) return node;
         NSArray *children = Read((__bridge AXUIElementRef)node, kAXChildrenAttribute);
         if ([children isKindOfClass:NSArray.class]) [pending addObjectsFromArray:children];
     }
@@ -48,7 +48,7 @@ static id WaitWindow(AXUIElementRef app, NSString *title) {
     NSTimeInterval end = NSProcessInfo.processInfo.systemUptime + 3;
     do {
         id window = WindowNamed(app, title);
-        if (window && Find((__bridge AXUIElementRef)window, @".name")) return window;
+        if (window && Find((__bridge AXUIElementRef)window, @"/name")) return window;
         [NSThread sleepForTimeInterval:0.02];
     } while (NSProcessInfo.processInfo.systemUptime < end);
     return nil;
@@ -87,7 +87,7 @@ int main(int argc, const char *argv[]) {
         }
         Check(fixture != nil, "disposable fixture window found");
         AXUIElementRef window = (__bridge AXUIElementRef)fixture;
-        id field = Find(window, @".name"), button = Find(window, @".submit"), checkbox = Find(window, @".allowed"), status = Find(window, @".status");
+        id field = Find(window, @"/name"), button = Find(window, @"/submit"), checkbox = Find(window, @"/allowed"), status = Find(window, @"/status");
         Check(field && button && checkbox && status, "all registered native 4D controls exposed");
         AXUIElementRef f = (__bridge AXUIElementRef)field, b = (__bridge AXUIElementRef)button;
         AXUIElementRef c = (__bridge AXUIElementRef)checkbox, s = (__bridge AXUIElementRef)status;
@@ -121,7 +121,7 @@ int main(int argc, const char *argv[]) {
         Check(WaitValue(s, @"4D submissions: 1; tester: AX café 日本語 🎸"), "real 4D action completed exactly once");
 
         id table = Find(window, @".lines"), row = Find(window, @".lines.line-003");
-        id reverse = Find(window, @".reverse"), remove = Find(window, @".remove");
+        id reverse = Find(window, @"/reverse"), remove = Find(window, @"/remove");
         Check(table && row && reverse && remove, "grid and lifecycle controls exposed");
         AXUIElementRef r = (__bridge AXUIElementRef)row;
         Check(AXUIElementPerformAction(r, kAXPressAction) == kAXErrorSuccess, "duplicate SKU row selected by identity");
@@ -162,16 +162,16 @@ int main(int argc, const char *argv[]) {
               WaitValue(s, @"4D submissions: 2; tester: AX café 日本語 🎸"),
               "blocked modal press had no delayed submission");
 
-        id secondButton = Find(window, @".second");
+        id secondButton = Find(window, @"/second");
         Check(secondButton && AXUIElementPerformAction((__bridge AXUIElementRef)secondButton, kAXPressAction) == kAXErrorSuccess,
               "independent second window requested through AX");
         id second = WaitWindow(app, @"4D accessibility probe 2");
         Check(second != nil, "independent second window registered");
-        id secondField = Find((__bridge AXUIElementRef)second, @".name");
-        id secondSubmit = Find((__bridge AXUIElementRef)second, @".submit");
+        id secondField = Find((__bridge AXUIElementRef)second, @"/name");
+        id secondSubmit = Find((__bridge AXUIElementRef)second, @"/submit");
         NSString *oldIdentifier = Read((__bridge AXUIElementRef)secondField, kAXIdentifierAttribute);
-        Check(oldIdentifier != nil && ![oldIdentifier isEqual:Read(f, kAXIdentifierAttribute)],
-              "separate windows have separate session identities");
+        Check(oldIdentifier != nil && !CFEqual((__bridge CFTypeRef)secondField, (__bridge CFTypeRef)field),
+              "separate windows retain independent element handles");
         Check(AXUIElementSetAttributeValue((__bridge AXUIElementRef)secondField, kAXValueAttribute, CFSTR("Second tester")) == kAXErrorSuccess &&
               WaitValue((__bridge AXUIElementRef)secondField, @"Second tester"), "second window edit completed");
         Check([Read(f, kAXValueAttribute) isEqual:name], "second window edit leaves parent data unchanged");
@@ -184,10 +184,10 @@ int main(int argc, const char *argv[]) {
               "second window reopened through ordinary 4D handler");
         id reopened = WaitWindow(app, @"4D accessibility probe 2");
         Check(reopened != nil, "reopened window registered");
-        id reopenedField = Find((__bridge AXUIElementRef)reopened, @".name");
-        Check(![oldIdentifier isEqual:Read((__bridge AXUIElementRef)reopenedField, kAXIdentifierAttribute)] &&
+        id reopenedField = Find((__bridge AXUIElementRef)reopened, @"/name");
+        Check([oldIdentifier isEqual:Read((__bridge AXUIElementRef)reopenedField, kAXIdentifierAttribute)] &&
               [Read((__bridge AXUIElementRef)reopenedField, kAXValueAttribute) isEqual:@"QA Tester"],
-              "reopened window has a fresh identity and rejects old-reference edits");
+              "reopened window repeats its locator and rejects old-reference edits");
         CloseSecondWindow(app, (__bridge AXUIElementRef)reopened);
         Check(WaitEnabled(b) && [Read(f, kAXValueAttribute) isEqual:name], "parent state survives close/reopen lifecycle");
         CFRelease(app);

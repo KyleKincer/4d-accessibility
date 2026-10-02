@@ -161,7 +161,7 @@ def main():
         while pending:
             candidate = pending.pop()
             identifier = candidate.read("AXIdentifier")
-            if isinstance(identifier, str) and identifier.startswith("axb.window."):
+            if isinstance(identifier, str) and identifier.startswith("axb/"):
                 group = candidate
                 break
             if candidate.read("AXRole") != "AXTable":

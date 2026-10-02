@@ -71,7 +71,7 @@ def main():
             report["architecture"] = ax.process_architecture(process.pid)
             app, window = activate_fixture(process, project, TITLE)
             group = ax.wait_for(lambda: next((e for e in window.read("AXChildren") or []
-                if str(e.read("AXIdentifier")).startswith("axb.window.")), None), "Area-owned provider", timeout=20)
+                if str(e.read("AXIdentifier")).startswith("axb/")), None), "Area-owned provider", timeout=20)
 
             def find(label):
                 # Captions and their editors share an accessible name. Select

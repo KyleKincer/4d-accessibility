@@ -50,7 +50,7 @@ def main():
         ready, report['mode_notice_acknowledged'] = wait_for_start(process, project, state, BUILD)
         check(ready['compiled'] is args.compiled and ready['start']['ok'], 'parent runs in the requested mode with its automatic bridge')
         app, window = activate_fixture(process, project, TITLE)
-        def root(w): return next((e for e in w.read('AXChildren') or [] if str(e.read('AXIdentifier')).startswith('axb.window.')), None)
+        def root(w): return next((e for e in w.read('AXChildren') or [] if str(e.read('AXIdentifier')).startswith('axb/')), None)
         parent = ax.wait_for(lambda:root(window), 'Parent tree', timeout=15)
         def find(group, label): return next((e for e in group.read('AXChildren') or [] if e.read('AXDescription') == label), None)
         def settle():

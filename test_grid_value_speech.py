@@ -20,7 +20,7 @@ import doctor
 CASES = ("single", "forward", "back", "leave", "inspection", "reload", "checkbox", "checkbox_leave", "popup")
 SOURCES = (
     "src/Session.mm", "src/Session.h", "src/Grid.mm", "src/Grid.h",
-    "src/Bridge.mm", "src/Bridge.h", "src/BridgePrivate.h", "src/GridNative.mm", "src/NativeLayout.mm", "src/NativeLayout.h", "src/Limits.h",
+    "src/Bridge.mm", "src/Bridge.h", "src/BridgePrivate.h", "src/GridNative.mm", "src/NativeLayout.mm", "src/NativeLayout.h", "src/Limits.h", "src/Identifiers.h",
     "tests/NativeGridFixture.mm", "tests/mac_ax.py", "tests/voiceover.py",
     "tests/ReadScreen.swift", "test_grid_value_speech.py",
 )
