@@ -67,6 +67,10 @@ If (($operation="register") & Not($aliases))
  $result.error:="unsupportedRegistrationData"
  return
 End if
+If (($options#Null) && (Value type($options)=Is object) && Not(OB Is defined($options; "automationKey")))
+ $options:=OB Copy($options)
+ $options.automationKey:=Choose(Current form name=""; "generated"; Current form name)
+End if
 $result:=AXB_ViewCreate($options)
 If (Not($result.ok=True))
  return

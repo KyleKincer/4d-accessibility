@@ -312,6 +312,25 @@ For each ($node; $description.nodes)
  End if
  $id:=$prefix+$node.id
  $copy.id:=$id
+ // Public paths use container names, never the UUID-bearing action route.
+ $key:=$node.id
+ If (Value type($node.objectName)=Is text)
+  $key:=$node.objectName
+  If ($view.options.controls#Null)
+   If ($view.options.controls[$key]#Null)
+    If (Value type($view.options.controls[$key].automationKey)=Is text)
+     $key:=$view.options.controls[$key].automationKey
+    End if
+   End if
+  End if
+ End if
+ If (Value type($node.automationKey)=Is text)
+  $key:=$node.automationKey
+ End if
+ $copy.automationPath:=$request.path.concat(New collection($key))
+ If ($node.automationChild#Null)
+  $copy.automationPath:=$copy.automationPath.concat($node.automationChild)
+ End if
  If (Value type($node.objectName)=Is text)
   $registry.controlContexts[$id]:=New object("formName"; $view.formName; "origin"; $view.origin; "bindingKey"; $view.bindingKey)
   // Keep host pointers outside the serializable tree. An unnamed button has

@@ -24,6 +24,11 @@ End if
 If (Length($options.label)>512)
  return
 End if
+If (OB Is defined($options; "automationKey"))
+ If ((Value type($options.automationKey)#Is text) || ($options.automationKey="") || (Length($options.automationKey)>128))
+  return New object("ok"; False; "error"; "invalidAutomationKey")
+ End if
+End if
 For each ($key; New collection("controls"; "children"; "grids"))
  If (OB Is defined($options; $key))
   If (($options[$key]=Null) | (Value type($options[$key])#Is object))
@@ -38,6 +43,11 @@ If ($options.controls#Null)
    return New object("ok"; False; "error"; "invalidControlMetadata")
   End if
   $metadata:=$options.controls[$name]
+  If (OB Is defined($metadata; "automationKey"))
+   If ((Value type($metadata.automationKey)#Is text) || ($metadata.automationKey="") || (Length($metadata.automationKey)>256))
+    return New object("ok"; False; "error"; "invalidControlAutomationKey")
+   End if
+  End if
   If (OB Is defined($metadata; "layer"))
    If (New collection(Is real; Is integer; Is longint).indexOf(Value type($metadata.layer))<0)
     return New object("ok"; False; "error"; "invalidControlLayer")

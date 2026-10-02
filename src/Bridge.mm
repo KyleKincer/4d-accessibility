@@ -2,6 +2,7 @@
 #import "Bridge.h"
 #import "Session.h"
 #import "BridgePrivate.h"
+#import "Identifiers.h"
 #include "Limits.h"
 #import "NativeLayout.h"
 
@@ -100,7 +101,7 @@ NSString *AXBNativeFocus(void *nativeWindow) {
 - (BOOL)isAccessibilityElement { return self.combo.isAccessibilityElement; }
 - (NSString *)accessibilityRole { return NSAccessibilityButtonRole; }
 - (NSString *)accessibilityLabel { return @"Show choices"; }
-- (NSString *)accessibilityIdentifier { return [self.combo.accessibilityIdentifier stringByAppendingString:@".choices"]; }
+- (NSString *)accessibilityIdentifier { return [self.combo.accessibilityIdentifier stringByAppendingString:@"/choices"]; }
 - (id)accessibilityParent { return self.combo; }
 - (id)accessibilityWindow { return self.combo.accessibilityWindow; }
 - (id)accessibilityTopLevelUIElement { return self.combo.accessibilityTopLevelUIElement; }
@@ -126,7 +127,7 @@ NSString *AXBNativeFocus(void *nativeWindow) {
     NSAccessibilityPostNotification(self, NSAccessibilityUIElementDestroyedNotification);
 }
 - (BOOL)isAccessibilityElement { return self.live && [self.data[@"visible"] boolValue]; }
-- (NSString *)accessibilityIdentifier { return [NSString stringWithFormat:@"axb.%@.%@", self.owner.session.identifier, self.data[@"id"]]; }
+- (NSString *)accessibilityIdentifier { return self.identifier; }
 - (NSString *)accessibilityLabel {
     // VoiceOver reads an image's label, not AXValue. Include its current text
     // alternative while preserving the stable identifier and raw value for AX.
@@ -396,9 +397,7 @@ NSString *AXBNativeFocus(void *nativeWindow) {
     if (explicitCells.count) return explicitCells;
     if (!self.summaryCell) {
         self.summaryCell = [AXBSummaryCell new]; self.summaryCell.row = self;
-        // Real nodes always start with "axb.". Keep generated cells outside
-        // that namespace even when a real row key ends with ".summary".
-        self.summaryCell.identifier = [NSString stringWithFormat:@"axb-cell.%@.%@", self.owner.session.identifier, self.data[@"id"]];
+        self.summaryCell.identifier = [self.accessibilityIdentifier stringByAppendingString:@"/summary"];
     }
     return @[self.summaryCell];
 }
@@ -712,7 +711,8 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
         if (data[@"grid"]) kind = AXBGridNode.class;
         if ([data[@"role"] isEqual:@"textfield"] && (!data[@"editable"] || [data[@"editable"] boolValue])) kind = AXBEditableTextNode.class;
         AXBNode *node = old[data[@"id"]];
-        if (node && (![node.data[@"role"] isEqual:data[@"role"]] || [node.data[@"combo"] boolValue] != [data[@"combo"] boolValue] || node.class != kind)) { [retired addObject:node]; node = nil; }
+        NSString *identifier = AXBNodeIdentifier(snapshot, data);
+        if (node && (![node.identifier isEqual:identifier] || ![node.data[@"role"] isEqual:data[@"role"]] || [node.data[@"combo"] boolValue] != [data[@"combo"] boolValue] || node.class != kind)) { [retired addObject:node]; node = nil; }
         if (!node) {
             node = [kind new]; node.owner = self; node.live = YES; structureChanged = YES;
         }
@@ -724,6 +724,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
         for (NSString *key in @[@"visible", @"frame", @"clip", @"parent", @"index", @"label", @"labelledBy", @"linked", @"enabled"])
             if (node.data && (node.data[key] || data[key]) && ![node.data[key] isEqual:data[key]]) structureChanged = YES;
         node.data = data;
+        node.identifier = identifier;
         node.revision = snapshot[@"revision"];
         if ([node isKindOfClass:AXBGridNode.class]) [(AXBGridNode *)node prepareGrid];
         [next addObject:node];
@@ -742,6 +743,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (![self.nodes isEqualToArray:next]) structureChanged = YES;
     self.nodes = next;
     self.publishedSnapshot = snapshot;
+    self.element.identifier = AXBRootIdentifier(snapshot);
     [self refreshComboPopup];
     id focused = self.accessibilityFocusedUIElement;
     BOOL focusChanged = NO;
@@ -874,7 +876,7 @@ static void ScheduleRefresh(AXBSession *session, void *nativeWindow) {
             view.session = session;
             view.element = [AXBWindowElement new];
             view.element.owner = view;
-            view.element.identifier = [@"axb.window." stringByAppendingString:session.identifier];
+            view.element.identifier = AXBRootIdentifier(session.snapshot);
             view.live = YES;
             AXBLayoutObserve(window);
             [window.contentView addSubview:view];
