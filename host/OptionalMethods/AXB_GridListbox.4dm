@@ -4,8 +4,8 @@
 var $node; $reply; $column; $columnsByID; $positions; $known; $frames; $headers; $rowFrames; $descriptor; $header; $page; $rowData; $cell; $item; $action; $binding; $attribute; $metadata : Object
 var $rows; $columns; $selected; $disabled; $unselectable; $uneditable; $visible; $allKeys; $clip; $frame; $pageRows; $cells; $actual; $rowLayout; $columnLayout : Collection
 var $keys; $selection; $control; $pointer; $previous; $headerPointer : Pointer
-var $name; $key; $columnID; $columnName; $orderState; $text; $expression; $property : Text
-var $count; $row; $i; $c; $first; $scrollColumn; $flags; $left; $top; $right; $bottom; $bodyTop; $lockedRight; $locked; $headerHeight; $sortValue : Integer
+var $name; $key; $columnID; $columnName; $orderState; $text; $expression; $property; $variableName : Text
+var $count; $row; $i; $c; $first; $scrollColumn; $flags; $left; $top; $right; $bottom; $bodyTop; $lockedRight; $locked; $headerHeight; $sortValue; $tableNumber; $fieldNumber : Integer
 var $hierarchical; $enabled; $rebound; $singleClick; $sortable; $headerClick : Boolean
 var $selectionMode : Integer
 $result:=New object("ok"; False; "error"; "unsupportedLogicalListbox"; "status"; "rejected"; "message"; "Grid is unavailable"; "nodes"; New collection; "pages"; New collection)
@@ -36,7 +36,7 @@ If ($options.meta#Null)
   return
  End if
 End if
-$binding:=AXB_GridBinding($options)
+$binding:=AXB_GridBinding($options; $state)
 If (Not($binding.ok))
  $node.label:=$options.label+": "+$binding.message
  return
@@ -116,12 +116,27 @@ For ($i; 1; Size of array($parts); 3)
   Else
    $expression:=LISTBOX Get column formula(*; $columnName)
    If ($metadata.value=Null)
-    If (Not(Match regex("^This[.][[:alpha:]_][[:alnum:]_]*$"; $expression)))
-     $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
-     return
+    If ($options.kind="selection")
+     $pointer:=OBJECT Get pointer(Object named; $columnName)
+     $property:=""
+     If (Not(Is nil pointer($pointer)))
+      RESOLVE POINTER($pointer; $variableName; $tableNumber; $fieldNumber)
+      If (($tableNumber=$binding.table) & ($fieldNumber>0))
+       $property:=Field name($tableNumber; $fieldNumber)
+      End if
+     End if
+     If ($property="")
+      $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+      return
+     End if
+    Else
+     If (Not(Match regex("^This[.][[:alpha:]_][[:alnum:]_]*$"; $expression)))
+      $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+      return
+     End if
+     $property:=Substring($expression; 6)
     End if
-    $property:=Substring($expression; 6)
-    If ($options.kind="entity")
+    If (($options.kind="entity") | ($options.kind="selection"))
      $attribute:=$binding.dataClass[$property]
      If (($attribute=Null) || ($attribute.kind#"storage") || (New collection("string"; "number"; "date"; "bool").indexOf($attribute.type)<0))
       $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
@@ -371,7 +386,7 @@ $descriptor.uneditable:=$uneditable
 If ($columns.length>0)
  $descriptor.layout:=New object("rows"; $rowLayout; "columns"; $columnLayout)
 End if
-$descriptor.actions:=New object("select"; LISTBOX Get property(*; $name; lk selection mode)>0; "reveal"; True; "edit"; True)
+$descriptor.actions:=New object("select"; (LISTBOX Get property(*; $name; lk selection mode)>0) & Not($binding.noSelection=True); "reveal"; True; "edit"; True)
 // Cell position alone survives loss of focus. The root resolves this table's
 // exact live instance before adopting its non-text cell position.
 If (Not(Is editing text) & (OBJECT Get name(Object with focus)=$name))

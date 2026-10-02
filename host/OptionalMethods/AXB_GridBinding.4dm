@@ -1,6 +1,6 @@
 // Read a list box's row identities and selection without moving its current
 // row or evaluating a column expression. Values remain in the owning host.
-#DECLARE($options : Object) -> $binding : Object
+#DECLARE($options : Object; $state : Object) -> $binding : Object
 var $name; $property; $key; $metaExpression; $metaProperty; $flag : Text
 var $count; $row; $flags : Integer
 var $keys; $selection; $control : Pointer
@@ -9,6 +9,9 @@ var $dataClass; $attribute; $sourceStore; $selectedStore : Object
 var $rawKeys; $selectedKeys; $selectedTextKeys : Collection
 var $hierarchical; $entity : Boolean
 $binding:=New object("ok"; False; "message"; "Unsupported list box binding"; "keys"; New collection; "selected"; New collection)
+If ($options.kind="selection")
+ return AXB_SelectionSource($options; $state)
+End if
 $name:=$options.objectName
 $count:=LISTBOX Get number of rows(*; $name)
 $binding.count:=$count

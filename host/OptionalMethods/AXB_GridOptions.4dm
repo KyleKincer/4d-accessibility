@@ -20,7 +20,7 @@ For each ($name; $grids)
    return
   End if
  End if
- If (New collection("array"; "areaList"; "collection"; "entity").indexOf($options.kind)<0)
+ If (New collection("array"; "areaList"; "collection"; "entity"; "selection").indexOf($options.kind)<0)
   return
  End if
  If ($options.kind="array")
