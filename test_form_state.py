@@ -35,6 +35,14 @@ For each ($badLayer; New collection("-1"; Null; True; 0.5; 32768; -32768))
  $reply:=AXB_ViewCreate(New object("label"; "Layer validation"; "controls"; New object("Background"; New object("layer"; $badLayer))))
  $checks.push(($reply.ok=False) & ($reply.error="invalidControlLayer"))
 End for each
+$checks.push(AXB_ViewCreate(New object("label"; "Keys"; "automationKey"; "records.main")).ok=True)
+$checks.push(AXB_ViewCreate(New object("label"; "Keys"; "controls"; New object("Search"; New object("automationKey"; "SearchAlias")))).ok=True)
+var $badKey : Variant
+For each ($badKey; New collection(""; Null; True; 1))
+ $checks.push(AXB_ViewCreate(New object("label"; "Keys"; "automationKey"; $badKey)).error="invalidAutomationKey")
+ $checks.push(AXB_ViewCreate(New object("label"; "Keys"; "controls"; New object("Search"; New object("automationKey"; $badKey)))).error="invalidControlAutomationKey")
+ $checks.push(Not(AXB_GridOptions(New object("Items"; New object("kind"; "array"; "keyColumn"; "Key"; "columns"; New object("Description"; New object("automationKey"; $badKey)))))))
+End for each
 $checks.push(AXB_ControlValue(1234.5; "###,##0.00")="1,234.50")
 $checks.push(AXB_ControlValue(!2026-09-23!; Char(Internal date long))="September 23, 2026")
 $checks.push(AXB_ControlValue(?13:05:09?; Char(HH MM SS))="13:05:09")

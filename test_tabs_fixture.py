@@ -81,7 +81,7 @@ def main():
             report['architecture'] = ax.process_architecture(process.pid)
             app, window = activate_fixture(process, project, TITLE)
             group = ax.wait_for(lambda: next((e for e in window.read('AXChildren') or []
-                if str(e.read('AXIdentifier')).startswith('axb.window.')), None), 'Area-owned provider', timeout=20)
+                if str(e.read('AXIdentifier')).startswith('axb/')), None), 'Area-owned provider', timeout=20)
 
             def find(label):
                 pending = list(group.read('AXChildren') or [])
@@ -105,19 +105,34 @@ def main():
             categories = ax.wait_for(lambda: find('Categories'), 'Array tab group', timeout=20)
             pages = ax.wait_for(lambda: find('Pages'), 'Object tab group', timeout=20)
             choices = ax.wait_for(lambda: find('List choices'), 'List tab group', timeout=20)
+            def assert_locators():
+                pending = [group]
+                identifiers = []
+                while pending:
+                    element = pending.pop()
+                    identifier = element.read('AXIdentifier')
+                    if identifier:
+                        identifiers.append(identifier)
+                    pending.extend(element.read('AXChildren') or [])
+                check(len(identifiers) == len(set(identifiers)), 'root, controls, repeated children and synthesized tabs have unique public locators')
+                check(pages.read('AXIdentifier').endswith('/ObjectTabs') and
+                    all(t.read('AXIdentifier').startswith(pages.read('AXIdentifier')+'/tab/') for t in pages.read('AXTabs') or []),
+                    'tab choices have distinct stable child paths under their object name')
+            assert_locators()
             def restart():
                 nonlocal group, categories, pages, choices
                 previous_group = group
                 previous_categories = categories
                 previous_children = categories.read('AXTabs') or []
+                previous_id = group.read('AXIdentifier')
                 original_state = state()
                 bindings = {key: original_state.get(key) for key in
                     ('array', 'index', 'page', 'bottomIndex', 'narrowObject', 'narrowList', 'leftChild', 'rightChild')}
                 tab_events = [e for e in original_state['events'] if e['object'].endswith('Tabs')]
                 check(find('Restart accessibility').press() == 0, 'restart request accepted through accessibility')
                 group = ax.wait_for(lambda: next((e for e in window.read('AXChildren') or []
-                    if str(e.read('AXIdentifier')).startswith('axb.window.') and
-                    e.read('AXIdentifier') != previous_group.read('AXIdentifier')), None),
+                    if str(e.read('AXIdentifier')).startswith('axb/') and
+                    not e.same_as(previous_group)), None),
                     'Replacement area-owned provider', timeout=20)
                 categories = ax.wait_for(lambda: find('Categories'), 'Tabs after registration restart', timeout=20)
                 pages = ax.wait_for(lambda: find('Pages'), 'Page tabs after registration restart', timeout=20)
@@ -137,6 +152,8 @@ def main():
                     'restart preserves bindings and tab business handlers')
                 check(previous_group.read('AXRole') is None and previous_categories.read('AXRole') is None and
                     all(t.press() != 0 for t in previous_children), 'restart retires the former tree and tab choices')
+                check(group.read('AXIdentifier') == previous_id, 'restart preserves the logical screen locator')
+                assert_locators()
             if args.restart_only:
                 restart()
                 check(find('Close fixture').press() == 0, 'restarted form closes through its ordinary action')

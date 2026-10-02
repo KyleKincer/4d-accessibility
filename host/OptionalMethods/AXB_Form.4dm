@@ -70,6 +70,14 @@ End if
 If (($options#Null) && (Value type($options)=Is object) && Not(OB Is defined($options; "automationKey")))
  $options:=OB Copy($options)
  $options.automationKey:=Choose(Current form name=""; "generated"; Current form name)
+ If ($operation="start")
+  $context:=AXB_FormContext
+  If ($context#Null)
+   If (Value type($context.view.options.automationKey)=Is text)
+    $options.automationKey:=$context.view.options.automationKey
+   End if
+  End if
+ End if
 End if
 $result:=AXB_ViewCreate($options)
 If (Not($result.ok=True))
@@ -78,6 +86,10 @@ End if
 $view:=$result.view
 $result:=AXB_Host("info"; New object)
 If (Not($result.ok=True))
+ return
+End if
+If (Position("; stableIdentifiers 1;"; $result.nativeStatus)=0)
+ $result:=New object("ok"; False; "error"; "stableIdentifiersUnavailable")
  return
 End if
 If ($result.componentInfo.formOwnership#1)

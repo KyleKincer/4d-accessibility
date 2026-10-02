@@ -700,13 +700,15 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
         for (NSString *key in [self.rowRegistry.allKeys copy]) if ([grid indexOfRow:key] == NSNotFound) {
             [self.rowRegistry[key] invalidate]; [self.rowRegistry removeObjectForKey:key];
         }
-        for (NSString *key in [self.columnRegistry.allKeys copy]) if ([grid indexOfColumn:key] == NSNotFound) {
+        for (NSString *key in [self.columnRegistry.allKeys copy]) if ([grid indexOfColumn:key] == NSNotFound ||
+            ![self.columnRegistry[key].identifier isEqual:Identifier(self, @"column", nil, key)]) {
             [self.columnRegistry[key] invalidate]; [self.columnRegistry removeObjectForKey:key];
         }
-        NSSet *columns = [NSSet setWithArray:[descriptor[@"columns"] valueForKey:@"id"]];
-        NSSet *previousColumns = [NSSet setWithArray:[self.lastDescriptor[@"columns"] valueForKey:@"id"] ?: @[]];
-        if (![previousColumns isSubsetOfSet:columns]) for (AXBGridRow *row in self.rowRegistry.allValues)
-            for (NSString *key in [row.cells.allKeys copy]) if (![columns containsObject:key]) {
+        // Cells can be instantiated without their columns or headers. Retire
+        // each cached cell independently when its column's locator changes.
+        for (AXBGridRow *row in self.rowRegistry.allValues)
+            for (NSString *key in [row.cells.allKeys copy]) if ([grid indexOfColumn:key] == NSNotFound ||
+                ![row.cells[key].identifier isEqual:Identifier(self, @"cell", row.key, key)]) {
                 [row.cells[key] invalidate]; [row.cells removeObjectForKey:key];
             }
     }

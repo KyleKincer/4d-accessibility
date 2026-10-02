@@ -90,7 +90,7 @@ def main():
         group = None
         while pending:
             item = pending.pop()
-            if (item.read("AXIdentifier") or "").startswith("axb.window."):
+            if (item.read("AXIdentifier") or "").startswith("axb/"):
                 group = item
                 break
             if item.read("AXRole") != "AXTable":
@@ -170,7 +170,7 @@ def main():
             enter(first, "CHANGE SCOPE")
             old_id = second.read("AXIdentifier")
             assert second.set_text("Stale continuation") == 0
-            ax.wait_for(lambda: find("Left lines") and find("Left lines").cell(1, 597).read("AXIdentifier") != old_id, "Exit handler did not replace scope", timeout=15)
+            ax.wait_for(lambda: find("Left lines") and not find("Left lines").cell(1, 597).same_as(second), "Exit handler did not replace scope", timeout=15)
             settle()
             current = find("Left lines").cell(1, 597)
             ax.wait_for(lambda: current.read("AXValue") == "Final second edit", "New scope value did not load", timeout=15)
@@ -340,17 +340,17 @@ def main():
         press("Loading")
         left = ax.wait_for(lambda: find("Left lines"), "Loaded grid did not return", timeout=15)
         new = left.cell(1, 0)
-        check(new.read("AXIdentifier") != far.read("AXIdentifier"), "readiness transition retires the prior grid generation")
+        check(not new.same_as(far), "readiness transition retires the prior grid generation")
         identifier = new.read("AXIdentifier")
         press("Scope")
-        ax.wait_for(lambda: (current := first_cell_identifier()) is not None and current != identifier, "New invoice scope did not retire old cells", timeout=15)
+        ax.wait_for(lambda: new.read("AXSize") in (None, (0, 0)) and first_cell_identifier() == identifier, "New invoice scope did not retire old cells", timeout=15)
         check(new.read("AXSize") in (None, (0, 0)), "old invoice cell has no active geometry after scope change")
         check(state()["timerTicks"] > ticks, "existing form timer continues during grid actions")
         if config.get("calculated"):
             old = find("Left lines").cell(1, 0)
             identifier = old.read("AXIdentifier")
             press("Rebind")
-            ax.wait_for(lambda: (current := first_cell_identifier()) is not None and current != identifier, "Column rebind did not retire old cells", timeout=15)
+            ax.wait_for(lambda: old.read("AXSize") in (None, (0, 0)) and first_cell_identifier() == identifier, "Column rebind did not retire old cells", timeout=15)
             rebound = find("Left lines").cell(1, 0)
             ax.wait_for(lambda: rebound.read("AXValue") == "Right line 0001", "Rebound column did not publish its new source", timeout=15)
             check(old.read("AXSize") in (None, (0, 0)) and old.set_text("STALE") != 0, "column rebind retires stale editors with unchanged keys and scope")

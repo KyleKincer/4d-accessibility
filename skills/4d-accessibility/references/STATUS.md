@@ -4,13 +4,16 @@ The initial release covers the implemented families below on 4D 20.8 and the tes
 
 ## Availability
 
-| Integration or adapter | Signed 0.19.7 | Main 0.20.0 source and CI kit | `feature/full-form-accessibility` |
+| Integration or adapter | Signed 0.19.7 | Main 0.20.0 source and CI kit | 0.21.0 release candidate |
 | --- | --- | --- | --- |
-| Manual lifecycle and previously validated controls/grids | Available | Available | Available |
-| Installer-added lifecycle area | Unavailable | Validated; unsigned CI kit | Available |
-| Ordinary styled text | Unavailable | Unavailable | Scoped acceptance passes; remaining cases below |
-| Tabs | Unavailable | Unavailable | Scoped acceptance and existing-control regressions pass |
-| Classic current/named-selection grids | Unavailable | Unavailable | Implemented; live acceptance in progress |
+| Manual lifecycle and previously validated controls/grids | Available | Available | Regression checks in progress |
+| Installer-added lifecycle area | Unavailable | Validated; unsigned CI kit | Available in candidate source |
+| Ordinary styled text | Unavailable | Unavailable | Scoped acceptance passes; current-kit rerun pending |
+| Tabs | Unavailable | Unavailable | 628 checks pass across eight live runs |
+| Classic current/named-selection grids | Unavailable | Unavailable | Implemented; current-kit acceptance in progress |
+| Stable automation locators | Unavailable | Unavailable | Implemented; native and desktop acceptance in progress |
+
+The 0.21.0 candidate is unpublished on `feature/stable-automation-identifiers`. Acceptance and signed-download validation remain before release.
 
 Build branch kits using [the build guide](../../../CONTRIBUTING.md). Install the plugin, component and helpers from the same kit. A newer helper with an older native plugin does not add a native capability.
 

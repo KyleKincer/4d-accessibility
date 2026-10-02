@@ -75,7 +75,7 @@ def main():
         windows = [w for w in application(pid).read('AXWindows') or [] if w.read('AXTitle') == TITLE]
         check(len(windows) == 1, 'exact AreaList subform window is open')
         window = windows[0]
-        group = wait_for(lambda: next((e for e in walk(window) if (e.read('AXIdentifier') or '').startswith('axb.window.')), None), 'Missing bridge group')
+        group = wait_for(lambda: next((e for e in walk(window) if (e.read('AXIdentifier') or '').startswith('axb/')), None), 'Missing bridge group')
 
         def settle():
             wait_for(lambda: group.read('AXHelp') not in (None, 'Action queued', 'Waiting for the application to complete the action'), 'Missing native acknowledgment')
@@ -94,7 +94,7 @@ def main():
             return next((e for e in walk(window) if e.read('AXRole') == 'AXTable' and e.read('AXDescription') == side + ' lines: ' + side + ' lines'), None)
 
         def row(side, key):
-            return next((e for e in table(side).read('AXRows') or [] if (e.read('AXIdentifier') or '').endswith('.lines.' + key)), None)
+            return next((e for e in table(side).read('AXRows') or [] if (e.read('AXIdentifier') or '').endswith('/lines.' + key)), None)
 
         def rows(side):
             return table(side).read('AXRows') or []
@@ -195,43 +195,43 @@ def main():
         wait_for(lambda: state()['right']['selected'] == ['line-006'] and row('Right', 'line-003'), 'Keyboard navigation did not restore the original viewport')
         right = row('Right', 'line-003')
         check(True, 'ordinary keyboard navigation restores rows with usable fresh elements')
-        send(lambda: window.find('.hide').press())
+        send(lambda: window.find('/hide').press())
         wait_for(lambda: table('Left') is None, 'Hidden subform still exposed')
         old_selection = state()['left']['selected']
         left.press(); time.sleep(.35)
         check(state()['left']['selected'] == old_selection, 'retained hidden-child row cannot change selection')
-        send(lambda: window.find('.hide').press())
+        send(lambda: window.find('/hide').press())
         wait_for(lambda: table('Left') is not None, 'Shown subform did not return')
-        send(lambda: window.find('.disable').press())
+        send(lambda: window.find('/disable').press())
         check(table('Right').read('AXEnabled') is False, 'disabled ancestor disables its grid')
         right.press(); time.sleep(.35)
         check(state()['right']['selected'] == ['line-006'], 'retained disabled-child row cannot change selection')
-        send(lambda: window.find('.disable').press())
+        send(lambda: window.find('/disable').press())
         old_left = row('Left', 'line-003')
         old_id = old_left.read('AXIdentifier')
-        send(lambda: window.find('.replace').press())
+        send(lambda: window.find('/replace').press())
         wait_for(lambda: state().get('oldLeftStopped'), 'Old child not stopped before replacement')
-        check(row('Left', 'line-003').read('AXIdentifier') != old_id, 'replaced child receives new AX identity')
+        check(row('Left', 'line-003').read('AXIdentifier') == old_id and not row('Left', 'line-003').same_as(old_left), 'replacement repeats its locator with a fresh element handle')
         old_left.press(); time.sleep(.35)
         check(state()['left']['selected'] == [], 'retained replaced-child row cannot affect its replacement')
         old_record_row = row('Left', 'line-003')
         old_record_id = old_record_row.read('AXIdentifier')
-        send(lambda: window.find('.reload').press())
+        send(lambda: window.find('/reload').press())
         wait_for(lambda: table('Left') is None, 'Loading child still publishes incomplete bindings')
         check(table('Right') is not None, 'parent readiness gate removes only the loading child')
         old_record_row.press(); time.sleep(.3)
         check(state()['left']['selected'] == [], 'retained row cannot select during reload')
-        send(lambda: window.find('.loaded').press())
+        send(lambda: window.find('/loaded').press())
         wait_for(lambda: table('Left') is not None, 'Loaded child did not resume')
-        check(row('Left', 'line-003').read('AXIdentifier') != old_record_id, 'new record scope changes identity even with identical line keys')
+        check(row('Left', 'line-003').read('AXIdentifier') == old_record_id and not row('Left', 'line-003').same_as(old_record_row), 'record scope retires the handle while preserving the locator')
         old_record_row.press(); time.sleep(.3)
         check(state()['left']['selected'] == [], 'retained old-record row cannot select the replacement record')
-        send(lambda: window.find('.badkey').press())
+        send(lambda: window.find('/badkey').press())
         wait_for(lambda: len(state()['left']['nodes']) == 1 and not state()['left']['nodes'][0]['enabled'], 'Offscreen duplicate was ignored')
         check(True, 'offscreen duplicate key disables the whole adapter')
-        send(lambda: window.find('.badkey').press())
+        send(lambda: window.find('/badkey').press())
         wait_for(lambda: table('Left') is not None and len(rows('Left')) > 0, 'Repaired keys did not restore rows')
-        send(lambda: window.find('.identity').press())
+        send(lambda: window.find('/identity').press())
         wait_for(lambda: row('Left', 'Case') and row('Left', 'case') and row('Left', 'café') and row('Left', 'cafe'), 'Case/accent keys were conflated')
         for key in ['Case', 'case', 'café', 'cafe']:
             send(lambda: table('Left').set_elements('AXSelectedRows', [row('Left', key)]))

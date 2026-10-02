@@ -79,7 +79,7 @@ def main():
         group = None
         while pending:
             element = pending.pop()
-            if str(element.read("AXIdentifier")).startswith("axb.window."):
+            if str(element.read("AXIdentifier")).startswith("axb/"):
                 group = element
                 break
             pending.extend(element.read("AXChildren") or [])

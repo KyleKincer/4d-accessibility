@@ -99,7 +99,7 @@ def main():
         window = next(w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE)
         app.set_boolean("AXFrontmost", True)
         wait_for(lambda: app.read("AXFrontmost") is True and (active := app.read("AXFocusedWindow")) and active.read("AXTitle") == TITLE, "Owned child fixture did not receive window focus")
-        group = wait_for(lambda: next((e for e in window.read("AXChildren") or [] if (e.read("AXIdentifier") or "").startswith("axb.window.")), None), "No root provider")
+        group = wait_for(lambda: next((e for e in window.read("AXChildren") or [] if (e.read("AXIdentifier") or "").startswith("axb/")), None), "No root provider")
 
         def elements():
             return group.read("AXChildren") or []
@@ -216,7 +216,7 @@ def main():
             old_button = find("Shipping: Remember")
             old_id = old_left.read("AXIdentifier")
             find("Replace left").press()
-            wait_for(lambda: (current := field("Shipping")) and current.read("AXIdentifier") != old_id, "Same-form/data replacement kept old identity")
+            wait_for(lambda: (current := field("Shipping")) and not current.same_as(old_left), "Same-form/data replacement kept old identity")
             settle()
             wait_for(lambda: state().get("invalidated"), "Replacement result was not published by the host timer")
             check(state()["invalidated"]["matchedParents"] == 1, "replacement boundary finds the owning parent")
@@ -226,7 +226,7 @@ def main():
             check(field("Shipping").read("AXValue") == "Billing edit 🎸", "retained control cannot edit its same-data replacement")
             def check_observed_lifetime(previous, boundary):
                 current = find("Shipping: Remember")
-                check(current.read("AXIdentifier") != previous.read("AXIdentifier"), boundary + " gives the button a new identity")
+                check(not current.same_as(previous), boundary + " gives the button a new identity")
                 current.set_boolean("AXFocused", True)
                 wait_for(lambda: current.read("AXFocused") is True, boundary + " did not observe the new button's focus")
                 settle()
@@ -256,7 +256,7 @@ def main():
             old_nested, old_id = field("Nested"), field("Nested").read("AXIdentifier")
             old_button = find("Shipping: Remember")
             find("Change record").press()
-            wait_for(lambda: (current := field("Nested")) and current.read("AXIdentifier") != old_id,
+            wait_for(lambda: (current := field("Nested")) and not current.same_as(old_nested),
                      "Root scope did not invalidate descendants")
             settle()
             check(group.read("AXHelp") == "Activation dispatched through the control's normal event path",
@@ -273,8 +273,8 @@ def main():
         other_window = wait_for(lambda: next((w for w in app.read("AXWindows") or []
             if w.read("AXTitle") == "AX bridge shared-data root"), None), "Shared-data dialog did not open")
         other_group = wait_for(lambda: next((e for e in other_window.read("AXChildren") or []
-            if (e.read("AXIdentifier") or "").startswith("axb.window.")), None), "Shared-data window has no provider")
-        check(other_group.read("AXIdentifier") != parent_id, "two roots sharing business data have independent sessions")
+            if (e.read("AXIdentifier") or "").startswith("axb/")), None), "Shared-data window has no provider")
+        check(not other_group.same_as(group), "two roots sharing business data have independent sessions")
         check(parent_field.read("AXEnabled") is False, "modal shared-data window blocks parent actions")
         other_field = next(e for e in other_group.read("AXChildren") or [] if e.read("AXRole") == "AXTextField")
         check(other_field.set_boolean("AXFocused", True) == 0, "shared-data root accepts explicit native focus")

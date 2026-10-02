@@ -128,7 +128,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             for (id segment in path) if (!Text(segment, 256) || ![segment length]) return @"invalid automation path segment";
         }
         NSString *locator = AXBNodeIdentifier(s, n);
-        if ([locators containsObject:locator]) return @"duplicate automation path";
+        if ([locators containsObject:locator]) return [@"duplicate automation path: " stringByAppendingString:locator];
         [locators addObject:locator];
         if (![roles containsObject:n[@"role"] ?: @""]) return @"unsupported role";
         if (n[@"grid"]) {

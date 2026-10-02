@@ -49,13 +49,85 @@ static NSWindow *Window(NSString *title) {
 static NSAccessibilityElement *Provider(NSWindow *window) {
     for (NSView *view in window.contentView.subviews) {
         id child = view.accessibilityChildren.firstObject;
-        if ([[child accessibilityIdentifier] hasPrefix:@"axb.window."]) return child;
+        if ([[child accessibilityIdentifier] hasPrefix:@"axb/"]) return child;
     }
     return nil;
 }
 static NSDictionary *Focus(void *window) {
     NSString *json = AXBNativeFocus(window);
     return [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+}
+static void StableIdentifierTest(void) {
+    NSWindow *first = Window(@"AXB stable locators first"), *second = Window(@"AXB stable locators second");
+    [NSApp activateIgnoringOtherApps:YES]; [first makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(first, 9020), *other = Open(second, 9021);
+    NSMutableDictionary *button = [@{@"id": @"route-first", @"automationPath": @[@"Search/É%"], @"role": @"button",
+        @"label": @"Search", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @20, @120, @30]} mutableCopy];
+    NSMutableDictionary *column = [@{@"id": @"internal-column", @"automationKey": @"Description", @"label": @"Description",
+        @"enabled": @YES, @"editable": @NO} mutableCopy];
+    NSMutableDictionary *grid = [@{@"generation": @"first-binding", @"order": @1, @"rows": @[@"line/1", @"line%2"],
+        @"columns": @[column], @"visible": @[], @"selected": @[], @"actions": @{@"select": @YES, @"reveal": @YES}} mutableCopy];
+    NSMutableDictionary *tableData = [@{@"id": @"route-table", @"automationPath": @[@"Details", @"Items"], @"role": @"table",
+        @"label": @"Items", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @60, @300, @120], @"grid": grid} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"automationKey": @"records.main", @"label": @"Records",
+        @"enabled": @YES, @"nodes": @[button, tableData]} mutableCopy];
+    Check([Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue] &&
+        [Exchange(second, 9021, 1, other, snapshot)[@"ok"] boolValue], "two windows accept the same logical screen locators"); Pump();
+    id root = Provider(first), otherRoot = Provider(second), retained = [root accessibilityChildren][0];
+    NSString *rootID = [root accessibilityIdentifier], *buttonID = [retained accessibilityIdentifier];
+    Check([rootID isEqual:@"axb/records.main"] && [rootID isEqual:[otherRoot accessibilityIdentifier]], "root locator repeats within separately owned windows");
+    Check([buttonID isEqual:@"axb/records.main/Search%2F%C3%89%25"] &&
+        [buttonID isEqual:[[otherRoot accessibilityChildren][0] accessibilityIdentifier]], "ordinary locators are readable, escaped and independent of window UUIDs");
+    Check([retained accessibilityPerformPress], "selected live window dispatches its located control");
+    NSDictionary *action = Exchange(first, 9020, 1, session, snapshot)[@"action"];
+    Check([action[@"node"] isEqual:@"route-first"] && !Exchange(second, 9021, 1, other, snapshot)[@"action"], "stable locator does not replace the session-specific action route");
+    Exchange(first, 9020, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"done"}); Pump();
+    AXBGridNode *table = [root accessibilityChildren][1];
+    id row = table.accessibilityRows[0], cell = [table accessibilityCellForColumn:0 row:0], header = [table headerForColumn:@"internal-column"];
+    Check([[row accessibilityIdentifier] isEqual:@"axb/records.main/Details/Items/row/line%2F1"], "grid row locator uses its key rather than visible position");
+    Check([[cell accessibilityIdentifier] isEqual:@"axb/records.main/Details/Items/cell/line%2F1/Description"], "grid cell locator includes the row key and column name");
+    Check([[header accessibilityIdentifier] isEqual:@"axb/records.main/Details/Items/header/Description"], "grid headers and cells have distinct locators");
+    grid[@"rows"] = @[@"line%2", @"line/1"]; grid[@"order"] = @2; snapshot[@"revision"] = @2;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    Check(table.accessibilityRows[1] == row && [table accessibilityCellForColumn:0 row:1] == cell,
+        "sorting preserves row handles and public locators for the same record");
+    column[@"automationKey"] = @"Renamed"; grid[@"order"] = @3; snapshot[@"revision"] = @3;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    Check(![cell isAccessibilityElement] && ![header isAccessibilityElement] &&
+        [[[table accessibilityCellForColumn:0 row:1] accessibilityIdentifier] hasSuffix:@"/Renamed"], "column locator changes retire retained cells and headers");
+    column[@"automationKey"] = @"Description"; grid[@"generation"] = @"replacement-binding"; grid[@"order"] = @1; snapshot[@"revision"] = @4;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    id replacementRow = table.accessibilityRows[1];
+    Check(replacementRow != row && [[replacementRow accessibilityIdentifier] isEqual:[row accessibilityIdentifier]] &&
+        ![row accessibilityPerformPress], "rebinding can repeat a locator while retiring its former row handle");
+    // Resolve only the cell. Reading a header or AXEnabled would materialize
+    // the column and hide the independent cell-registry retirement case.
+    id headerlessCell = [table accessibilityCellForColumn:0 row:1];
+    NSString *headerlessID = [headerlessCell accessibilityIdentifier];
+    column[@"automationKey"] = @"HeaderlessRename"; grid[@"order"] = @2; snapshot[@"revision"] = @5;
+    Check([Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue], "headerless column rename publishes a new snapshot revision"); Pump();
+    id renamedCell = [table accessibilityCellForColumn:0 row:1];
+    Check(renamedCell != headerlessCell && ![headerlessCell isAccessibilityElement] &&
+        [[headerlessCell accessibilityIdentifier] isEqual:headerlessID] &&
+        [[renamedCell accessibilityIdentifier] hasSuffix:@"/HeaderlessRename"],
+        "column locator changes retire cells even when no column or header was requested");
+    button[@"id"] = @"route-replacement"; snapshot[@"revision"] = @6;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    id replacement = [Provider(first) accessibilityChildren][0];
+    Check(replacement != retained && [[replacement accessibilityIdentifier] isEqual:buttonID] && ![retained accessibilityPerformPress],
+        "replacement internal routes do not resurrect retained ordinary handles");
+    snapshot[@"automationKey"] = @"renamed.screen"; snapshot[@"revision"] = @7;
+    Exchange(first, 9020, 1, session, snapshot);
+    Check(![replacement accessibilityPerformPress], "screen renaming blocks old actions even before the queued native refresh"); Pump();
+    AXBDetach(session, 1); Pump();
+    snapshot[@"automationKey"] = @"records.main"; snapshot[@"revision"] = @1; button[@"id"] = @"route-reopened";
+    NSString *reopened = Open(first, 9020);
+    Check(![reopened isEqual:session] && [Exchange(first, 9020, 1, reopened, snapshot)[@"ok"] boolValue], "reopening allocates an independent internal session"); Pump();
+    Check([[Provider(first) accessibilityIdentifier] isEqual:rootID] &&
+        [[[Provider(first) accessibilityChildren][0] accessibilityIdentifier] isEqual:buttonID] && ![retained accessibilityPerformPress],
+        "reopening repeats public locators and keeps closed references retired");
+    Check(![Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue], "old session cannot route through a reopened stable screen");
+    [first close]; [second close]; Pump();
 }
 static void RefreshDelayTest(void) {
     NSWindow *window = Window(@"AXB delayed accessibility refresh");
@@ -760,6 +832,7 @@ int main(void) {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
         [NSApp finishLaunching];
+        StableIdentifierTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();

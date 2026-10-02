@@ -59,7 +59,7 @@ A collection cell containing an object or another unsupported value exposes `Cel
 
 ## Use a classic current or named selection
 
-This adapter is on `feature/full-form-accessibility`. Install the plugin, component and helpers from that branch together; the current main kit and signed 0.19.7 release do not include it. Final live acceptance is in progress. Use a development host to validate it, and keep the application's existing pin until [status](STATUS.md#availability) records a pass.
+Choose a matching kit that includes this adapter from [availability](STATUS.md#availability). Keep the application's existing pin until that version's acceptance gate passes. Install plugin, component and helpers together.
 
 For an existing current-selection or named-selection list box, add one entry in `AXB_Configure`:
 
@@ -81,6 +81,8 @@ Rows publish after a private read completes. Until then, including briefly after
 Each completed read starts another short-lived process and copies the highlight set. Selection feedback arrives after a later read and must fit the existing two-second confirmation deadline. The fixture covers 600 local records; measure larger selections before claiming acceptable performance.
 
 ## Describe custom native grid columns
+
+In kits with [stable locators](IDENTIFIERS.md), column metadata can include `automationKey`. It replaces the native column object-name segment, or the AreaList `column.N` segment. Use 1–256 UTF-16 units and a unique key within that grid. An invalid value rejects startup with `invalidGrids`; duplicate keys reject publication. Row keys are also visible in `AXIdentifier`, so use opaque, non-sensitive identities.
 
 The working source accepts column metadata for array, collection, entity-selection and classic-selection grids. Keep the same grid configuration and add entries only where automatic scalar reading does not describe the visible UI. Keys are existing column object names, not header captions or column positions. Find the column itself in the Form editor; its header has a separate object name. An unknown column name disables the grid and reports `gridUnavailable`.
 
