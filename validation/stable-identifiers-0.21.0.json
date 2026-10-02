@@ -6636,6 +6636,66 @@
       "failure_report_sha256": "4bec86ea57b1e533cddebf88af5b2d4ef0d1a50f76ad21b5fff59d21a3e96dda",
       "scope": "Generated compiled VoiceOver rerun passes; prior passing cases retained",
       "corrected_harness_sha256": "caf85399e824be64b821a27f81a5086abcd692978d1459036d0554298fa75513"
+    },
+    {
+      "case": "extra native-grid VoiceOver run",
+      "cause": "The two-column traversal test was invoked against the five-column widget fixture.",
+      "correction": "Use the two-column fixture for this test. The dedicated five-column widget test already passes.",
+      "scope": "Corrected compiled VoiceOver run passes; no product or assertion change."
     }
-  ]
+  ],
+  "additionalNativeGridVoiceOver": {
+    "passed": true,
+    "compiled": true,
+    "checks": [
+      {
+        "passed": true,
+        "name": "automatic form starts in the requested desktop mode"
+      },
+      {
+        "passed": true,
+        "name": "actual native ARM execution"
+      },
+      {
+        "passed": true,
+        "name": "one root contains both ordinary controls and grid"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the first visible value without a loading placeholder"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads enterable cells as text"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver End reaches the final logical row"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reads the asynchronously loaded final-column value"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver reading reveals the real final row"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver activation selects the revealed row through the existing handler"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver returns to the beginning of the complete grid"
+      },
+      {
+        "passed": true,
+        "name": "VoiceOver leaves the grid and reaches the ordinary form editor"
+      }
+    ],
+    "report_sha256": "93c926f29ff50f2227847284a9b23b88f20e814b5ae8b98bb474d358ca33bd4b",
+    "native_sha256": "e9f37f9f6438aae82d4436fd3e3f044f7b8efed012d1bdfb6987324eaf3638e4",
+    "component_sha256": "714e12e719770a05b827bcf4f0f9847b4229d592c8f97c7b1895316f14a7aa73",
+    "scope": "Two-column collection grid with row states, area-owned lifecycle and compiled VoiceOver."
+  }
 }
