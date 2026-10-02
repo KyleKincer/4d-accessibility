@@ -192,6 +192,7 @@ static void GridControlsTest(void) {
     Check([checkbox accessibilityPerformPress], "grid checkbox dispatches an activation");
     NSDictionary *action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
     Check([action[@"operation"] isEqual:@"gridPress"] && [action[@"value"][@"expectedCell"][@"checked"] isEqual:@2], "native checkbox activation preserves its observed value");
+    Check(table.owner.actionFeedback[@"control"] == checkbox && [table.owner.actionFeedback[@"id"] isEqual:action[@"id"]], "grid checkbox feedback belongs to its exact live control and request");
     NSDictionary *input = @{@"action": action[@"id"], @"point": @[@21, @44]};
     Exchange(window, 9012, 1, session, snapshot, nil, nil, input); Pump(); Pump();
     if (canvas.presses != 1 || canvas.releases != 1 || canvas.lastPoint.x != 21 || canvas.lastPoint.y != 44)
@@ -200,8 +201,36 @@ static void GridControlsTest(void) {
     Check([Exchange(window, 9012, 1, session, snapshot, nil, nil, input)[@"controlInputResult"][@"accepted"] boolValue], "grid mouse delivery has an exact acknowledgement"); Pump();
     Check(canvas.presses == 1, "grid input replay cannot repeat the native click");
     Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(table.owner.actionFeedback != nil, "grid checkbox receipt waits for its updated value page");
+    value[@"checked"] = @1; value[@"value"] = @"1";
+    Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    Check([[checkbox accessibilityValue] isEqual:@1] && table.owner.actionFeedback == nil, "published checkbox state consumes confirmed feedback once");
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}, nil, nil, @[page]); Pump();
+    Check(table.owner.actionFeedback == nil, "grid checkbox receipt replay cannot repeat feedback");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts a separately rejected request");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"validation rejected"}); Pump();
+    Check(table.owner.actionFeedback == nil, "rejected grid activation clears feedback without announcing success");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts a request whose value arrives late");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    NSMutableDictionary *expired = [table.owner.actionFeedback mutableCopy];
+    expired[@"deadline"] = @(NSProcessInfo.processInfo.systemUptime-1); table.owner.actionFeedback = expired;
+    value[@"checked"] = @2; value[@"value"] = @"2";
+    Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    Check(table.owner.actionFeedback == nil, "late checkbox value publication cannot keep expired feedback alive");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts a request before its role retires");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    value[@"role"] = @"text"; [value removeObjectForKey:@"checked"];
+    Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    (void)[cell accessibilityChildren];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(![checkbox isAccessibilityElement] && table.owner.actionFeedback == nil, "retired grid checkbox cannot announce a replacement control's result");
+    value[@"role"] = @"checkbox";
+    value[@"checked"] = @2; value[@"value"] = @"2";
     value[@"enabled"] = @NO; value[@"editable"] = @NO;
     Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    checkbox = [cell accessibilityChildren][0];
     Check(![checkbox isAccessibilityEnabled] && ![checkbox accessibilityPerformPress] && [[checkbox accessibilityValue] isEqual:@2], "disabled cell retains readable mixed state without an activation");
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

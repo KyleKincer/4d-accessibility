@@ -198,6 +198,70 @@
       "passed": true
     },
     {
+      "name": "workerHighlight/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: OK preserved",
+      "passed": true
+    },
+    {
       "name": "recordNumbers/saved: original record state preserved",
       "passed": true
     },
@@ -390,6 +454,70 @@
       "passed": true
     },
     {
+      "name": "workerHighlight/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: OK preserved",
+      "passed": true
+    },
+    {
       "name": "interpreted/saved: full selection order and distinct physical record IDs",
       "passed": true
     },
@@ -403,6 +531,14 @@
     },
     {
       "name": "interpreted/saved: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: production worker reports an invalid physical record without running the application error handler",
       "passed": true
     },
     {
@@ -422,6 +558,14 @@
       "passed": true
     },
     {
+      "name": "interpreted/modified: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
       "name": "interpreted/unloaded: full selection order and distinct physical record IDs",
       "passed": true
     },
@@ -435,6 +579,14 @@
     },
     {
       "name": "interpreted/unloaded: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: production worker reports an invalid physical record without running the application error handler",
       "passed": true
     },
     {
@@ -454,6 +606,14 @@
       "passed": true
     },
     {
+      "name": "interpreted/new: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
       "name": "compiled/saved: full selection order and distinct physical record IDs",
       "passed": true
     },
@@ -467,6 +627,14 @@
     },
     {
       "name": "compiled/saved: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: production worker reports an invalid physical record without running the application error handler",
       "passed": true
     },
     {
@@ -486,6 +654,14 @@
       "passed": true
     },
     {
+      "name": "compiled/modified: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
       "name": "compiled/unloaded: full selection order and distinct physical record IDs",
       "passed": true
     },
@@ -502,6 +678,14 @@
       "passed": true
     },
     {
+      "name": "compiled/unloaded: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
       "name": "compiled/new: full selection order and distinct physical record IDs",
       "passed": true
     },
@@ -515,6 +699,14 @@
     },
     {
       "name": "compiled/new: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: production worker reports an invalid physical record without running the application error handler",
       "passed": true
     },
     {
@@ -1653,6 +1845,210 @@
               "Saved 4"
             ],
             "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
           }
         ],
         "compiled": false,
@@ -2787,6 +3183,210 @@
             "values": [
               "Saved 5",
               "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              true
             ],
             "okPreserved": true
           }
@@ -3927,6 +4527,210 @@
         "okPreserved": true
       },
       {
+        "read": "workerHighlight",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
         "read": "recordNumbers",
         "mode": "saved",
         "before": {
@@ -5047,6 +5851,210 @@
         "values": [
           "Saved 5",
           "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          true
         ],
         "okPreserved": true
       }
@@ -5056,22 +6064,10 @@
     "success": true,
     "errors": []
   },
-  "driver_sha256": "b834f1ddfc4bbedd8b406cf52b213a53108ac7ab43ad376a7834293e92139857",
-  "scope": "Candidate commands in interpreted and compiled desktop engine processes. No grid, accessibility UI or VoiceOver coverage claim.",
-  "recordedAt": "2026-10-02T18:25:41.860963+00:00",
-  "runtime": {
-    "application": "4D",
-    "version": "20.8",
-    "build": "20.102009",
-    "architecture": "ARM64",
-    "macOS": "26.7",
-    "modes": [
-      "interpreted",
-      "compiled"
-    ]
+  "driver_sha256": "aeaea5535bde49686ef2e1d32975b53b3ff63a67054161ce4af9e984d9dd7102",
+  "worker_sources_sha256": {
+    "AXB_SelectionRead.4dm": "03352069d06bad8eac35274af66c9ab26e82eb2aaf2472599a6d014ac0eb693b",
+    "AXB_SelectionError.4dm": "c94b1348090d485d9fe77c74c4a201d202708cb80bc98041455fd17adb24045b"
   },
-  "reportSha256": "397526360db51998718a56cb15f20958fff84edad52b778d585e8873380a37eb",
-  "hostHooksAdded": false,
-  "adapterImplemented": false,
-  "status": "Command-level preservation and isolated named-selection conversion pass; live accessible grids remain open"
+  "scope": "Candidate commands in interpreted and compiled desktop engine processes. No grid, accessibility UI or VoiceOver coverage claim."
 }
