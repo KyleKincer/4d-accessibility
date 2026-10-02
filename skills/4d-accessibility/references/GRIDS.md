@@ -57,9 +57,32 @@ The adapter discovers direct property columns such as `This.description`. Entity
 
 A collection cell containing an object or another unsupported value exposes `Cell description required` and is disabled until it has a text description. The bridge never serializes that object into the accessibility tree. `gridValueDescriptionRequired` appears after a cell is read and resets after a reorder, so an audit must read all pages. Large or remote entity selections remain untested for polling cost; each refresh reads all row keys.
 
+## Use a classic current or named selection
+
+This adapter is on `feature/full-form-accessibility`. Install the plugin, component and helpers from that branch together; the current main kit and signed 0.19.7 release do not include it. Final live acceptance is in progress. Use a development host to validate it, and keep the application's existing pin until [status](STATUS.md#availability) records a pass.
+
+For an existing current-selection or named-selection list box, add one entry in `AXB_Configure`:
+
+```4d
+$options.grids:=New object("Items"; New object(\
+ "kind"; "selection"; "label"; "Records"))
+```
+
+`Items` is its existing form-object name. Keep its master table or named selection, highlight set, columns, events and methods. The adapter reads the actual source and uses the dataclass's primary key for stable row identity. An optional `keyProperty` names another stored attribute with unique, nonempty Text values of at most 254 UTF-16 units, or whole numbers from -2,147,483,648 through 2,147,483,647. Null, empty, fractional or duplicate keys disable the table. Add `scope` and the `ready` guard from the [array example](#add-a-native-array-list-box-without-replacing-discovery) when the list box shows another parent record's rows or loads them after On Load. Add `onSelection` only when the existing selection controller must refresh dependent UI. Omit `selection`; this kind reads the list box's highlight set. A source without a highlight set offers no selection action. No copied display arrays or form event hook is needed.
+
+The bridge reads ordered physical record numbers and copies the existing highlight set. A private read-only process resolves those numbers into a shared entity selection. Displayed values come from stored fields in the master table, with the original column formats. Accessibility reads preserve the form's current selection, loaded record, unsaved values and `OK`. Actions use the original native list box and editors, so explicit navigation or editing can change record state through the application's normal behavior.
+
+The table needs a datastore mapping and a unique supported identity. Automatic columns cover stored text, number, date and Boolean master-table fields. For calculated expressions, related-table fields, styled cells or other displays, use [column descriptions](#describe-custom-native-grid-columns). The description receives the row's `4D.Entity` as `This` and `$1.item`. Read each value from that entity: `[Table]Field` reads the form's current record rather than the requested row. Pass entity attributes to the existing formatter, for example `Formula(FormatStatus(This.status))`. For a related field, follow its ORDA relation, for example `Formula(String(This.customer.name))`. Keep record loading, selection changes, `SELECTION TO ARRAY`, `SELECTION RANGE TO ARRAY` and `Selection to JSON` out of this callback; the last three unload a modified record. A description provides reading only. An enterable custom column still needs an editor adapter before that screen is fully accessible.
+
+In the fixture, screenshot review confirms that the list box paints saved values while the form's process holds a modified, unsaved record. Automated checks verify the persisted accessibility value and preserve the separate unsaved buffer. Uncommitted transaction records, remote/client-server data, classic grids in child subforms, custom display expressions and additional cell types require their own acceptance tests.
+
+Rows publish after a private read completes. Until then, including briefly after sorting or changing the rows, the table is disabled with `Classic selection is loading` and cell actions are rejected. Retained row identities survive ordinary sorting. A read failure appears in the table label as `Classic selection read failed: <error>: <method>: <line>`; it does not call `onError` or the application's error handler. The next refresh retries. Both loading and read failure produce `gridUnavailable` in coverage diagnostics; read the table label before changing the configuration. The configured label prefixes these messages, for example `Records: Classic selection is loading`.
+
+Each completed read starts another short-lived process and copies the highlight set. Selection feedback arrives after a later read and must fit the existing two-second confirmation deadline. The fixture covers 600 local records; measure larger selections before claiming acceptable performance.
+
 ## Describe custom native grid columns
 
-The working source accepts column metadata for array, collection and entity-selection grids. Keep the same grid configuration and add entries only where automatic scalar reading does not describe the visible UI. Keys are existing column object names, not header captions or column positions. Find the column itself in the Form editor; its header has a separate object name. An unknown column name disables the grid and reports `gridUnavailable`.
+The working source accepts column metadata for array, collection, entity-selection and classic-selection grids. Keep the same grid configuration and add entries only where automatic scalar reading does not describe the visible UI. Keys are existing column object names, not header captions or column positions. Find the column itself in the Form editor; its header has a separate object name. An unknown column name disables the grid and reports `gridUnavailable`.
 
 Some columns require a description before the grid becomes available:
 
@@ -68,6 +91,7 @@ Some columns require a description before the grid becomes available:
 | Array | Picture or Object array columns; multi-style columns. |
 | Collection/entity | Expressions other than direct `This.<property>`; multi-style columns. |
 | Entity | Attributes other than stored text, number, date or Boolean. |
+| Classic selection | Calculated expressions, related-table fields, unsupported master-table fields and multi-style columns. |
 
 Until those descriptions are supplied, the table is disabled and diagnostics report `gridUnavailable`. A direct collection property containing an object is instead reported per requested cell. Other metadata can improve a header or the meaning of a value. For example:
 
@@ -80,7 +104,7 @@ $options.grids.Items.columns.StatusPicture:=New object(\
 $options.grids.Items.columns.Spacer:=New object("decorative"; True)
 ```
 
-Here `DescribeLineStatus` is the application's existing formatter, which reads `This` as the collection item or entity. It returns meaningful text such as `Ready to ship`. If the formatter takes an argument instead, use `Formula(DescribeLineStatus($1.item))`. Use the same formatter as the visual UI; do not duplicate its business rules in an accessibility adapter. Array grids instead pass the current source row to the existing array formatter, for example `Formula(DescribeArrayLineStatus($1.row))`. Assign this metadata before returning the options.
+Here `DescribeLineStatus` is the application's existing formatter, which reads `This` as the collection item or entity. It returns meaningful text such as `Ready to ship`. If the formatter takes an argument instead, use `Formula(DescribeLineStatus($1.item))`. Use the same formatter as the visual UI, passing entity attributes for a classic grid; do not duplicate its business rules in an accessibility adapter. Array grids instead pass the current source row to the existing array formatter, for example `Formula(DescribeArrayLineStatus($1.row))`. Assign this metadata before returning the options.
 
 An array formatter must index arrays that 4D reorders with the list box, including arrays bound to hidden columns. A parallel unbound array keeps its old order after a header sort and describes the wrong line. Bind it to a hidden column, or resolve `$1.key` in the existing application model.
 
@@ -90,10 +114,10 @@ The `value` Formula receives one object:
 
 | Field | 4D type and meaning |
 | --- | --- |
-| `key` | The original Text or Number key from the bound array or row property. Numeric keys are whole numbers within the supported range, not necessarily an `Is integer` value. |
+| `key` | The original Text or Number key from the bound array, row property or classic identity attribute. Numeric keys are whole numbers within the supported range, not necessarily an `Is integer` value. |
 | `row` | Number, whole and one-based, in the current key array, collection or entity selection. It changes after sorting/filtering and can be passed to an Integer parameter. |
 | `column` | Text. The native column's object name; one formatter can serve several columns. |
-| `item` | The original collection object or `4D.Entity`, by reference. Undefined for arrays, so `$1.item=Null`. It stays in the host. Do not modify, save or reload it. |
+| `item` | The original collection object or `4D.Entity`, by reference. Classic grids supply the resolved entity for that record. Undefined for arrays, so `$1.item=Null`. It stays in the host. Do not modify, save or reload it. |
 
 The callback runs on demand in the owning form or child and must return Text without changing UI, selection or data. `This` is the current collection object or entity; array callbacks have no receiver. It can describe a computed expression, picture, object value or styled display. The bridge does not evaluate the column's source string to manufacture a value. Supplying `value` makes that column read-only through accessibility; it does not change the ordinary 4D control. Custom editor support remains separate work. A `label` alone changes the header while retaining supported native editing. An enterable column with a description still needs custom editor support before the screen is fully accessible; coverage reports `gridCellEditingPending` with its column name. An enterable decorative column produces the same diagnostic. Do not use `decorative` to hide an interactive column.
 
@@ -109,7 +133,7 @@ Configure metadata before `start`; changing it afterwards is not a supported upd
 
 ## Reuse row metadata
 
-A native array grid reads its existing LongInt row-control array automatically. It must have one entry per source row. Hidden rows are omitted; other row states follow the rules below. A `meta` option is invalid for array and AreaList grids. Collection/entity grids can also use the existing Meta Info Expression. A direct `This.<property>` expression, such as `This.meta`, needs no additional configuration. For a method or other expression, pass one Formula that calls the same application code:
+A native array grid reads its existing LongInt row-control array automatically. It must have one entry per source row. Hidden rows are omitted; other row states follow the rules below. A `meta` option is valid only for collection and entity grids; other kinds return `invalidGrids`. Classic grids do not read per-row disabled or unselectable flags. Their global control and column permissions, native editor validation and selection mode still apply. A classic grid with application-specific row restrictions needs adapter work before its full behavior is accessible. Collection/entity grids can also use the existing Meta Info Expression. A direct `This.<property>` expression, such as `This.meta`, needs no additional configuration. For a method or other expression, pass one Formula that calls the same application code:
 
 ```4d
 // The list box's existing Meta Info Expression is RowMeta.
@@ -140,7 +164,7 @@ For automatic native grids, the bridge changes the native selection, waits for t
 
 The native grid adapter discovers Boolean checkboxes, numeric three-state checkboxes and Boolean popup columns. Keep the existing `grids` configuration and column methods. No additional callback is required. Build the packages and install the helpers from the same commit; automatic startup checks the native `gridControls 1` capability.
 
-The column must be enterable to offer editing. Bind it to a Boolean array, a direct `This.<property>` Boolean in a collection, or a stored Boolean entity attribute. Numeric bindings displayed as three-state checkboxes use the same path. Do not add a `columns.<name>.value` description to an operable checkbox or popup. It replaces the widget with read-only text and reports `gridCellEditingPending` for an enterable column. `decorative` omits the column. A Boolean checkbox's native caption supplies its spoken name and takes precedence over a label override. Change a misleading caption in the form definition. `columns.<name>.label` renames the header and is the fallback when that caption is empty. Numeric checkboxes use the column label: 4D 20.8's public getters return the numeric format instead of their caption. If a numeric checkbox has a meaningful visible caption, include it in `columns.<name>.label`, for example `New object("label"; "Reviewed")`.
+The column must be enterable to offer editing. Bind it to a Boolean array, a direct `This.<property>` Boolean in a collection, a stored Boolean entity attribute or a stored Boolean master-table field in a classic grid. Numeric bindings displayed as three-state checkboxes use the same path. Do not add a `columns.<name>.value` description to an operable checkbox or popup. It replaces the widget with read-only text and reports `gridCellEditingPending` for an enterable column. `decorative` omits the column. A Boolean checkbox's native caption supplies its spoken name and takes precedence over a label override. Change a misleading caption in the form definition. `columns.<name>.label` renames the header and is the fallback when that caption is empty. Numeric checkboxes use the column label: 4D 20.8's public getters return the numeric format instead of their caption. If a numeric checkbox has a meaningful visible caption, include it in `columns.<name>.label`, for example `New object("label"; "Reviewed")`.
 
 A checkbox exposes unchecked, checked or mixed state. A Boolean popup exposes its selected label and uses its column label as its name. Give both popup choices meaningful labels in the form's True/False text properties. These widgets do not accept text assignment.
 
