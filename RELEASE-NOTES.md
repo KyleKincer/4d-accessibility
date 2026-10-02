@@ -1,4 +1,4 @@
-# 0.20.0 development branch
+# 0.20.0 on main
 
 The new integration path adds an invisible, non-focusable plug-in area to each form. The area starts the existing accessibility adapters after ordinary initialization and releases its captured session when the form closes. Most ordinary forms need no bridge code in their form method. One optional `AXB_Configure` method supplies names, grid providers and other application-specific metadata.
 
@@ -8,7 +8,7 @@ This branch also fixes duplicate-named root/child text selection and ordinary bu
 
 Database close/reopen now reinitializes the native bridge through 4D's plugin callbacks. Sessions from the closed database remain retired; newly opened forms get fresh identities. The regression fixture exercises the complete controls workflow after a real reopen in interpreted and compiled mode.
 
-Version 0.20.0 is not published. Its native plug-in, component and helpers must be built and installed together. See [area integration](skills/4d-accessibility/references/AREA-INTEGRATION.md) for setup and migration. The supported control families and vendor restrictions are unchanged.
+Version 0.20.0 is merged to main but is not a published signed release. Download the matching development kit from a passing Build and test workflow run, or build the exact revision. Its native plug-in, component and helpers must be installed together. See [area integration](skills/4d-accessibility/references/AREA-INTEGRATION.md) for setup and migration. The supported control families and vendor restrictions are unchanged.
 
 # 0.19.7 published release
 
