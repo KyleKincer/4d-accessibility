@@ -67,6 +67,11 @@ For each ($name; $grids)
      return
     End if
    End if
+   If (OB Is defined($metadata; "automationKey"))
+    If ((Value type($metadata.automationKey)#Is text) || ($metadata.automationKey="") || (Length($metadata.automationKey)>256))
+     return
+    End if
+   End if
    If (OB Is defined($metadata; "decorative"))
     If (Value type($metadata.decorative)#Is Boolean)
      return

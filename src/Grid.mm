@@ -42,7 +42,7 @@ BOOL AXBGridRowAllowsSelection(NSDictionary *descriptor, NSString *row) {
 NSString *AXBValidateGrid(id descriptor) {
     if (![descriptor isKindOfClass:NSDictionary.class]) return @"grid must be an object";
     if (!Text(descriptor[@"generation"], 128, YES) || !Integer(descriptor[@"order"], 1)) return @"invalid grid generation or order";
-    NSMutableSet *rows = [NSMutableSet new], *columns = [NSMutableSet new];
+    NSMutableSet *rows = [NSMutableSet new], *columns = [NSMutableSet new], *locators = [NSMutableSet new];
     if (!Keys(descriptor[@"rows"], rows)) return @"invalid grid row identities";
     NSArray *definitions = descriptor[@"columns"];
     if (![definitions isKindOfClass:NSArray.class]) return @"invalid grid columns";
@@ -51,6 +51,10 @@ NSString *AXBValidateGrid(id descriptor) {
             !Text(column[@"label"], 512) || !Bool(column[@"enabled"]) || !Bool(column[@"editable"]) ||
             [columns containsObject:column[@"id"]]) return @"invalid grid column";
         [columns addObject:column[@"id"]];
+        if (column[@"automationKey"] && !Text(column[@"automationKey"], 256, YES)) return @"invalid grid column automation key";
+        NSString *locator = column[@"automationKey"] ?: column[@"id"];
+        if ([locators containsObject:locator]) return @"duplicate grid column automation key";
+        [locators addObject:locator];
         id header = column[@"header"];
         if (header && (![header isKindOfClass:NSDictionary.class] || !Bool(header[@"visible"]) ||
             !Bool(header[@"enabled"]) || !Bool(header[@"press"]) || !Bool(header[@"sortable"]) ||

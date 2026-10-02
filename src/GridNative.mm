@@ -1,5 +1,6 @@
 #import "BridgePrivate.h"
 #import "Grid.h"
+#import "Identifiers.h"
 
 // A full-array request is truthful. Indexed AX requests resolve only their
 // requested slice, and no native getter waits for the 4D form process.
@@ -38,8 +39,16 @@ static NSArray *Slice(NSArray *array, NSUInteger index, NSUInteger maximum) {
     return [array subarrayWithRange:NSMakeRange(index, MIN(maximum, array.count - index))];
 }
 static NSString *Identifier(AXBGridNode *table, NSString *kind, NSString *row, NSString *column) {
-    NSData *bytes = [NSJSONSerialization dataWithJSONObject:@[table.owner.session.identifier ?: @"", table.data[@"id"] ?: @"", table.data[@"grid"][@"generation"] ?: @"", kind, row ?: @"", column ?: @""] options:0 error:nil];
-    return [@"axb-grid." stringByAppendingString:[bytes base64EncodedStringWithOptions:0]];
+    NSString *columnKey = column;
+    for (NSDictionary *definition in table.data[@"grid"][@"columns"])
+        if ([definition[@"id"] isEqual:column]) { columnKey = definition[@"automationKey"] ?: column; break; }
+    NSArray *segments;
+    if ([kind isEqual:@"row"]) segments = @[@"row", row];
+    else if ([kind isEqual:@"column"] || [kind isEqual:@"header"]) segments = @[kind, columnKey];
+    else if (row && column) {
+        segments = [kind isEqual:@"cell"] ? @[@"cell", row, columnKey] : @[@"cell", row, columnKey, kind];
+    } else segments = @[kind];
+    return AXBIdentifierAppend(table.accessibilityIdentifier, segments);
 }
 @class AXBGridRow, AXBGridCell, AXBGridColumn, AXBGridHeader, AXBGridContent, AXBGridWidget, AXBGridHeaderGroup;
 @protocol AXBGridContentElement <NSObject, NSAccessibility>
@@ -143,7 +152,8 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
             widget.identifier = Identifier(self.table, role, self.row.key, self.columnKey);
             self.content = widget;
         } else {
-            AXBGridContent *text = [AXBGridContent new]; text.cell = self; self.content = text;
+            AXBGridContent *text = [AXBGridContent new]; text.cell = self;
+            text.identifier = Identifier(self.table, @"content", self.row.key, self.columnKey); self.content = text;
         }
         self.contentRole = role; self.content.live = YES;
     }
@@ -311,7 +321,6 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 }
 #pragma clang diagnostic pop
 - (AXBWindowView *)owner { return self.table.owner; }
-- (NSString *)accessibilityIdentifier { return Identifier(self.table, @"content", self.cell.row.key, self.cell.columnKey); }
 - (NSDictionary *)data {
     NSDictionary *focus = self.cell.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
     NSMutableDictionary *data = [@{@"editable": @([self.cell canEdit] && focus[@"selection"]), @"protected": @NO} mutableCopy];

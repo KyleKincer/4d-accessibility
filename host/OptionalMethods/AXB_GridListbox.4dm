@@ -160,6 +160,7 @@ For ($i; 1; Size of array($parts); 3)
     $header.sort:="descending"
   End case
   $columns.push(New object("id"; $columnID; "label"; $text; "enabled"; OBJECT Get enabled(*; $columnName); "editable"; $enabled; "header"; $header))
+  $columns[$columns.length-1].automationKey:=Choose($metadata.automationKey=Null; $columnName; $metadata.automationKey)
   $column:=New object("name"; $columnName; "number"; Int(($i-1)/3)+1; "property"; $property; "format"; OBJECT Get format(*; $columnName); "protected"; OBJECT Get font(*; $columnName)="%password")
   $column.headerName:=$parts{$i+1}
   $column.header:=$header

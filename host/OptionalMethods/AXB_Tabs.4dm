@@ -159,6 +159,7 @@ For ($i; 0; $items.length-1)
   $label:=Substring($label; 1; $end)
  End if
  $node:=New object("id"; $id+"."+$signature+"."+String($i); "parent"; $id; "objectName"; $name; "role"; "tab"; "label"; $label; "value"; $segment.selected; "enabled"; $group.enabled & $segment.enabled; "visible"; True; "focusable"; False; "editable"; False; "frame"; New collection($segment.frame[0]-$originX; $segment.frame[1]-$originY; $segment.frame[2]; $segment.frame[3]))
+ $node.automationChild:=New collection("tab"; $items[$i].key)
  $result.nodes.push($node)
 End for
 $result.ok:=True

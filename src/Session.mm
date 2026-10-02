@@ -1,6 +1,7 @@
 #import "Session.h"
 #import "Grid.h"
 #include "Limits.h"
+#import "Identifiers.h"
 #include <cmath>
 
 static BOOL Text(id value, NSUInteger limit) {
@@ -61,7 +62,7 @@ static NSDictionary *ActionState(NSDictionary *snapshot, NSDictionary *action) {
                 [rows addObject:node];
         }
     }
-    return @{@"label": snapshot[@"label"], @"enabled": snapshot[@"enabled"],
+    return @{@"label": snapshot[@"label"], @"enabled": snapshot[@"enabled"], @"automationKey": snapshot[@"automationKey"] ?: NSNull.null,
         @"focused": focused, @"nodes": dependencies, @"rows": rows};
 }
 
@@ -107,9 +108,11 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     double revision = [s[@"revision"] respondsToSelector:@selector(doubleValue)] ? [s[@"revision"] doubleValue] : 0;
     if (!Number(s[@"revision"]) || revision < 1 || revision > 9007199254740991.0 || floor(revision) != revision) return @"invalid revision";
     if (!Text(s[@"label"], 512) || !Bool(s[@"enabled"])) return @"invalid window metadata";
+    if (s[@"automationKey"] && (!Text(s[@"automationKey"], 128) || ![s[@"automationKey"] length])) return @"invalid automation key";
     NSArray *nodes = s[@"nodes"];
     if (![nodes isKindOfClass:NSArray.class] || nodes.count > AXBLimits::nodes) return @"invalid node count";
     NSMutableSet *ids = [NSMutableSet new];
+    NSMutableSet *locators = [NSMutableSet new];
     NSMutableDictionary *byID = [NSMutableDictionary new];
     NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper", @"tabgroup", @"tab"]];
     for (id raw in nodes) {
@@ -119,6 +122,14 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (!Text(identifier, 128) || !identifier.length || [ids containsObject:identifier]) return @"invalid or duplicate node identifier";
         [ids addObject:identifier];
         byID[identifier] = n;
+        if (n[@"automationPath"]) {
+            NSArray *path = n[@"automationPath"];
+            if (![path isKindOfClass:NSArray.class] || !path.count || path.count > 16) return @"invalid automation path";
+            for (id segment in path) if (!Text(segment, 256) || ![segment length]) return @"invalid automation path segment";
+        }
+        NSString *locator = AXBNodeIdentifier(s, n);
+        if ([locators containsObject:locator]) return @"duplicate automation path";
+        [locators addObject:locator];
         if (![roles containsObject:n[@"role"] ?: @""]) return @"unsupported role";
         if (n[@"grid"]) {
             if (![n[@"role"] isEqual:@"table"]) return @"grid descriptor requires a table";

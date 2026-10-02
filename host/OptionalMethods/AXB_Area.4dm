@@ -107,6 +107,10 @@ Else
   End if
  End if
 End if
+If (($options#Null) && (Value type($options)=Is object) && Not(OB Is defined($options; "automationKey")) && ($configuration#""))
+ $options:=OB Copy($options)
+ $options.automationKey:=$configuration
+End if
 $record.options:=$options
 If (($options#Null) && ($options.enabled=False))
  $record.state:="disabled"
