@@ -45,6 +45,7 @@ jobs:
         run: |
           python3 ci/download_tool4d.py
           python3 build_component.py --tool4d build/toolchain/tool4d.app
+          python3 test_styled_text.py --tool4d build/toolchain/tool4d.app
       - name: Package development artifacts
         run: |
           python3 package_release.py
