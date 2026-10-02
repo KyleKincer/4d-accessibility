@@ -1,10 +1,11 @@
 // Fixed recursive entry point for a registered form/subform instance.
 // Every path comes from the application's describe callback, never an AX request.
 #DECLARE($request : Object) -> $result : Object
-var $view; $description; $node; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
-var $name; $prefix; $id; $key; $registration : Text
+var $view; $description; $node; $other; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
+var $pageByObject : Object
+var $name; $prefix; $id; $key; $registration; $standardAction : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported : Collection
-var $left; $top; $right; $bottom; $originX; $originY : Integer
+var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY : Integer
 var $x; $y; $r; $b : Real
 var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
 var $pointer : Pointer
@@ -12,6 +13,9 @@ ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; False; "error"; "invalidView"; "status"; "rejected"; "message"; "Form instance is unavailable")
+If ($request.paintOffset=Null)
+ $request.paintOffset:=New collection(0; 0)
+End if
 $reading:=$request.operation="readGrid"
 $readOnly:=$reading | ($request.operation="reveal")
 If ($request.depth>8)
@@ -94,7 +98,7 @@ If ($view.automatic=True)
    End if
   End if
  Else
-  $description:=AXB_Discover($view.options)
+  $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset)
   $view.discovery:=$description
  End if
  $grids:=AXB_Grids($view; New object("operation"; "describe"))
@@ -129,6 +133,25 @@ If ($view.automatic=True)
  $description.nodes:=$description.nodes.concat($grids.nodes)
  $description.unsupported:=$description.unsupported.concat($grids.unsupported)
  $description.unsupported:=$description.unsupported.concat(AXB_ControlGroups($description.nodes; $view.options))
+ // A standard page-navigation tab relates to the actual current page. Do
+ // not infer page ownership for tabs whose application method loads data.
+ $pageByObject:=New object
+ For ($position; 1; Size of array($objects))
+  $pageByObject[$objects{$position}]:=$pages{$position}
+ End for
+ For each ($node; $description.nodes)
+  If (($node.role="tab") && ($node.value=True))
+   $standardAction:=OBJECT Get action(*; $node.objectName)
+   If (($standardAction=ak goto page) | (Position(ak goto page+"?"; $standardAction)=1))
+    $node.linked:=New collection
+    For each ($other; $description.nodes)
+     If (OB Is defined($pageByObject; $other.objectName) && ($pageByObject[$other.objectName]>0) && $other.visible && ($other.parent=Null) && ($other.objectName#$node.objectName))
+      $node.linked.push($other.id)
+     End if
+    End for each
+   End if
+  End if
+ End for each
  If (OB Is defined($view.options; "scope"))
   If (Value type($view.options.scope)=Is text)
    $description.scope:=$view.options.scope
@@ -186,6 +209,8 @@ If (($request.operation="apply") | ($request.operation="confirm") | ($request.op
   End for each
   $packet.path:=$request.path.slice(1)
   $packet.depth:=$request.depth+1
+  OBJECT GET SCROLL POSITION(*; $name; $scrollY; $scrollX)
+  $packet.paintOffset:=New collection($request.paintOffset[0]+$scrollX; $request.paintOffset[1]+$scrollY)
   OB REMOVE($packet; "autoParent")
   OB REMOVE($packet; "container")
   If ($view.automatic=True)
@@ -236,7 +261,7 @@ If (($request.operation="apply") | ($request.operation="confirm") | ($request.op
     If (Position("grid."; $request.action.node)=1)
      $result:=AXB_Grids($view; New object("operation"; "apply"; "node"; $request.action.node; "action"; $request.action))
     Else
-     $result:=AXB_ControlAction($request.action; $view.options)
+     $result:=AXB_ControlAction($request.action; $view.options; $view.tabs; $request.paintOffset)
     End if
    Else
     $result:=$view.apply.call(Null; $request.action)
@@ -308,6 +333,12 @@ For each ($node; $description.nodes)
  If (OB Is defined($node; "labelledBy"))
   $copy.labelledBy:=$prefix+$node.labelledBy
  End if
+ If (OB Is defined($node; "linked"))
+  $copy.linked:=New collection
+  For each ($key; $node.linked)
+   $copy.linked.push($prefix+$key)
+  End for each
+ End if
  $copy.enabled:=$node.enabled & $request.enabled & Not($description.enabled=False)
  $copy.revealable:=$view.automatic=True
  $frame:=$node.frame
@@ -366,6 +397,8 @@ If (Value type($description.subforms)=Is collection)
     $packet.navigation:=$request.navigation.concat(New collection($top; $left))
     $packet.rootOrigin:=$request.rootOrigin
     $packet.rootView:=$request.rootView
+    OBJECT GET SCROLL POSITION(*; $name; $scrollY; $scrollX)
+    $packet.paintOffset:=New collection($request.paintOffset[0]+$scrollX; $request.paintOffset[1]+$scrollY)
     If ($view.automatic=True)
      $packet.autoParent:=$view
      $packet.container:=$name

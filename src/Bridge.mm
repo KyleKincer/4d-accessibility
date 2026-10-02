@@ -3,6 +3,7 @@
 #import "Session.h"
 #import "BridgePrivate.h"
 #include "Limits.h"
+#import "NativeLayout.h"
 
 static NSMutableDictionary<NSString *, AXBSession *> *sessions;
 static NSMutableDictionary<NSString *, NSMutableDictionary *> *bindings;
@@ -140,12 +141,24 @@ NSString *AXBNativeFocus(void *nativeWindow) {
         @"radio": NSAccessibilityRadioButtonRole, @"popup": NSAccessibilityPopUpButtonRole,
         @"textfield": NSAccessibilityTextFieldRole, @"text": NSAccessibilityStaticTextRole,
         @"table": NSAccessibilityTableRole, @"row": NSAccessibilityRowRole, @"cell": NSAccessibilityCellRole,
-        @"group": NSAccessibilityGroupRole, @"image": NSAccessibilityImageRole, @"progress": NSAccessibilityProgressIndicatorRole, @"slider": NSAccessibilitySliderRole, @"stepper": NSAccessibilityIncrementorRole}[self.data[@"role"]];
+        @"group": NSAccessibilityGroupRole, @"tabgroup": NSAccessibilityTabGroupRole, @"tab": NSAccessibilityRadioButtonRole,
+        @"image": NSAccessibilityImageRole, @"progress": NSAccessibilityProgressIndicatorRole, @"slider": NSAccessibilitySliderRole, @"stepper": NSAccessibilityIncrementorRole}[self.data[@"role"]];
 }
-- (NSString *)accessibilitySubrole { return [self.data[@"protected"] boolValue] ? NSAccessibilitySecureTextFieldSubrole : nil; }
+- (NSString *)accessibilitySubrole {
+    if ([self.data[@"protected"] boolValue]) return NSAccessibilitySecureTextFieldSubrole;
+    return [self.data[@"role"] isEqual:@"tab"] ? NSAccessibilityTabButtonSubrole : nil;
+}
 - (NSString *)accessibilityPlaceholderValue { return self.data[@"placeholder"]; }
 - (BOOL)isAccessibilityExpanded { return self.live && self.owner.comboOwner == self && self.owner.comboList.window.isVisible; }
-- (NSArray *)accessibilityLinkedUIElements { return self.isAccessibilityExpanded ? @[self.owner.comboList] : @[]; }
+- (NSArray *)accessibilityLinkedUIElements {
+    if ([self.data[@"combo"] boolValue]) return self.isAccessibilityExpanded ? @[self.owner.comboList] : @[];
+    NSMutableArray *linked = [NSMutableArray new];
+    NSMutableDictionary *byID = [NSMutableDictionary new];
+    for (AXBNode *node in self.owner.nodes) if (node.isAccessibilityElement) byID[node.data[@"id"]] = node;
+    for (NSString *identifier in self.data[@"linked"])
+        if (byID[identifier]) [linked addObject:byID[identifier]];
+    return linked;
+}
 - (id)accessibilityTitleUIElement {
     for (AXBNode *node in self.owner.nodes) if ([node.data[@"id"] isEqual:self.data[@"labelledBy"]]) return node;
     return nil;
@@ -171,7 +184,17 @@ NSString *AXBNativeFocus(void *nativeWindow) {
 - (id)accessibilityTopLevelUIElement { return self.owner.window; }
 - (NSArray *)accessibilityChildrenInNavigationOrder { return NavigationChildren(self.accessibilityChildren); }
 - (id)accessibilityWindow { return self.owner.window; }
-- (id)accessibilityValue { return self.data[@"value"] == NSNull.null ? nil : self.data[@"value"]; }
+- (NSArray *)accessibilityTabs { return [self.data[@"role"] isEqual:@"tabgroup"] ? self.accessibilityChildren : nil; }
+- (NSArray *)accessibilitySelectedChildren {
+    if (![self.data[@"role"] isEqual:@"tabgroup"]) return nil;
+    NSMutableArray *selected = [NSMutableArray new];
+    for (AXBNode *tab in self.accessibilityChildren) if ([tab.data[@"value"] boolValue]) [selected addObject:tab];
+    return selected;
+}
+- (id)accessibilityValue {
+    if ([self.data[@"role"] isEqual:@"tabgroup"]) return self.accessibilitySelectedChildren.firstObject;
+    return self.data[@"value"] == NSNull.null ? nil : self.data[@"value"];
+}
 - (NSString *)accessibilityValueDescription { return self.data[@"valueDescription"]; }
 - (NSAccessibilityOrientation)accessibilityOrientation {
     if (![@[@"slider", @"progress"] containsObject:self.data[@"role"]]) return NSAccessibilityOrientationUnknown;
@@ -212,8 +235,9 @@ NSString *AXBNativeFocus(void *nativeWindow) {
         // controls need feedback after the exact host completion receipt.
         NSString *action = self.owner.session.activity[@"id"];
         BOOL checkbox = [operation isEqual:@"press"] && [self.data[@"role"] isEqual:@"checkbox"] && ![self.data[@"focusable"] boolValue];
+        BOOL tab = [operation isEqual:@"press"] && [self.data[@"role"] isEqual:@"tab"];
         BOOL slider = [@[@"increment", @"decrement"] containsObject:operation] && [self.data[@"role"] isEqual:@"slider"];
-        if (action && (checkbox || slider))
+        if (action && (checkbox || slider || tab))
             self.owner.actionFeedback = @{@"id": action, @"node": self.data[@"id"], @"role": self.data[@"role"], @"label": self.data[@"label"], @"value": self.data[@"value"]};
     }
     return accepted;
@@ -267,11 +291,12 @@ NSString *AXBNativeFocus(void *nativeWindow) {
         return [@[@"slider", @"stepper"] containsObject:self.data[@"role"]] && [self.data[@"adjustable"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(setAccessibilityFocused:)) return [self.data[@"focusable"] boolValue] && self.isAccessibilityEnabled;
     if (selector == @selector(setAccessibilityValue:)) return [self.data[@"role"] isEqual:@"textfield"] && (!self.data[@"editable"] || [self.data[@"editable"] boolValue]) && self.isAccessibilityEnabled;
-    if (selector == @selector(accessibilityPerformPress)) return ([@[@"button", @"checkbox", @"radio", @"popup"] containsObject:self.data[@"role"]] || [self.data[@"combo"] boolValue]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
+    if (selector == @selector(accessibilityPerformPress)) return ([@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:self.data[@"role"]] || [self.data[@"combo"] boolValue]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformShowMenu)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformConfirm)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformCancel)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
-    if (selector == @selector(isAccessibilityExpanded) || selector == @selector(accessibilityLinkedUIElements)) return [self.data[@"combo"] boolValue] && self.isAccessibilityElement;
+    if (selector == @selector(isAccessibilityExpanded)) return [self.data[@"combo"] boolValue] && self.isAccessibilityElement;
+    if (selector == @selector(accessibilityLinkedUIElements)) return ([self.data[@"combo"] boolValue] || self.data[@"linked"]) && self.isAccessibilityElement;
     return [super isAccessibilitySelectorAllowed:selector];
 }
 @end
@@ -664,12 +689,18 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (!self.session.active) { [self invalidate]; return; }
     if (!snapshot) return;
     NSWindow *window = self.window;
+    AXBLayoutObserve(window);
     NSView *container = NativeContainer(window, snapshot);
     if (container != self.superview) { [self removeFromSuperview]; [container addSubview:self]; }
     self.frame = [container convertRect:window.contentView.bounds fromView:window.contentView];
     self.bounds = NSMakeRect(0, 0, NSWidth(window.contentView.bounds), NSHeight(window.contentView.bounds));
     NSMutableDictionary *old = [NSMutableDictionary new];
-    for (AXBNode *node in self.nodes) old[node.data[@"id"]] = node;
+    NSMutableDictionary *oldTabs = [NSMutableDictionary new];
+    for (AXBNode *node in self.nodes) {
+        old[node.data[@"id"]] = node;
+        if ([node.data[@"role"] isEqual:@"tabgroup"])
+            oldTabs[node.data[@"id"]] = [node.accessibilitySelectedChildren valueForKey:@"accessibilityIdentifier"];
+    }
     NSMutableArray *next = [NSMutableArray new];
     NSMutableArray<AXBNode *> *retired = [NSMutableArray new];
     NSMutableOrderedSet<AXBNode *> *changedValues = [NSMutableOrderedSet new];
@@ -690,7 +721,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
         BOOL gainedFocus = [data[@"focused"] boolValue] && ![node.data[@"focused"] boolValue];
         BOOL textSelectionChanged = node.data && ![node.data[@"selection"] isEqual:data[@"selection"]] && (node.data[@"selection"] || data[@"selection"]);
         BOOL selectionChanged = node.data && ![node.data[@"selected"] isEqual:data[@"selected"]] && [data[@"role"] isEqual:@"row"];
-        for (NSString *key in @[@"visible", @"frame", @"clip", @"parent", @"index", @"label", @"labelledBy", @"enabled"])
+        for (NSString *key in @[@"visible", @"frame", @"clip", @"parent", @"index", @"label", @"labelledBy", @"linked", @"enabled"])
             if (node.data && (node.data[key] || data[key]) && ![node.data[key] isEqual:data[key]]) structureChanged = YES;
         node.data = data;
         node.revision = snapshot[@"revision"];
@@ -736,10 +767,18 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     NSMutableOrderedSet *tables = [NSMutableOrderedSet new];
     for (AXBNode *node in changedSelections) if (node.accessibilityParent) [tables addObject:node.accessibilityParent];
     for (id table in tables) NSAccessibilityPostNotification(table, NSAccessibilitySelectedRowsChangedNotification);
+    for (AXBNode *node in self.nodes) if ([node.data[@"role"] isEqual:@"tabgroup"] && oldTabs[node.data[@"id"]] &&
+        ![oldTabs[node.data[@"id"]] isEqual:[node.accessibilitySelectedChildren valueForKey:@"accessibilityIdentifier"]]) {
+        NSAccessibilityPostNotification(node, NSAccessibilitySelectedChildrenChangedNotification);
+        NSAccessibilityPostNotification(node, NSAccessibilityValueChangedNotification);
+    }
     for (AXBNode *node in changedTextSelections) NSAccessibilityPostNotification(node, NSAccessibilitySelectedTextChangedNotification);
     if (focusChanged) NSAccessibilityPostNotification(focused, NSAccessibilityFocusedUIElementChangedNotification);
     if (structureChanged) NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
     NSDictionary *feedback = self.actionFeedback;
+    if ([feedback[@"role"] isEqual:@"tab"] && (focusChanged || (feedback[@"deadline"] && Now() >= [feedback[@"deadline"] doubleValue]))) {
+        self.actionFeedback = nil; feedback = nil;
+    }
     NSDictionary *activity = self.session.activity;
     if (self.popupRequest && (![activity[@"busy"] boolValue] || ![activity[@"id"] isEqual:self.popupRequest[@"id"]])) self.popupRequest = nil;
     if (self.adoptedMenu && ![self.adoptedMenu.accessibilityParent isAccessibilityElement]) [self restorePopupMenu];
@@ -749,13 +788,30 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
         if (![activity[@"busy"] boolValue] && [result[@"status"] isEqual:@"completed"] && NSApp.isActive && self.window.isKeyWindow && [self canAct]) {
             for (AXBNode *node in self.nodes) {
                 if (![node.data[@"id"] isEqual:feedback[@"node"]] || ![node.data[@"role"] isEqual:feedback[@"role"]] ||
-                    ![node.data[@"label"] isEqual:feedback[@"label"]] || [node.data[@"value"] isEqual:feedback[@"value"]] ||
-                    !node.isAccessibilityElement || !node.isAccessibilityEnabled || ([feedback[@"role"] isEqual:@"checkbox"] && node.isAccessibilityFocused)) continue;
+                    ![node.data[@"label"] isEqual:feedback[@"label"]] ||
+                    !node.isAccessibilityElement || !node.isAccessibilityEnabled || ([feedback[@"role"] isEqual:@"checkbox"] && node.isAccessibilityFocused) ||
+                    ([feedback[@"role"] isEqual:@"tab"] && focusChanged)) continue;
+                if ([node.data[@"value"] isEqual:feedback[@"value"]]) {
+                    if ([feedback[@"role"] isEqual:@"tab"] && ![node.data[@"value"] boolValue]) {
+                        // Native dispatch can be acknowledged before the form
+                        // process applies selection. Keep this exact request
+                        // briefly; a new action or real focus transfer cancels it.
+                        NSNumber *deadline = feedback[@"deadline"] ?: @(Now()+2);
+                        if (Now() < deadline.doubleValue) {
+                            NSMutableDictionary *waiting = [feedback mutableCopy]; waiting[@"deadline"] = deadline;
+                            self.actionFeedback = waiting;
+                        }
+                    }
+                    continue;
+                }
+                if ([feedback[@"role"] isEqual:@"tab"] && ![node.data[@"value"] boolValue]) continue;
                 NSString *state = node.accessibilityValueDescription ?: [node.accessibilityValue description];
                 if ([feedback[@"role"] isEqual:@"checkbox"]) {
                     NSBundle *bundle = [NSBundle bundleForClass:AXBNode.class];
                     NSString *key = [node.data[@"value"] integerValue] == 2 ? @"mixed" : [node.data[@"value"] boolValue] ? @"checked" : @"unchecked";
                     state = [bundle localizedStringForKey:key value:key table:@"AccessibilityBridge"];
+                } else if ([feedback[@"role"] isEqual:@"tab"]) {
+                    state = [[NSBundle bundleForClass:AXBNode.class] localizedStringForKey:@"selected" value:@"selected" table:@"AccessibilityBridge"];
                 }
                 NSString *announcement = [NSString stringWithFormat:@"%@: %@", node.accessibilityLabel, state];
                 NSAccessibilityPostNotificationWithUserInfo(self.window, NSAccessibilityAnnouncementRequestedNotification,
@@ -782,6 +838,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     self.publishedSnapshot = nil;
     self.actionFeedback = nil;
     self.comboOwner = nil; self.comboList = nil;
+    AXBLayoutForget(window);
     if (window) NSAccessibilityPostNotification(window, NSAccessibilityLayoutChangedNotification);
 }
 - (void)dealloc {
@@ -819,6 +876,7 @@ static void ScheduleRefresh(AXBSession *session, void *nativeWindow) {
             view.element.owner = view;
             view.element.identifier = [@"axb.window." stringByAppendingString:session.identifier];
             view.live = YES;
+            AXBLayoutObserve(window);
             [window.contentView addSubview:view];
             views[session.identifier] = view;
             __weak AXBWindowView *weakView = view;
@@ -929,7 +987,7 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     if (![target isAccessibilityElement] || ![target isAccessibilityEnabled]) return;
                     local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 }
-                BOOL button = [data[@"operation"] isEqual:@"press"] && [data[@"role"] isEqual:@"button"];
+                BOOL button = [data[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:data[@"role"]];
                 if (button) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 NSPoint point = [view convertPoint:local toView:nil];
                 NSPoint screen = [view.window convertPointToScreen:point];
@@ -1030,6 +1088,7 @@ void AXBDetach(NSString *sessionID, NSInteger processID) {
 
 void AXBInitialize(void) {
     Init();
+    AXBLayoutInitialize();
     // 4D can close and reopen a database while this bundle remains loaded.
     // Shutdown has retired old sessions and completed native-view cleanup.
     @synchronized(registryLock) { stopped = NO; }
@@ -1046,6 +1105,6 @@ void AXBShutdown(void) {
     }
     // Unload must wait until every AppKit object and queued refresh has gone.
     // No monitor is held, and cleanup never calls 4D or waits for the form.
-    dispatch_block_t cleanup = ^{ for (AXBWindowView *v in views.allValues) [v invalidate]; [views removeAllObjects]; };
+    dispatch_block_t cleanup = ^{ for (AXBWindowView *v in views.allValues) [v invalidate]; [views removeAllObjects]; AXBLayoutShutdown(); };
     if (NSThread.isMainThread) cleanup(); else dispatch_sync(dispatch_get_main_queue(), cleanup);
 }

@@ -64,6 +64,7 @@ If (OB Is defined($options; "grids"))
 End if
 $view:=New object("instance"; Generate UUID; "scope"; ""; "label"; $options.label; "options"; $options; "automatic"; Not(OB Is defined($options; "describe")); "children"; New object)
 $view.bindingKey:=$view.instance
+$view.tabs:=New object
 If (Not($view.automatic))
  $view.describe:=$options.describe
 End if

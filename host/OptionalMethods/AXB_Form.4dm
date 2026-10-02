@@ -151,6 +151,11 @@ If (($operation="start") & (AXB_Areas#Null))
   End if
  End for each
 End if
+If (($area#Null) && ($area.context.active=True) && (Position("; tabs 1;"; $result.nativeStatus)>0))
+ // An intentional restart of this captured form lifetime keeps unchanged
+ // canvas geometry. Normal close/replacement still retires it completely.
+ $reply:=AXB_Host("layout"; New object("operation"; "restart"))
+End if
 $reply:=AXB_Form("stop"; New object)
 If ($aliases)
  OB REMOVE(Form; "axbError")
