@@ -1,6 +1,6 @@
 # Classic-selection reads
 
-The compatibility branch implements flat classic current/named-selection grids. These command checks establish how the adapter reads rows without disturbing the form's record buffer. They are separate from live AX and VoiceOver acceptance. See [integration and limitations](../skills/4d-accessibility/references/GRIDS.md#use-a-classic-current-or-named-selection).
+Version 0.21.0 implements flat classic current/named-selection grids. These command checks establish how the adapter reads rows without disturbing the form's record buffer. They are separate from live AX and VoiceOver acceptance. See [integration and limitations](../skills/4d-accessibility/references/GRIDS.md#use-a-classic-current-or-named-selection).
 
 Run the compiler and desktop checks sequentially, with other 4D instances closed:
 

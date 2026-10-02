@@ -1,6 +1,6 @@
 # Find controls by stable identifiers
 
-Version 0.21.0 introduces stable locators. Check [availability](STATUS.md#availability) before selecting a kit; this source is currently an unpublished release candidate. `AXIdentifier` identifies a logical control and repeats when the same form reopens. Find it inside the selected live application's window, then perform its ordinary accessibility action. Two open copies of a screen may have the same locators.
+Version 0.21.0 introduces stable locators. Choose a matching kit from [availability](STATUS.md#availability). Install plugin, component and helpers together. `AXIdentifier` identifies a logical control and repeats when the same form reopens. Find it inside the selected live application's window, then perform its ordinary accessibility action. Two open copies of a screen may have the same locators.
 
 | Element | Example identifier |
 | --- | --- |
@@ -30,7 +30,7 @@ For a logical screen whose form name is shared or may be renamed, add one proper
 $options.automationKey:="customers.main"
 ```
 
-This is optional. Keep the existing grid, child, scope and controller configuration in that object. No control methods need identifier code. To keep one control's locator across an object-name change, set its existing control metadata's `automationKey`. For a child field, that metadata lives under the root's `children.Container.controls.Field` configuration. A tab-group override also changes its choices' prefix. Grid column metadata accepts the same override; see [grid configuration](GRIDS.md). For AreaList column 5, set `columns["5"].automationKey` to replace its default `column.5` segment.
+This is optional. Keep the existing grid, child, scope and controller configuration in that object. No control methods need identifier code. To keep one control's locator across an object-name change, set its existing control metadata's `automationKey`. For a child field, that metadata lives under the root's `children.Container.controls.Field` configuration. A tab-group override also changes its choices' prefix. Grid column metadata accepts the same override; see [column locators](GRIDS.md#describe-custom-native-grid-columns). For AreaList column 5, set `columns["5"].automationKey` to replace its default `column.5` segment.
 
 Generated forms use the logical configuration name passed to `AXB_AreaForm`. That configuration name must match `[A-Za-z][A-Za-z0-9_-]{0,63}`, for example `CustomerDetails`. A dotted screen key such as `customers.main` belongs in the configuration's `automationKey`, not in the `AXB_AreaForm` argument. An intentional `AXB_Form("start"; options)` restart retains the current screen key when the new options omit it. Without one, generated forms use `generated`. Supply a name at the shared builder when several generated screens need distinct automation names. The lower-level native snapshot API defaults to `form` plus the provided node IDs; those IDs must themselves be stable to make a repeatable locator.
 
