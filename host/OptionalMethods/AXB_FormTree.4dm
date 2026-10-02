@@ -1,7 +1,7 @@
 // Binding identity stays in process-owned state, outside the application's
 // Form object. Referencing Form from its own provider would create a cycle.
 #DECLARE() -> $result : Object
-var $registry; $node; $focus; $column; $observed : Object
+var $registry; $node; $focus; $column; $observed; $styledText : Object
 var $keys : Collection
 var $key : Text
 var $x; $y : Integer
@@ -47,7 +47,12 @@ If ($result.ok=True)
    End if
    If (($node.role="textfield") && $focus.editing && Not($node.protected))
     $node.value:=Get edited text
-    If ($focus.native.selection#Null)
+    If ($node.styled=True)
+     $styledText:=AXB_StyledText($node.value)
+     $node.value:=$styledText.text
+     $node.editable:=$node.editable & $styledText.ok & Not($styledText.references)
+    End if
+    If (($focus.native.selection#Null) & (Not($node.styled=True) | $node.editable))
      $node.selection:=$focus.native.selection
     End if
    End if

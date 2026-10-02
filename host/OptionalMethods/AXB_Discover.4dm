@@ -1,6 +1,6 @@
 // Discover ordinary live controls in their owning form. Never evaluate source
 // expressions, read masked values, or copy application object/collection data.
-#DECLARE($options : Object) -> $result : Object
+#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection) -> $result : Object
 var $name; $role; $label; $font : Text
 var $indicator : Integer
 var $minimum; $maximum : Real
@@ -9,7 +9,7 @@ var $description : Variant
 var $parts; $labels : Collection
 var $valueType : Integer
 var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end : Integer
-var $node; $other; $metadata; $popup : Object
+var $node; $other; $metadata; $popup; $styledText; $tabs : Object
 var $value : Variant
 var $protected : Boolean
 ARRAY TEXT($names; 0)
@@ -32,6 +32,7 @@ For ($i; 1; Size of array($names))
   $value:=""
   $protected:=False
   $metadata:=Null
+  $styledText:=Null
   If (($options#Null) && ($options.controls#Null))
    $metadata:=$options.controls[$name]
   End if
@@ -82,7 +83,12 @@ For ($i; 1; Size of array($names))
        $value:=$value.currentValue
       End if
      End if
-     $value:=AXB_ControlValue($value; OBJECT Get format(*; $name))
+     If (($type=Object type text input) && OBJECT Is styled text(*; $name) && (Value type($value)=Is text))
+      $styledText:=AXB_StyledText($value)
+      $value:=$styledText.text
+     Else
+      $value:=AXB_ControlValue($value; OBJECT Get format(*; $name))
+     End if
     End if
    : (($type=Object type popup dropdown list) | ($type=Object type hierarchical popup menu))
     $role:="popup"
@@ -90,6 +96,12 @@ For ($i; 1; Size of array($names))
     $value:=$popup.value
     If (Not($popup.ok))
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "popupValueTypePending"))
+    End if
+   : ($type=Object type tab control)
+    $tabs:=AXB_Tabs($name; $pointers{$i}; $options; $tabState; $paintOffset)
+    $result.nodes:=$result.nodes.concat($tabs.nodes)
+    If (Not($tabs.ok))
+     $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; $tabs.error))
     End if
    : ($type=Object type groupbox)
     $role:="group"
@@ -174,6 +186,13 @@ For ($i; 1; Size of array($names))
      $node.multiline:=Not($node.combo) && (OBJECT Get multiline(*; $name)=Multiline Yes)
      $node.placeholder:=OBJECT Get placeholder(*; $name)
      $node.editable:=OBJECT Get enterable(*; $name)
+     $node.styled:=$styledText#Null
+     If ($styledText#Null)
+      If (Not($styledText.ok) | $styledText.references)
+       $node.editable:=False
+       $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; Choose($styledText.ok; "styledTextReferencesPending"; "invalidStyledText")))
+      End if
+     End if
     End if
     If (New collection("group"; "image"; "progress").indexOf($role)>=0)
      $node.focusable:=False

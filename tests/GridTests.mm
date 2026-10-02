@@ -43,6 +43,13 @@ static NSDictionary *Snapshot(NSDictionary *descriptor, NSUInteger revision) {
 int main(void) {
     @autoreleasepool {
         NSDictionary *descriptor = Descriptor(50000);
+        NSMutableDictionary *locatorGrid = Copy(Descriptor(2));
+        locatorGrid[@"columns"][0][@"automationKey"] = @"Description";
+        Check(AXBValidateGrid(locatorGrid) == nil, "grid columns accept an optional readable locator key");
+        locatorGrid[@"columns"][1][@"automationKey"] = @"Description";
+        Check(AXBValidateGrid(locatorGrid) != nil, "duplicate public column keys are rejected");
+        locatorGrid[@"columns"][1][@"automationKey"] = @"";
+        Check(AXBValidateGrid(locatorGrid) != nil, "empty public column keys are rejected");
         NSMutableDictionary *headerGrid = Copy(Descriptor(0));
         NSMutableDictionary *header = [@{@"visible": @YES, @"enabled": @YES, @"press": @YES, @"sortable": @YES, @"sort": @"ascending"} mutableCopy];
         headerGrid[@"columns"][0][@"header"] = header;

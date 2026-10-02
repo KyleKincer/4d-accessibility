@@ -20,7 +20,10 @@ def main():
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--compiled", action="store_true")
     parser.add_argument("--voiceover", action="store_true")
+    parser.add_argument("--checkbox-smoke", action="store_true", help="Repeatable first-activation check after native focus and blur")
     args = parser.parse_args()
+    if args.voiceover and args.checkbox_smoke:
+        parser.error("The checkbox smoke case and VoiceOver suite are separate runs")
     if not args.run or not ax.trusted() or not doctor.desktop_session()["unlocked"]:
         parser.error("--run, existing Accessibility permission and an unlocked desktop are required")
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
@@ -39,7 +42,7 @@ def main():
     for path in [status, native_error, FIXTURE / "Resources/closed.json", FIXTURE / "Resources/widget-command.json"]:
         path.unlink(missing_ok=True)
     checks = []
-    report = {"passed": False, "mode": "voiceover" if args.voiceover else "actions", "compiled": args.compiled, **config, "checks": checks, "actions": [],
+    report = {"passed": False, "mode": "voiceover" if args.voiceover else "checkbox-smoke" if args.checkbox_smoke else "actions", "compiled": args.compiled, **config, "checks": checks, "actions": [],
               "native_sha256": compiled["native_sha256"], "component_sha256": compiled["component_sha256"], "test_sha256": sha(Path(__file__).resolve())}
     last_state = {}
 
@@ -86,7 +89,7 @@ def main():
             pending = [window]
             while pending:
                 node = pending.pop()
-                if (node.read("AXIdentifier") or "").startswith("axb.window."):
+                if (node.read("AXIdentifier") or "").startswith("axb/"):
                     group = node
                     return node
                 if node.read("AXRole") != "AXTable":
@@ -287,6 +290,13 @@ def main():
         report["focus_only"] = {"selection_before": focus_selection, "selection_after": state()["selected"], "events": state()["widgets"]["events"][focus_events:]}
         check(row_state()["approved"] is False and 20 not in [event["event"] for event in report["focus_only"]["events"]], "focus and blur do not change the checkbox binding or send data-change")
         toggle(2, True)
+        if args.checkbox_smoke:
+            close = find("Close")
+            check(close.press() == 0, "first-activation fixture closes through its ordinary action")
+            process.wait(timeout=15)
+            check(process.returncode == 0, "first-activation fixture exits normally")
+            report["passed"] = True
+            return
         toggle(2, False)
         for expected in [1, 2, 0]:
             toggle(4, expected)
@@ -411,7 +421,7 @@ def main():
             check((receipt == "Cell checkbox state confirmed") == (flag == "redirect"), "completion respects native rejection and scope retirement: " + flag)
             if flag == "rebind":
                 table = ax.wait_for(lambda: find("Invoice lines"), "Replacement grid missing")
-                ax.wait_for(lambda: content(2, 0, "AXCheckBox").read("AXIdentifier") != old_identifier, "Form replacement retained an old widget")
+                ax.wait_for(lambda: not content(2, 0, "AXCheckBox").same_as(previous), "Form replacement retained an old widget")
                 check(previous.read("AXSize") in (None, (0.0, 0.0)) and previous.press() != 0, "retained widget cannot act on a replacement form")
             configure()
         close = find("Close")
@@ -434,7 +444,7 @@ def main():
                 ax.capture_window(process.pid, BUILD / "grid-controls-failure.png")
             except RuntimeError:
                 pass
-        destination = "grid-controls-voiceover-report.json" if args.voiceover else "grid-controls-runtime-report.json"
+        destination = "grid-controls-checkbox-smoke-report.json" if args.checkbox_smoke else "grid-controls-voiceover-report.json" if args.voiceover else "grid-controls-runtime-report.json"
         (BUILD / destination).write_text(json.dumps(report, indent=2) + "\n")
         if process.poll() is None:
             if close is not None:

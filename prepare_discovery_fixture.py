@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--baseline", action="store_true")
     parser.add_argument("--reopen", action="store_true", help="Reopen the same database once before area startup")
     parser.add_argument("--dynamic", action="store_true", help="Open generated JSON through the generic lifecycle wrapper")
+    parser.add_argument("--styled", action="store_true", help="Include styled native text and a labeled reference")
     args = parser.parse_args()
     if args.reopen and not args.area:
         parser.error("--reopen requires area-owned lifecycle")
@@ -78,7 +79,7 @@ File("/RESOURCES/closed.json").setText(JSON Stringify(New object("runId"; $data.
 CLOSE WINDOW($window)
 QUIT 4D
 ''')
-    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "baseline": args.baseline, "dynamic": args.dynamic, "reopen": args.reopen}) + "\n")
+    (FIXTURE / "Resources/launch.json").write_text(json.dumps({"runId": uuid.uuid4().hex, "baseline": args.baseline, "dynamic": args.dynamic, "styled": args.styled, "reopen": args.reopen}) + "\n")
     objects = {
         "Heading": {"type": "text", "text": "Contact details", "left": 20, "top": 15, "width": 250, "height": 24},
         "NameLabel": {"type": "text", "text": "Name", "left": 20, "top": 52, "width": 100, "height": 24},
@@ -109,13 +110,47 @@ QUIT 4D
         "Close": {"type": "button", "text": "Close fixture", "left": 380, "top": 400, "width": 160, "height": 28, "action": "cancel", "events": ["onClick"]},
     }
     form_path = sources / "Forms/Probe"
+    if args.styled:
+        objects.update({
+            "StyledLabel": {"type": "text", "text": "Styled notes", "left": 20, "top": 450, "width": 100, "height": 24},
+            "Styled": {"type": "input", "dataSource": "Form.styled", "styledText": True, "multiline": "yes",
+                       "left": 130, "top": 448, "width": 410, "height": 36,
+                       "events": ["onBeforeKeystroke", "onAfterKeystroke", "onDataChange", "onGettingFocus", "onLosingFocus"]},
+            "ReferenceLabel": {"type": "text", "text": "Linked help", "left": 20, "top": 500, "width": 100, "height": 24},
+            "Reference": {"type": "input", "dataSource": "Form.reference", "styledText": True, "enterable": False,
+                          "left": 130, "top": 498, "width": 410, "height": 26},
+        })
+        lifecycle = methods / "AXBF_Form.4dm"
+        lifecycle.write_text(lifecycle.read_text().replace('  Form.name:="Ada"', '''  Form.styled:="Alpha <span style='font-weight:bold'>βeta</span> 🎸"
+  Form.reference:="Read <a href='https://example.com/'>the help</a>"
+  Form.styledCommits:=0
+  Form.name:="Ada"'''))
+        event = methods / "AXBF_Event.4dm"
+        event.write_text(event.read_text().replace("AXBF_State\n", '''If ($name="Styled")
+ If ((Form event code=On Before Keystroke) & (Keystroke="#"))
+  FILTER KEYSTROKE("")
+ End if
+ If (Form event code=On Data Change)
+  Form.styledCommits:=Form.styledCommits+1
+ End if
+End if
+AXBF_State
+'''))
+        state = methods / "AXBF_State.4dm"
+        state.write_text(state.read_text().replace('$state.notes:=Form.notes', '''$state.styled:=Form.styled
+$state.styledCommits:=Form.styledCommits
+$state.reference:=Form.reference
+var $bold : Integer
+ST GET ATTRIBUTES(*; "Styled"; 7; 10; Attribute bold style; $bold)
+$state.styledWordBold:=$bold=1
+$state.notes:=Form.notes'''))
     (form_path / "ObjectMethods").mkdir(parents=True)
     (form_path / "method.4dm").write_text("AXBF_Form\n")
     for name, obj in objects.items():
         if obj.get("events"):
             (form_path / "ObjectMethods" / (name + ".4dm")).write_text("AXBF_Event\n")
             obj["method"] = "ObjectMethods/" + name + ".4dm"
-    form = {"windowTitle": TITLE, "width": 560, "height": 450, "method": "method.4dm",
+    form = {"windowTitle": TITLE, "width": 560, "height": 540 if args.styled else 450, "method": "method.4dm",
             "events": ["onLoad", "onUnload", "onTimer"], "pages": [None, {"objects": objects}]}
     (form_path / "form.4DForm").write_text(json.dumps(form, indent=2) + "\n")
     form["method"] = "AXBF_Form"
@@ -152,6 +187,7 @@ QUIT 4D
         "baseline": args.baseline,
         "dynamic": args.dynamic,
         "area": args.area,
+        "styled": args.styled,
     }, indent=2) + "\n")
     print(f"{'PASS' if passed else 'FAIL'}: discovery fixture compilation; {FIXTURE}")
     raise SystemExit(0 if passed else 1)

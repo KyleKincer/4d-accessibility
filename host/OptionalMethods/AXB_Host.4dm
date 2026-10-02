@@ -7,7 +7,7 @@ ARRAY LONGINT($numbers; 0)
 ARRAY TEXT($names; 0)
 ARRAY TEXT($components; 0)
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
-If (New collection("info"; "start"; "stop"; "node"; "exchange"; "focus").indexOf($operation)<0)
+If (New collection("info"; "start"; "stop"; "node"; "exchange"; "focus"; "layout").indexOf($operation)<0)
  return
 End if
 If ((Value type($request)#Is object) | ($request=Null))

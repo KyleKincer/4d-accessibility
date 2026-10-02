@@ -146,7 +146,7 @@ The adapter reads the actual entity selection from the control and checks select
 
 Entity reads can touch the datastore. This adapter accepts at most 1,000 entities, reads only configured storage attributes, and performs no query. The application's describe callback should not query either. Load/filter/page the selection through the application's existing handlers. Measure the resulting polling cost against the real server before deploying; local fixture timing does not establish remote performance.
 
-Current/named record selections remain disabled. A live probe found that native current-selection list-box commands unloaded an unsaved classic record buffer. They need a separate application-aware action path and readback; converting a named selection into the current selection on every poll is unsafe.
+This legacy row-summary adapter does not read current/named selections. Use the automatic [classic-selection grid](../GRIDS.md#use-a-classic-current-or-named-selection) in 0.21.0, after checking its validation status.
 
 ## A list box inside a subform
 

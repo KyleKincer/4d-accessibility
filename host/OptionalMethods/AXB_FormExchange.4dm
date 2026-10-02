@@ -59,6 +59,9 @@ Use ($token)
  $token.fast:=$context.pending#Null
 End use
 $snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current form window=Frontmost window; "nodes"; $tree.nodes)
+If (Value type($context.view.options.automationKey)=Is text)
+ $snapshot.automationKey:=$context.view.options.automationKey
+End if
 $state:=JSON Stringify($snapshot)
 If (Compare strings($state; $context.state; sk char codes)#0)
  $context.revision:=$context.revision+1

@@ -11,6 +11,7 @@ import shutil
 import subprocess
 import tempfile
 import zipfile
+from urllib.parse import quote
 
 from build_component import verify_package
 
@@ -59,6 +60,31 @@ def copy_source_folders(kit, folders):
         target = kit / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source, target)
+
+
+
+def portable_document_links(kit, source_ref):
+    # Maintainer-only files stay in the repository. Downloads link to the
+    # matching public revision while keeping included integration docs local.
+    source_url = "https://github.com/KyleKincer/4d-accessibility/blob/" + source_ref + "/"
+    for doc in [*kit.joinpath("skills").rglob("*.md"), *kit.joinpath("tests/native-messages").rglob("*.md")]:
+        def link(match):
+            value = match[1]
+            if re.match(r"\w+://", value) or value.startswith("mailto:"):
+                return match[0]
+            target, separator, anchor = value.partition("#")
+            if not target:
+                return match[0]
+            resolved = (doc.parent / target).resolve()
+            if not resolved.is_relative_to(kit.resolve()):
+                raise ValueError(f"Document link leaves the kit: {doc.relative_to(kit)} -> {value}")
+            if resolved.exists():
+                return match[0]
+            relative = resolved.relative_to(kit.resolve())
+            if not (ROOT / relative).is_file():
+                raise ValueError(f"Missing source document: {relative}")
+            return "](" + source_url + quote(relative.as_posix()) + separator + anchor + ")"
+        doc.write_text(re.sub(r"\]\(([^)]+)\)", link, doc.read_text()))
 
 
 def verify_inputs():
@@ -126,6 +152,8 @@ def main():
             "3. Reopen 4D and follow `skills/4d-accessibility/references/AREA-INTEGRATION.md` for optional central configuration and live validation. Existing form methods need no startup/shutdown hooks.\n\n"
             + ("Developer ID signed and submitted for notarization by the release workflow.\n" if args.sign else
                "Development build: ad hoc signed, not notarized. Do not treat this artifact as a production release.\n"))
+        source_ref = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        portable_document_links(kit, source_ref)
         if args.sign:
             for path in [kit / "Components/AccessibilityBridge.4dbase/Libraries/lib4d-arm64.dylib", kit / "Plugins/AccessibilityBridge.bundle"]:
                 run("codesign", "--force", "--timestamp", "--options", "runtime", "--keychain", args.keychain, "--sign", identity, path)

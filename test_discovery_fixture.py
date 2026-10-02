@@ -109,7 +109,7 @@ def main():
         check(ready["start"]["ok"], "the root lifecycle registers automatic discovery without describe/apply callbacks")
         app = application(pid)
         window = next(w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE)
-        group = wait_for(lambda: next((e for e in window.read("AXChildren") or [] if (e.read("AXIdentifier") or "").startswith("axb.window.")), None), "No automatic tree")
+        group = wait_for(lambda: next((e for e in window.read("AXChildren") or [] if (e.read("AXIdentifier") or "").startswith("axb/")), None), "No automatic tree")
 
         def controls():
             return group.read("AXChildren") or []
@@ -235,7 +235,7 @@ def main():
         choices = menu.read("AXChildren") or []
         check([e.read("AXTitle") for e in choices] == ["United States", "Canada", "United Kingdom"], "existing native menu exposes every popup choice")
         menu_focus = app.read("AXFocusedUIElement")
-        check(isinstance(menu_focus, Element) and not (menu_focus.read("AXIdentifier") or "").startswith("axb."), "native popup tracking restores application focus to its own accessibility provider")
+        check(isinstance(menu_focus, Element) and not (menu_focus.read("AXIdentifier") or "").startswith("axb/"), "native popup tracking restores application focus to its own accessibility provider")
         check(choices[1].press() == 0, "choice is selected through the native menu's AX action")
         wait_for(lambda: state().get("choice") == 2, "Popup selection did not reach 4D")
         settle()

@@ -69,7 +69,7 @@ def main():
         check(ready["start"]["ok"], "automatic bridge starts with typed dropdowns")
         app = ax.application(process.pid)
         window = ax.wait_for(lambda: next((w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE), None), "Owned window missing")
-        root = ax.wait_for(lambda: next((e for e in descendants(window) if (e.read("AXIdentifier") or "").startswith("axb.window.")), None), "Bridge group missing")
+        root = ax.wait_for(lambda: next((e for e in descendants(window) if (e.read("AXIdentifier") or "").startswith("axb/")), None), "Bridge group missing")
 
         def control(name):
             return next(e for e in root.read("AXChildren") or [] if e.read("AXDescription") == name)

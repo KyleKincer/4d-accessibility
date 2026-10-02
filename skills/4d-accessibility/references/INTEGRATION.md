@@ -10,7 +10,8 @@ The working source is an implementation checkpoint. Build both packages and inst
 | --- | --- |
 | Previously exercised in isolated live fixtures; rerun in your host | Ordinary inputs/buttons, checkboxes/radios, typed dropdowns and hierarchical popup menus, editable combos, automatic page subforms with scrolling and reveal on macOS 26, semantic groups, described images, numeric/date/time progress, rulers and steppers, and all logical rows and columns of flat native array, collection, entity-selection and AreaList grids. AreaList text editing is limited to BMP text; further cell types remain open. Editable progress uses the shared-controller mapping below; other tested controls retain their existing editors and handlers. See [validation scope](VALIDATION.md) for the evidence boundaries and required reruns. |
 | Previously exercised native cell controls; rerun in your host | Boolean checkbox/popup and numeric mixed-state cells, including repeated child grids and VoiceOver. See [validation scope](VALIDATION.md). |
-| Still required | Tabs, dials, editable pictures, hierarchical lists, classic-selection grids and further grid layouts/cell types, AreaList supplementary Unicode and protected editing, IME and exact text geometry, further assistive-technology testing, standard-action dropdown menus, `AXScrollToVisible` before macOS 26, root forms larger than their window, expanded compiled desktop coverage, client/server delivery, and complete application workflows. |
+| Compatibility branch | Tabs pass their scoped gate; ordinary styled fields have live evidence. Classic-selection grids are implemented with acceptance in progress. Check [current status](STATUS.md) and install matching branch packages. |
+| Still required | Dials, editable pictures, hierarchical lists and further grid layouts/cell types, AreaList supplementary Unicode and protected editing, IME and exact text geometry, further assistive-technology testing, standard-action dropdown menus, `AXScrollToVisible` before macOS 26, root forms larger than their window, expanded compiled desktop coverage, client/server delivery, and complete application workflows. |
 
 The [full accessibility requirements](REQUIREMENTS.md) define completion. Resolve every unsupported control before calling its screen accessible.
 
@@ -58,7 +59,7 @@ Completion: the application compiles. If packages are optional in this host, ver
 
 [Add the lifecycle area](AREA-INTEGRATION.md#ordinary-named-form) with `--form Customer`. Existing form and object methods need no startup or shutdown calls. Clear existing names need no callback. When metadata is needed, return it from one application-owned [`AXB_Configure`](AREA-INTEGRATION.md#one-optional-configuration-method).
 
-For a record editor with editable grids, add `grids` configuration to that callback. Use existing stable line keys, record `scope` and loader `ready` state. Describe visual-only columns and map an existing selection controller only when selection must refresh other UI. The [assembled example](GRIDS.md#configure-a-record-editor-with-editable-grids) shows the application changes.
+For a record editor with editable grids, add `grids` configuration to that callback. Use existing stable line keys, record `scope` and loader `ready` state. Describe visual-only columns and map an existing selection controller only when selection must refresh other UI. The [assembled example](examples/RECORD-EDITOR.md) shows the application changes.
 
 The [manual lifecycle](MANUAL-LIFECYCLE.md) remains available for application-owned registrations. The configuration contracts below are shared by both paths. Automatic buttons run their ordinary actions; text goes through native editors, keystroke handlers, Undo and validation. Protected inputs remain write-only.
 
@@ -211,7 +212,7 @@ $coverage:=AXB_Form("diagnostics"; New object)
 
 This is an optional debugging/verification call, not another lifecycle hook. Do not ship a new diagnostics call just to inspect the report. It returns `ready: false` until the first snapshot, then `ready: true`, the snapshot `revision`, `nodeCount` and an `issues` collection. Each issue names the form object's `object`, its nested subform `path`, and a `reason`. Grid issues can also identify a `column` object name. An empty path means the root. For example, `{path: ["ShippingAddress"], object: "Phone", reason: "missingLabel"}` identifies that input in that particular child.
 
-`missingLabel` needs a meaningful label. `providerPending` means an unhandled object type is omitted from automatic discovery. This includes tabs, hierarchical lists, unconfigured grids, plugin areas and web areas. Accept an existing native provider only after verifying its complete tree and actions. Tabs and other controls without such a provider remain unfinished bridge work; do not dismiss their diagnostic. A verified usable web provider needs no extra adapter. Other reasons identify unsupported editing, ambiguous groups or an unavailable configured grid. `gridLoading` is temporary while the grid's readiness formula is false. A correctly configured grid is not reported as an unsupported ordinary control.
+`missingLabel` needs a meaningful label. `providerPending` means an unhandled object type is omitted from automatic discovery. This includes hierarchical lists, unconfigured grids, plugin areas and web areas. Tabs also report this in signed 0.19.7 and 0.20.0 kits; 0.21.0 provides the [validated tab adapter](TABS.md). Accept an existing native provider only after verifying its complete tree and actions. Controls without a usable provider remain unfinished bridge work; do not dismiss their diagnostic. A verified usable web provider needs no extra adapter. Other reasons identify unsupported editing, ambiguous groups or an unavailable configured grid. `gridLoading` is temporary while the grid's readiness formula is false. A correctly configured grid is not reported as an unsupported ordinary control.
 
 | Coverage reason | Required action |
 | --- | --- |
@@ -224,7 +225,7 @@ This is an optional debugging/verification call, not another lifecycle hook. Do 
 | `pictureEditingPending` | Picture description is readable; editing remains unfinished bridge work. |
 | `adjustableValueTypePending`, `progressValueTypePending` | This control variant needs further bridge implementation. |
 | `gridLoading` | Wait for the configured loader; if it persists, check readiness and loaded-record identity. |
-| `gridUnavailable` | Correct the grid configuration or implement its unsupported layout. A table asking for a displayed-value description needs `columns.<objectName>.value`, or `decorative` for content with no meaning or action. |
+| `gridUnavailable` | Read the table label first. A classic-selection grid can be loading or retrying a failed read; see [classic grid feedback](GRIDS.md#use-a-classic-current-or-named-selection). Otherwise correct the configuration or implement its unsupported layout. A table asking for a displayed-value description needs `columns.<objectName>.value`, or `decorative` for content with no meaning or action. |
 | `gridCellEditingPending` | In a native list box, an enterable column has a description or is marked decorative. Custom editor support is still required. Remove `decorative` from interactive content. The issue names the column. |
 | `gridValueDescriptionRequired` | A requested native-grid cell has an unsupported value or its description did not return Text. Configure or correct the [column description](GRIDS.md#describe-custom-native-grid-columns). |
 
@@ -269,7 +270,7 @@ Determinate progress exposes its actual range and supports numeric, date and tim
 
 ### Configure data grids
 
-Use [the grid recipe](GRIDS.md) for native array, collection or entity-selection list boxes and AreaList Pro. It covers stable keys, loading, selection controllers, cell descriptions, row metadata and an [assembled record-editor example](GRIDS.md#configure-a-record-editor-with-editable-grids). Keep the root area and return grid options from `AXB_Configure`.
+Use [the grid recipe](GRIDS.md) for native array, collection or entity-selection list boxes, and [AreaList grids](AREALIST-GRIDS.md) for AreaList Pro. The compatibility branch also implements [classic current/named selections](GRIDS.md#use-a-classic-current-or-named-selection). The recipe covers stable keys, loading, selection controllers, cell descriptions and row metadata; the [record-editor example](examples/RECORD-EDITOR.md) assembles them. Keep the root area and return grid options from `AXB_Configure`.
 
 ### Explicit providers for existing integrations
 
@@ -359,21 +360,22 @@ sequenceDiagram
 
 Setting a name through accessibility and typing that name must reach the same validation. The automatic provider enters text through the real editor; normal commit runs the form's existing validation. An explicit custom provider must preserve its application's equivalent behavior. An accessibility transport success code only means the request reached the bridge; verify the resulting application state.
 
-An external AX client can read progress from the bridge root group's `AXHelp`. Locate that group by its `AXIdentifier` beginning with `axb.window.`. It reports `Action queued`, then `Waiting for the application to complete the action`, then the application's final receipt message. With no action history it reports `Ready`. The public attribute contains the message, not the internal `completed` or `rejected` status. Use it as a progress signal and read the target's resulting value, selection or focus to verify the outcome. For popup activation, completion means the menu opened; choosing an item is a separate native interaction. Neither transport success nor a timeout authorizes an automatic retry.
+An external AX client can read progress from the bridge root group's `AXHelp`. Locate that group by its `AXIdentifier` beginning with `axb/`. It reports `Action queued`, then `Waiting for the application to complete the action`, then the application's final receipt message. With no action history it reports `Ready`. The public attribute contains the message, not the internal `completed` or `rejected` status. Use it as a progress signal and read the target's resulting value, selection or focus to verify the outcome. For popup activation, completion means the menu opened; choosing an item is a separate native interaction. Neither transport success nor a timeout authorizes an automatic retry.
 
 ## 4. Choose the right extension
 
 | Your form contains | Integration path |
 | --- | --- |
 | Ordinary inputs, buttons, checkboxes, radios, typed/object/choice-list dropdowns, hierarchical popup menus, editable combos, group boxes, progress, images and readable text | [Automatic form](examples/AUTOMATIC-FORM.md). Add one root area; supply missing labels declaratively. |
-| Flat array-backed AreaList grid | Use [`options.grids`](GRIDS.md). Bind existing row keys; describe image indicators and decorative spacers only where necessary. |
+| Flat array-backed AreaList grid | Use [`options.grids`](AREALIST-GRIDS.md). Bind existing row keys; describe image indicators and decorative spacers only where necessary. |
 | Flat native array list box with complete rows and columns | Use [`options.grids`](GRIDS.md) alongside automatic ordinary controls. |
 | Flat collection or entity-selection list box with direct property columns | Use `options.grids` with the existing Selected Items expression. Supply a collection key property, or use the entity dataclass's primary key. |
+| Flat classic current/named-selection list box | In 0.21.0, configure `kind: "selection"` and keep the native source, columns and highlight set. See [the classic grid recipe and acceptance limits](GRIDS.md#use-a-classic-current-or-named-selection). |
 | Existing array, collection, or entity-selection summary integration | [Native list-box form](examples/LISTBOX-FORM.md). Configure the bound key column and permitted Text label columns; the helper resolves native selection after sorting and scrolling. |
 | Ordinary page subforms, including repeated/nested instances | The current automatic provider discovers children from the root. Supply readable child labels and invalidate a container at its shared replacement point. See [the automatic child example](examples/AUTOMATIC-FORM.md#repeated-and-nested-page-subforms). |
 | Subforms with explicit custom providers | Register each child with `AXB_Form("register"; options)`. The parent description lists its allowed subform object names. One root owns the scheduler. See [form families](FORM-SUPPORT.md#explicit-child-providers). |
 | JSON-generated dialogs and subforms | [Generated-form recipe](examples/DYNAMIC-FORM.md). Prepare with `AXB_AreaForm` at the shared builder. Use `AXB_Dynamic` only for explicit per-instance registration with private data. |
-| Pages | Automatic discovery publishes current-page and inherited objects. Tab controls are not exposed yet, so page switching remains unfinished. See [form families](FORM-SUPPORT.md). |
+| Pages | Automatic discovery publishes current-page and inherited objects. Tabs are unavailable in signed 0.19.7 and 0.20.0 kits; 0.21.0 provides [accessible tabs](TABS.md). See [form families](FORM-SUPPORT.md). |
 | Other list-box bindings, editable grids, web areas, other controls | Use the family-specific behavior and limits in [form families](FORM-SUPPORT.md). A label alone does not make a control editable. |
 
 ## 5. Prove the application integration

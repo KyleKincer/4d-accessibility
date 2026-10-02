@@ -121,10 +121,10 @@ def main():
             return windows[0] if windows else None
 
         window = wait_for(fixture_window, "Disposable fixture AX window not found")
-        field = wait_for(lambda: window.find(".name"), "Name field not published")
-        submit = wait_for(lambda: window.find(".submit"), "Submit not published")
-        allowed = wait_for(lambda: window.find(".allowed"), "Checkbox not published")
-        status = wait_for(lambda: window.find(".status"), "Status not published")
+        field = wait_for(lambda: window.find("/name"), "Name field not published")
+        submit = wait_for(lambda: window.find("/submit"), "Submit not published")
+        allowed = wait_for(lambda: window.find("/allowed"), "Checkbox not published")
+        status = wait_for(lambda: window.find("/status"), "Status not published")
         check(field.read("AXValue") == "Fixture tester" and status.read("AXValue") == "Ready", "fixture starts untouched")
 
         def status_is(text):
@@ -149,30 +149,30 @@ def main():
         check(submit.press() == 0, "submit requested through AX")
         wait_for(lambda: status_is("Submissions: 1"), "Submission did not complete")
         check(True, "application completed exactly one submission")
-        hide = window.find(".hide")
+        hide = window.find("/hide")
         check(hide is not None and hide.press() == 0, "hide requested through AX")
-        wait_for(lambda: window.find(".name") is None, "Hidden input remained in AX tree")
+        wait_for(lambda: window.find("/name") is None, "Hidden input remained in AX tree")
         check(True, "hidden input is removed from AX")
         check(hide.press() == 0, "show requested through AX")
-        field = wait_for(lambda: window.find(".name"), "Input did not return")
+        field = wait_for(lambda: window.find("/name"), "Input did not return")
         check(field.read("AXValue") == "AX café 日本語 🎸", "show preserves accepted data")
         identifier = field.read("AXIdentifier")
-        restart = window.find(".restart")
+        restart = window.find("/restart")
         check(restart is not None and restart.press() == 0, "session replacement requested through AX")
 
         def replacement():
-            candidate = window.find(".name")
-            return candidate if candidate and candidate.read("AXIdentifier") != identifier else None
+            candidate = window.find("/name")
+            return candidate if candidate and not candidate.same_as(field) else None
 
         replacement_field = wait_for(replacement, "Fresh session identity not published")
-        status = wait_for(lambda: window.find(".status"), "Replacement status missing")
+        status = wait_for(lambda: window.find("/status"), "Replacement status missing")
         wait_for(lambda: status_is("Bridge restarted"), "Replacement did not complete")
         field.set_text("Stale edit")
         submit.press()
         time.sleep(0.3)
         check(replacement_field.read("AXValue") == "AX café 日本語 🎸" and status_is("Bridge restarted"),
               "retained old-session controls cannot change replacement state")
-        submit = window.find(".submit")
+        submit = window.find("/submit")
         check(submit is not None and submit.press() == 0, "replacement session accepts a fresh action")
         wait_for(lambda: status_is("Submissions: 2"), "Fresh replacement action failed")
         check(state().get("timerFirings") == 1, "host timer remains one-shot while AX actions continue")

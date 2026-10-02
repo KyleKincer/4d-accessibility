@@ -3,6 +3,7 @@
 #import "Bridge.h"
 #include "Area.h"
 #include "Limits.h"
+#import "NativeLayout.h"
 #include <vector>
 
 static NSString *TextParameter(PA_PluginParameters parameters, short index, NSUInteger limit) {
@@ -20,6 +21,7 @@ static void ReturnText(PA_PluginParameters parameters, NSString *value) {
 @interface AXBFocusRequest : NSObject
 @property(nonatomic) void *nativeWindow;
 @property(atomic, strong) NSString *result;
+@property(nonatomic, copy) NSString *layout;
 @end
 @implementation AXBFocusRequest
 @end
@@ -30,7 +32,7 @@ static void ReadNativeFocus(void *parameter) {
     @autoreleasepool {
         AXBFocusRequest *request;
         @synchronized(focusRequestLock) { request = focusRequests[@(reinterpret_cast<uintptr_t>(parameter))]; }
-        if (request) request.result = AXBNativeFocus(request.nativeWindow);
+        if (request) request.result = request.layout ? AXBReadNativeLayout(request.nativeWindow, request.layout) : AXBNativeFocus(request.nativeWindow);
     }
 }
 extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
@@ -52,8 +54,9 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 break;
             }
             case 2: AXBDetach(TextParameter(parameters, 1, 128), PA_GetCurrentProcessNumber()); break;
-            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; macOS", AXB_VERSION]); break;
-            case 4: {
+            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; macOS", AXB_VERSION]); break;
+            case 4:
+            case 7: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
                 sLONG_PTR native = PA_GetWindowPtr(reinterpret_cast<PA_WindowRef>(static_cast<intptr_t>(windowID)));
                 if (PA_GetLastError() != eER_NoErr) native = 0;
@@ -61,6 +64,10 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 dispatch_once(&once, ^{ focusRequests = [NSMutableDictionary new]; focusRequestLock = [NSObject new]; });
                 AXBFocusRequest *request = [AXBFocusRequest new];
                 request.nativeWindow = reinterpret_cast<void *>(native);
+                if (selector == 7) {
+                    request.layout = TextParameter(parameters, 2, 4096);
+                    if (!request.layout) { ReturnText(parameters, @"{\"ok\":false,\"error\":\"invalidLayoutRequest\"}"); break; }
+                }
                 uintptr_t identifier;
                 @synchronized(focusRequestLock) { identifier = ++nextFocusRequest; focusRequests[@(identifier)] = request; }
                 // SDK callback context is an opaque lookup key, never a stack
@@ -69,7 +76,8 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 PA_RunInMainProcess(ReadNativeFocus, reinterpret_cast<void *>(identifier));
                 bool succeeded = PA_GetLastError() == eER_NoErr;
                 @synchronized(focusRequestLock) { [focusRequests removeObjectForKey:@(identifier)]; }
-                ReturnText(parameters, succeeded && request.result ? request.result : @"{\"ok\":false,\"error\":\"noNativeFocus\"}");
+                NSString *failure = selector == 7 ? @"{\"ok\":false,\"error\":\"nativeTabLayoutUnavailable\"}" : @"{\"ok\":false,\"error\":\"noNativeFocus\"}";
+                ReturnText(parameters, succeeded && request.result ? request.result : failure);
                 break;
             }
             case 5: {

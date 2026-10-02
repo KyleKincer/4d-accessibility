@@ -71,7 +71,7 @@ def main():
             pending = [window]
             while pending:
                 node = pending.pop()
-                if (node.read("AXIdentifier") or "").startswith("axb.window."):
+                if (node.read("AXIdentifier") or "").startswith("axb/"):
                     return node
                 if node.read("AXRole") != "AXTable":
                     pending.extend(node.read("AXChildren") or [])

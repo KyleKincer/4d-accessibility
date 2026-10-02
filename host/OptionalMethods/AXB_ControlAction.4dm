@@ -1,12 +1,12 @@
 // Use native events or an explicitly configured shared application controller.
-#DECLARE($action : Object; $options : Object) -> $result : Object
+#DECLARE($action : Object; $options : Object; $tabState : Object; $paintOffset : Collection) -> $result : Object
 var $description; $node; $target; $metadata : Object
 var $ignored; $value : Variant
 var $valueType : Integer
 var $left; $top; $right; $bottom; $x; $y : Integer
 var $point : Collection
 $result:=New object("status"; "rejected"; "message"; "Control is unavailable")
-$description:=AXB_Discover($options)
+$description:=AXB_Discover($options; $tabState; $paintOffset)
 For each ($node; $description.nodes)
  If (Compare strings($node.id; $action.node; sk char codes)=0)
   $target:=$node
@@ -77,8 +77,15 @@ Case of
   GOTO OBJECT(*; $target.objectName)
   $result:=New object("status"; "pending"; "confirm"; Formula(AXB_ControlKey($1)); "data"; New object("objectName"; $target.objectName; "operation"; "press"; "role"; $target.role; "previousValue"; $target.value))
   return
- : (($action.operation="press") & (New collection("button"; "checkbox"; "radio"; "popup").indexOf($target.role)>=0))
-  OBJECT GET COORDINATES(*; $target.objectName; $left; $top; $right; $bottom)
+ : (($action.operation="press") & (New collection("button"; "checkbox"; "radio"; "popup"; "tab").indexOf($target.role)>=0))
+  If ($target.role="tab")
+   $left:=$target.frame[0]
+   $top:=$target.frame[1]
+   $right:=$left+$target.frame[2]
+   $bottom:=$top+$target.frame[3]
+  Else
+   OBJECT GET COORDINATES(*; $target.objectName; $left; $top; $right; $bottom)
+  End if
   If ($action.viewport#Null)
    // Use the portion revealed through every ancestor, including the window.
    // A wide control's center can remain outside a small page-subform viewport.
@@ -105,7 +112,7 @@ Case of
     return
    End if
   End if
-  If ($target.role="button")
+  If (New collection("button"; "tab").indexOf($target.role)>=0)
    $point:=AXB_ControlPoint($target; $description; $options; New collection($left; $top; $right; $bottom))
   Else
    // Checkboxes/radios must still hit their indicator, not a free caption.
@@ -118,7 +125,7 @@ Case of
   $x:=$point[0]
   $y:=$point[1]
   CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
-  If ($target.role="button")
+  If (New collection("button"; "tab").indexOf($target.role)>=0)
    // Reuse guarded native delivery so nested dialogs receive a complete
    // mouse-down/up pair in their actual AppKit window.
    AXB_PollGuard.context.controlInput:=New object("action"; $action.id; "point"; New collection($x; $y))

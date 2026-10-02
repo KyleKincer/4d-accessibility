@@ -3,8 +3,11 @@
 #import <Cocoa/Cocoa.h>
 #import "Bridge.h"
 #import "BridgePrivate.h"
+#import "NativeLayout.h"
+#import <objc/runtime.h>
 #include <cstdio>
 #include <cstdlib>
+#include <thread>
 
 static void Check(BOOL condition, const char *message) {
     if (!condition) { fprintf(stderr, "FAIL: %s\n", message); exit(1); }
@@ -46,13 +49,85 @@ static NSWindow *Window(NSString *title) {
 static NSAccessibilityElement *Provider(NSWindow *window) {
     for (NSView *view in window.contentView.subviews) {
         id child = view.accessibilityChildren.firstObject;
-        if ([[child accessibilityIdentifier] hasPrefix:@"axb.window."]) return child;
+        if ([[child accessibilityIdentifier] hasPrefix:@"axb/"]) return child;
     }
     return nil;
 }
 static NSDictionary *Focus(void *window) {
     NSString *json = AXBNativeFocus(window);
     return [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+}
+static void StableIdentifierTest(void) {
+    NSWindow *first = Window(@"AXB stable locators first"), *second = Window(@"AXB stable locators second");
+    [NSApp activateIgnoringOtherApps:YES]; [first makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(first, 9020), *other = Open(second, 9021);
+    NSMutableDictionary *button = [@{@"id": @"route-first", @"automationPath": @[@"Search/É%"], @"role": @"button",
+        @"label": @"Search", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @20, @120, @30]} mutableCopy];
+    NSMutableDictionary *column = [@{@"id": @"internal-column", @"automationKey": @"Description", @"label": @"Description",
+        @"enabled": @YES, @"editable": @NO} mutableCopy];
+    NSMutableDictionary *grid = [@{@"generation": @"first-binding", @"order": @1, @"rows": @[@"line/1", @"line%2"],
+        @"columns": @[column], @"visible": @[], @"selected": @[], @"actions": @{@"select": @YES, @"reveal": @YES}} mutableCopy];
+    NSMutableDictionary *tableData = [@{@"id": @"route-table", @"automationPath": @[@"Details", @"Items"], @"role": @"table",
+        @"label": @"Items", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @60, @300, @120], @"grid": grid} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"automationKey": @"records.main", @"label": @"Records",
+        @"enabled": @YES, @"nodes": @[button, tableData]} mutableCopy];
+    Check([Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue] &&
+        [Exchange(second, 9021, 1, other, snapshot)[@"ok"] boolValue], "two windows accept the same logical screen locators"); Pump();
+    id root = Provider(first), otherRoot = Provider(second), retained = [root accessibilityChildren][0];
+    NSString *rootID = [root accessibilityIdentifier], *buttonID = [retained accessibilityIdentifier];
+    Check([rootID isEqual:@"axb/records.main"] && [rootID isEqual:[otherRoot accessibilityIdentifier]], "root locator repeats within separately owned windows");
+    Check([buttonID isEqual:@"axb/records.main/Search%2F%C3%89%25"] &&
+        [buttonID isEqual:[[otherRoot accessibilityChildren][0] accessibilityIdentifier]], "ordinary locators are readable, escaped and independent of window UUIDs");
+    Check([retained accessibilityPerformPress], "selected live window dispatches its located control");
+    NSDictionary *action = Exchange(first, 9020, 1, session, snapshot)[@"action"];
+    Check([action[@"node"] isEqual:@"route-first"] && !Exchange(second, 9021, 1, other, snapshot)[@"action"], "stable locator does not replace the session-specific action route");
+    Exchange(first, 9020, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"done"}); Pump();
+    AXBGridNode *table = [root accessibilityChildren][1];
+    id row = table.accessibilityRows[0], cell = [table accessibilityCellForColumn:0 row:0], header = [table headerForColumn:@"internal-column"];
+    Check([[row accessibilityIdentifier] isEqual:@"axb/records.main/Details/Items/row/line%2F1"], "grid row locator uses its key rather than visible position");
+    Check([[cell accessibilityIdentifier] isEqual:@"axb/records.main/Details/Items/cell/line%2F1/Description"], "grid cell locator includes the row key and column name");
+    Check([[header accessibilityIdentifier] isEqual:@"axb/records.main/Details/Items/header/Description"], "grid headers and cells have distinct locators");
+    grid[@"rows"] = @[@"line%2", @"line/1"]; grid[@"order"] = @2; snapshot[@"revision"] = @2;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    Check(table.accessibilityRows[1] == row && [table accessibilityCellForColumn:0 row:1] == cell,
+        "sorting preserves row handles and public locators for the same record");
+    column[@"automationKey"] = @"Renamed"; grid[@"order"] = @3; snapshot[@"revision"] = @3;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    Check(![cell isAccessibilityElement] && ![header isAccessibilityElement] &&
+        [[[table accessibilityCellForColumn:0 row:1] accessibilityIdentifier] hasSuffix:@"/Renamed"], "column locator changes retire retained cells and headers");
+    column[@"automationKey"] = @"Description"; grid[@"generation"] = @"replacement-binding"; grid[@"order"] = @1; snapshot[@"revision"] = @4;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    id replacementRow = table.accessibilityRows[1];
+    Check(replacementRow != row && [[replacementRow accessibilityIdentifier] isEqual:[row accessibilityIdentifier]] &&
+        ![row accessibilityPerformPress], "rebinding can repeat a locator while retiring its former row handle");
+    // Resolve only the cell. Reading a header or AXEnabled would materialize
+    // the column and hide the independent cell-registry retirement case.
+    id headerlessCell = [table accessibilityCellForColumn:0 row:1];
+    NSString *headerlessID = [headerlessCell accessibilityIdentifier];
+    column[@"automationKey"] = @"HeaderlessRename"; grid[@"order"] = @2; snapshot[@"revision"] = @5;
+    Check([Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue], "headerless column rename publishes a new snapshot revision"); Pump();
+    id renamedCell = [table accessibilityCellForColumn:0 row:1];
+    Check(renamedCell != headerlessCell && ![headerlessCell isAccessibilityElement] &&
+        [[headerlessCell accessibilityIdentifier] isEqual:headerlessID] &&
+        [[renamedCell accessibilityIdentifier] hasSuffix:@"/HeaderlessRename"],
+        "column locator changes retire cells even when no column or header was requested");
+    button[@"id"] = @"route-replacement"; snapshot[@"revision"] = @6;
+    Exchange(first, 9020, 1, session, snapshot); Pump();
+    id replacement = [Provider(first) accessibilityChildren][0];
+    Check(replacement != retained && [[replacement accessibilityIdentifier] isEqual:buttonID] && ![retained accessibilityPerformPress],
+        "replacement internal routes do not resurrect retained ordinary handles");
+    snapshot[@"automationKey"] = @"renamed.screen"; snapshot[@"revision"] = @7;
+    Exchange(first, 9020, 1, session, snapshot);
+    Check(![replacement accessibilityPerformPress], "screen renaming blocks old actions even before the queued native refresh"); Pump();
+    AXBDetach(session, 1); Pump();
+    snapshot[@"automationKey"] = @"records.main"; snapshot[@"revision"] = @1; button[@"id"] = @"route-reopened";
+    NSString *reopened = Open(first, 9020);
+    Check(![reopened isEqual:session] && [Exchange(first, 9020, 1, reopened, snapshot)[@"ok"] boolValue], "reopening allocates an independent internal session"); Pump();
+    Check([[Provider(first) accessibilityIdentifier] isEqual:rootID] &&
+        [[[Provider(first) accessibilityChildren][0] accessibilityIdentifier] isEqual:buttonID] && ![retained accessibilityPerformPress],
+        "reopening repeats public locators and keeps closed references retired");
+    Check(![Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue], "old session cannot route through a reopened stable screen");
+    [first close]; [second close]; Pump();
 }
 static void RefreshDelayTest(void) {
     NSWindow *window = Window(@"AXB delayed accessibility refresh");
@@ -189,6 +264,7 @@ static void GridControlsTest(void) {
     Check([checkbox accessibilityPerformPress], "grid checkbox dispatches an activation");
     NSDictionary *action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
     Check([action[@"operation"] isEqual:@"gridPress"] && [action[@"value"][@"expectedCell"][@"checked"] isEqual:@2], "native checkbox activation preserves its observed value");
+    Check(table.owner.actionFeedback[@"control"] == checkbox && [table.owner.actionFeedback[@"id"] isEqual:action[@"id"]], "grid checkbox feedback belongs to its exact live control and request");
     NSDictionary *input = @{@"action": action[@"id"], @"point": @[@21, @44]};
     Exchange(window, 9012, 1, session, snapshot, nil, nil, input); Pump(); Pump();
     if (canvas.presses != 1 || canvas.releases != 1 || canvas.lastPoint.x != 21 || canvas.lastPoint.y != 44)
@@ -197,8 +273,36 @@ static void GridControlsTest(void) {
     Check([Exchange(window, 9012, 1, session, snapshot, nil, nil, input)[@"controlInputResult"][@"accepted"] boolValue], "grid mouse delivery has an exact acknowledgement"); Pump();
     Check(canvas.presses == 1, "grid input replay cannot repeat the native click");
     Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(table.owner.actionFeedback != nil, "grid checkbox receipt waits for its updated value page");
+    value[@"checked"] = @1; value[@"value"] = @"1";
+    Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    Check([[checkbox accessibilityValue] isEqual:@1] && table.owner.actionFeedback == nil, "published checkbox state consumes confirmed feedback once");
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}, nil, nil, @[page]); Pump();
+    Check(table.owner.actionFeedback == nil, "grid checkbox receipt replay cannot repeat feedback");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts a separately rejected request");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"validation rejected"}); Pump();
+    Check(table.owner.actionFeedback == nil, "rejected grid activation clears feedback without announcing success");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts a request whose value arrives late");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    NSMutableDictionary *expired = [table.owner.actionFeedback mutableCopy];
+    expired[@"deadline"] = @(NSProcessInfo.processInfo.systemUptime-1); table.owner.actionFeedback = expired;
+    value[@"checked"] = @2; value[@"value"] = @"2";
+    Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    Check(table.owner.actionFeedback == nil, "late checkbox value publication cannot keep expired feedback alive");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts a request before its role retires");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    value[@"role"] = @"text"; [value removeObjectForKey:@"checked"];
+    Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    (void)[cell accessibilityChildren];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(![checkbox isAccessibilityElement] && table.owner.actionFeedback == nil, "retired grid checkbox cannot announce a replacement control's result");
+    value[@"role"] = @"checkbox";
+    value[@"checked"] = @2; value[@"value"] = @"2";
     value[@"enabled"] = @NO; value[@"editable"] = @NO;
     Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    checkbox = [cell accessibilityChildren][0];
     Check(![checkbox isAccessibilityEnabled] && ![checkbox accessibilityPerformPress] && [[checkbox accessibilityValue] isEqual:@2], "disabled cell retains readable mixed state without an activation");
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -537,11 +641,200 @@ static void GridHeaderTest(void) {
     [window close]; Pump();
 }
 
+static NSData *PaintCell(NSView *view, NSCell *cell, CGFloat anchorY = 20) {
+    NSData *pixels;
+    @autoreleasepool {
+        NSBitmapImageRep *bitmap = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:nil pixelsWide:400 pixelsHigh:100
+            bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace bytesPerRow:0 bitsPerPixel:0];
+        [NSGraphicsContext saveGraphicsState];
+        NSGraphicsContext.currentContext = [NSGraphicsContext graphicsContextWithBitmapImageRep:bitmap];
+        CGContextTranslateCTM(NSGraphicsContext.currentContext.CGContext, 0, anchorY);
+        [cell drawWithFrame:NSMakeRect(20, 0, 180, 24) inView:view];
+        pixels = [bitmap representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+        [NSGraphicsContext restoreGraphicsState];
+    }
+    return pixels;
+}
+static NSSegmentedCell *TabCell(void) {
+    NSSegmentedCell *cell = [NSSegmentedCell new];
+    cell.segmentCount = 3;
+    [cell setWidth:40 forSegment:0]; [cell setWidth:80 forSegment:1]; [cell setWidth:50 forSegment:2];
+    [cell setLabel:@"One" forSegment:0]; [cell setLabel:@"Longer" forSegment:1]; [cell setLabel:@"Last" forSegment:2];
+    [cell setSelected:YES forSegment:0];
+    return cell;
+}
+static NSData *PaintTabs(NSView *view) { return PaintCell(view, TabCell()); }
+static NSData *PaintPopup(NSView *view) {
+    NSPopUpButtonCell *cell = [[NSPopUpButtonCell alloc] initTextCell:@"" pullsDown:NO];
+    [cell addItemsWithTitles:@[@"First", @"Last"]];
+    [cell selectItemAtIndex:1];
+    return PaintCell(view, cell);
+}
+static NSDictionary *TabLayout(NSWindow *window, NSString *request = @"{\"frame\":[20,20,180,24],\"count\":3}") {
+    return [NSJSONSerialization JSONObjectWithData:[AXBReadNativeLayout((__bridge void *)window, request) dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+}
+static void NativeTabLayoutTest(void) {
+    NSWindow *window = Window(@"AXB native tab layout");
+    IMP original = method_getImplementation(class_getInstanceMethod(NSSegmentedCell.class, @selector(drawWithFrame:inView:)));
+    IMP originalPopup = method_getImplementation(class_getInstanceMethod(NSPopUpButtonCell.class, @selector(drawWithFrame:inView:)));
+    NSData *baseline = PaintTabs(window.contentView);
+    NSData *popupBaseline = PaintPopup(window.contentView);
+    AXBLayoutInitialize();
+    IMP observed = method_getImplementation(class_getInstanceMethod(NSSegmentedCell.class, @selector(drawWithFrame:inView:)));
+    NSData *candidate = PaintTabs(window.contentView);
+    Check([baseline isEqual:candidate], "tab observation preserves every rendered pixel");
+    Check([TabLayout(window)[@"error"] isEqual:@"inactiveLayoutWindow"], "painting does not register an inactive native window");
+    AXBLayoutObserve(window);
+    NSDictionary *layout = TabLayout(window);
+    Check([layout[@"ok"] boolValue] && [layout[@"segments"] count] == 3, "first paint survives later bridge registration");
+    Check([layout[@"segments"][0][@"selected"] boolValue] && ![layout[@"segments"][1][@"selected"] boolValue], "captured native state preserves actual selection");
+    Check([layout[@"segments"][1][@"frame"][2] doubleValue] > [layout[@"segments"][0][@"frame"][2] doubleValue], "captured native frames preserve unequal widths");
+    NSSegmentedCell *reused = TabCell();
+    PaintCell(window.contentView, reused);
+    NSUInteger beforeReuse = [TabLayout(window)[@"serial"] unsignedIntegerValue];
+    // NSActionCell can remember the canvas it last drew in. That canvas is
+    // not an owning NSControl and must not suppress the next capture.
+    reused.controlView = window.contentView;
+    [reused setSelected:YES forSegment:2];
+    PaintCell(window.contentView, reused);
+    layout = TabLayout(window);
+    Check([layout[@"serial"] unsignedIntegerValue] > beforeReuse && [layout[@"segments"][2][@"selected"] boolValue], "reused canvas cells publish their actual later paint");
+    NSUInteger beforeQueued = [layout[@"serial"] unsignedIntegerValue];
+    [reused setSelected:YES forSegment:1]; PaintCell(window.contentView, reused);
+    [reused setSelected:YES forSegment:2]; PaintCell(window.contentView, reused);
+    layout = TabLayout(window);
+    Check([layout[@"serial"] unsignedIntegerValue] == beforeQueued+1 && [layout[@"segments"][2][@"selected"] boolValue], "queued paints at one anchor keep only the latest actual state");
+    NSPopUpButtonCell *manyPopups = [[NSPopUpButtonCell alloc] initTextCell:@"" pullsDown:NO];
+    [manyPopups addItemsWithTitles:@[@"Grid choice"]];
+    for (NSInteger i = 0; i < 600; ++i) PaintCell(window.contentView, manyPopups, 30+i);
+    Check([TabLayout(window)[@"kind"] isEqual:@"tabs"], "popup paint traffic cannot evict a tab strip's geometry");
+    NSString *firstOwner = @"{\"frame\":[20,20,180,24],\"count\":3,\"owner\":\"first\"}";
+    NSString *secondOwner = @"{\"frame\":[20,20,180,24],\"count\":3,\"owner\":\"second\"}";
+    Check([TabLayout(window, firstOwner)[@"ok"] boolValue], "first control claims its actual native layout");
+    Check([TabLayout(window, secondOwner)[@"error"] isEqual:@"nativeTabLayoutPending"], "a new control cannot reuse the previous control's paint");
+    PaintTabs(window.contentView);
+    Check([TabLayout(window, secondOwner)[@"ok"] boolValue], "fresh painting allows the replacement control to claim its geometry");
+    Check([TabLayout(window, firstOwner)[@"error"] isEqual:@"nativeTabLayoutPending"], "returning to an earlier control also requires its actual repaint");
+    Check([popupBaseline isEqual:PaintPopup(window.contentView)], "popup observation preserves every rendered pixel");
+    layout = TabLayout(window);
+    Check([layout[@"ok"] boolValue] && [layout[@"kind"] isEqual:@"popup"] && [layout[@"label"] isEqual:@"Last"], "native popup painting replaces the prior segmented presentation");
+    PaintTabs(window.contentView);
+    Check([TabLayout(window)[@"kind"] isEqual:@"tabs"], "returning native tabs replace the popup layout");
+    NSString *restartOwner = @"{\"frame\":[20,20,180,24],\"count\":3,\"owner\":\"beforeRestart\",\"signature\":\"sameLabels\"}";
+    NSString *restartedOwner = @"{\"frame\":[20,20,180,24],\"count\":3,\"owner\":\"afterRestart\",\"signature\":\"sameLabels\"}";
+    Check([TabLayout(window, restartOwner)[@"ok"] boolValue], "restart fixture claims its painted source");
+    Check([TabLayout(window, @"{\"operation\":\"restart\"}")[@"ok"] boolValue], "active window can prepare an intentional registration restart");
+    AXBLayoutForget(window);
+    Check([TabLayout(window, restartedOwner)[@"error"] isEqual:@"inactiveLayoutWindow"], "prepared restart grants no access before the replacement registration");
+    AXBLayoutObserve(window);
+    Check([TabLayout(window, @"{\"frame\":[20,20,180,24],\"count\":3,\"owner\":\"changed\",\"signature\":\"newLabels\"}")[@"error"] isEqual:@"nativeTabLayoutPending"], "restart cannot reuse geometry for changed source labels");
+    Check([TabLayout(window, @"{\"frame\":[10,20,200,24],\"count\":3,\"owner\":\"changedFrame\",\"signature\":\"sameLabels\"}")[@"error"] isEqual:@"nativeTabLayoutPending"], "restart cannot reuse geometry for changed dimensions at the same anchor");
+    Check([TabLayout(window, restartedOwner)[@"ok"] boolValue], "intentional restart reuses unchanged painted geometry without forcing native redraw");
+    Check([TabLayout(window, @"{\"frame\":[20,20,180,24],\"count\":3,\"owner\":\"afterRestart\",\"signature\":\"newLabels\"}")[@"error"] isEqual:@"nativeTabLayoutPending"], "source changes on the same owner wait for real painting");
+    Check([TabLayout(window, restartOwner)[@"error"] isEqual:@"nativeTabLayoutPending"], "restart transfers a paint claim only once");
+    for (NSString *request in @[@"[]", @"{\"frame\":[0,0,0,20],\"count\":3}", @"{\"frame\":[20,20,180,24],\"count\":3.5}", @"{\"frame\":[20,20,180],\"count\":3}",
+        @"{\"frame\":[true,20,180,24],\"count\":3}", @"{\"frame\":[20,20,180,24],\"count\":true}"])
+        Check([TabLayout(window, request)[@"error"] isEqual:@"invalidLayoutRequest"], "invalid native tab requests fail closed");
+    Check([TabLayout(window, @"{\"frame\":[20,60,180,24],\"count\":3}")[@"error"] isEqual:@"nativeTabLayoutPending"], "unpainted geometry is not invented");
+    AXBLayoutForget(window);
+    Check([TabLayout(window)[@"error"] isEqual:@"inactiveLayoutWindow"], "detached window cannot retain a readable layout");
+    AXBLayoutShutdown();
+    Check(method_getImplementation(class_getInstanceMethod(NSSegmentedCell.class, @selector(drawWithFrame:inView:))) == original, "shutdown restores the original public drawing method");
+    Check(method_getImplementation(class_getInstanceMethod(NSPopUpButtonCell.class, @selector(drawWithFrame:inView:))) == originalPopup, "shutdown restores native popup drawing too");
+    AXBLayoutInitialize();
+    Check(method_getImplementation(class_getInstanceMethod(NSSegmentedCell.class, @selector(drawWithFrame:inView:))) == observed, "database reopen reuses its drawing observer without stacking wrappers");
+    AXBLayoutObserve(window);
+    Check([TabLayout(window)[@"error"] isEqual:@"nativeTabLayoutPending"], "database reopen cannot inherit a previous layout");
+    PaintTabs(window.contentView);
+    Check([TabLayout(window)[@"ok"] boolValue], "new painting works after database reopen");
+    NSDictionary *workerRead;
+    std::thread reader([&] { @autoreleasepool { workerRead = TabLayout(window); } }); reader.join();
+    Check([workerRead[@"error"] isEqual:@"notMainThread"], "worker layout reads reject without touching AppKit windows");
+    AXBLayoutForget(window); AXBLayoutObserve(window);
+    NSSegmentedControl *native = [[NSSegmentedControl alloc] initWithFrame:NSMakeRect(20, 20, 180, 24)];
+    NSSegmentedCell *nativeCell = TabCell();
+    native.cell = nativeCell; nativeCell.controlView = native;
+    PaintCell(window.contentView, nativeCell);
+    Check([TabLayout(window)[@"error"] isEqual:@"nativeTabLayoutPending"], "a real AppKit control keeps its native tree without a duplicate captured layout");
+    NSView *replacedCanvas = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    [window.contentView addSubview:replacedCanvas];
+    PaintTabs(replacedCanvas);
+    Check([TabLayout(window)[@"ok"] boolValue], "paint belongs to its live canvas in the registered window");
+    [replacedCanvas removeFromSuperview];
+    Check([TabLayout(window)[@"error"] isEqual:@"nativeTabLayoutPending"], "a detached canvas cannot supply geometry to its replacement");
+    // A second plugin can wrap our drawing observer and keep it after close.
+    // Reopening must preserve both observers without collecting twice.
+    Method draw = class_getInstanceMethod(NSSegmentedCell.class, @selector(drawWithFrame:inView:));
+    Method popup = class_getInstanceMethod(NSPopUpButtonCell.class, @selector(drawWithFrame:inView:));
+    IMP chained = method_getImplementation(draw), chainedPopup = method_getImplementation(popup);
+    __block NSInteger laterDraws = 0, laterPopups = 0;
+    IMP later = imp_implementationWithBlock(^(id cell, NSRect frame, NSView *view) {
+        ++laterDraws; ((void (*)(id, SEL, NSRect, NSView *))chained)(cell, @selector(drawWithFrame:inView:), frame, view);
+    });
+    IMP laterPopup = imp_implementationWithBlock(^(id cell, NSRect frame, NSView *view) {
+        ++laterPopups; ((void (*)(id, SEL, NSRect, NSView *))chainedPopup)(cell, @selector(drawWithFrame:inView:), frame, view);
+    });
+    method_setImplementation(draw, later); method_setImplementation(popup, laterPopup);
+    AXBLayoutShutdown();
+    Check(method_getImplementation(draw) == later && method_getImplementation(popup) == laterPopup, "closing preserves a later plugin's drawing observers");
+    Check([baseline isEqual:PaintTabs(window.contentView)] && [popupBaseline isEqual:PaintPopup(window.contentView)], "inactive chained observers preserve native rendering");
+    AXBLayoutInitialize(); AXBLayoutObserve(window);
+    NSInteger priorDraws = laterDraws, priorPopups = laterPopups;
+    PaintTabs(window.contentView); NSUInteger tabSerial = [TabLayout(window)[@"serial"] unsignedIntegerValue];
+    PaintPopup(window.contentView); NSUInteger popupSerial = [TabLayout(window)[@"serial"] unsignedIntegerValue];
+    Check(laterDraws == priorDraws+1 && laterPopups == priorPopups+1 && popupSerial == tabSerial+1, "reopen chains other observers once and captures each layout once");
+    AXBLayoutShutdown();
+    Check(method_getImplementation(draw) == later && method_getImplementation(popup) == laterPopup, "second shutdown preserves the other plugin too");
+    method_setImplementation(draw, original); method_setImplementation(popup, originalPopup);
+    imp_removeBlock(later); imp_removeBlock(laterPopup);
+    [window close]; Pump();
+}
+
+static void TabSemanticsTest(void) {
+    NSWindow *window = Window(@"AXB tab semantics");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9030);
+    NSDictionary *group = @{@"id": @"tabs", @"role": @"tabgroup", @"label": @"Sections", @"value": @"", @"enabled": @YES,
+        @"visible": @YES, @"frame": @[@10, @20, @300, @30]};
+    NSDictionary *tab = @{@"id": @"first", @"parent": @"tabs", @"role": @"tab", @"label": @"First", @"value": @YES, @"enabled": @YES,
+        @"visible": @YES, @"frame": @[@10, @20, @100, @30]};
+    NSDictionary *snapshot = @{@"version": @1, @"revision": @1, @"label": @"Tab semantics", @"enabled": @YES, @"nodes": @[group, tab]};
+    Check([Exchange(window, 9030, 1, session, snapshot)[@"ok"] boolValue], "native tab semantics snapshot accepted"); Pump();
+    id tabs = Provider(window).accessibilityChildren.firstObject, child = [tabs accessibilityTabs][0];
+    Check([[child accessibilityRole] isEqual:NSAccessibilityRadioButtonRole] && [[child accessibilitySubrole] isEqual:NSAccessibilityTabButtonSubrole], "tab uses Apple's radio role and tab-button subrole");
+    Check([[tabs accessibilitySelectedChildren] isEqual:@[child]] && [tabs accessibilityValue] == child && [child accessibilityParent] == tabs, "selected tab and containment relationships agree");
+    NSMutableDictionary *unselected = [tab mutableCopy]; unselected[@"value"] = @NO;
+    NSMutableDictionary *updated = [snapshot mutableCopy]; updated[@"revision"] = @2; updated[@"nodes"] = @[group, unselected];
+    Exchange(window, 9030, 1, session, updated); Pump();
+    Check([child accessibilityPerformPress], "tab selection queues its original action");
+    NSDictionary *action = Exchange(window, 9030, 1, session, updated)[@"action"];
+    Exchange(window, 9030, 1, session, updated, @{@"id": action[@"id"], @"status": @"completed", @"message": @"dispatched"}); Pump();
+    AXBWindowView *view = ((AXBNode *)child).owner;
+    Check(view.actionFeedback != nil, "dispatch acknowledgement keeps tab feedback until selection is published");
+    updated[@"revision"] = @3; updated[@"nodes"] = @[group, tab];
+    Exchange(window, 9030, 1, session, updated); Pump();
+    Check(view.actionFeedback == nil, "published selection consumes exact tab feedback once");
+    Exchange(window, 9030, 1, session, updated); Pump();
+    Check(view.actionFeedback == nil, "receipt replay does not repeat completed tab feedback");
+    updated[@"revision"] = @4; updated[@"nodes"] = @[group, unselected];
+    Exchange(window, 9030, 1, session, updated); Pump();
+    Check([child accessibilityPerformPress], "vetoed selection can be requested without changing its native value");
+    action = Exchange(window, 9030, 1, session, updated)[@"action"];
+    Exchange(window, 9030, 1, session, updated, @{@"id": action[@"id"], @"status": @"completed", @"message": @"dispatched"}); Pump();
+    NSMutableDictionary *expired = [view.actionFeedback mutableCopy]; expired[@"deadline"] = @0; view.actionFeedback = expired;
+    Exchange(window, 9030, 1, session, updated); Pump();
+    Check(view.actionFeedback == nil && ![[child accessibilityValue] boolValue], "unchanged tab selection expires without inventing a selected value");
+    [window close]; Pump();
+}
+
 int main(void) {
     @autoreleasepool {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
         [NSApp finishLaunching];
+        StableIdentifierTest();
+        NativeTabLayoutTest();
+        TabSemanticsTest();
         SessionLifetimeTest();
         LogicalFrameTest();
         NavigationOrderTest();
