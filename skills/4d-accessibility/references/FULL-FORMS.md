@@ -15,7 +15,7 @@ The following is an implementation checklist, not a coverage percentage. A sourc
 | Family | Current position | Work needed for complete support |
 | --- | --- | --- |
 | Ordinary text, buttons, checkboxes, radios, dropdowns and combos | Live coverage exists for the cases in status. | Complete input-method, grapheme, wrapped-text geometry and protected-editor checks. |
-| Styled native text | Plain-text normalization and native-editor changes are on `feature/full-form-accessibility`. Real 4D command tests and both compiler targets pass. Desktop and VoiceOver checks are pending. | Validate style-preserving edits, selection, Undo and long input in both modes. Read embedded expressions from their original rendered context without extra evaluation; expose links and style ranges. |
+| Styled native text | On `feature/full-form-accessibility`, named/generated forms pass interpreted and compiled native editing, style preservation, Unicode selection, multiline input, original validation, Undo and stale-element checks. Compiled VoiceOver reads both variants. Both compiler targets and private-copy command checks pass. | Validate long input. Read embedded expressions from their original rendered context without extra evaluation; expose actionable links and style ranges. Styled grid-cell editors remain separate work. |
 | Array, collection and entity list boxes | Flat logical grids, native editors and selected cell types are exercised. | Support classic current/named selections, hierarchy, remaining cell types and remote performance. Keep row identities stable after sorting and replacement. |
 | Page subforms and generated forms | Automatic discovery and area-owned lifecycle are exercised. | Resolve the nonblocking parent/child case with identically named object-property editors. Validate classic list subforms and additional table-form contexts. |
 | Tabs | Not implemented. | Discover all labels and the selected tab; expose tab-group semantics; select through the original handler or standard action. Scrolling, icons and bottom placement must use real control geometry. |
@@ -34,7 +34,7 @@ Parsing a fresh private copy of a 4D expression reference can execute its method
 
 ## Validation order
 
-Finish the area-integration acceptance gate before updating any host's upstream pin. Then implement and validate one family at a time. Start with ordinary styled editors and focus in compound generated forms, followed by tabs, classic selection/list subforms and hierarchy. These families exercise reusable text, selection and containment behavior before the larger embedded-editor adapters.
+Finish the area-integration acceptance gate before updating any host's upstream pin. Then implement and validate one family at a time. Ordinary styled-field basics now have live evidence. Next are focus in compound generated forms, tabs, classic selection/list subforms and hierarchy. These families exercise reusable text, selection and containment behavior before the larger embedded-editor adapters.
 
 For each family, compare the bridge with the unmodified native UI, exercise external accessibility and VoiceOver, and verify the application result in every claimed execution mode. Test stale elements after hiding, page changes, rebinding and close. Publish the exact source and package hashes with the results. A compiler pass or an accepted AX request cannot close the family.
 
