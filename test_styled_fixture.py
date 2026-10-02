@@ -140,7 +140,7 @@ def main():
             ax.wait_for(lambda: styled.read("AXValue") == "Recovered 🎹", "Complete Unicode recovery", timeout=20)
             settle()
             check(find("Save contact").press() == 0, "recovered text uses the ordinary commit handler")
-            ax.wait_for(lambda: "Recovered" in state()["styled"], "Committed recovered text", timeout=20)
+            ax.wait_for(lambda: "Recovered" in state().get("styled", ""), "Committed recovered text", timeout=20)
             settle()
             check(styled.set_text("Recovered 🎹\nSecond styled line") == 0,
                   "styled multiline replacement accepted")
@@ -150,7 +150,7 @@ def main():
             check(styled.read("AXNumberOfCharacters") == 31,
                   "styled character count uses visible UTF-16 text without markup")
             check(find("Save contact").press() == 0, "multiline styled text uses the original commit handler")
-            ax.wait_for(lambda: "Second styled line" in state()["styled"],
+            ax.wait_for(lambda: "Second styled line" in state().get("styled", ""),
                         "Committed multiline styled text", timeout=20)
             settle()
             if args.voiceover:

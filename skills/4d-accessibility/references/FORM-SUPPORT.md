@@ -64,7 +64,7 @@ Native Boolean checkbox/popup and numeric mixed-state cells use their existing e
 
 ## AreaList grids and large tables
 
-Use [automatic AreaList grid composition](GRIDS.md#add-an-arealist-grid-to-the-same-form) for flat array-backed areas. It discovers the actual vendor bindings and exposes complete logical rows/columns alongside the form's ordinary controls. Supply existing stable keys, readiness and record scope, plus text descriptions for meaningful custom/picture columns. Repeated subforms use separate area variables and arrays. Native selection/reveal and BMP text entry pass the live fixtures with existing vendor entry/exit validation and Undo/Redo. VoiceOver reaches the final logical row and returns to ordinary controls.
+Use [automatic AreaList grid composition](AREALIST-GRIDS.md) for flat array-backed areas. It discovers the actual vendor bindings and exposes complete logical rows/columns alongside the form's ordinary controls. Supply existing stable keys, readiness and record scope, plus text descriptions for meaningful custom/picture columns. Repeated subforms use separate area variables and arrays. Native selection/reveal and BMP text entry pass the live fixtures with existing vendor entry/exit validation and Undo/Redo. VoiceOver reaches the final logical row and returns to ordinary controls.
 
 Supplementary-Unicode entry, protected write-only entry, hierarchy/SubALP, breaks, transposition and other complex vendor modes remain required work. The current early rejection of supplementary input prevents a reproduced vendor editor defect; it is not an accepted final limitation. [Evidence](VALIDATION.md).
 

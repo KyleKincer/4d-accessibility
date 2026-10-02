@@ -23,7 +23,7 @@ python3 ci/check_repository.py
 
 `test_native.py` compiles the AppKit provider tests. Add `--run` only in an unlocked graphical session. Live fixture scripts also require 4D desktop and appropriate Accessibility permission. Screen recording is needed for visual/VoiceOver probes.
 
-The compatibility branch has [tab-control acceptance cases](tests/TABS.md#run-the-acceptance-cases) for named/generated forms, repeated children and compact native menus. Keep its plugin, component and helpers together when preparing a fixture.
+Version 0.21.0 has [tab-control acceptance cases](tests/TABS.md#run-the-acceptance-cases) for named/generated forms, repeated children and compact native menus. Keep its plugin, component and helpers together when preparing a fixture.
 
 ## Area-owned integration
 

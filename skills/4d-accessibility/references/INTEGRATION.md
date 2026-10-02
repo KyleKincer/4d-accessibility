@@ -59,7 +59,7 @@ Completion: the application compiles. If packages are optional in this host, ver
 
 [Add the lifecycle area](AREA-INTEGRATION.md#ordinary-named-form) with `--form Customer`. Existing form and object methods need no startup or shutdown calls. Clear existing names need no callback. When metadata is needed, return it from one application-owned [`AXB_Configure`](AREA-INTEGRATION.md#one-optional-configuration-method).
 
-For a record editor with editable grids, add `grids` configuration to that callback. Use existing stable line keys, record `scope` and loader `ready` state. Describe visual-only columns and map an existing selection controller only when selection must refresh other UI. The [assembled example](GRIDS.md#configure-a-record-editor-with-editable-grids) shows the application changes.
+For a record editor with editable grids, add `grids` configuration to that callback. Use existing stable line keys, record `scope` and loader `ready` state. Describe visual-only columns and map an existing selection controller only when selection must refresh other UI. The [assembled example](examples/RECORD-EDITOR.md) shows the application changes.
 
 The [manual lifecycle](MANUAL-LIFECYCLE.md) remains available for application-owned registrations. The configuration contracts below are shared by both paths. Automatic buttons run their ordinary actions; text goes through native editors, keystroke handlers, Undo and validation. Protected inputs remain write-only.
 
@@ -270,7 +270,7 @@ Determinate progress exposes its actual range and supports numeric, date and tim
 
 ### Configure data grids
 
-Use [the grid recipe](GRIDS.md) for native array, collection or entity-selection list boxes and AreaList Pro. The compatibility branch also implements [classic current/named selections](GRIDS.md#use-a-classic-current-or-named-selection). The recipe covers stable keys, loading, selection controllers, cell descriptions, row metadata and an [assembled record-editor example](GRIDS.md#configure-a-record-editor-with-editable-grids). Keep the root area and return grid options from `AXB_Configure`.
+Use [the grid recipe](GRIDS.md) for native array, collection or entity-selection list boxes, and [AreaList grids](AREALIST-GRIDS.md) for AreaList Pro. The compatibility branch also implements [classic current/named selections](GRIDS.md#use-a-classic-current-or-named-selection). The recipe covers stable keys, loading, selection controllers, cell descriptions and row metadata; the [record-editor example](examples/RECORD-EDITOR.md) assembles them. Keep the root area and return grid options from `AXB_Configure`.
 
 ### Explicit providers for existing integrations
 
@@ -367,7 +367,7 @@ An external AX client can read progress from the bridge root group's `AXHelp`. L
 | Your form contains | Integration path |
 | --- | --- |
 | Ordinary inputs, buttons, checkboxes, radios, typed/object/choice-list dropdowns, hierarchical popup menus, editable combos, group boxes, progress, images and readable text | [Automatic form](examples/AUTOMATIC-FORM.md). Add one root area; supply missing labels declaratively. |
-| Flat array-backed AreaList grid | Use [`options.grids`](GRIDS.md). Bind existing row keys; describe image indicators and decorative spacers only where necessary. |
+| Flat array-backed AreaList grid | Use [`options.grids`](AREALIST-GRIDS.md). Bind existing row keys; describe image indicators and decorative spacers only where necessary. |
 | Flat native array list box with complete rows and columns | Use [`options.grids`](GRIDS.md) alongside automatic ordinary controls. |
 | Flat collection or entity-selection list box with direct property columns | Use `options.grids` with the existing Selected Items expression. Supply a collection key property, or use the entity dataclass's primary key. |
 | Flat classic current/named-selection list box | On the compatibility branch, configure `kind: "selection"` and keep the native source, columns and highlight set. See [the classic grid recipe and acceptance limits](GRIDS.md#use-a-classic-current-or-named-selection). |
