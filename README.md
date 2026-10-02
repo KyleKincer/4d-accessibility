@@ -34,7 +34,7 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project
 
 Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download the [release kit](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Signed releases use Sweetwater's Developer ID and Apple notarization; each release's notes define its tested scope. Older ad hoc candidates remain separately labeled.
 
-With the matching 0.20.0 kit, add the lifecycle area automatically:
+With a matching kit that supports area integration, add the lifecycle area automatically:
 
 ```sh
 python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Customer
@@ -42,7 +42,7 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Cust
 
 Use `--all-forms` for named project and table forms, or repeat `--form` for selected forms. `--dry-run` lists proposed changes. The area draws nothing and starts after the existing initialization. Its destruction retires that window's bridge. Ordinary forms need no startup or shutdown calls in their business methods.
 
-Complex forms return their existing provider configuration from one optional application-owned `AXB_Configure` method. The [area integration guide](skills/4d-accessibility/references/AREA-INTEGRATION.md) gives the complete installation, configuration, generated-form and migration contract. Version 0.20.0 is on `main`. Use its matching [Build and test workflow artifact](https://github.com/KyleKincer/4d-accessibility/actions/workflows/ci.yml) or build the exact source revision. It is not yet a signed published release. The released 0.19.7 kit retains the [manual lifecycle](skills/4d-accessibility/references/MANUAL-LIFECYCLE.md). Do not mix that kit with 0.20.0 helpers.
+Complex forms return their existing provider configuration from one optional application-owned `AXB_Configure` method. The [area integration guide](skills/4d-accessibility/references/AREA-INTEGRATION.md) gives the complete installation, configuration, generated-form and migration contract. Check the [availability table](skills/4d-accessibility/references/STATUS.md#availability) for the required kit. For an unpublished version, use its matching [Build and test workflow artifact](https://github.com/KyleKincer/4d-accessibility/actions/workflows/ci.yml) or build the exact source revision. The older 0.19.7 kit retains the [manual lifecycle](skills/4d-accessibility/references/MANUAL-LIFECYCLE.md).
 
 ## More complex forms
 
@@ -50,14 +50,18 @@ Complex forms return their existing provider configuration from one optional app
 | --- | --- |
 | Ordinary controls, repeated or nested page subforms | Add an area to the root. Configure child labels under `children`. Invalidate a child before replacing its form or data binding. [Example](skills/4d-accessibility/references/examples/AUTOMATIC-FORM.md). |
 | Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery). |
-| AreaList Pro grids | Add stable row keys, record scope, loading readiness and descriptions for custom columns. Configure repeated grids within their owning child. [AreaList configuration](skills/4d-accessibility/references/GRIDS.md#add-an-arealist-grid-to-the-same-form). |
+| AreaList Pro grids | Add stable row keys, record scope, loading readiness and descriptions for custom columns. Configure repeated grids within their owning child. [AreaList grids](skills/4d-accessibility/references/AREALIST-GRIDS.md). |
 | JSON-generated forms | Add `AXB_AreaForm` at the shared builder; the original method, events and data stay in place. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
 | Existing application alert and confirmation forms | Add the area and labels. Route inaccessible built-in prompts through the application's existing dialog methods when their appearance is acceptable. Preserve returned choices and validation. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
 | Custom controls or existing native/web content | Preserve a usable native provider. Use the explicit provider contract for application-specific controls; account for every interactive element. [Extension contract](skills/4d-accessibility/references/FORM-SUPPORT.md). |
 
-For a form combining ordinary fields, editable grids and subforms, follow the [assembled record-editor example](skills/4d-accessibility/references/GRIDS.md#configure-a-record-editor-with-editable-grids).
+For a form combining ordinary fields, editable grids and subforms, follow the [assembled record-editor example](skills/4d-accessibility/references/examples/RECORD-EDITOR.md).
 
 The modern grid adapters expose logical rows beyond the viewport and reveal them for supported actions. The older explicit row-summary adapters are retained for compatibility and expose only a subset. They are not the default for new integrations.
+
+## Stable automation identifiers
+
+The 0.21.0 source adds readable paths such as `axb/Customers/SearchFld`. Reopening repeats the locator while retiring the old element handle. Existing object names supply the defaults; an optional `automationKey` gives a logical screen name. Find controls within the selected live window. See [identifier examples and upgrade rules](skills/4d-accessibility/references/IDENTIFIERS.md).
 
 ## Integrate with an agent
 

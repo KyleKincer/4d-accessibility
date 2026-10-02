@@ -2,6 +2,21 @@
 
 The initial release covers the implemented families below on 4D 20.8 and the tested macOS installations. The longer-term goal is complete access to the UI through standard macOS accessibility with minimal application code. That goal is not yet met. Unsupported families remain explicit follow-up work; applications must validate each integrated workflow before relying on it.
 
+## Availability
+
+| Integration or adapter | Signed 0.19.7 | 0.20.0 source and CI kit | 0.21.0 |
+| --- | --- | --- | --- |
+| Manual lifecycle and previously validated controls/grids | Available | Available | Local regression checks pass |
+| Installer-added lifecycle area | Unavailable | Validated; unsigned CI kit | Available |
+| Ordinary styled text | Unavailable | Unavailable | 116 checks pass in four live runs |
+| Tabs | Unavailable | Unavailable | 628 checks pass across eight live runs |
+| Classic current/named-selection grids | Unavailable | Unavailable | 164 checks pass in six live runs |
+| Stable automation locators | Unavailable | Unavailable | Native and desktop acceptance pass |
+
+Local 0.21.0 acceptance passes. For signed distribution, use the published [GitHub release](https://github.com/KyleKincer/4d-accessibility/releases); its notes and attached report record the exact signed-download checks. CI artifacts are development builds. [Candidate evidence](../../../validation/stable-identifiers-0.21.0.json) retains each tested package and source hash.
+
+Build branch kits using [the build guide](../../../CONTRIBUTING.md). Install the plugin, component and helpers from the same kit. A newer helper with an older native plugin does not add a native capability.
+
 Version 0.19.7 packages the helper corrections below together with the plugin and component. Its exact signed download passes 39 compiled VoiceOver checks and 127 interpreted action checks. [Distribution evidence](../../../validation/signed-release-0.19.7.json) records asset hashes and installation checks. Historical 0.19.5 evidence remains linked to distinguish earlier binaries from newer helpers.
 
 The signed 0.19.6 draft passed 39 compiled native-grid VoiceOver checks and 37 compiled AreaList checks. Recording exposed an early checkbox-caption sample in the test; eleven repeated activations confirmed asynchronous speech, eight after an initially stale caption. The driver now observes for up to five seconds without replaying input or moving focus. [Evidence](../../../validation/checkbox-speech-observation.json). Version 0.19.7 changes packaged wording and this test, with no provider behavior change.
@@ -12,9 +27,17 @@ Version 0.20.0 is on `main` with development artifacts from passing CI runs; a s
 
 The area integration passes 1846 checks across 53 live runs in native ARM 4D 20.8/macOS 26.7. Coverage includes ordinary and generated controls, repeated/shared/generated children, nested modal dialogs, named inheritance, intentional restart, optional dependencies, and failure recovery on plain/entity/shared/class roots. Native array, collection and entity grids and repeated AreaList grids retain their tested behavior. Compiled VoiceOver checks cover native grids, AreaList checkboxes and layered buttons. Each run records its execution mode and source/report hashes in [the evidence](../../../validation/area-owned-integration.json).
 
-The complete synthetic window is pixel-identical with and without the area, with zero tolerance or masking. A Form Editor save adds only 4D editor metadata; all original definitions and the canonical area remain unchanged, and reinstalling changes no bytes. Opus 5.5 rated the agent skill 9/10; Fable 5.1 reviewed minimal host changes and its corrections passed the relevant live suites. See [the integration guide](AREA-INTEGRATION.md). These results establish the integration path for the exercised families, not new control-family coverage, Intel runtime, client/server delivery or a signed downloadable 0.20.0 release.
+The complete synthetic window is pixel-identical with and without the area, with zero tolerance or masking. A Form Editor save adds only 4D editor metadata; all original definitions and the canonical area remain unchanged, and reinstalling changes no bytes. See [the integration guide](AREA-INTEGRATION.md). These results establish the integration path for the exercised families, not new control-family coverage, Intel runtime, client/server delivery or a signed downloadable 0.20.0 release.
 
-## Current development check
+## Compatibility additions in 0.21.0
+
+Version 0.21.0 adds tabs through the same area-owned discovery, without extra application hooks. [Tab coverage and checks](TABS.md#coverage) are the authority for each presentation. The tab matrix passes 628 checks across eight interpreted/compiled runs, including compiled VoiceOver. Existing controls pass 520 regression checks, and both pixel comparisons are unchanged. Independent source review found no demonstrated defect. The evidence distinguishes the full matrix from subsequent native corrections and final signed-download checks.
+
+Version 0.21.0 adds ordinary styled native text without application-specific hooks. Named and generated forms pass 116 checks across four live runs in interpreted and compiled ARM 4D 20.8/macOS 26.7. The checks cover visible text, Unicode selections and multiline input, format-preserving native edits, original validation, Undo, recovery and retired elements. Compiled VoiceOver reads both form variants. Both compiler targets and 62 command-level checks pass; inspecting a private copy preserves source text, `OK` and embedded-expression execution counts. [Exact evidence](../../../validation/styled-text-development.json).
+
+The default 4D 20.8 Edit menu leaves Redo unavailable after the same edit in the native baseline and bridge fixture; this does not establish Redo execution in other menu contexts. Embedded expressions still need their original rendered context. Actionable links, style-range reporting and long styled input remain follow-up work. These additions are in 0.21.0; an application gains them only after upgrading its matching kit. See [the family checklist](FULL-FORMS.md) before claiming an entire form accessible.
+
+Version 0.21.0 implements flat classic current/named-selection grids through the existing logical-grid provider. A private read-only process converts record numbers into a shared entity selection. Stored master-table fields are then read from those entities without touching the form's record buffer; actions use the native selection and editors. Current and named selections pass 164 checks across six interpreted/compiled runs, including compiled VoiceOver. Both full-window pixel comparisons are unchanged. Existing array, collection and entity grids pass 388 action checks in six runs. See [configuration and limits](GRIDS.md#use-a-classic-current-or-named-selection) and [the command checks](../../../tests/CLASSIC-SELECTION.md).
 
 Static captions and grouping boxes no longer block hit testing of an overlapping control. The native provider uses the same nonblocking roles as the host overlap check; captions remain reading stops where no control occupies the point. A regression reproduces rejected native button delivery before the fix and verifies one complete mouse pair afterwards. Interactive controls and native views still obstruct delivery. Real application workflow acceptance is separate.
 
@@ -55,14 +78,14 @@ Automatic array grids also accept legacy Boolean hidden-row arrays directly. The
 ## Work required before full accessibility
 
 - Standard 4D `CONFIRM` and `ALERT` dialogs still need accessible text and actions. A [standalone reproduction](https://github.com/KyleKincer/4d-accessibility/tree/main/tests/native-messages) with no plugin, component or replacement form exposes only an empty text element on 4D 20.8/macOS 26.7 in native ARM and Rosetta execution. [Recorded observations](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/native-messages.json). Applications can [integrate their existing dialog forms](MESSAGES.md) and route prompts through them where that appearance is acceptable. The built-in commands themselves remain inaccessible on the tested installation.
-- Tabs, dials, editable pictures, hierarchical lists and standard-action-generated menus need implementation or further validation.
-- Classic current/named-selection grids, native hierarchy, custom/styled/protected editors and further AreaList layouts remain open.
+- Tabs in 0.21.0 pass their scoped acceptance gate. Actual native scroll-arrow presentation remains unvalidated. Dials, editable pictures, hierarchical lists and standard-action-generated menus need implementation or further validation.
+- Native hierarchy, advanced styled/custom/protected editor behavior and further AreaList layouts remain open. Classic current/named selections pass their scoped acceptance; per-row restrictions, transactions, child grids and client/server data remain separate work. Ordinary styled-field coverage in 0.21.0 is described above; styled grid cells remain separate work.
 - Native grid headers pass array, collection and entity tests in interpreted and compiled modes. An earlier intermittent compiled entity activation reported delivery without a handler event. A fresh full run passes; its cause remains unresolved and is retained in the validation record.
 - IME/grapheme behavior, wrapped text geometry, errors/status speech and complete reading order need further work.
 - Advanced `AXB_Dynamic` wrappers and explicit child registration still require private plain data. Automatic area preparation and child discovery do not have this restriction.
 - Voice Control/Switch Control, overlapping providers, multiple displays, older macOS reveal, root forms larger than their window, Intel runtime and remote entity performance need validation.
 - Broader compiled desktop coverage, client/server delivery and complete real application workflows remain open.
-- The plug-in manifest ID must not conflict with another plug-in in a target host. The current ID matches the optional host lookup. Developer ID signing and notarization pass for the 0.19.5 signed candidate; full-UI coverage remains unfinished.
+- The plug-in manifest ID must not conflict with another plug-in in a target host. The current ID matches the optional host lookup. Signed-release installation evidence is linked above; full-UI coverage remains unfinished.
 
 The native binary's deployment target is a compiler setting, not a tested macOS support promise. Windows has no accessibility implementation. A label on an opaque interactive control, a compiler pass or a clean diagnostics report is not proof of an accessible screen.
 

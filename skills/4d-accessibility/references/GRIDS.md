@@ -2,6 +2,16 @@
 
 Install matching packages and add the root [lifecycle area](AREA-INTEGRATION.md). Return these grid options from the application-owned `AXB_Configure` method. Ordinary controls remain automatically discovered. The same options also work with the [manual lifecycle](INTEGRATION.md#2-connect-one-form).
 
+| Grid | Read |
+| --- | --- |
+| Native array list box | [Array list box](#add-a-native-array-list-box-without-replacing-discovery) |
+| Collection or entity-selection list box | [Collection/entity list box](#use-a-collection-or-entity-selection-list-box) |
+| Classic current or named selection | [Classic selection](#use-a-classic-current-or-named-selection) |
+| AreaList Pro | [AreaList grids](AREALIST-GRIDS.md) |
+| Record editor combining fields, an editable grid and subforms | [Record-editor example](examples/RECORD-EDITOR.md) |
+
+Every kind shares the [loading guard](#gate-loading-and-record-changes), [temporary keys for unsaved rows](#give-unsaved-rows-temporary-keys), [stable column locators](#describe-custom-native-grid-columns) and the [selection callback contract](#reuse-the-existing-selection-controller). This file is the authority for those contracts.
+
 ## Add a native array list box without replacing discovery
 
 In `AXB_Configure`, add the list box's object name and its stable row-key column to the returned options:
@@ -13,21 +23,17 @@ $options.grids:=New object("Items"; New object(\
  "kind"; "array"; "keyColumn"; "LineID"; "label"; "Record rows"))
 ```
 
-`Items` is the list box's form-object name. `LineID` is a column bound to the existing Text, Integer or LongInt identity array, with one unique key per source row. Text keys must be nonempty and at most 256 UTF-16 units. Negative integer keys and zero are valid. The column can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`.
+`Items` is the list box's form-object name. `LineID` is a column bound to the existing Text, Integer or LongInt identity array, with one unique key per source row. Text keys must be nonempty and at most 256 UTF-16 units. Negative integer keys and zero are valid. The column can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`. Add the [loading guard](#gate-loading-and-record-changes) when rows load after On Load, and [temporary keys](#give-unsaved-rows-temporary-keys) when unsaved rows share a placeholder ID.
 
 The list box's own variable must be its Boolean selection array, with the same row count as the key array. Keep unique numeric IDs in their original array. The bridge converts them to Text only for accessibility identity; callbacks receive the original numeric key. An already unique identity array needs no parallel array. Real-array keys are unsupported.
 
 Keep the existing row-control array too. Automatic grids accept both LongInt flags and legacy Boolean hidden-row arrays, where True hides a row. Hidden rows are omitted from the logical table and cannot be edited through a retained element. The array must match the source row count and follow the list box's existing sorting and filtering. No additional grid option or array conversion is needed. [4D's row-control bindings](https://developer.4d.com/docs/commands/listbox-get-arrays).
 
-If several new rows have ID `0` until saved, those IDs cannot identify them yet. Assign a UI UUID once when each row is inserted, keep it through editing and saving, and move or delete it with that row in every array operation. Bind this key array to a hidden column so native sorting moves it too. Retire its keys when reloading the display arrays. These keys need no database field and must not replace business IDs. The same rule applies to AreaList: append its hidden key column after the existing columns to preserve their numbers. Never generate new keys during accessibility reads or use a repeated product number instead.
-
-If rows load after On Load or the loader calls `IDLE`, add `"ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID))` to the grid options. Initialize `linesReady` to false at the start of On Load, before any code that can run the line loader. In the existing loader, set it false before touching arrays and capture the record ID when loading begins. When the arrays are complete, store that captured ID in `linesLoadedID`, then set `linesReady` true. The ID comparison also closes the interval between switching records and starting the loader. Changing `scope` alone would publish old rows under the new record identity during that interval. While false, the table is disabled and previous cell references stop working. Use a Formula for changing readiness; a literal Boolean stays fixed.
-
 The provider discovers the displayed columns, reads their existing scalar formats, and exposes every non-hidden row. Cell values load as accessibility tools request them. It retains keyed cell identities after sorting, scrolls through the native control, and uses the existing editor for supported enterable cells. It does not assign backing arrays during text entry. A completed text action means the text reached the editor; normal validation and commit still happen when editing ends. Keystroke filters can reject the action.
 
 If selection needs the application's existing dependent-UI refresh, add `"onSelection"; Formula(YourExistingSelectionHandler)`. See the [selection callback contract](#reuse-the-existing-selection-controller).
 
-The validated fixture covers flat array list boxes with scalar text, number, date, time or Boolean values and VoiceOver navigation through all logical rows. [Column descriptions](#describe-custom-native-grid-columns) make picture and object-array displays readable. Native checkbox and Boolean popup cells use the existing control path described below. Hierarchical/custom cell editing and cold-cache announcements remain required work.
+The validated fixture covers flat array list boxes with scalar text, number, date, time or Boolean values and VoiceOver navigation through all logical rows. [Column descriptions](#describe-custom-native-grid-columns) make picture and object-array displays readable. Native checkbox and Boolean popup cells use the [existing control path](#native-checkbox-and-popup-cells). Hierarchical/custom cell editing and cold-cache announcements remain required work.
 
 ## Use a collection or entity-selection list box
 
@@ -49,17 +55,60 @@ $options.grids:=New object("Items"; New object(\
  "label"; "Record rows"))
 ```
 
-Here `Form.selectedLines` is the list box's existing selected entity selection. The bridge reads the bound entity selection, discovers the primary-key attribute and loads displayed cell values on demand. Sorting and filtering preserve identities within the same dataclass and datastore. Switching dataclasses retires old cells even when their primary keys match. An optional `keyProperty` selects another stored unique identity attribute. Keep the form's `scope` and loading `ready` guard from the array example when a record change reuses the grid.
+Here `Form.selectedLines` is the list box's existing selected entity selection. The bridge reads the bound entity selection, discovers the primary-key attribute and loads displayed cell values on demand. Sorting and filtering preserve identities within the same dataclass and datastore. Switching dataclasses retires old cells even when their primary keys match. An optional `keyProperty` selects another stored unique identity attribute. Keep the form's `scope` and the [loading guard](#gate-loading-and-record-changes) when a record change reuses the grid.
 
 The `selection` Formula must return the list box's actual Selected Items expression. If that property is empty, configure it first. For collections, it contains references to the original selected objects. Do not return copied rows or a separately maintained list of keys. 4D 20.8 cannot discover that expression through a public getter. A selectable grid therefore needs this one mapping. A grid whose selection mode is None can omit it. Use `onSelection` only when the application's existing selection controller needs to run, following the [selection callback contract](#reuse-the-existing-selection-controller).
 
-The adapter discovers direct property columns such as `This.description`. Entity columns must be stored text, number, date or Boolean attributes for automatic value reading and editing. Other displayed expressions and custom values can use the descriptions below. Hidden columns stay hidden, and password-formatted values are not read. Enterable text/number/date cells use the existing native editor and application validation. The bridge never assigns object properties or calls `save()`. 4D performs its normal entity save when editing ends; errors from that save go to the application's existing error handling. Null cells remain read-only. Boolean cells use their native checkbox or popup editor. Editing custom/styled cells and hierarchies still need implementation. Row metadata uses the configuration below.
+The adapter discovers direct property columns such as `This.description`. Entity columns must be stored text, number, date or Boolean attributes for automatic value reading and editing. Other displayed expressions and custom values can use the [column descriptions](#describe-custom-native-grid-columns). Hidden columns stay hidden, and password-formatted values are not read. Enterable text/number/date cells use the existing native editor and application validation. The bridge never assigns object properties or calls `save()`. 4D performs its normal entity save when editing ends; errors from that save go to the application's existing error handling. Null cells remain read-only. Boolean cells use their native checkbox or popup editor. Editing custom/styled cells and hierarchies still need implementation. Row metadata uses [the metadata configuration](#reuse-row-metadata).
 
 A collection cell containing an object or another unsupported value exposes `Cell description required` and is disabled until it has a text description. The bridge never serializes that object into the accessibility tree. `gridValueDescriptionRequired` appears after a cell is read and resets after a reorder, so an audit must read all pages. Large or remote entity selections remain untested for polling cost; each refresh reads all row keys.
 
+## Use a classic current or named selection
+
+Choose a matching kit that includes this adapter from [availability](STATUS.md#availability). Keep the application's existing pin until that version's acceptance gate passes. Install plugin, component and helpers together.
+
+For an existing current-selection or named-selection list box, add one entry in `AXB_Configure`:
+
+```4d
+$options.grids:=New object("Items"; New object(\
+ "kind"; "selection"; "label"; "Records"))
+```
+
+`Items` is its existing form-object name. Keep its master table or named selection, highlight set, columns, events and methods. The adapter reads the actual source and uses the dataclass's primary key for stable row identity. An optional `keyProperty` names another stored attribute with unique, nonempty Text values of at most 254 UTF-16 units, or whole numbers from -2,147,483,648 through 2,147,483,647. Null, empty, fractional or duplicate keys disable the table. Add `scope` and the [loading guard](#gate-loading-and-record-changes) when the list box shows another parent record's rows or loads them after On Load. Add `onSelection` only when the existing selection controller must refresh dependent UI. Omit `selection`; this kind reads the list box's highlight set. A source without a highlight set offers no selection action. No copied display arrays or form event hook is needed.
+
+The bridge reads ordered physical record numbers and copies the existing highlight set. A private read-only process resolves those numbers into a shared entity selection. Displayed values come from stored fields in the master table, with the original column formats. Accessibility reads preserve the form's current selection, loaded record, unsaved values and `OK`. Actions use the original native list box and editors, so explicit navigation or editing can change record state through the application's normal behavior.
+
+The table needs a datastore mapping and a unique supported identity. Automatic columns cover stored text, number, date and Boolean master-table fields. For calculated expressions, related-table fields, styled cells or other displays, use [column descriptions](#describe-custom-native-grid-columns). The description receives the row's `4D.Entity` as `This` and `$1.item`. Read each value from that entity: `[Table]Field` reads the form's current record rather than the requested row. Pass entity attributes to the existing formatter, for example `Formula(FormatStatus(This.status))`. For a related field, follow its ORDA relation, for example `Formula(String(This.customer.name))`. Keep record loading, selection changes, `SELECTION TO ARRAY`, `SELECTION RANGE TO ARRAY` and `Selection to JSON` out of this callback; the last three unload a modified record. A description provides reading only. An enterable custom column still needs an editor adapter before that screen is fully accessible.
+
+In the fixture, screenshot review confirms that the list box paints saved values while the form's process holds a modified, unsaved record. Automated checks verify the persisted accessibility value and preserve the separate unsaved buffer. Uncommitted transaction records, remote/client-server data, classic grids in child subforms, custom display expressions and additional cell types require their own acceptance tests.
+
+Rows publish after a private read completes. Until then, including briefly after sorting or changing the rows, the table is disabled with `Classic selection is loading` and cell actions are rejected. Retained row identities survive ordinary sorting. A read failure appears in the table label as `Classic selection read failed: <error>: <method>: <line>`; it does not call `onError` or the application's error handler. The next refresh retries. Both loading and read failure produce `gridUnavailable` in coverage diagnostics; read the table label before changing the configuration. The configured label prefixes these messages, for example `Records: Classic selection is loading`.
+
+Each completed read starts another short-lived process and copies the highlight set. Selection feedback arrives after a later read and must fit the existing two-second confirmation deadline. The fixture covers 600 local records; measure larger selections before claiming acceptable performance.
+
+## Gate loading and record changes
+
+Every grid kind uses this guard when rows load after On Load, the loader calls `IDLE`, or the grid shows another parent record's rows. Add `"ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID))` to that grid's options, and order the existing loader:
+
+1. Initialize `linesReady` to false at the start of On Load, before any code that can run the line loader.
+2. In the existing loader, set it false before replacing or refreshing arrays, and capture the record ID when loading begins.
+3. When the data is complete, store that captured ID in `linesLoadedID`, then set `linesReady` true. If loading finishes asynchronously, carry the captured ID with that load and use it at completion; do not substitute the currently displayed ID.
+
+Change `scope` when the record changes too. Scope alone does not prove which record the arrays contain: changing it alone would publish old rows under the new record identity between switching records and starting the loader. The loaded-ID comparison closes that interval. While readiness is false, the table is disabled and previous cell references stop working. Use a Formula for changing readiness; a literal Boolean stays fixed.
+
+These properties assume existing mutable plain form data. For an entity, class-instance or shared root, keep readiness and loaded-record identity in the application's existing editor state, as in the [record-editor example](examples/RECORD-EDITOR.md#entity-class-and-shared-root-data). Do not add UI attributes to an entity or bypass a shared object's `Use...End use` rules.
+
+In a child grid, each `ready` Formula reads that child's data. A completion delivered to the root with `CALL FORM` has the root's `Form`; update the actual child data captured when the load began, rather than assuming `Form.linesReady` refers to that child. Before marking it ready, verify the current container still owns that data and represents that record. Repeated automatic children sharing a plain business object need distinct per-instance readiness/loaded-ID properties if their loaders differ.
+
+## Give unsaved rows temporary keys
+
+If several new rows have ID `0` until saved, those IDs cannot identify them yet. Assign a UI UUID once when each row is inserted, keep it through editing and saving, and move or delete it with that row in every array operation. Bind this key array to a hidden column so native sorting moves it too. Retire its keys when reloading the display arrays. These keys need no database field and must not replace business IDs. The same rule applies to AreaList: append its hidden key column after the existing columns to preserve their numbers. Never generate new keys during accessibility reads or use a repeated product number instead.
+
 ## Describe custom native grid columns
 
-The working source accepts column metadata for array, collection and entity-selection grids. Keep the same grid configuration and add entries only where automatic scalar reading does not describe the visible UI. Keys are existing column object names, not header captions or column positions. Find the column itself in the Form editor; its header has a separate object name. An unknown column name disables the grid and reports `gridUnavailable`.
+In kits with [stable locators](IDENTIFIERS.md), column metadata can include `automationKey`. It replaces the native column object-name segment, or the AreaList `column.N` segment. Use 1–256 UTF-16 units and a unique key within that grid. An invalid value rejects startup with `invalidGrids`; duplicate keys reject publication. Row keys are also visible in `AXIdentifier`, so use opaque, non-sensitive identities.
+
+The working source accepts column metadata for array, collection, entity-selection and classic-selection grids. AreaList columns use [their own description rules](AREALIST-GRIDS.md#describe-custom-columns). Keep the same grid configuration and add entries only where automatic scalar reading does not describe the visible UI. Keys are existing column object names, not header captions or column positions. Find the column itself in the Form editor; its header has a separate object name. An unknown column name disables the grid and reports `gridUnavailable`.
 
 Some columns require a description before the grid becomes available:
 
@@ -68,6 +117,7 @@ Some columns require a description before the grid becomes available:
 | Array | Picture or Object array columns; multi-style columns. |
 | Collection/entity | Expressions other than direct `This.<property>`; multi-style columns. |
 | Entity | Attributes other than stored text, number, date or Boolean. |
+| Classic selection | Calculated expressions, related-table fields, unsupported master-table fields and multi-style columns. |
 
 Until those descriptions are supplied, the table is disabled and diagnostics report `gridUnavailable`. A direct collection property containing an object is instead reported per requested cell. Other metadata can improve a header or the meaning of a value. For example:
 
@@ -80,7 +130,7 @@ $options.grids.Items.columns.StatusPicture:=New object(\
 $options.grids.Items.columns.Spacer:=New object("decorative"; True)
 ```
 
-Here `DescribeLineStatus` is the application's existing formatter, which reads `This` as the collection item or entity. It returns meaningful text such as `Ready to ship`. If the formatter takes an argument instead, use `Formula(DescribeLineStatus($1.item))`. Use the same formatter as the visual UI; do not duplicate its business rules in an accessibility adapter. Array grids instead pass the current source row to the existing array formatter, for example `Formula(DescribeArrayLineStatus($1.row))`. Assign this metadata before returning the options.
+Here `DescribeLineStatus` is the application's existing formatter, which reads `This` as the collection item or entity. It returns meaningful text such as `Ready to ship`. If the formatter takes an argument instead, use `Formula(DescribeLineStatus($1.item))`. Use the same formatter as the visual UI, passing entity attributes for a classic grid; do not duplicate its business rules in an accessibility adapter. Array grids instead pass the current source row to the existing array formatter, for example `Formula(DescribeArrayLineStatus($1.row))`. Assign this metadata before returning the options.
 
 An array formatter must index arrays that 4D reorders with the list box, including arrays bound to hidden columns. A parallel unbound array keeps its old order after a header sort and describes the wrong line. Bind it to a hidden column, or resolve `$1.key` in the existing application model.
 
@@ -90,10 +140,10 @@ The `value` Formula receives one object:
 
 | Field | 4D type and meaning |
 | --- | --- |
-| `key` | The original Text or Number key from the bound array or row property. Numeric keys are whole numbers within the supported range, not necessarily an `Is integer` value. |
+| `key` | The original Text or Number key from the bound array, row property or classic identity attribute. Numeric keys are whole numbers within the supported range, not necessarily an `Is integer` value. |
 | `row` | Number, whole and one-based, in the current key array, collection or entity selection. It changes after sorting/filtering and can be passed to an Integer parameter. |
 | `column` | Text. The native column's object name; one formatter can serve several columns. |
-| `item` | The original collection object or `4D.Entity`, by reference. Undefined for arrays, so `$1.item=Null`. It stays in the host. Do not modify, save or reload it. |
+| `item` | The original collection object or `4D.Entity`, by reference. Classic grids supply the resolved entity for that record. Undefined for arrays, so `$1.item=Null`. It stays in the host. Do not modify, save or reload it. |
 
 The callback runs on demand in the owning form or child and must return Text without changing UI, selection or data. `This` is the current collection object or entity; array callbacks have no receiver. It can describe a computed expression, picture, object value or styled display. The bridge does not evaluate the column's source string to manufacture a value. Supplying `value` makes that column read-only through accessibility; it does not change the ordinary 4D control. Custom editor support remains separate work. A `label` alone changes the header while retaining supported native editing. An enterable column with a description still needs custom editor support before the screen is fully accessible; coverage reports `gridCellEditingPending` with its column name. An enterable decorative column produces the same diagnostic. Do not use `decorative` to hide an interactive column.
 
@@ -109,7 +159,7 @@ Configure metadata before `start`; changing it afterwards is not a supported upd
 
 ## Reuse row metadata
 
-A native array grid reads its existing LongInt row-control array automatically. It must have one entry per source row. Hidden rows are omitted; other row states follow the rules below. A `meta` option is invalid for array and AreaList grids. Collection/entity grids can also use the existing Meta Info Expression. A direct `This.<property>` expression, such as `This.meta`, needs no additional configuration. For a method or other expression, pass one Formula that calls the same application code:
+A native array grid reads its existing LongInt row-control array automatically. It must have one entry per source row. Hidden rows are omitted; other row states follow the rules below. A `meta` option is valid only for collection and entity grids; other kinds return `invalidGrids`. Classic grids do not read per-row disabled or unselectable flags. Their global control and column permissions, native editor validation and selection mode still apply. A classic grid with application-specific row restrictions needs adapter work before its full behavior is accessible. Collection/entity grids can also use the existing Meta Info Expression. A direct `This.<property>` expression, such as `This.meta`, needs no additional configuration. For a method or other expression, pass one Formula that calls the same application code:
 
 ```4d
 // The list box's existing Meta Info Expression is RowMeta.
@@ -134,13 +184,13 @@ Programmatic row selection does not run the list box's ordinary object method. I
 
 Keyboard focus may still belong to a search field or another grid. Pass the grid's object name to a controller that needs it, for example `Formula(RefreshCategory("Categories"))`. Carry that name through the called methods instead of rediscovering it with `Object with focus`. Test selection after editing another field as well as immediately after opening the form.
 
-For automatic native grids, the bridge changes the native selection, waits for the binding, and calls `onSelection` once. It checks the binding again, reveals the last selected row, and confirms completion. A handler that changes the selection produces a rejected result without replay. Confirmation has a two-second deadline, so a slow handler can already have run when the bridge reports rejection. A rejected request does not imply rollback. AreaList uses its own selection readback path. The older explicit summary recipe below has a separate confirmation contract.
+For automatic native grids, the bridge changes the native selection, waits for the binding, and calls `onSelection` once. It checks the binding again, reveals the last selected row, and confirms completion. A handler that changes the selection produces a rejected result without replay. Confirmation has a two-second deadline, so a slow handler can already have run when the bridge reports rejection. A rejected request does not imply rollback. AreaList uses its own selection readback path. The older explicit [summary recipe](examples/LISTBOX-FORM.md) has a separate confirmation contract.
 
 ## Native checkbox and popup cells
 
 The native grid adapter discovers Boolean checkboxes, numeric three-state checkboxes and Boolean popup columns. Keep the existing `grids` configuration and column methods. No additional callback is required. Build the packages and install the helpers from the same commit; automatic startup checks the native `gridControls 1` capability.
 
-The column must be enterable to offer editing. Bind it to a Boolean array, a direct `This.<property>` Boolean in a collection, or a stored Boolean entity attribute. Numeric bindings displayed as three-state checkboxes use the same path. Do not add a `columns.<name>.value` description to an operable checkbox or popup. It replaces the widget with read-only text and reports `gridCellEditingPending` for an enterable column. `decorative` omits the column. A Boolean checkbox's native caption supplies its spoken name and takes precedence over a label override. Change a misleading caption in the form definition. `columns.<name>.label` renames the header and is the fallback when that caption is empty. Numeric checkboxes use the column label: 4D 20.8's public getters return the numeric format instead of their caption. If a numeric checkbox has a meaningful visible caption, include it in `columns.<name>.label`, for example `New object("label"; "Reviewed")`.
+The column must be enterable to offer editing. Bind it to a Boolean array, a direct `This.<property>` Boolean in a collection, a stored Boolean entity attribute or a stored Boolean master-table field in a classic grid. Numeric bindings displayed as three-state checkboxes use the same path. Do not add a `columns.<name>.value` description to an operable checkbox or popup. It replaces the widget with read-only text and reports `gridCellEditingPending` for an enterable column. `decorative` omits the column. A Boolean checkbox's native caption supplies its spoken name and takes precedence over a label override. Change a misleading caption in the form definition. `columns.<name>.label` renames the header and is the fallback when that caption is empty. Numeric checkboxes use the column label: 4D 20.8's public getters return the numeric format instead of their caption. If a numeric checkbox has a meaningful visible caption, include it in `columns.<name>.label`, for example `New object("label"; "Reviewed")`.
 
 A checkbox exposes unchecked, checked or mixed state. A Boolean popup exposes its selected label and uses its column label as its name. Give both popup choices meaningful labels in the form's True/False text properties. These widgets do not accept text assignment.
 
@@ -156,150 +206,20 @@ The dispatcher checks the cell, value, permissions, window and hit region before
 
 Negative numeric checkbox states follow 4D: `-1` is blank, and `-2`, `-3` and `-4` are disabled unchecked, checked and mixed states. Disabled cells stay readable. Other negative values report `gridValueDescriptionRequired`; correct the stored state rather than adding a text description to an interactive checkbox. Values above `2` are mixed. Null cells are blank and read-only. Existing row restrictions and Single-Click Edit settings govern whether the native editor is available. A semicolon in a checkbox caption does not make it a popup; discovery also reads the column's native display type.
 
-This adapter covers native flat list boxes. [AreaList checkboxes](#arealist-checkbox-cells) use the vendor's own entry path. [Validation scope](VALIDATION.md) distinguishes historical coverage from checks still owed in a new host.
+This adapter covers native flat list boxes. [AreaList checkboxes](AREALIST-GRIDS.md#checkbox-cells) use the vendor's own entry path. [Validation scope](VALIDATION.md) distinguishes historical coverage from checks still owed in a new host.
 
 ## Add an AreaList grid to the same form
 
-Install AreaList Pro and the host helpers with `--area-list`. The current fixtures use AreaList Pro 11.4.2. Before changing configuration, inspect the live layout. The current adapter requires flat array-backed data, row selection, normal vendor array sorting, no transposition or multi-row layout, and unique Text, Integer or LongInt keys in one bound column. Read `ALP_Area_Transposed=0`, `ALP_Area_SelType=0`, `ALP_Area_RowsInGrid=1`, `ALP_Area_DontSortArrays=0` and `ALP_Area_AutoHierarchy=0` with the vendor getters. `AL_GetObjects2` for `ALP_Object_Hierarchy` must report no hierarchy levels. A custom sort callback is compatible only if it preserves these conditions and sorts the bound arrays together. Preserve the application's semantics; an incompatible layout requires adapter work, not a silent change to vendor flags.
-
-If an existing supported identity array is not bound to a column, append it as a hidden column only after checking every sort, insert and delete path keeps it aligned with the other arrays. Preserve existing physical column numbers. Real-array keys and other unsupported bindings require adapter work. Prefer extending the canonical adapter over adding a parallel Text identity array. Unsaved rows need stable application-owned temporary identities. Validate selection, sorting and editing through the actual application paths.
-
-Use the existing Text, Integer or LongInt identity array. Integer IDs are normalized to Text only in the accessibility descriptor; the bound array stays numeric. Real arrays are not accepted as keys. Empty Text keys and duplicate identities disable the grid.
-
-Identify the area's existing compatible key array:
-
-```4d
-$options:=New object("label"; "Record details"; "scope"; Formula(String(Form.recordID)); \
- "onError"; Formula(ReportAccessibilityFailure($1)))
-$lines:=New object("kind"; "areaList"; "label"; "Record rows"; \
- "keys"; ->aLineID; "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
-$options.grids:=New object("Items"; $lines)
-```
-
-`Items` is the form object's name. The provider finds the key array in the area's actual column bindings; it must occur exactly once. An optional `keyColumn` asserts a particular physical column if your application needs that additional check. Initialize `Form.linesReady` to false at the start of On Load, before any line loading. In the existing loader, clear readiness and capture the record ID before replacing or refreshing arrays. When that load completes, store its captured ID in `Form.linesLoadedID` before setting readiness true. The formula checks that loaded ID against the displayed record, including any delay before loading begins. Change the scope when the record changes; scope alone does not prove which record the arrays contain. The provider reads current vendor bindings and formatting, exposes every non-hidden row and displayed column, and resolves retained cells by their keys after sorting. The other fields and buttons remain automatically discovered.
-
-Ordinary scalar text, numeric, date, time and Boolean columns need no description configuration. Supported Boolean/integer checkbox displays also retain their existing editing behavior; see [checkbox cells](#arealist-checkbox-cells). Every displayed picture, calculated or custom column requires a text description or an explicit decorative declaration; otherwise the grid is disabled with a “needs a text description” label. Add metadata only where the existing UI does not describe its meaning. For example, an image indicator and a decorative spacer:
-
-```4d
-// Set this before returning the options from AXB_Configure.
-$lines.columns:=New object(\
- "5"; New object("label"; "Visibility"; \
-  "value"; Formula(Choose(AXB_PictureEquals(apictVisibility{$1.row}; <>hiddenPict); "Hidden item"; "Visible item"))); \
- "6"; New object("decorative"; True))
-```
-
-Here `apictVisibility` is the picture array bound to that column, and `<>hiddenPict` is the application's existing hidden-item icon. Use your application's actual array/icon names, or resolve `$1.key` in its existing model.
-
-For a calculated column, reuse the function called by its existing vendor callback:
-
-```4d
-$lines.columns["1"]:=New object("label"; "Location"; \
- "value"; Formula(DescribeLocation(aLineID{$1.row}; aLineKind{$1.row})))
-```
-
-`DescribeLocation` stands for the application's existing read-only display function. Its required data must already be loaded. AreaList Pro 11.4.2 rejects source-name queries for calculated columns and cannot read an uncached calculated cell by logical row. The bridge compares the actual column pointers and uses this formula to read any requested row without scrolling the vendor control. A missing formula disables the grid before either invalid vendor query. Keep calculated columns read-only; an editable custom display still requires an editor adapter.
-
-Column keys are actual runtime vendor column numbers as Text, independent of display order. An unconfigured custom column disables the table with a label such as `column 5 needs a text description`; read that label through AX to identify the physical column. Confirm its live binding before supplying metadata: legacy setup can omit an empty column and shift later bindings. Never mark an assumed spacer decorative; it may now contain data. Verify this with the vendor's live binding getters before writing column metadata. A `label` overrides the header. A `value` formula provides readable text for a picture or another custom display; it receives `{key, row, column}` in `$1` and runs inside the owning form when a cell page is requested. Read the existing UI model, without querying, saving, or changing selection. A row-based formula must read an array that AreaList sorts together with the grid, or resolve `$1.key` in the model. An unbound parallel array can describe the wrong row after sorting. Custom descriptions are read-only. A decorative column is omitted from the tree while retaining its width for neighboring cells. Hidden and password-formatted cells never call the value formula or publish their contents. Attributed text is published without its formatting markup.
-
-Text entry uses the existing vendor editor and its entry/exit callbacks. Normal Undo, Redo and validation remain responsible for the edit. Moving into another cell first exits the active editor through the vendor. Rejected input keeps that editor open; a scope change in its exit handler rejects the queued continuation. The bridge then rechecks the requested cell before opening it. No extra application callback is needed. Add `onSelection` only if the application's ordinary selection path needs an existing shared refresh handler; do not call a general click handler that also opens records or runs business commands.
-
-For a grid inside an automatic subform, put this same grid configuration under `options.children.LineDetails.grids`. The root owns registration; the child needs no bridge method. Give each repeated instance its own area variable, every bound array, key-array pointer and record scope. Leave the plugin object’s Variable blank for an instance-local area. Sharing only the key array separately is insufficient.
-
-For example, independently changing records in repeated children can use:
-
-```4d
-// Root context. These are separate, existing process arrays bound in each area.
-// The other bound arrays must also belong to their respective instance.
-$leftLines:=New object("kind"; "areaList"; "label"; "Pending lines"; "keys"; ->aLeftLineID; \
- "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
-$rightLines:=New object("kind"; "areaList"; "label"; "Posted lines"; "keys"; ->aRightLineID; \
- "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
-$options.children:=New object
-$options.children.Left:=New object("label"; "Pending record"; "scope"; Formula(String(Form.recordID)); "grids"; New object("Items"; $leftLines))
-$options.children.Right:=New object("label"; "Posted record"; "scope"; Formula(String(Form.recordID)); "grids"; New object("Items"; $rightLines))
-```
-
-Each grid's `ready` Formula reads that child's data. A completion delivered to the root with `CALL FORM` has the root's `Form`; update the actual child data captured when the load began, rather than assuming `Form.linesReady` refers to that child. Carry the captured record ID with the load. Before marking it ready, verify the current container still owns that data and represents that record. Repeated automatic children sharing a plain business object need distinct per-instance readiness/loaded-ID properties if their loaders differ. Separate AreaList areas and bound arrays remain required for independent grid contents.
-
-The current flat-grid adapter requires row selection mode, a non-transposed single-row layout, no hierarchy, and permission for AreaList to sort its bound arrays. All bound arrays must match the row count. The key array must contain unique Text, Integer or LongInt identities. Text keys must be nonempty and at most 256 UTF-16 units. An incompatible layout appears as a disabled table. Layout failures share a generic label; read the vendor properties listed above to identify the failed requirement. For `areaList`, optional `keyColumn` is a physical number; for native `array`, it is the form-object name of the key column.
-
-AreaList flat row selection and ordinary text editing work in isolated fixtures. Supplementary Unicode is rejected before opening or changing an editor. AreaList Pro 11.4.2 corrupts memory while reading, copying or committing long supplementary text even without this bridge; the 11.4.3b5 preview also fails. The guard protects bridge requests, not the vendor's direct-input path. See the [reproduction](https://github.com/KyleKincer/4d-accessibility/blob/main/tests/AREA-LIST-UNICODE.md).
-
-Protected-cell editing, vendor popup/radio interaction, hierarchical and multiline layouts, and complete assistive-technology validation remain open. These are implementation gaps, not the final accessibility contract.
+Moved to [AreaList grids](AREALIST-GRIDS.md): live preflight, configuration, custom columns, editing, repeated child grids and limits.
 
 ### AreaList checkbox cells
 
-Keep the same grid configuration. Boolean columns displayed as checkboxes and Integer/LongInt columns configured as two- or three-state checkboxes are discovered automatically. The column header supplies the label; use `columns.<number>.label` when it needs clarification. Leave `value` descriptions off interactive checkboxes, since a description replaces the control with read-only text.
-
-The adapter preserves the column's `ALP_Column_FocusableCheckbox` setting. For a non-focusable checkbox, AXPress uses AreaList's normal cell-entry command, which toggles the value and runs the existing entry/exit callbacks. AXFocused is unavailable because that vendor command would also toggle the value. For a focusable checkbox, AXFocused opens the editor without changing the value, and AXPress sends Space to that editor. Its uncommitted value appears in AX; normal Escape and focus transfer retain the vendor's cancel, commit and validation behavior. A completed press confirms the displayed checkbox state, not a database save.
-
-Area, column and cell entry permissions remain authoritative. Hidden and password-formatted cells publish no state. A validation callback that restores the previous value produces a rejected action receipt; the adapter does not retry it. Sorting follows stable row keys, and a loading or scope transition retires old controls.
-
-Install matching plugin, component and host helpers. Startup requires `cellFocus 1` so an older plugin cannot advertise a focus operation on a control that activates immediately. The synthetic fixture exercises normal, small and mini checkbox display modes. Formatted Boolean editors, vendor radio/popup choices and custom-picture checkbox rendering need separate validation or implementation.
+See [AreaList checkbox cells](AREALIST-GRIDS.md#checkbox-cells).
 
 ## Configure a record editor with editable grids
 
-This example combines ordinary fields and buttons with an editable grid and optional nested or repeated subforms. The additional configuration identifies rows across sorting, distinguishes the current record from previously loaded data, and reuses existing formatters and selection controllers. `RecordEditor`, `recordID` and the other application names below are placeholders for the host's existing form and bindings.
-
-For a native list box, use the array, collection or entity grid options above in place of the AreaList `$lines` configuration. Keep the same scope, readiness and loader ordering.
-
-This example uses existing mutable plain form data. Keep readiness and loaded-record identity in the application's existing UI state when the root is an entity, class instance or shared object; map the formulas to that state without adding entity attributes. Use this ordering in the existing form method and line loader. Initialization must precede the first load, including when that loader runs inside On Load.
-
-```4d
-// Form method: start of On Load, before existing initialization can load lines.
-Form.linesReady:=False
-
-// Existing line loader: before changing arrays or starting asynchronous work.
-// Match this declaration to the actual record ID type. This example uses Integer.
-var $loadingRecordID : Integer
-Form.linesReady:=False
-$loadingRecordID:=Form.recordID
-// Existing code loads this record's arrays.
-// When that work finishes, record the ID the data actually belongs to:
-Form.linesLoadedID:=$loadingRecordID
-Form.linesReady:=True
-
-```
-
-The installer adds the lifecycle area to `RecordEditor`. Keep configuration in an application method called by `AXB_Configure`:
-
-```4d
-// Application method: RecordEditorAccessibilityOptions
-#DECLARE() -> $options : Object
-var $lines : Object
-$options:=New object("label"; "Record details"; "scope"; Formula(String(Form.recordID)); \
- "onError"; Formula(ReportAccessibilityFailure($1)))
-$lines:=New object("kind"; "areaList"; "label"; "Record rows"; \
- "keys"; ->aLineID; "ready"; Formula(Form.linesReady && (Form.linesLoadedID=Form.recordID)))
-$options.grids:=New object("Items"; $lines)
-```
-
-If loading finishes asynchronously, retain its captured record ID with that load and use it at completion. Do not substitute the currently displayed ID. Add the picture/custom-column descriptions shown above to `$lines.columns`. If selection needs a dependent-UI refresh, set `$lines.onSelection` to the existing shared selection handler before returning the options. Add `C_OBJECT(RecordEditorAccessibilityOptions; $0)` to the application's compiler method, outside the installer-owned declarations. The area handles startup, startup failure reporting and shutdown.
+See the [record-editor example](examples/RECORD-EDITOR.md).
 
 ### Entity, class and shared root data
 
-Use the application's existing editor state instead of assigning the plain-data properties above. For example, a record-editor process may already own a mutable `RecordEditorState` object independently of its persisted record entity. Initialize that state before the first load, and update it in the existing loader:
-
-```4d
-// Existing process-owned editor state, before its first load:
-RecordEditorState.linesReady:=False
-// Before refreshing the bound arrays:
-var $loadingRecordID : Integer
-RecordEditorState.linesReady:=False
-$loadingRecordID:=Form.recordID
-// Existing loader fills the arrays, preserving its normal locking/validation.
-RecordEditorState.linesLoadedID:=$loadingRecordID
-RecordEditorState.linesReady:=True
-```
-
-The configuration reads that state while the actual record remains `Form`:
-
-```4d
-$options.scope:=Formula(String(Form.recordID))
-$lines.ready:=Formula(RecordEditorState.linesReady && \
- (RecordEditorState.linesLoadedID=Form.recordID))
-```
-
-This example assumes one record editor per process. If the application keeps several editors in one process, use its existing per-window state lookup instead. Repeated children need their existing per-instance state too. An asynchronous completion must verify that its captured state and record still belong to the current editor before marking them ready. Declare the actual process variable and method types in the application's compiler method. Do not add UI attributes to an entity or bypass a shared object's `Use...End use` rules.
-
-Fields, buttons and page subforms remain automatically discovered. Save, return and print keep their existing buttons, menus and business handlers. There is no accessibility-specific copy of those operations.
+See [entity, class and shared root data](examples/RECORD-EDITOR.md#entity-class-and-shared-root-data).

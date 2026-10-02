@@ -1,4 +1,5 @@
 #import "Session.h"
+#import "Identifiers.h"
 #include <atomic>
 #include <cstdio>
 #include <cstdlib>
@@ -30,6 +31,64 @@ static NSMutableDictionary *MutableCopy(id object) {
 }
 int main(void) {
     @autoreleasepool {
+        NSMutableDictionary *stable = MutableCopy(Envelope(1));
+        stable[@"snapshot"][@"automationKey"] = @"records.main";
+        stable[@"snapshot"][@"nodes"][0][@"automationPath"] = @[@"LeftChild", @"Search/É%"];
+        stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"RightChild", @"Search/É%"];
+        Check(AXBValidateEnvelope(stable) == nil, "repeated child names have distinct valid public paths");
+        Check([AXBNodeIdentifier(stable[@"snapshot"], stable[@"snapshot"][@"nodes"][0]) isEqual:@"axb/records.main/LeftChild/Search%2F%C3%89%25"], "locator segments use unambiguous UTF-8 percent encoding");
+        stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"LeftChild", @"Search/É%"];
+        Check(AXBValidateEnvelope(stable) != nil, "duplicate public paths reject the complete snapshot");
+        stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"LeftChild", @"Search", @"É%"];
+        Check(AXBValidateEnvelope(stable) == nil, "a slash in one name cannot collide with nested names");
+        for (id bad in @[@"", @1, NSNull.null, [@"x" stringByPaddingToLength:129 withString:@"x" startingAtIndex:0]]) {
+            NSMutableDictionary *invalid = MutableCopy(stable); invalid[@"snapshot"][@"automationKey"] = bad;
+            Check(AXBValidateEnvelope(invalid) != nil, "invalid screen automation key is rejected");
+        }
+        for (id bad in @[@[], @"Search", @[@""], @[@1], @[NSNull.null], @[[ @"x" stringByPaddingToLength:257 withString:@"x" startingAtIndex:0]]]) {
+            NSMutableDictionary *invalid = MutableCopy(stable); invalid[@"snapshot"][@"nodes"][0][@"automationPath"] = bad;
+            Check(AXBValidateEnvelope(invalid) != nil, "invalid automation path is rejected");
+        }
+        AXBSession *stableSession = [[AXBSession alloc] initWithIdentifier:@"stable-session" windowID:1];
+        Check([[stableSession exchange:stable now:0][@"ok"] boolValue], "stable locator snapshot publishes");
+        NSDictionary *stableObserved = stableSession.snapshot;
+        stable[@"snapshot"][@"automationKey"] = @"renamed"; stable[@"snapshot"][@"revision"] = @2;
+        [stableSession exchange:stable now:0];
+        Check(![stableSession enqueueNode:@"button" revision:@1 operation:@"press" value:nil observedSnapshot:stableObserved now:1], "renaming a logical screen rejects an observed old action route");
+        NSDictionary *tabGroup = @{@"id": @"pages", @"role": @"tabgroup", @"label": @"Pages", @"value": @"",
+            @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @20, @200, @24]};
+        NSDictionary *tab = @{@"id": @"details", @"parent": @"pages", @"role": @"tab", @"label": @"Details", @"value": @YES,
+            @"focusable": @NO, @"editable": @NO, @"enabled": @YES, @"visible": @YES, @"frame": @[@60, @22, @70, @20], @"linked": @[@"field"]};
+        NSMutableDictionary *tabEnvelope = MutableCopy(Envelope(1));
+        tabEnvelope[@"snapshot"][@"nodes"] = @[tabGroup, tab, Envelope(1)[@"snapshot"][@"nodes"][1]];
+        AXBSession *tabs = [[AXBSession alloc] initWithIdentifier:@"tabs" windowID:1];
+        Check([[tabs exchange:tabEnvelope now:0][@"ok"] boolValue], "tab choices and their current content form a valid snapshot");
+        Check(![tabs enqueueNode:@"pages" revision:@1 operation:@"press" value:nil now:1], "tab group does not invent a group activation");
+        Check(![tabs enqueueNode:@"details" revision:@1 operation:@"focus" value:@YES now:1], "painted tab does not invent native keyboard focus");
+        Check([tabs enqueueNode:@"details" revision:@1 operation:@"press" value:nil now:1], "selected tab still accepts its normal click action");
+        NSDictionary *tabAction = [tabs exchange:tabEnvelope now:1][@"action"];
+        NSDictionary *tabInput = @{@"action": tabAction[@"id"], @"point": @[@100, @30]};
+        Check([[tabs exchange:@{@"snapshot": tabEnvelope[@"snapshot"], @"controlInput": tabInput} now:1][@"controlInput"] isEqual:tabInput], "tab native input is confined to its captured segment");
+        NSMutableDictionary *movedTab = MutableCopy(tabEnvelope);
+        movedTab[@"snapshot"][@"revision"] = @2;
+        movedTab[@"snapshot"][@"nodes"][1][@"frame"] = @[@130, @22, @70, @20];
+        [tabs exchange:movedTab now:1];
+        Check(![tabs controlInputNode:tabInput], "moving a tab before dispatch cancels its captured hit");
+        for (NSString *mutation in @[@"parent", @"value", @"missingLink", @"selfLink", @"duplicateLink", @"invalidLink", @"multipleSelected"]) {
+            NSMutableDictionary *invalidTab = MutableCopy(tabEnvelope);
+            NSMutableDictionary *choice = invalidTab[@"snapshot"][@"nodes"][1];
+            if ([mutation isEqual:@"parent"]) choice[@"parent"] = @"field";
+            if ([mutation isEqual:@"value"]) choice[@"value"] = @"selected";
+            if ([mutation isEqual:@"missingLink"]) choice[@"linked"] = @[@"missing"];
+            if ([mutation isEqual:@"selfLink"]) choice[@"linked"] = @[@"details"];
+            if ([mutation isEqual:@"duplicateLink"]) choice[@"linked"] = @[@"field", @"field"];
+            if ([mutation isEqual:@"invalidLink"]) choice[@"linked"] = @42;
+            if ([mutation isEqual:@"multipleSelected"]) {
+                NSMutableDictionary *duplicate = [choice mutableCopy]; duplicate[@"id"] = @"second";
+                invalidTab[@"snapshot"][@"nodes"] = [invalidTab[@"snapshot"][@"nodes"] arrayByAddingObject:duplicate];
+            }
+            Check(AXBValidateEnvelope(invalidTab) != nil, "malformed tab selection or content relationships fail closed");
+        }
         AXBSession *s = Fresh();
         Check(!Press(s, 0), "stale revision rejected");
         Check(Press(s, 1), "current revision accepted");

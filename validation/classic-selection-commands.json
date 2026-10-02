@@ -1,0 +1,6073 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "all candidate reads and record states returned in both modes",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "recordNumbers/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "namedRecordNumbers/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entitySelection/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "entityValues/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerEntities/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerValues/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerHighlight/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/saved: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/modified: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/unloaded: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: original record state preserved",
+      "passed": true
+    },
+    {
+      "name": "workerFailure/new: OK preserved",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/saved: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/modified: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/unloaded: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "interpreted/new: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/saved: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/modified: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/unloaded: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: full selection order and distinct physical record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: named selection keeps its own reverse order",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: entity selection count and persisted values",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: isolated named selection preserves order and shared entity values",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: isolated highlight read keeps both selected record IDs",
+      "passed": true
+    },
+    {
+      "name": "compiled/new: production worker reports an invalid physical record without running the application error handler",
+      "passed": true
+    },
+    {
+      "name": "destructive baseline detects loss of unsaved record",
+      "passed": true
+    },
+    {
+      "name": "reads do not save synthetic editor values",
+      "passed": true
+    }
+  ],
+  "result": {
+    "runs": [
+      {
+        "cases": [
+          {
+            "read": "recordNumbers",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "recordNumbers",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "recordNumbers",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "recordNumbers",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "workerEntities",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerEntities",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerEntities",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerEntities",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          }
+        ],
+        "compiled": false,
+        "savedNames": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ]
+      },
+      {
+        "cases": [
+          {
+            "read": "recordNumbers",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "recordNumbers",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "recordNumbers",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "recordNumbers",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              0,
+              1,
+              2,
+              3,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "namedRecordNumbers",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              4,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeRecordNumbers",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              1,
+              2,
+              3
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "rangeFields",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 2",
+              "Saved 3",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entitySelection",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              5
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "entityValues",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionFields",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 1",
+              "Saved 2",
+              "Saved 3",
+              "Saved 4",
+              "Saved 5"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "selectionJSON",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 5,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              {
+                "id": 1,
+                "name": "Saved 1"
+              },
+              {
+                "id": 2,
+                "name": "Saved 2"
+              },
+              {
+                "id": 3,
+                "name": "Saved 3"
+              },
+              {
+                "id": 4,
+                "name": "Saved 4"
+              },
+              {
+                "id": 5,
+                "name": "Saved 5"
+              }
+            ],
+            "okPreserved": false
+          },
+          {
+            "read": "workerEntities",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerEntities",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerEntities",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerEntities",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              2
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerValues",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              "Saved 5",
+              "Saved 4"
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerHighlight",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              0,
+              4
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "saved",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false,
+              "id": 2,
+              "name": "Saved 2"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "modified",
+            "before": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "after": {
+              "loaded": true,
+              "record": 1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 2,
+              "name": "Unsaved editor value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "unloaded",
+            "before": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "after": {
+              "loaded": false,
+              "record": -1,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": false
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          },
+          {
+            "read": "workerFailure",
+            "mode": "new",
+            "before": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "after": {
+              "loaded": true,
+              "record": -3,
+              "selectedRecord": 2,
+              "selectionCount": 5,
+              "modified": true,
+              "id": 99,
+              "name": "Unsaved new value"
+            },
+            "values": [
+              true
+            ],
+            "okPreserved": true
+          }
+        ],
+        "compiled": true,
+        "savedNames": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ]
+      }
+    ],
+    "cases": [
+      {
+        "read": "recordNumbers",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "workerEntities",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerEntities",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerEntities",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerEntities",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "recordNumbers",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "namedRecordNumbers",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          4,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeRecordNumbers",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          1,
+          2,
+          3
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "rangeFields",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 2",
+          "Saved 3",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entitySelection",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          5
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "entityValues",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionFields",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 1",
+          "Saved 2",
+          "Saved 3",
+          "Saved 4",
+          "Saved 5"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "selectionJSON",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 5,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          {
+            "id": 1,
+            "name": "Saved 1"
+          },
+          {
+            "id": 2,
+            "name": "Saved 2"
+          },
+          {
+            "id": 3,
+            "name": "Saved 3"
+          },
+          {
+            "id": 4,
+            "name": "Saved 4"
+          },
+          {
+            "id": 5,
+            "name": "Saved 5"
+          }
+        ],
+        "okPreserved": false
+      },
+      {
+        "read": "workerEntities",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerEntities",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerEntities",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerEntities",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          2
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerValues",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          "Saved 5",
+          "Saved 4"
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerHighlight",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          0,
+          4
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "saved",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false,
+          "id": 2,
+          "name": "Saved 2"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "modified",
+        "before": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "after": {
+          "loaded": true,
+          "record": 1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 2,
+          "name": "Unsaved editor value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "unloaded",
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": false
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      },
+      {
+        "read": "workerFailure",
+        "mode": "new",
+        "before": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "after": {
+          "loaded": true,
+          "record": -3,
+          "selectedRecord": 2,
+          "selectionCount": 5,
+          "modified": true,
+          "id": 99,
+          "name": "Unsaved new value"
+        },
+        "values": [
+          true
+        ],
+        "okPreserved": true
+      }
+    ]
+  },
+  "compiler": {
+    "success": true,
+    "errors": []
+  },
+  "driver_sha256": "aeaea5535bde49686ef2e1d32975b53b3ff63a67054161ce4af9e984d9dd7102",
+  "worker_sources_sha256": {
+    "AXB_SelectionRead.4dm": "03352069d06bad8eac35274af66c9ab26e82eb2aaf2472599a6d014ac0eb693b",
+    "AXB_SelectionError.4dm": "c94b1348090d485d9fe77c74c4a201d202708cb80bc98041455fd17adb24045b"
+  },
+  "scope": "Candidate commands in interpreted and compiled desktop engine processes. No grid, accessibility UI or VoiceOver coverage claim."
+}

@@ -1,6 +1,6 @@
 # Integrate with a lifecycle area
 
-The area owns startup and shutdown. Discovery, grids, editors, validation and actions use the same adapters as the manual interface. This path passes the [area acceptance suite](../../../validation/area-owned-integration.json) with the 0.20.0 source now on `main`; the published 0.19.7 kit uses the [manual lifecycle](MANUAL-LIFECYCLE.md).
+The area owns startup and shutdown. Discovery, grids, editors, validation and actions use the same adapters as the manual interface. This path passes the [area acceptance suite](../../../validation/area-owned-integration.json) and is included in the 0.21.0 matching kit. The older 0.19.7 kit uses the [manual lifecycle](MANUAL-LIFECYCLE.md).
 
 ## Ordinary named form
 
@@ -18,7 +18,7 @@ Review those other uses too; use central opt-out where another inherited form sh
 
 Printing creates no registration because native area initialization ignores printing and the area is non-printable. Remove only the exact installer-owned area from a previously instrumented derived form before retrying. Never delete an application object to resolve a name conflict.
 
-The installer adds `__AXB_Bridge`, a non-enterable 1×1 `%AXB Area`, at (0,0) on page zero. It draws nothing, has no method or form events, does not take keyboard focus and does not print. Existing object definitions, dimensions, methods and events are preserved. Source JSON is reformatted using the project's tab/space convention. Keep the area definition installer-owned and review the diff.
+The installer adds `__AXB_Bridge`, a non-enterable 1×1 `%AXB Area`, at (0,0) on page zero. It draws nothing, has no method or form events, does not take keyboard focus and does not print. Existing object definitions, dimensions, methods and events are preserved. The installer rewrites form JSON using the project's indentation. Keep the area definition installer-owned and review the diff.
 
 For an ordinary form with clear existing labels, there is no application method to write. Its form method keeps its existing initialization, timer and business code. The area queues startup after initialization and retires its own captured lifetime when destroyed.
 
@@ -29,7 +29,7 @@ Create application-owned `AXB_Configure` when discovery needs labels or provider
 ```4d
 // Application method: AXB_Configure
 #DECLARE($formName : Text) -> $options : Object
-$options:=New object("onError"; Formula(ReportAccessibilityFailure($1)))
+$options:=New object
 Case of
  : ($formName="Customer")
   $options.label:="Customer details"
@@ -37,9 +37,10 @@ Case of
  : ($formName="RecordEditor")
   $options:=RecordEditorAccessibilityOptions
 End case
+$options.onError:=Formula(ReportAccessibilityFailure($1))
 ```
 
-`RecordEditorAccessibilityOptions` is an application method returning the configuration built in the [record-editor example](GRIDS.md#configure-a-record-editor-with-editable-grids). Use existing object names, stable IDs, formatters, readiness flags and controllers. This callback returns configuration; it does not start a second bridge. Other forms get automatic discovery with the default reporter. `ReportAccessibilityFailure` represents the application's existing logger, not a shipped method; omit that option if no reporter is needed. With no callback at all, startup and later adapter failures remain inspectable in area diagnostics. Production applications that need active reporting can use this one central default.
+`RecordEditorAccessibilityOptions` is an application method returning the configuration built in the [record-editor example](examples/RECORD-EDITOR.md). Use existing object names, stable IDs, formatters, readiness flags and controllers. This callback returns configuration; it does not start a second bridge. Other forms get automatic discovery and the same reporter. `ReportAccessibilityFailure` represents the application's existing logger, not a shipped method; omit that option if no reporter is needed. With no callback at all, startup and later adapter failures remain inspectable in area diagnostics. Production applications that need active reporting can use this one central default.
 
 Distinguish identically named table forms by their actual table context. For a table form called `Input` owned by the existing `Records` table, a configuration case can test `($formName="Input") && (Current form table=->[Records])`. Project forms have a nil table pointer. [4D table-context contract](https://developer.4d.com/docs/commands/current-form-table).
 
@@ -50,7 +51,7 @@ C_TEXT(AXB_Configure; $1)
 C_OBJECT(AXB_Configure; $0)
 ```
 
-Declare any application configuration method's return type there too. `AXB_Configure` is the application-owned exception to the reserved `AXB_` helper prefix. The installer never creates or overwrites it. Return `New object("enabled"; False)` to opt a form out. All other options use the existing [configuration contract](INTEGRATION.md): `controls`, `children`, `grids`, `scope`, `describe`, `apply` and `onError`.
+Declare any application configuration method's return type there too. `AXB_Configure` is the application-owned exception to the reserved `AXB_` helper prefix. The installer never creates or overwrites it. Return `New object("enabled"; False)` to opt a form out. All other options use the existing [configuration contract](INTEGRATION.md): `controls`, `children`, `grids`, `scope`, `describe`, `apply` and `onError`. An optional root `automationKey` supplies a [logical screen locator](IDENTIFIERS.md) in supporting kits.
 
 ## Repeated and nested children
 
@@ -77,7 +78,7 @@ CLOSE WINDOW($window)
 
 `AXB_AreaForm` copies the definition and adds the same area. It leaves the original definition, method, events, object methods and data untouched. The optional key starts with an ASCII letter and contains at most 64 ASCII letters, digits, underscores or hyphens. It is stored in the area's object name, not the business data. Repeated preparation accepts the same canonical area and key. On failure it returns `ok: False`, `error` and the original `form`, so the application's normal dialog can still open.
 
-Generated roots use the existing `DIALOG` data, including implicit, entity, class-instance or shared data. In the example, `AXB_Configure` receives `RecordEditor`. Without a key it receives `Current form name`, which is not a useful stable selector for a generated definition. Prefer an explicit key when configuration is needed. A central callback that returns Null or an empty object for an unrecognized form leaves that form on automatic defaults. Ordinary generated children are discovered from the root.
+Generated roots use the existing `DIALOG` data, including implicit, entity, class-instance or shared data. In the example, `AXB_Configure` receives `RecordEditor`, which also becomes the screen key unless the returned options override `automationKey`. Without a key the callback receives `Current form name`, which is not a useful stable selector for a generated definition. Prefer an explicit key when configuration is needed. A central callback that returns Null or an empty object for an unrecognized form leaves that form on automatic defaults. Ordinary generated children are discovered from the root.
 
 For generated definitions inheriting a named form, install the area in that named base and open the original generated definition unchanged. Do not add another area with `AXB_AreaForm`; it returns `inheritedAreaForm` before mutation because it cannot inspect an external base safely. Inline/external JSON inheritance needs an explicitly prepared base or the [manual interface](MANUAL-LIFECYCLE.md). List and print destinations return `unsupportedAreaDestination`. The advanced `AXB_Dynamic` wrapper remains for explicit per-instance provider registration and its private-data contract; it is not needed for ordinary automatic generated forms.
 

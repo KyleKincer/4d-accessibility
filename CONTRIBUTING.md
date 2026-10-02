@@ -23,6 +23,8 @@ python3 ci/check_repository.py
 
 `test_native.py` compiles the AppKit provider tests. Add `--run` only in an unlocked graphical session. Live fixture scripts also require 4D desktop and appropriate Accessibility permission. Screen recording is needed for visual/VoiceOver probes.
 
+Version 0.21.0 has [tab-control acceptance cases](tests/TABS.md#run-the-acceptance-cases) for named/generated forms, repeated children and compact native menus. Keep its plugin, component and helpers together when preparing a fixture.
+
 ## Area-owned integration
 
 Version 0.20.0 adds a lifecycle area to ordinary forms without changing their business methods or event masks. Build both packages first, then run the smallest end-to-end case:
@@ -57,6 +59,18 @@ python3 test_grid_controls_fixture.py --run --compiled --voiceover
 ```
 
 Omit `--compiled` for interpreted execution or `--voiceover` for the external AX action suite alone. Add `--subform --repeated` when preparing to test independent copies of the widget grid in child forms.
+
+For classic current/named-selection grids, run the real-command checks, then the external AX suite:
+
+```sh
+python3 test_classic_selection.py --server /path/to/4D\ Server.app --run
+python3 prepare_selection_fixture.py --server /path/to/4D\ Server.app
+python3 test_selection_fixture.py --run
+```
+
+Prepare a fresh fixture before every driver run: native edits deliberately persist. Add `--compiled` to the driver for compiled action tests, or `--compiled --voiceover` for spoken navigation, native selection and checkbox feedback. Add `--named` to preparation to exercise a named selection with a different order. The suite checks loaded, modified, unloaded and unsaved-new record states, distant values, native text/checkbox commits, sorting and hidden stale cells. [Integration and limitations](skills/4d-accessibility/references/GRIDS.md#use-a-classic-current-or-named-selection).
+
+`test_selection_pixels.py --server /path/to/4D\ Server.app --run` separately prepares bridge-free and integrated compiled forms and compares every window pixel. It requires Pillow and the desktop application at `/Applications/4D/4D.app`. It replaces the disposable selection fixture, so archive earlier reports first. Add `--named` for the named-selection baseline; neither comparison uses masks or tolerance.
 
 For native array identities, prepare with `prepare_grid_fixture.py --key-type integer` or `--key-type longint`, plus `--row-states --described`. Run `test_grid_fixture.py --run` and then `--compiled` to exercise both desktop modes. Keep the required `--server` argument when preparing.
 
@@ -116,9 +130,11 @@ For calculated AreaList columns, add `--calculated` when preparing, then run `te
 
 For direct moves between edited AreaList cells, add `--cell-transitions` to `test_alp_grid_fixture.py`. This shorter case verifies complete text commits, rejection by the existing exit handler, correction and a scope change during exit. The ordinary text suite also tests cell transitions after Undo/Redo. The checkbox suite checks transitions from a text editor into a checkbox, including rejected text. These tests assert committed values, not just text visible in the native editor.
 
-## Source ownership
+For styled native text, prepare the ordinary discovery fixture with `--area --styled` and the required `--server`. Run `test_styled_text.py --tool4d /path/to/tool4d.app` for command-level reading and side-effect checks; a licensed `--server` is also supported. Run `test_styled_fixture.py --run` and then `--run --compiled --voiceover` for native selection, multiline Unicode input, style-preserving edits, original validation, Undo, stale elements and spoken reading. Prepare again with `--dynamic` to repeat both runs on a JSON-generated form. The test selects actual controls, because their captions can have the same accessible name. Default-menu Redo availability is compared with the observed native 4D 20.8 baseline; it is not a Redo execution claim. Desktop tests require an unlocked graphical session. The [family checklist](skills/4d-accessibility/references/FULL-FORMS.md) tracks the remaining work.
 
-Live AX polling and fixture startup stop immediately if the graphical session locks. For unattended runs, keep a login-session sleep assertion alive for the whole run. A timed `caffeinate` process exits when its timeout expires; a persistent LaunchAgent needs `RunAtLoad` and `KeepAlive` so it renews and survives terminal/session-host exits. Verify `PreventUserIdleDisplaySleep`, `PreventUserIdleSystemSleep` and `UserIsActive` with `pmset -g assertions`. Keep normal authentication enabled. An explicit lock or logout still requires an unlock before testing resumes.
+Live AX polling and fixture startup stop immediately if the graphical session locks. For unattended runs, keep login-session sleep and user-activity assertions alive for the whole run. `caffeinate -u` defaults to a five-second user-activity timeout when `-t` is omitted. Use a login LaunchAgent with `RunAtLoad` and `KeepAlive`. Its persistent `caffeinate -di` process holds sleep assertions while a child loop runs `caffeinate -u -t 600 /bin/sleep 240`. The loop renews user activity every four minutes; the outer sleep assertions stay active across renewals and terminal/session-host exits. Verify that its process owns `PreventUserIdleDisplaySleep`, `PreventUserIdleSystemSleep` and `UserIsActive` in `pmset -g assertions`. Keep normal authentication enabled. An explicit lock or logout still requires an unlock before testing resumes.
+
+## Source ownership
 
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.
 

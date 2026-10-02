@@ -7,6 +7,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic, weak) AXBWindowView *owner;
 @property(nonatomic, strong) NSDictionary *data;
 @property(nonatomic, strong) NSNumber *revision;
+@property(nonatomic, copy) NSString *identifier;
 @property(nonatomic, strong) NSAccessibilityElement *comboButton;
 @property(nonatomic) BOOL live;
 - (BOOL)queue:(NSString *)operation value:(id)value;
@@ -48,6 +49,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 - (BOOL)canAct;
 - (void)restoreNativeFocus;
 - (void)expectPopupFrom:(id)element;
+- (void)expectCheckboxFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value;
 - (void)adoptPopupMenu:(NSMenu *)menu;
 - (void)restorePopupMenu;
 @end

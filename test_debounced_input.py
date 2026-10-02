@@ -61,7 +61,7 @@ def main():
         app, window = activate_fixture(process, project, TITLE)
         time.sleep(1)
         def group():
-            return next((e for e in window.read("AXChildren") or [] if str(e.read("AXIdentifier")).startswith("axb.window.")), None)
+            return next((e for e in window.read("AXChildren") or [] if str(e.read("AXIdentifier")).startswith("axb/")), None)
         g = ax.wait_for(group, "Form not published", timeout=20)
         controls = {e.read("AXDescription"): e for e in g.read("AXChildren") or []}
         close = controls["Close"]

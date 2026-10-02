@@ -215,6 +215,9 @@ For ($i; 1; Size of array($grid))
   $typed:=$typed & Not($checkbox)
   $typed:=$typed & (AL_GetColumnLongProperty($area; $number; ALP_Column_Attributed)=0) & ($metadata.value=Null)
   $columns.push(New object("id"; $id; "label"; $label; "enabled"; True; "editable"; ($typed | $checkbox) & $editable))
+  If ($metadata.automationKey#Null)
+   $columns[$columns.length-1].automationKey:=$metadata.automationKey
+  End if
   $columnLayout.push(New collection($columnLeft; $columnWidth))
   $column:=New object("number"; $number; "gridCell"; $i; "left"; $columnLeft; "width"; $columnWidth; "locked"; $i<=$locked; "typed"; $typed)
   $column.value:=$metadata.value

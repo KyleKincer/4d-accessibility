@@ -1,5 +1,6 @@
 #import "BridgePrivate.h"
 #import "Grid.h"
+#import "Identifiers.h"
 
 // A full-array request is truthful. Indexed AX requests resolve only their
 // requested slice, and no native getter waits for the 4D form process.
@@ -38,8 +39,16 @@ static NSArray *Slice(NSArray *array, NSUInteger index, NSUInteger maximum) {
     return [array subarrayWithRange:NSMakeRange(index, MIN(maximum, array.count - index))];
 }
 static NSString *Identifier(AXBGridNode *table, NSString *kind, NSString *row, NSString *column) {
-    NSData *bytes = [NSJSONSerialization dataWithJSONObject:@[table.owner.session.identifier ?: @"", table.data[@"id"] ?: @"", table.data[@"grid"][@"generation"] ?: @"", kind, row ?: @"", column ?: @""] options:0 error:nil];
-    return [@"axb-grid." stringByAppendingString:[bytes base64EncodedStringWithOptions:0]];
+    NSString *columnKey = column;
+    for (NSDictionary *definition in table.data[@"grid"][@"columns"])
+        if ([definition[@"id"] isEqual:column]) { columnKey = definition[@"automationKey"] ?: column; break; }
+    NSArray *segments;
+    if ([kind isEqual:@"row"]) segments = @[@"row", row];
+    else if ([kind isEqual:@"column"] || [kind isEqual:@"header"]) segments = @[kind, columnKey];
+    else if (row && column) {
+        segments = [kind isEqual:@"cell"] ? @[@"cell", row, columnKey] : @[@"cell", row, columnKey, kind];
+    } else segments = @[kind];
+    return AXBIdentifierAppend(table.accessibilityIdentifier, segments);
 }
 @class AXBGridRow, AXBGridCell, AXBGridColumn, AXBGridHeader, AXBGridContent, AXBGridWidget, AXBGridHeaderGroup;
 @protocol AXBGridContentElement <NSObject, NSAccessibility>
@@ -143,7 +152,8 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
             widget.identifier = Identifier(self.table, role, self.row.key, self.columnKey);
             self.content = widget;
         } else {
-            AXBGridContent *text = [AXBGridContent new]; text.cell = self; self.content = text;
+            AXBGridContent *text = [AXBGridContent new]; text.cell = self;
+            text.identifier = Identifier(self.table, @"content", self.row.key, self.columnKey); self.content = text;
         }
         self.contentRole = role; self.content.live = YES;
     }
@@ -208,8 +218,11 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 - (BOOL)accessibilityPerformPress {
     if (![self.table synchronizeForAction] || !self.isAccessibilityEnabled) return NO;
     if ([self canEdit]) {
+        NSDictionary *before = self.value;
         BOOL accepted = [self.table queue:[self isWidget] ? @"gridPress" : @"gridEdit" value:@{@"row": self.row.key, @"column": self.columnKey}];
         if (accepted && [self.value[@"role"] isEqual:@"popup"]) [self.table.owner expectPopupFrom:self.accessibilityChildren.firstObject];
+        if (accepted && [before[@"role"] isEqual:@"checkbox"])
+            [self.table.owner expectCheckboxFrom:self.accessibilityChildren.firstObject previousValue:before[@"checked"]];
         return accepted;
     }
     if (![self.table.grid.descriptor[@"actions"][@"select"] boolValue] || !AXBGridRowAllowsSelection(self.table.grid.descriptor, self.row.key)) return NO;
@@ -311,7 +324,6 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 }
 #pragma clang diagnostic pop
 - (AXBWindowView *)owner { return self.table.owner; }
-- (NSString *)accessibilityIdentifier { return Identifier(self.table, @"content", self.cell.row.key, self.cell.columnKey); }
 - (NSDictionary *)data {
     NSDictionary *focus = self.cell.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
     NSMutableDictionary *data = [@{@"editable": @([self.cell canEdit] && focus[@"selection"]), @"protected": @NO} mutableCopy];
@@ -688,13 +700,15 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
         for (NSString *key in [self.rowRegistry.allKeys copy]) if ([grid indexOfRow:key] == NSNotFound) {
             [self.rowRegistry[key] invalidate]; [self.rowRegistry removeObjectForKey:key];
         }
-        for (NSString *key in [self.columnRegistry.allKeys copy]) if ([grid indexOfColumn:key] == NSNotFound) {
+        for (NSString *key in [self.columnRegistry.allKeys copy]) if ([grid indexOfColumn:key] == NSNotFound ||
+            ![self.columnRegistry[key].identifier isEqual:Identifier(self, @"column", nil, key)]) {
             [self.columnRegistry[key] invalidate]; [self.columnRegistry removeObjectForKey:key];
         }
-        NSSet *columns = [NSSet setWithArray:[descriptor[@"columns"] valueForKey:@"id"]];
-        NSSet *previousColumns = [NSSet setWithArray:[self.lastDescriptor[@"columns"] valueForKey:@"id"] ?: @[]];
-        if (![previousColumns isSubsetOfSet:columns]) for (AXBGridRow *row in self.rowRegistry.allValues)
-            for (NSString *key in [row.cells.allKeys copy]) if (![columns containsObject:key]) {
+        // Cells can be instantiated without their columns or headers. Retire
+        // each cached cell independently when its column's locator changes.
+        for (AXBGridRow *row in self.rowRegistry.allValues)
+            for (NSString *key in [row.cells.allKeys copy]) if ([grid indexOfColumn:key] == NSNotFound ||
+                ![row.cells[key].identifier isEqual:Identifier(self, @"cell", row.key, key)]) {
                 [row.cells[key] invalidate]; [row.cells removeObjectForKey:key];
             }
     }

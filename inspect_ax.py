@@ -35,7 +35,7 @@ def inspect(window, max_nodes, max_children, row_start, include_values):
             value = element.read("AXValue")
             if isinstance(value, (str, int, float, bool)) or value is None:
                 node["attributes"]["AXValue"] = value
-        if str(node["attributes"].get("AXIdentifier") or "").startswith("axb.window."):
+        if str(node["attributes"].get("AXIdentifier") or "").startswith("axb/"):
             node["attributes"]["AXHelp"] = element.read("AXHelp")
         nodes.append(node)
         if depth >= 24:

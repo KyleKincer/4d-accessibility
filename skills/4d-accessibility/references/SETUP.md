@@ -2,7 +2,7 @@
 
 The source repository is https://github.com/KyleKincer/4d-accessibility. The skill works when copied on its own, but its installer and binaries come from a matching checkout or release.
 
-For a published release, download the complete versioned macOS kit from that repository's Releases page and verify `SHA256SUMS`. The component-only `4d-accessibility.zip` is for Dependency Manager; it still needs the plugin and host methods from the same release. Check current status before selecting a version. Version 0.19.7 is the published stable kit. Area-owned integration is in 0.20.0 on `main`. Until its signed kit is published, use a matching development artifact from a passing Build and test workflow run or build the exact source revision. Record that revision and artifact hashes; never combine the 0.19.7 packages with 0.20.0 helpers.
+For a published release, download the complete versioned macOS kit from that repository's Releases page and verify `SHA256SUMS`. The component-only `4d-accessibility.zip` is for Dependency Manager; it still needs the plugin and host methods from the same release. Use the [availability table](STATUS.md#availability) to select a kit containing the required adapters. For an unpublished version, use a matching development artifact from a passing Build and test workflow run or build the exact source revision. Record that revision and artifact hashes. Install plugin, component and helpers together from that kit.
 
 For source development:
 

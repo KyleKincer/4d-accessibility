@@ -67,6 +67,18 @@ If (($operation="register") & Not($aliases))
  $result.error:="unsupportedRegistrationData"
  return
 End if
+If (($options#Null) && (Value type($options)=Is object) && Not(OB Is defined($options; "automationKey")))
+ $options:=OB Copy($options)
+ $options.automationKey:=Choose(Current form name=""; "generated"; Current form name)
+ If ($operation="start")
+  $context:=AXB_FormContext
+  If ($context#Null)
+   If (Value type($context.view.options.automationKey)=Is text)
+    $options.automationKey:=$context.view.options.automationKey
+   End if
+  End if
+ End if
+End if
 $result:=AXB_ViewCreate($options)
 If (Not($result.ok=True))
  return
@@ -74,6 +86,10 @@ End if
 $view:=$result.view
 $result:=AXB_Host("info"; New object)
 If (Not($result.ok=True))
+ return
+End if
+If (Position("; stableIdentifiers 1;"; $result.nativeStatus)=0)
+ $result:=New object("ok"; False; "error"; "stableIdentifiersUnavailable")
  return
 End if
 If ($result.componentInfo.formOwnership#1)
@@ -150,6 +166,11 @@ If (($operation="start") & (AXB_Areas#Null))
    $area:=$candidate
   End if
  End for each
+End if
+If (($area#Null) && ($area.context.active=True) && (Position("; tabs 1;"; $result.nativeStatus)>0))
+ // An intentional restart of this captured form lifetime keeps unchanged
+ // canvas geometry. Normal close/replacement still retires it completely.
+ $reply:=AXB_Host("layout"; New object("operation"; "restart"))
 End if
 $reply:=AXB_Form("stop"; New object)
 If ($aliases)

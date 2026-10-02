@@ -1,0 +1,548 @@
+{
+  "status": "command, compiler and scoped live styled-field acceptance passed",
+  "upstream_base": "44c769ae980be8a3b8dbf8d7817d080c70778156",
+  "runtime": "4D 20.8 build 20.102009, macOS 26.7, ARM64; interpreted and compiled desktop execution",
+  "sources_sha256": {
+    "host/OptionalMethods/AXB_StyledText.4dm": "c194256e299ba5a001721e671751f7a5c350064acb745ae8ef8b870d7cf6f49e",
+    "host/OptionalMethods/AXB_Discover.4dm": "413664f9ccb52dd80d49158f91f9fd71854fb092660d1b080a210ccfc5fadaf8",
+    "host/OptionalMethods/AXB_FormTree.4dm": "a55605ed21e747796d8ff79fc23544bd8a150245690e086461c1094bc7847d84",
+    "host/OptionalMethods/AXB_TextEditor.4dm": "0491e2a03b7ed4e1ee59dce7be49268c2cb3356fe857e52081a583798b4c434f",
+    "host/OptionalMethods/AXB_TextAction.4dm": "22da43eb0a1dd5bf15b1cf4558c130dee847638c69e1b976b3d5fc529b625208",
+    "host/OptionalMethods/Compiler_AXBHost.4dm": "ae4d80b15d3359827ad3545dd102aa88115a976903f5aa5ac97c96b9767e70cc",
+    "test_styled_text.py": "bcc0a768460a75dd10acaa389832ccaf3c08193b24802aa48d001d07466080d9",
+    "test_styled_fixture.py": "bb688862c5a231a82fa59999502bc84f28caffbbfae4c1b8b63fa88963659b18",
+    "prepare_discovery_fixture.py": "b4dc43eadd2444c7eef5eeb3a335f88902abc725735cc0a515ae7b68b61b0544"
+  },
+  "commands": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "all plain cases returned",
+        "passed": true
+      },
+      {
+        "name": "style spans: valid text",
+        "passed": true
+      },
+      {
+        "name": "style spans: visible text",
+        "passed": true
+      },
+      {
+        "name": "style spans: reference classification",
+        "passed": true
+      },
+      {
+        "name": "style spans: original text preserved",
+        "passed": true
+      },
+      {
+        "name": "style spans: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "Unicode: valid text",
+        "passed": true
+      },
+      {
+        "name": "Unicode: visible text",
+        "passed": true
+      },
+      {
+        "name": "Unicode: reference classification",
+        "passed": true
+      },
+      {
+        "name": "Unicode: original text preserved",
+        "passed": true
+      },
+      {
+        "name": "Unicode: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "plain text: valid text",
+        "passed": true
+      },
+      {
+        "name": "plain text: visible text",
+        "passed": true
+      },
+      {
+        "name": "plain text: reference classification",
+        "passed": true
+      },
+      {
+        "name": "plain text: original text preserved",
+        "passed": true
+      },
+      {
+        "name": "plain text: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "empty: valid text",
+        "passed": true
+      },
+      {
+        "name": "empty: visible text",
+        "passed": true
+      },
+      {
+        "name": "empty: reference classification",
+        "passed": true
+      },
+      {
+        "name": "empty: original text preserved",
+        "passed": true
+      },
+      {
+        "name": "empty: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "link label: valid text",
+        "passed": true
+      },
+      {
+        "name": "link label: visible text",
+        "passed": true
+      },
+      {
+        "name": "link label: reference classification",
+        "passed": true
+      },
+      {
+        "name": "link label: original text preserved",
+        "passed": true
+      },
+      {
+        "name": "link label: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "all reference cases returned",
+        "passed": true
+      },
+      {
+        "name": "original: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "original: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "original: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "original: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "original: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "uppercase: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "uppercase: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "uppercase: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "uppercase: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "uppercase: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "decimal hyphen: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "decimal hyphen: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "decimal hyphen: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "decimal hyphen: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "decimal hyphen: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal hyphen: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal hyphen: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal hyphen: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal hyphen: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal hyphen: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "decimal identifier: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "decimal identifier: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "decimal identifier: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "decimal identifier: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "decimal identifier: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal identifier: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal identifier: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal identifier: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal identifier: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "hexadecimal identifier: application OK preserved",
+        "passed": true
+      },
+      {
+        "name": "padded uppercase identifier: classified as a reference",
+        "passed": true
+      },
+      {
+        "name": "padded uppercase identifier: original source preserved",
+        "passed": true
+      },
+      {
+        "name": "padded uppercase identifier: original rendered value required",
+        "passed": true
+      },
+      {
+        "name": "padded uppercase identifier: inspection does not evaluate the expression",
+        "passed": true
+      },
+      {
+        "name": "padded uppercase identifier: application OK preserved",
+        "passed": true
+      }
+    ],
+    "result": {
+      "cases": [
+        {
+          "ok": true,
+          "text": "Hello world",
+          "references": false,
+          "okPreserved": true,
+          "sourcePreserved": true,
+          "label": "style spans"
+        },
+        {
+          "ok": true,
+          "text": "Zoë 🎸 & 🎹",
+          "references": false,
+          "okPreserved": true,
+          "sourcePreserved": true,
+          "label": "Unicode"
+        },
+        {
+          "ok": true,
+          "text": "ordinary text",
+          "references": false,
+          "okPreserved": true,
+          "sourcePreserved": true,
+          "label": "plain text"
+        },
+        {
+          "ok": true,
+          "text": "",
+          "references": false,
+          "okPreserved": true,
+          "sourcePreserved": true,
+          "label": "empty"
+        },
+        {
+          "ok": true,
+          "text": "Read the help",
+          "references": true,
+          "okPreserved": true,
+          "sourcePreserved": true,
+          "label": "link label"
+        }
+      ],
+      "compiled": false,
+      "expressions": [
+        {
+          "label": "original",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        },
+        {
+          "label": "uppercase",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        },
+        {
+          "label": "decimal hyphen",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        },
+        {
+          "label": "hexadecimal hyphen",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        },
+        {
+          "label": "decimal identifier",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        },
+        {
+          "label": "hexadecimal identifier",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        },
+        {
+          "label": "padded uppercase identifier",
+          "read": {
+            "ok": true,
+            "text": "",
+            "references": true,
+            "requiresRenderedValue": true
+          },
+          "sourcePreserved": true,
+          "okPreserved": true,
+          "callsBefore": 0,
+          "callsAfter": 0
+        }
+      ]
+    },
+    "helper_sha256": "c194256e299ba5a001721e671751f7a5c350064acb745ae8ef8b870d7cf6f49e",
+    "scope": "Headless text commands; no desktop editing or VoiceOver claim",
+    "toolchain": "checksum-pinned public tool4d used by CI"
+  },
+  "compiler": {
+    "success": true,
+    "errors": []
+  },
+  "reference_regression": {
+    "before_helper_sha256": "150e08006e4ec55dbf4a00c8648e6359d25c76ce9b306fb8633c7991b9c1aaee",
+    "before_failed_checks": [
+      "decimal hyphen: original rendered value required",
+      "decimal hyphen: inspection does not evaluate the expression",
+      "hexadecimal hyphen: original rendered value required",
+      "hexadecimal hyphen: inspection does not evaluate the expression",
+      "decimal identifier: original rendered value required",
+      "decimal identifier: inspection does not evaluate the expression",
+      "hexadecimal identifier: original rendered value required",
+      "hexadecimal identifier: inspection does not evaluate the expression",
+      "padded uppercase identifier: original rendered value required",
+      "padded uppercase identifier: inspection does not evaluate the expression"
+    ],
+    "after_failed_checks": []
+  },
+  "pending": [
+    "original rendered expression values, actionable links and style ranges",
+    "long styled input and styled grid-cell editors",
+    "broader form families, assistive technologies and application-specific workflows"
+  ],
+  "host_pin_changed": false,
+  "published": false,
+  "finishedAt": "2026-10-02T11:17:02.205520+00:00",
+  "live": {
+    "passed": true,
+    "runs": [
+      {
+        "compiled": false,
+        "generated": false,
+        "architecture": "ARM64",
+        "voiceoverRequested": false,
+        "compile_report_sha256": "42502d51c17c5d05b1a48bed2848d25ed862aebe3e51a5d69c50df926ef1eb33",
+        "native_sha256": "be52adbe7282a39e704fc1d2c2c8c9528d73d22c9475902e3e01ae9ab692e176",
+        "component_sha256": "ccf0be43e12d525a13c113dfb10c5e78991715328154ed10030b4338b3326c81",
+        "passed": true,
+        "checks": 26,
+        "report_sha256": "fe4a0972a128be5157fd01aabd2ca3f144ff8353597d2a855c06290fbd48222e"
+      },
+      {
+        "compiled": true,
+        "generated": false,
+        "architecture": "ARM64",
+        "voiceoverRequested": true,
+        "compile_report_sha256": "42502d51c17c5d05b1a48bed2848d25ed862aebe3e51a5d69c50df926ef1eb33",
+        "native_sha256": "be52adbe7282a39e704fc1d2c2c8c9528d73d22c9475902e3e01ae9ab692e176",
+        "component_sha256": "ccf0be43e12d525a13c113dfb10c5e78991715328154ed10030b4338b3326c81",
+        "passed": true,
+        "checks": 32,
+        "report_sha256": "3fdc6838414ff0b3c5a88da33cf1185dd086d73cf6e8994993acdf1e15ee48bb"
+      },
+      {
+        "compiled": false,
+        "generated": true,
+        "architecture": "ARM64",
+        "voiceoverRequested": false,
+        "compile_report_sha256": "fe1f9a2f8fbb2082266936b28d1e72a8744a51f5c91f98ba4a6d6c006e5edea7",
+        "native_sha256": "be52adbe7282a39e704fc1d2c2c8c9528d73d22c9475902e3e01ae9ab692e176",
+        "component_sha256": "ccf0be43e12d525a13c113dfb10c5e78991715328154ed10030b4338b3326c81",
+        "passed": true,
+        "checks": 26,
+        "report_sha256": "8d30bbc701dac268b2296cd82a82de3207b1c4337086ea54f0bb2b8f2b62feb3"
+      },
+      {
+        "compiled": true,
+        "generated": true,
+        "architecture": "ARM64",
+        "voiceoverRequested": true,
+        "compile_report_sha256": "fe1f9a2f8fbb2082266936b28d1e72a8744a51f5c91f98ba4a6d6c006e5edea7",
+        "native_sha256": "be52adbe7282a39e704fc1d2c2c8c9528d73d22c9475902e3e01ae9ab692e176",
+        "component_sha256": "ccf0be43e12d525a13c113dfb10c5e78991715328154ed10030b4338b3326c81",
+        "passed": true,
+        "checks": 32,
+        "report_sha256": "915cf85292d1c5388c9403a07580aacd837430afccc645d791b68f4490cc2639"
+      }
+    ],
+    "checks": 116,
+    "checks_exercised": [
+      "actual requested desktop mode",
+      "styled value contains visible text without markup",
+      "styled multiline editor retains text-area semantics",
+      "reference displays its visible link label",
+      "reference does not advertise an unsupported edit",
+      "ordinary text still reads normally",
+      "protected input remains undisclosed",
+      "styled focus request accepted",
+      "styled range request accepted",
+      "selection indexes refer to visible text",
+      "styled partial replacement accepted",
+      "ordinary Undo accepts the styled native edit",
+      "Redo availability matches the observed native 4D baseline",
+      "styled selection recovers after native Undo",
+      "styled native editor accepts another replacement after Undo",
+      "ordinary commit handler accepted",
+      "native commit preserves surrounding text and bold style",
+      "styled filtered input requested",
+      "original keystroke filter stops the remaining text",
+      "styled editor recovers after rejection",
+      "recovered text uses the ordinary commit handler",
+      "styled multiline replacement accepted",
+      "styled character count uses visible UTF-16 text without markup",
+      "multiline styled text uses the original commit handler",
+      "VoiceOver reaches the window independently of editor focus",
+      "VoiceOver reaches the complete form group",
+      "VoiceOver reads the styled editor name and visible text without markup",
+      "VoiceOver reads the link's visible label without source markup",
+      "VoiceOver navigation reaches both styled fields",
+      "read-only VoiceOver navigation preserves form content and saved results",
+      "ordinary close accepted",
+      "closed styled reference retires"
+    ],
+    "scope": "Ordinary styled fields in named and JSON-generated forms. VoiceOver reading in compiled desktop runs. No rich-expression, link-action, style-range, styled-grid or full-application claim."
+  },
+  "compiler_report_sha256": "fe1f9a2f8fbb2082266936b28d1e72a8744a51f5c91f98ba4a6d6c006e5edea7",
+  "ordinary_controls_regression": {
+    "interpreted": {
+      "passed": true,
+      "checks": 69,
+      "report_sha256": "891b8a6e10e646ca9589e82c956b96f57e4f257de477c521264986335d594cba"
+    },
+    "compiled": {
+      "passed": true,
+      "checks": 69,
+      "report_sha256": "9bbb9253a1c45d69fe2f61d2867b1f7ae48e54918727875c79e62e3102e88056"
+    }
+  },
+  "native_menu_baseline": {
+    "providerActive": false,
+    "baselineForm": true,
+    "baselineCompileReportSHA256": "4d1a1a550d901f83a79eb2506df8ae3601d578a334393f67824046d864f053b7",
+    "interaction": "Native keyboard selection and typing, then Command-Z and the Edit menu, driven through computer use",
+    "redoEnabledAfterUndo": false,
+    "scope": "Observed menu availability with no lifecycle area or provider registration; plugin/component remained installed. Not a Redo execution claim."
+  }
+}

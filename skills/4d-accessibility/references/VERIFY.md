@@ -12,7 +12,7 @@ python3 inspect_ax.py --pid 12345 --window-title "Customer details" --output /ho
 
 Use the actual process ID and exact window title, and a fresh `--output` path for each run. The inspector refuses to overwrite an existing file. The invoking app needs normal macOS Accessibility permission. The script sends no actions, focus changes, mouse events or keystrokes. It reports roles, identifiers, names, state, geometry, offered actions, logical table counts and the bridge root's receipt. It reads bounded slices and records truncation. Use `--row-start 590` to sample distant logical rows and `--include-values` when the test requires field values. Use an existing ignored host-local output directory. Reports are private mode-0600 files; labels and identifiers can also contain application data. Keep them outside source control.
 
-A truncated sample does not establish entire-UI coverage. Traverse omitted branches and logical row ranges with a suitable AX client. A native provider can coexist with the bridge; inspect both. `AXHelp` on the root whose identifier begins `axb.window.` is the action receipt, not the internal coverage diagnostics.
+A truncated sample does not establish entire-UI coverage. Traverse omitted branches and logical row ranges with a suitable AX client. A native provider can coexist with the bridge; inspect both. `AXHelp` on the root whose identifier begins `axb/` is the action receipt, not the internal coverage diagnostics.
 
 For coverage reasons such as `providerPending`, obtain `AXB_Form("diagnostics"; New object)` in the root's debugger context or through a temporary development-only export. Record every issue's path/object/reason, then remove the export. Inspect every runtime page and state, not only source form definitions.
 
@@ -38,6 +38,6 @@ A button activation receipt confirms that the bridge posted the click through th
 | Action receipt | AX transport accepts or rejects the request. A bridge root may then report queued/waiting and a final message. Verify actual control/model state after callbacks settle. An unsuccessful receipt can follow an already-delivered action; do not replay automatically. |
 | Entire workflow | VoiceOver can reach every meaningful active control, open/dismiss transient UI, edit, recover from a validation error and finish the business operation. Verify resulting application state through its ordinary UI or authorized data checks. |
 
-Use `AXIdentifier` to retain elements for stale-reference tests. Ordinary control IDs can remain stable through scrolling; replacement and scope changes must retire prior actionable identities. Sorting keeps a row attached to its original key, not its old index.
+Keep the original element handles for stale-reference tests. Replacement and scope changes must retire those handles even when their `AXIdentifier` strings repeat. Sorting keeps a row attached to its original key, not its old index.
 
 Run the same scenario in each claimed execution mode. Record the version/hash, macOS/4D/vendor versions, mode, expected result, observed result and any blocking prerequisite. If live tests cannot run, deliver the source changes and exact test debt while keeping accessibility completion pending.

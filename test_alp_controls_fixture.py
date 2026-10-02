@@ -73,7 +73,7 @@ def main():
         pending = [window]
         while pending:
             item = pending.pop()
-            if (item.read('AXIdentifier') or '').startswith('axb.window.'):
+            if (item.read('AXIdentifier') or '').startswith('axb/'):
                 group = item
                 break
             if item.read('AXRole') != 'AXTable':

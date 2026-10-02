@@ -251,7 +251,7 @@ class Element:
                 return None
             element = pending.pop()
             identifier = element.read("AXIdentifier")
-            if isinstance(identifier, str) and identifier.startswith("axb.") and identifier.endswith(suffix):
+            if isinstance(identifier, str) and identifier.startswith("axb/") and identifier.endswith(suffix):
                 return element
             pending.extend(x for x in (element.read("AXChildren") or []) if isinstance(x, Element))
         raise RuntimeError("Fixture AX traversal exceeded its bound")

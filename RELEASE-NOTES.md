@@ -1,4 +1,23 @@
-# 0.20.0 on main
+# 0.21.0
+
+This release combines area-owned form integration with stable automation identifiers and broader native-control support. Install the native plugin, compiled component and host helpers from the same versioned macOS kit. The release workflow signs the packages as Sweetwater and notarizes the ZIP and DMG. Publication requires live checks of those exact downloads.
+
+## What changes
+
+- Ordinary forms need one invisible lifecycle area. The installer preserves existing objects and methods; generated forms use a prepared copy. One optional central configuration supplies application knowledge such as row identity and loading readiness.
+- Public identifiers now use readable paths such as `axb/CustomerSearch/SearchFld`. They repeat across form openings. Internal session UUIDs still reject actions against closed forms. Find the selected live window first and reacquire its elements; identifiers are not globally unique handles. Optional screen, control and column keys let an application preserve locators through renames.
+- Native tabs, ordinary styled fields and flat classic current/named-selection grids use their existing UI, editors, validation and business handlers. Static tabs with repeated reference values receive distinct choice identifiers. Styled edits preserve formatting. Classic grids read through a private entity selection without changing the form's current record buffer.
+- A changed column alias retires cached grid cells even if no column header was previously inspected. Public locator changes cannot leave an old cell usable.
+
+## Validation and scope
+
+Local candidate acceptance includes 628 tab checks, 164 classic-selection checks, 388 existing native-grid action checks, 116 styled-field checks and 121 AreaList checks. Four whole-window comparisons are pixel-identical. The native provider passes 276 checks. [Candidate evidence](validation/stable-identifiers-0.21.0.json) records actual run hashes and distinguishes the earlier tab matrix from final native corrections. Signed-download evidence is attached to the release after its acceptance gate passes.
+
+The tested host is 4D 20.8 on macOS 26.7, with native Apple Silicon fixtures. The plugin and component contain both ARM and Intel code; this does not establish Intel hardware, Windows accessibility or remote-client delivery. Support is defined by the [family checklist](skills/4d-accessibility/references/FULL-FORMS.md). Hierarchical grids, list subforms and advanced embedded/custom editors remain separate work. AreaList supplementary-Unicode editing retains its documented vendor restriction.
+
+See [installation and migration](skills/4d-accessibility/references/AREA-INTEGRATION.md), [stable identifier rules](skills/4d-accessibility/references/IDENTIFIERS.md) and [the integration skill](skills/4d-accessibility/SKILL.md). Earlier recordings demonstrate the workflows, but are not acceptance evidence for this version.
+
+# 0.20.0 integration history
 
 The new integration path adds an invisible, non-focusable plug-in area to each form. The area starts the existing accessibility adapters after ordinary initialization and releases its captured session when the form closes. Most ordinary forms need no bridge code in their form method. One optional `AXB_Configure` method supplies names, grid providers and other application-specific metadata.
 
@@ -8,7 +27,7 @@ This branch also fixes duplicate-named root/child text selection and ordinary bu
 
 Database close/reopen now reinitializes the native bridge through 4D's plugin callbacks. Sessions from the closed database remain retired; newly opened forms get fresh identities. The regression fixture exercises the complete controls workflow after a real reopen in interpreted and compiled mode.
 
-Version 0.20.0 is merged to main but is not a published signed release. Download the matching development kit from a passing Build and test workflow run, or build the exact revision. Its native plug-in, component and helpers must be installed together. See [area integration](skills/4d-accessibility/references/AREA-INTEGRATION.md) for setup and migration. The supported control families and vendor restrictions are unchanged.
+Version 0.20.0 introduced this integration path on main. Version 0.21.0 includes it in the matching release kit. The native plugin, component and helpers must be installed together. See [area integration](skills/4d-accessibility/references/AREA-INTEGRATION.md) for setup and migration. The supported control families and vendor restrictions are unchanged.
 
 # 0.19.7 published release
 

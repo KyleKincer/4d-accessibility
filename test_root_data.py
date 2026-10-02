@@ -299,13 +299,13 @@ def main():
             pending = [window]
             while pending:
                 node = pending.pop()
-                if str(node.read("AXIdentifier") or "").startswith("axb.window."):
+                if str(node.read("AXIdentifier") or "").startswith("axb/"):
                     return node
                 pending.extend(node.read("AXChildren") or [])
         root = ax.wait_for(group, "Root tree missing")
         def replacement(previous):
             current = group()
-            return current if current and current.read("AXIdentifier") != previous and current.read("AXChildren") else None
+            return current if current and not current.same_as(previous) and current.read("AXChildren") else None
         def control(name):
             return ax.wait_for(lambda: next((n for n in root.read("AXChildren") or []
                 if name in [n.read("AXTitle"), n.read("AXDescription")]), None), name + " missing")
@@ -329,7 +329,7 @@ def main():
         check(control("Change").press() == 0, "existing business button accepts AXPress")
         ax.wait_for(lambda: state().get("name") == "Handler changed" and state().get("clicks") == 1, "Business handler did not run once")
         ax.wait_for(lambda: root.read("AXHelp") == "Activation dispatched through the control's normal event path", "Business button did not finish")
-        previous = root.read("AXIdentifier")
+        previous = root
         check(control("Restart").press() == 0, "lifecycle restart uses the existing root")
         root = ax.wait_for(lambda: replacement(previous), "Replacement root missing")
         check(field.set_text("stale") != 0 or not field.actions(), "retired field cannot edit the replacement root")
@@ -342,7 +342,7 @@ def main():
         check(state()["name"] == "Handler changed" and state()["clicks"] == 1, "failure and stale access preserve business state")
         if args.no_error_callback:
             check(state()["areaDiagnostics"]["areas"][0]["failure"]["error"] == "callbackError", "area diagnostics retain the failure without an application callback")
-            previous = root.read("AXIdentifier")
+            previous = root
             (fixture / "Resources/restart.json").write_text("{}")
             root = ax.wait_for(lambda: replacement(previous), "Recovery root missing")
             ax.wait_for(lambda: state().get("active") and state()["areaDiagnostics"]["areas"][0]["registered"], "Recovered session did not retain area ownership")
