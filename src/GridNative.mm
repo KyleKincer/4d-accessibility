@@ -208,8 +208,11 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 - (BOOL)accessibilityPerformPress {
     if (![self.table synchronizeForAction] || !self.isAccessibilityEnabled) return NO;
     if ([self canEdit]) {
+        NSDictionary *before = self.value;
         BOOL accepted = [self.table queue:[self isWidget] ? @"gridPress" : @"gridEdit" value:@{@"row": self.row.key, @"column": self.columnKey}];
         if (accepted && [self.value[@"role"] isEqual:@"popup"]) [self.table.owner expectPopupFrom:self.accessibilityChildren.firstObject];
+        if (accepted && [before[@"role"] isEqual:@"checkbox"])
+            [self.table.owner expectCheckboxFrom:self.accessibilityChildren.firstObject previousValue:before[@"checked"]];
         return accepted;
     }
     if (![self.table.grid.descriptor[@"actions"][@"select"] boolValue] || !AXBGridRowAllowsSelection(self.table.grid.descriptor, self.row.key)) return NO;

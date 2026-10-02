@@ -10,6 +10,7 @@ The initial release covers the implemented families below on 4D 20.8 and the tes
 | Installer-added lifecycle area | Unavailable | Validated; unsigned CI kit | Available |
 | Ordinary styled text | Unavailable | Unavailable | Scoped acceptance passes; remaining cases below |
 | Tabs | Unavailable | Unavailable | Scoped acceptance and existing-control regressions pass |
+| Classic current/named-selection grids | Unavailable | Unavailable | Implemented; live acceptance in progress |
 
 Build branch kits using [the build guide](../../../CONTRIBUTING.md). Install the plugin, component and helpers from the same kit. A newer helper with an older native plugin does not add a native capability.
 
@@ -33,7 +34,7 @@ The complete synthetic window is pixel-identical with and without the area, with
 
 The default 4D 20.8 Edit menu leaves Redo unavailable after the same edit in the native baseline and bridge fixture; this does not establish Redo execution in other menu contexts. Embedded expressions still need their original rendered context. Actionable links, style-range reporting and long styled input remain follow-up work. These changes are on the compatibility branch, not in the current main kit or an application's existing pin. See [the family checklist](FULL-FORMS.md) before claiming an entire form accessible.
 
-Classic selection reads pass 131 command-level checks in interpreted and compiled ARM 4D 20.8. An isolated process resolves named selections without changing the form's loaded record or unsaved input. Export commands that unload that record are excluded. This establishes a safe reading path; the grid adapter and live accessibility acceptance remain open. See [the command checks](../../../tests/CLASSIC-SELECTION.md).
+The compatibility branch implements flat classic current/named-selection grids through the existing logical-grid provider. A private read-only process converts record numbers into a shared entity selection. Stored master-table fields are then read from those entities without touching the form's record buffer; actions use the native selection and editors. Final interpreted/compiled, VoiceOver, pixel and regression acceptance is in progress. See [configuration and limits](GRIDS.md#use-a-classic-current-or-named-selection) and [the command checks](../../../tests/CLASSIC-SELECTION.md).
 
 Static captions and grouping boxes no longer block hit testing of an overlapping control. The native provider uses the same nonblocking roles as the host overlap check; captions remain reading stops where no control occupies the point. A regression reproduces rejected native button delivery before the fix and verifies one complete mouse pair afterwards. Interactive controls and native views still obstruct delivery. Real application workflow acceptance is separate.
 
@@ -75,7 +76,7 @@ Automatic array grids also accept legacy Boolean hidden-row arrays directly. The
 
 - Standard 4D `CONFIRM` and `ALERT` dialogs still need accessible text and actions. A [standalone reproduction](https://github.com/KyleKincer/4d-accessibility/tree/main/tests/native-messages) with no plugin, component or replacement form exposes only an empty text element on 4D 20.8/macOS 26.7 in native ARM and Rosetta execution. [Recorded observations](https://github.com/KyleKincer/4d-accessibility/blob/main/validation/native-messages.json). Applications can [integrate their existing dialog forms](MESSAGES.md) and route prompts through them where that appearance is acceptable. The built-in commands themselves remain inaccessible on the tested installation.
 - Tabs on the compatibility branch pass their scoped acceptance gate. Actual native scroll-arrow presentation remains unvalidated. Dials, editable pictures, hierarchical lists and standard-action-generated menus need implementation or further validation.
-- Classic current/named-selection grids, native hierarchy, advanced styled/custom/protected editor behavior and further AreaList layouts remain open. Ordinary styled-field coverage on the compatibility branch is described above; styled grid cells remain separate work.
+- Classic current/named-selection acceptance, native hierarchy, advanced styled/custom/protected editor behavior and further AreaList layouts remain open. Ordinary styled-field coverage on the compatibility branch is described above; styled grid cells remain separate work.
 - Native grid headers pass array, collection and entity tests in interpreted and compiled modes. An earlier intermittent compiled entity activation reported delivery without a handler event. A fresh full run passes; its cause remains unresolved and is retained in the validation record.
 - IME/grapheme behavior, wrapped text geometry, errors/status speech and complete reading order need further work.
 - Advanced `AXB_Dynamic` wrappers and explicit child registration still require private plain data. Automatic area preparation and child discovery do not have this restriction.

@@ -381,7 +381,8 @@ def main():
             check(find("Disable far").press() == 0, "change row metadata through the existing application state")
             ax.wait_for(lambda: state().get("disableFar") is True and far.read("AXEnabled") is False, "Offscreen row did not become disabled")
             check(not far.is_settable("AXValue"), "retained offscreen cell loses editing when its row becomes disabled")
-            find("Disable far").press()
+            settle()
+            check(find("Disable far").press() == 0, "restore row metadata through the original control")
             ax.wait_for(lambda: state().get("disableFar") is False and far.is_settable("AXValue"), "Restored row did not regain its editor")
             check(far.read("AXIdentifier") == far_identity, "row-state changes preserve record identity")
             settle()
@@ -450,6 +451,10 @@ def main():
                 amount = table.cell(1, 598)
                 ax.wait_for(lambda: far.read("AXValue") == "Line item 0600" and amount.read("AXValue") == "600.25", "Restored metadata mapping did not load values")
                 settle()
+            if described is not None and config.get("kind") in ("collection", "entity"):
+                check(described.read("AXSize") in (None, (0.0, 0.0)), "metadata replacement retires the prior description cell")
+                described = table.cell(2, 598)
+                ax.wait_for(lambda: described.read("AXValue") == "Ready: Line item 0600", "Restored description did not load from the current grid")
         ticks = state()["timerTicks"]
 
         selection_hooks = state()["hooks"]

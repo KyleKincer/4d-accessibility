@@ -562,6 +562,11 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
 @end
 
 @implementation AXBWindowView
+- (void)expectCheckboxFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value {
+    NSString *action = self.session.activity[@"id"];
+    if (action && element && value)
+        self.actionFeedback = @{@"id": action, @"control": element, @"value": value};
+}
 - (void)expectPopupFrom:(id)element {
     NSString *action = self.session.activity[@"id"];
     if (action) self.popupRequest = @{@"id": action, @"element": element};
@@ -776,7 +781,8 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (focusChanged) NSAccessibilityPostNotification(focused, NSAccessibilityFocusedUIElementChangedNotification);
     if (structureChanged) NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
     NSDictionary *feedback = self.actionFeedback;
-    if ([feedback[@"role"] isEqual:@"tab"] && (focusChanged || (feedback[@"deadline"] && Now() >= [feedback[@"deadline"] doubleValue]))) {
+    if (([feedback[@"role"] isEqual:@"tab"] && focusChanged) ||
+        (feedback[@"deadline"] && Now() >= [feedback[@"deadline"] doubleValue])) {
         self.actionFeedback = nil; feedback = nil;
     }
     NSDictionary *activity = self.session.activity;
@@ -786,7 +792,27 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (feedback && [feedback[@"id"] isEqual:result[@"id"]]) {
         self.actionFeedback = nil; // A receipt replay must never repeat speech.
         if (![activity[@"busy"] boolValue] && [result[@"status"] isEqual:@"completed"] && NSApp.isActive && self.window.isKeyWindow && [self canAct]) {
-            for (AXBNode *node in self.nodes) {
+            id<NSAccessibility> control = feedback[@"control"];
+            if (control) {
+                // A grid's native click can complete before its value page
+                // arrives. Speak only this live control's changed state, once.
+                if ([control isAccessibilityElement] && [[control accessibilityRole] isEqual:NSAccessibilityCheckBoxRole]) {
+                    NSNumber *value = [control accessibilityValue];
+                    if ([value isKindOfClass:NSNumber.class] && [value isEqual:feedback[@"value"]]) {
+                        NSNumber *deadline = feedback[@"deadline"] ?: @(Now()+2);
+                        if (Now() < deadline.doubleValue) {
+                            NSMutableDictionary *waiting = [feedback mutableCopy]; waiting[@"deadline"] = deadline;
+                            self.actionFeedback = waiting;
+                        }
+                    } else if ([value isKindOfClass:NSNumber.class]) {
+                        NSString *key = value.integerValue == 2 ? @"mixed" : value.boolValue ? @"checked" : @"unchecked";
+                        NSString *state = [[NSBundle bundleForClass:AXBNode.class] localizedStringForKey:key value:key table:@"AccessibilityBridge"];
+                        NSAccessibilityPostNotificationWithUserInfo(self.window, NSAccessibilityAnnouncementRequestedNotification,
+                            @{NSAccessibilityAnnouncementKey: [NSString stringWithFormat:@"%@: %@", [control accessibilityLabel] ?: @"", state],
+                              NSAccessibilityPriorityKey: @(NSAccessibilityPriorityMedium)});
+                    }
+                }
+            } else for (AXBNode *node in self.nodes) {
                 if (![node.data[@"id"] isEqual:feedback[@"node"]] || ![node.data[@"role"] isEqual:feedback[@"role"]] ||
                     ![node.data[@"label"] isEqual:feedback[@"label"]] ||
                     !node.isAccessibilityElement || !node.isAccessibilityEnabled || ([feedback[@"role"] isEqual:@"checkbox"] && node.isAccessibilityFocused) ||
