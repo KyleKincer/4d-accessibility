@@ -1,6 +1,6 @@
 # Integrate with a lifecycle area
 
-The area owns startup and shutdown. Discovery, grids, editors, validation and actions use the same adapters as the manual interface. This path passes the [area acceptance suite](../../../validation/area-owned-integration.json) with the 0.20.0 source now on `main`; the published 0.19.7 kit uses the [manual lifecycle](MANUAL-LIFECYCLE.md).
+The area owns startup and shutdown. Discovery, grids, editors, validation and actions use the same adapters as the manual interface. This path passes the [area acceptance suite](../../../validation/area-owned-integration.json) and is included in the 0.21.0 matching kit. The older 0.19.7 kit uses the [manual lifecycle](MANUAL-LIFECYCLE.md).
 
 ## Ordinary named form
 
