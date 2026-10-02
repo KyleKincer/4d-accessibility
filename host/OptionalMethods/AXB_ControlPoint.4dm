@@ -38,7 +38,7 @@ If (($options#Null) && ($options.controls#Null) && ($options.controls[$target.ob
 End if
 $regions:=New collection($bounds)
 For each ($node; $nodes)
- If (($node.id#$target.id) & (New collection("text"; "group").indexOf($node.role)<0))
+ If (($node.id#$target.id) & Not(($target.role="tab") & ($node.objectName=$target.objectName)) & (New collection("text"; "group").indexOf($node.role)<0))
   $otherLayer:=0
   If (($options#Null) && ($options.controls#Null) && ($options.controls[$node.objectName]#Null))
    $metadata:=$options.controls[$node.objectName]

@@ -25,6 +25,11 @@ $bindings:=New collection
 $names:=New collection
 $gridMatch:=False
 For each ($node; $registry.controls)
+ If (New collection("tab"; "tabgroup").indexOf($node.role)>=0)
+  // Tab activation does not transfer 4D keyboard focus to the painted cell.
+  // Its group and choices deliberately share the same object binding.
+  continue
+ End if
  If ($node.visible & $node.enabled)
   If (Compare strings($name; $node.objectName; sk char codes)=0)
    $names.push(New object("node"; $node))

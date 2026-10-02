@@ -1,6 +1,6 @@
 // Discover ordinary live controls in their owning form. Never evaluate source
 // expressions, read masked values, or copy application object/collection data.
-#DECLARE($options : Object) -> $result : Object
+#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection) -> $result : Object
 var $name; $role; $label; $font : Text
 var $indicator : Integer
 var $minimum; $maximum : Real
@@ -9,7 +9,7 @@ var $description : Variant
 var $parts; $labels : Collection
 var $valueType : Integer
 var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end : Integer
-var $node; $other; $metadata; $popup; $styledText : Object
+var $node; $other; $metadata; $popup; $styledText; $tabs : Object
 var $value : Variant
 var $protected : Boolean
 ARRAY TEXT($names; 0)
@@ -96,6 +96,12 @@ For ($i; 1; Size of array($names))
     $value:=$popup.value
     If (Not($popup.ok))
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "popupValueTypePending"))
+    End if
+   : ($type=Object type tab control)
+    $tabs:=AXB_Tabs($name; $pointers{$i}; $options; $tabState; $paintOffset)
+    $result.nodes:=$result.nodes.concat($tabs.nodes)
+    If (Not($tabs.ok))
+     $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; $tabs.error))
     End if
    : ($type=Object type groupbox)
     $role:="group"

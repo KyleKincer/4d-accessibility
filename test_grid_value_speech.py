@@ -20,7 +20,7 @@ import doctor
 CASES = ("single", "forward", "back", "leave", "inspection", "reload", "checkbox", "checkbox_leave", "popup")
 SOURCES = (
     "src/Session.mm", "src/Session.h", "src/Grid.mm", "src/Grid.h",
-    "src/Bridge.mm", "src/Bridge.h", "src/BridgePrivate.h", "src/GridNative.mm", "src/Limits.h",
+    "src/Bridge.mm", "src/Bridge.h", "src/BridgePrivate.h", "src/GridNative.mm", "src/NativeLayout.mm", "src/NativeLayout.h", "src/Limits.h",
     "tests/NativeGridFixture.mm", "tests/mac_ax.py", "tests/voiceover.py",
     "tests/ReadScreen.swift", "test_grid_value_speech.py",
 )
@@ -197,7 +197,7 @@ def main():
     binary, ocr = output / "NativeGridFixture", output / "read-fixture-screen"
     subprocess.run([
         "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
-        *[str(ROOT / name) for name in ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "tests/NativeGridFixture.mm")],
+        *[str(ROOT / name) for name in ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "tests/NativeGridFixture.mm")],
         "-framework", "Cocoa", "-o", str(binary),
     ], check=True)
     if not args.run:

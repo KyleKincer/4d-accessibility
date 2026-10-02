@@ -23,7 +23,7 @@ def main():
     binary = ROOT / "build/NativeGridFixture"
     subprocess.run([
         "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
-        *[str(ROOT / path) for path in ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "tests/NativeGridFixture.mm"]],
+        *[str(ROOT / path) for path in ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "tests/NativeGridFixture.mm"]],
         "-framework", "Cocoa", "-o", str(binary),
     ], check=True)
     if not args.run:
@@ -148,7 +148,7 @@ def main():
             command("quit")
             process.wait(timeout=10)
             check(process.returncode == 0, "owned grid host exits normally")
-            sources = ["src/Session.mm", "src/Grid.mm", "src/GridNative.mm", "src/Bridge.mm", "src/BridgePrivate.h", "tests/NativeGridFixture.mm", "tests/mac_ax.py", "test_native_grids.py"]
+            sources = ["src/Session.mm", "src/Grid.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/NativeLayout.h", "src/Bridge.mm", "src/BridgePrivate.h", "tests/NativeGridFixture.mm", "tests/mac_ax.py", "test_native_grids.py"]
             (ROOT / "build/native-grid-report.json").write_text(json.dumps({"checks": checks, "count": len(checks), "voiceover": voiceover_steps, "sources_sha256": {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in sources}}, indent=2) + "\n")
         except Exception as error:
             (ROOT / "build/native-grid-report.json").write_text(json.dumps({

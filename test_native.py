@@ -13,7 +13,7 @@ binary = root / "build/NativeProviderTests"
 subprocess.run([
     "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror",
     "-I", str(root / "src"), str(root / "tests/NativeProviderTests.mm"),
-    str(root / "src/Session.mm"), str(root / "src/Grid.mm"), str(root / "src/Bridge.mm"), str(root / "src/GridNative.mm"),
+    str(root / "src/Session.mm"), str(root / "src/Grid.mm"), str(root / "src/Bridge.mm"), str(root / "src/GridNative.mm"), str(root / "src/NativeLayout.mm"),
     "-framework", "Cocoa", "-o", str(binary),
 ], check=True)
 print("Built native provider tests; an unlocked desktop is required to run them.")

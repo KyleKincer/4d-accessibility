@@ -23,6 +23,8 @@ python3 ci/check_repository.py
 
 `test_native.py` compiles the AppKit provider tests. Add `--run` only in an unlocked graphical session. Live fixture scripts also require 4D desktop and appropriate Accessibility permission. Screen recording is needed for visual/VoiceOver probes.
 
+The compatibility branch has [tab-control acceptance cases](tests/TABS.md#run-the-acceptance-cases) for named/generated forms, repeated children and compact native menus. Keep its plugin, component and helpers together when preparing a fixture.
+
 ## Area-owned integration
 
 Version 0.20.0 adds a lifecycle area to ordinary forms without changing their business methods or event masks. Build both packages first, then run the smallest end-to-end case:
@@ -120,7 +122,7 @@ For direct moves between edited AreaList cells, add `--cell-transitions` to `tes
 
 For styled native text, prepare the ordinary discovery fixture with `--area --styled` and the required `--server`. Run `test_styled_text.py --tool4d /path/to/tool4d.app` for command-level reading and side-effect checks; a licensed `--server` is also supported. Run `test_styled_fixture.py --run` and then `--run --compiled --voiceover` for native selection, multiline Unicode input, style-preserving edits, original validation, Undo, stale elements and spoken reading. Prepare again with `--dynamic` to repeat both runs on a JSON-generated form. The test selects actual controls, because their captions can have the same accessible name. Default-menu Redo availability is compared with the observed native 4D 20.8 baseline; it is not a Redo execution claim. Desktop tests require an unlocked graphical session. The [family checklist](skills/4d-accessibility/references/FULL-FORMS.md) tracks the remaining work.
 
-Live AX polling and fixture startup stop immediately if the graphical session locks. For unattended runs, keep a login-session sleep assertion alive for the whole run. A timed `caffeinate` process exits when its timeout expires; a persistent LaunchAgent needs `RunAtLoad` and `KeepAlive` so it renews and survives terminal/session-host exits. Verify `PreventUserIdleDisplaySleep`, `PreventUserIdleSystemSleep` and `UserIsActive` with `pmset -g assertions`. Keep normal authentication enabled. An explicit lock or logout still requires an unlock before testing resumes.
+Live AX polling and fixture startup stop immediately if the graphical session locks. For unattended runs, keep login-session sleep and user-activity assertions alive for the whole run. `caffeinate -u` defaults to a five-second user-activity timeout when `-t` is omitted. A persistent LaunchAgent can renew `caffeinate -diu -t 300` using `RunAtLoad` and `KeepAlive`, including after terminal/session-host exits. Verify that its process owns `PreventUserIdleDisplaySleep`, `PreventUserIdleSystemSleep` and `UserIsActive` in `pmset -g assertions`. Keep normal authentication enabled. An explicit lock or logout still requires an unlock before testing resumes.
 
 `src/` contains the macOS provider and action/session model. `host/Methods` contains component methods and AreaList adapters; `host/OptionalMethods` contains the high-level host API. Edit canonical helpers, then reinstall them into test hosts with `install_host_methods.py`. The installer protects application-owned methods and modified generated files.
 

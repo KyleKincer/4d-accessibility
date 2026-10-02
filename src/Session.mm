@@ -111,7 +111,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (![nodes isKindOfClass:NSArray.class] || nodes.count > AXBLimits::nodes) return @"invalid node count";
     NSMutableSet *ids = [NSMutableSet new];
     NSMutableDictionary *byID = [NSMutableDictionary new];
-    NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper"]];
+    NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper", @"tabgroup", @"tab"]];
     for (id raw in nodes) {
         if (![raw isKindOfClass:NSDictionary.class]) return @"invalid node";
         NSDictionary *n = raw;
@@ -159,7 +159,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 [n[@"min"] doubleValue] > [n[@"max"] doubleValue]) return @"invalid progress range";
         } else if ([n[@"role"] isEqual:@"checkbox"]) {
             if (!Bool(n[@"value"]) && !(Number(n[@"value"]) && [n[@"value"] doubleValue] == 2)) return @"invalid checkbox state";
-        } else if ([n[@"role"] isEqual:@"radio"] ? !Bool(n[@"value"]) : !Text(n[@"value"], AXBLimits::text)) return @"invalid node value";
+        } else if ([@[@"radio", @"tab"] containsObject:n[@"role"]] ? !Bool(n[@"value"]) : !Text(n[@"value"], AXBLimits::text)) return @"invalid node value";
         if (n[@"valueDescription"] && !Text(n[@"valueDescription"], AXBLimits::text)) return @"invalid value description";
         for (NSString *key in @[@"focused", @"focusable", @"editable", @"protected", @"multiline", @"combo", @"revealable"])
             if (n[key] && !Bool(n[key])) return @"invalid control capability";
@@ -181,10 +181,15 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     }
     // Ordinary controls can belong to semantic groups. Table rows/cells retain
     // their stricter hierarchy. Validate all ancestry before following it.
+    NSMutableSet *selectedTabGroups = [NSMutableSet new];
     for (NSDictionary *n in nodes) {
         NSString *role = n[@"role"];
-        NSString *expected = [role isEqual:@"row"] ? @"table" : [role isEqual:@"cell"] ? @"row" : nil;
+        NSString *expected = [role isEqual:@"row"] ? @"table" : [role isEqual:@"cell"] ? @"row" : [role isEqual:@"tab"] ? @"tabgroup" : nil;
         if (expected && (!n[@"parent"] || ![byID[n[@"parent"]][@"role"] isEqual:expected])) return @"invalid table hierarchy";
+        if ([role isEqual:@"tab"] && [n[@"value"] boolValue]) {
+            if ([selectedTabGroups containsObject:n[@"parent"]]) return @"multiple selected tabs";
+            [selectedTabGroups addObject:n[@"parent"]];
+        }
         if (n[@"parent"] && byID[n[@"parent"]][@"grid"]) return @"logical grid cannot mix explicit summary rows";
         if (!expected && n[@"parent"] && ![byID[n[@"parent"]][@"role"] isEqual:@"group"]) return @"invalid group parent";
         NSMutableSet *ancestors = [NSMutableSet new];
@@ -194,6 +199,14 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             if (ancestor[@"parent"] && !byID[ancestor[@"parent"]]) return @"missing control parent";
         }
         if (n[@"labelledBy"] && (![byID[n[@"labelledBy"]][@"role"] isEqual:@"text"] || [n[@"id"] isEqual:n[@"labelledBy"]])) return @"invalid label relationship";
+        if (n[@"linked"]) {
+            if (![n[@"linked"] isKindOfClass:NSArray.class] || [n[@"linked"] count] > nodes.count) return @"invalid linked controls";
+            NSMutableSet *linked = [NSMutableSet new];
+            for (id identifier in n[@"linked"]) {
+                if (!Text(identifier, 128) || !byID[identifier] || [identifier isEqual:n[@"id"]] || [linked containsObject:identifier]) return @"invalid linked controls";
+                [linked addObject:identifier];
+            }
+        }
     }
     if (envelope[@"gridPages"]) {
         NSArray *pages = envelope[@"gridPages"];
@@ -291,7 +304,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         ![snapshot[@"enabled"] boolValue]) return nil;
     for (NSDictionary *node in snapshot[@"nodes"]) if ([node[@"id"] isEqual:_pending[@"node"]]) {
         if (![node[@"enabled"] boolValue] || ![node[@"visible"] boolValue]) return nil;
-        if ([_pending[@"operation"] isEqual:@"press"] && [node[@"role"] isEqual:@"button"]) {
+        if ([_pending[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:node[@"role"]]) {
             NSArray *point = input[@"point"], *frame = node[@"frame"];
             if (!point) return nil;
             double x = [point[0] doubleValue], y = [point[1] doubleValue];
@@ -547,7 +560,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         NSString *role = node[@"role"];
         NSDictionary *gridValue = nil;
         if ([operation isEqual:@"press"]) {
-            if (![@[@"button", @"checkbox", @"radio", @"popup"] containsObject:role]) return NO;
+            if (![@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:role]) return NO;
         } else if ([@[@"showMenu", @"confirm", @"dismissMenu"] containsObject:operation]) {
             if (![node[@"combo"] boolValue]) return NO;
         } else if ([@[@"increment", @"decrement"] containsObject:operation]) {

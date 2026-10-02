@@ -8,7 +8,7 @@ ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
-If (New collection("info"; "start"; "stop"; "node"; "exchange"; "focus").indexOf($operation)<0)
+If (New collection("info"; "start"; "stop"; "node"; "exchange"; "focus"; "layout").indexOf($operation)<0)
  return
 End if
 If ((Value type($request)#Is object) | ($request=Null))
@@ -41,6 +41,14 @@ If ($operation="stop")
 End if
 If (Current form window=0)
  $result.error:="noFormContext"
+ return
+End if
+If ($operation="layout")
+ If (Position("; tabs 1;"; $status)>0)
+  $result:=JSON Parse(AXB Native layout(Current form window; JSON Stringify($request)))
+ Else
+  $result.error:="nativeTabLayoutUnavailable"
+ End if
  return
 End if
 If ($operation="focus")
