@@ -114,4 +114,3 @@ static NSString *ProbeNativeHierarchy(void *nativeWindow) {
     NSData *data=[NSJSONSerialization dataWithJSONObject:result options:0 error:nil];
     return [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
 }
-

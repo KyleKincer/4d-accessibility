@@ -15,6 +15,7 @@ from build_component import BUILD, ROOT, sha
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prepare-only", action="store_true")
+    parser.add_argument("--source", default="HEAD", help="Committed production source to observe")
     args = parser.parse_args()
     destination = BUILD / "hierarchy-observer"
     if destination.exists():
@@ -22,7 +23,8 @@ def main():
             parser.error("Observer destination must not be a symlink")
         destination.rename(BUILD / ("hierarchy-observer-previous-" + uuid.uuid4().hex))
     destination.mkdir(parents=True)
-    revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    revision = subprocess.check_output(["git", "rev-parse", "--verify", "--end-of-options",
+        args.source + "^{commit}"], cwd=ROOT, text=True).strip()
     archive = subprocess.check_output(["git", "archive", revision], cwd=ROOT)
     with tarfile.open(fileobj=io.BytesIO(archive)) as files:
         files.extractall(destination, filter="data")
@@ -31,7 +33,7 @@ def main():
     source = plugin.read_text()
     patches = [
         ("#import <Foundation/Foundation.h>", "#import <Foundation/Foundation.h>\n#import <objc/runtime.h>"),
-        ("static NSString *TextParameter", helper.read_text() + "static NSString *TextParameter"),
+        ("static NSString *TextParameter", helper.read_text() + "\nstatic NSString *TextParameter"),
         ("if (request) request.result = request.layout ?",
          'if (request && [request.layout isEqual:@"hierarchyProbe"]) { request.result=ProbeNativeHierarchy(request.nativeWindow); return; }\n        if (request) request.result = request.layout ?'),
         ("case kServerInitPlugin: AXBInitialize(); break;",

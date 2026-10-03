@@ -42,9 +42,9 @@
   },
   "diagnosticObserver": {
     "productionSourceCommit": "b699e632c863f360ad0ec9658c114fe3563a515b",
-    "observerTemplateSHA256": "d971c2ff849a743b2089a64b18e1efa6b56d2112a8d18a9128bb040ef61e42f9",
+    "observerTemplateSHA256": "1e8ca27bdc537f800685aec16815f269b28623255cd1a4ad6325b4f168940809",
     "observerPluginSourceSHA256": "f4ec27dacdb8635cb07705d7aa7cf2e4716e0a0f8424f3bebc2d2f037e4f55fc",
-    "preparerSHA256": "69a405990ac224c16875684517e9ae86cae26be38ffb2a5da3a1671c4f52aacb",
+    "preparerSHA256": "43f9da398fa0bfc950750f073fa15609521b30ef2adc48ba522e78578e948c65",
     "scope": "Disposable native view and public NSCell drawing observation, no adapter acceptance",
     "diagnosticNativeSHA256": "cd893e93467ea5d654191403c95dcbfaa628e1129ba107f9bb111589466934d1",
     "publicationRecipePreparedOnly": true,
