@@ -235,7 +235,7 @@ def main():
         if compiled.get("diagnosticsTest"):
             expected = {"classicIdentityRequired", "listSubformParentMetadataRequired"}
             def diagnostic_reasons():
-                return {issue.get("reason") for issue in state().get("diagnostics", {}).get("unsupported", [])}
+                return {issue.get("reason") for issue in state().get("diagnostics", {}).get("issues", [])}
             ax.wait_for(lambda: expected <= diagnostic_reasons(), "Parent diagnostics disappeared while the identity binding failed", timeout=20)
             check(expected <= diagnostic_reasons(), "parent metadata and identity failures are both reported")
             check(table.read("AXEnabled") is False, "invalid list is disabled in the public accessibility tree")
