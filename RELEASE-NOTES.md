@@ -1,3 +1,11 @@
+# 0.21.1 compound-form focus
+
+Generated nonblocking forms can have identically named parent/child editors. Version 0.21.1 fixes initial focus, intentional restart and child replacement through the existing form observer. Native editors, business handlers, timers and layout retain their behavior.
+
+Most forms still need only the lifecycle area. Add a focus observer only when testing shows wrong or ambiguous editor focus, then complete the affected descendant branch. A parent-only call can make a same-named parent editor ambiguous. Unique native pointers continue to work without child observers. See the [decision and integration recipe](skills/4d-accessibility/references/INTEGRATION.md#repeated-controls-with-ambiguous-focus).
+
+Upgrade the plugin, component and helpers together. [Candidate acceptance](validation/compound-form-focus-0.21.1.json) records the exercised layouts; hierarchy, classic list subforms and advanced embedded editors remain follow-up work. CI kits are development builds. Signed distribution follows acceptance of the exact signed download.
+
 # 0.21.0
 
 This release combines area-owned form integration with stable automation identifiers and broader native-control support. Install the native plugin, compiled component and host helpers from the same versioned macOS kit. The release workflow signs the packages as Sweetwater and notarizes the ZIP and DMG. Publication requires live checks of those exact downloads.

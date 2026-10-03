@@ -1,6 +1,6 @@
 # Integrate with a lifecycle area
 
-The area owns startup and shutdown. Discovery, grids, editors, validation and actions use the same adapters as the manual interface. This path passes the [area acceptance suite](../../../validation/area-owned-integration.json) and is included in the 0.21.0 matching kit. The older 0.19.7 kit uses the [manual lifecycle](MANUAL-LIFECYCLE.md).
+The area owns startup and shutdown. Discovery, grids, editors, validation and actions use the same adapters as the manual interface. This path passes the [area acceptance suite](../../../validation/area-owned-integration.json) and is included in 0.21.0 or later matching kits. The older 0.19.7 kit uses the [manual lifecycle](MANUAL-LIFECYCLE.md).
 
 ## Ordinary named form
 
@@ -19,6 +19,8 @@ Review those other uses too; use central opt-out where another inherited form sh
 Printing creates no registration because native area initialization ignores printing and the area is non-printable. Remove only the exact installer-owned area from a previously instrumented derived form before retrying. Never delete an application object to resolve a name conflict.
 
 The installer adds `__AXB_Bridge`, a non-enterable 1×1 `%AXB Area`, at (0,0) on page zero. It draws nothing, has no method or form events, does not take keyboard focus and does not print. Existing object definitions, dimensions, methods and events are preserved. The installer rewrites form JSON using the project's indentation. Keep the area definition installer-owned and review the diff.
+
+The [0.21.1 early-focus and close-during-load tests](../../../validation/compound-form-focus-0.21.1.json) verify area reservation before On Load on the tested runtime, so the existing [focus observer](INTEGRATION.md#repeated-controls-with-ambiguous-focus) can retain early events. Root registration and `AXB_Configure` still wait until the form reaches its ordinary event loop. Closing during On Load retires the reservation without starting a provider.
 
 For an ordinary form with clear existing labels, there is no application method to write. Its form method keeps its existing initialization, timer and business code. The area queues startup after initialization and retires its own captured lifetime when destroyed.
 
@@ -88,7 +90,7 @@ The area owns the registration it created. An intentional `AXB_Form("start"; new
 
 If startup failed before creating a context, a later manual start remains application-owned and needs its manual stop. Close and reopen the form to retry automatic area startup.
 
-From the root, inspect `AXB_Area("diagnostics"; ""; "")` for area states and startup failures, and `AXB_Form("diagnostics"; New object)` for published coverage. Area states include `queued`, `active`, `child`, `ignored`, `existingRegistration`, `disabled`, `stopped` and `failed`. Each record includes `configured`, `configuration`, `registered` and any `failure`. `configured` proves the optional callback returned; check it when a callback is expected. `registered` reports current session activity rather than historical startup success. A later adapter failure leaves `stopped` with a copied failure reason, including for entity/class/shared roots without `onError`. Intentional stop has no failure reason. Configure the central reporter when failures must be logged actively. Startup is asynchronous; wait for an active registration and ready coverage before asserting accessibility.
+From the root, inspect `AXB_Area("diagnostics"; ""; "")` for area states and startup failures, and `AXB_Form("diagnostics"; New object)` for published coverage. Area states include `initializing`, `queued`, `active`, `child`, `ignored`, `existingRegistration`, `disabled`, `stopped` and `failed`. Each record includes `configured`, `configuration`, `registered` and any `failure`. `configured` proves the optional callback returned; check it when a callback is expected. `registered` reports current session activity rather than historical startup success. A later adapter failure leaves `stopped` with a copied failure reason, including for entity/class/shared roots without `onError`. Intentional stop has no failure reason. Configure the central reporter when failures must be logged actively. Startup is asynchronous; wait for an active registration and ready coverage before asserting accessibility.
 
 An empty area list does not prove success or optional absence. Check that the form has the canonical area, that `AXB_Host("info"; New object)` advertises matching versions and `areaLifecycle 1`, and that the form has reached its event loop. A missing/older native plugin cannot deliver area callbacks. With a current native plugin but absent component, the area reports `dependencyUnavailable` and normal form behavior continues.
 

@@ -4,14 +4,15 @@ The initial release covers the implemented families below on 4D 20.8 and the tes
 
 ## Availability
 
-| Integration or adapter | Signed 0.19.7 | 0.20.0 source and CI kit | 0.21.0 |
-| --- | --- | --- | --- |
-| Manual lifecycle and previously validated controls/grids | Available | Available | Local regression checks pass |
-| Installer-added lifecycle area | Unavailable | Validated; unsigned CI kit | Available |
-| Ordinary styled text | Unavailable | Unavailable | 116 checks pass in four live runs |
-| Tabs | Unavailable | Unavailable | 628 checks pass across eight live runs |
-| Classic current/named-selection grids | Unavailable | Unavailable | 164 checks pass in six live runs |
-| Stable automation locators | Unavailable | Unavailable | Native and desktop acceptance pass |
+| Integration or adapter | Signed 0.19.7 | 0.20.0 source and CI kit | 0.21.0 source and CI kit | 0.21.1 candidate |
+| --- | --- | --- | --- | --- |
+| Manual lifecycle and previously validated controls/grids | Available | Available | Local regression checks pass | Included |
+| Installer-added lifecycle area | Unavailable | Validated; unsigned CI kit | Available | Included |
+| Ordinary styled text | Unavailable | Unavailable | 116 checks pass in four live runs | Included |
+| Tabs | Unavailable | Unavailable | 628 checks pass across eight live runs | Included |
+| Classic current/named-selection grids | Unavailable | Unavailable | 164 checks pass in six live runs | Included |
+| Stable automation locators | Unavailable | Unavailable | Native and desktop acceptance pass | Included |
+| Compound generated early focus, restart and replacement | Unavailable | Unavailable | Replacement gap | Scoped acceptance |
 
 Local 0.21.0 acceptance passes. For signed distribution, use the published [GitHub release](https://github.com/KyleKincer/4d-accessibility/releases); its notes and attached report record the exact signed-download checks. CI artifacts are development builds. [Candidate evidence](../../../validation/stable-identifiers-0.21.0.json) retains each tested package and source hash.
 
@@ -64,6 +65,14 @@ The 0.19 AreaList checkbox adapter passes 30 checks in interpreted 4D and 30 in 
 The 0.18 editor-cache correction passes the six interpreted/compiled AreaList suites and a compiled Guard Malloc case. AreaList Pro 11.4.2 corrupts memory when reading, copying or committing long supplementary Unicode text in a bridge-free one-cell project. The 11.4.3b5 preview fails at the same conversion in the complete fixture. The adapter continues to reject supplementary input before mutation. The experimental clipboard workaround was removed because it did not resolve that defect. See the [reproduction](https://github.com/KyleKincer/4d-accessibility/blob/main/tests/AREA-LIST-UNICODE.md).
 
 Generated wrappers opened with different plain/shared/entity/class data now preserve original lifecycle events without adding attributes to incompatible data. All eight interpreted/compiled wrong-data cases pass, 56 checks. Preparing an advanced `AXB_Dynamic` wrapper on non-plain data remains unsupported; generated forms using `AXB_AreaForm` support all four root data types.
+
+## Compound-form focus in 0.21.1
+
+Version 0.21.1 fixes initial focus, intentional restart and child replacement in generated nonblocking forms with identically named parent/child editors. Native editors, timers, validation and layout stay unchanged. Most forms still need only the area. Where focus needs observation, use [one form-level call plus On Load](INTEGRATION.md#repeated-controls-with-ambiguous-focus) and complete the affected descendant branch. Unique native pointers continue to work without child observers.
+
+The [candidate evidence](../../../validation/compound-form-focus-0.21.1.json) distinguishes earlier replacement and unsafe-focus failures from acceptance of the matching 0.21.1 kit. It covers interpreted ARM, compiled ARM and compiled Rosetta compound forms, compiled VoiceOver reading/activation, restart, replacement, manual-registration coexistence, inherited/yielding startup, dependency/configuration failure and close before first idle. Real 4D command checks, repeated/shared scrolling, data ownership, pixels and a Form Editor save have separate records.
+
+This is a scoped compound-form gate. Physical Intel hardware, remote client/server delivery, list subforms and hierarchy remain separate work. CI kits are development packages; signed distribution still needs its exact-download acceptance.
 
 ## Implemented and exercised
 

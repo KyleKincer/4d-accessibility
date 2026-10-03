@@ -29,18 +29,23 @@ If ($operation="diagnostics")
  End for each
  return
 End if
-If ($operation="attach")
+If (($operation="reserve") | ($operation="attach"))
  If ((Current form window=0) | (($name#"__AXB_Bridge") & (Position("__AXB_Bridge."; $name)#1)))
   return New object("ok"; False; "error"; "invalidAreaContext")
  End if
  If (AXB_Areas=Null)
   AXB_Areas:=New object
  End if
- If (AXB_Areas[$id]#Null)
+ $record:=AXB_Areas[$id]
+ If ($record=Null)
+  $record:=New object("window"; Current form window; "name"; $name; "state"; "initializing"; "configuration"; Substring($name; Length("__AXB_Bridge.")+1))
+  AXB_Areas[$id]:=$record
+ End if
+ If (($operation="reserve") | ($record.state#"initializing"))
   return
  End if
- $record:=New object("window"; Current form window; "name"; $name; "pointer"; OBJECT Get pointer(Object named; $name); "state"; "queued"; "configuration"; Substring($name; Length("__AXB_Bridge.")+1))
- AXB_Areas[$id]:=$record
+ $record.pointer:=OBJECT Get pointer(Object named; $name)
+ $record.state:="queued"
  CALL FORM($record.window; Formula(AXB_Area("start"; $1; $2)); $id; $name)
  return
 End if
@@ -63,15 +68,22 @@ End if
 // register or retire that root, even when it shares data and lies at (0,0).
 If (($record.window#Current form window) | ($record.pointer=Null))
  $record.state:="ignored"
+ OB REMOVE($record; "focusObservation")
+ OB REMOVE($record; "focusObservers")
  return
 End if
 If ($record.pointer#OBJECT Get pointer(Object named; $record.name))
  $record.state:="child"
+ OB REMOVE($record; "focusObservation")
+ OB REMOVE($record; "focusObservers")
  return
 End if
 $context:=AXB_FormContext
 If ($context#Null)
  $record.state:="existingRegistration"
+ AXB_FormObserver("transfer"; $record)
+ OB REMOVE($record; "focusObservation")
+ OB REMOVE($record; "focusObservers")
  return
 End if
 $guard:=New object("previousHandler"; Method called on error(ek local); "previousGuard"; AXB_AreaGuard; "record"; $record)
@@ -128,6 +140,7 @@ Else
    $record.context:=AXB_FormContext
    If ($record.context#Null)
     $record.context.areaID:=$id
+    AXB_FormObserver("transfer"; $record)
    End if
   End if
  End if
@@ -142,5 +155,7 @@ Else
   End if
  End if
 End if
+OB REMOVE($record; "focusObservation")
+OB REMOVE($record; "focusObservers")
 ON ERR CALL($guard.previousHandler; ek local)
 AXB_AreaGuard:=$guard.previousGuard
