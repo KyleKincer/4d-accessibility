@@ -129,6 +129,47 @@ static void StableIdentifierTest(void) {
     Check(![Exchange(first, 9020, 1, session, snapshot)[@"ok"] boolValue], "old session cannot route through a reopened stable screen");
     [first close]; [second close]; Pump();
 }
+static void OutlineSemanticsTest(void) {
+    NSWindow *window = Window(@"AXB outline semantics");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9040);
+    NSMutableDictionary *grid = [@{@"generation": @"outline-first", @"order": @1, @"rows": @[@"group", @"leaf", @"later"],
+        @"columns": @[@{@"id": @"a", @"label": @"Item", @"enabled": @YES, @"editable": @YES},
+                       @{@"id": @"b", @"label": @"Value", @"enabled": @YES, @"editable": @YES}],
+        @"visible": @[@"group", @"leaf", @"later"], @"selected": @[@"later"],
+        @"actions": @{@"select": @YES, @"edit": @YES, @"reveal": @NO},
+        @"outline": @{
+            @"group": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Repeated", @"expanded": @YES, @"frame": @[@10, @20, @300, @24]},
+            @"leaf": @{@"parent": @"group", @"level": @1, @"kind": @"leaf"},
+            @"later": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Repeated", @"expanded": @NO, @"frame": @[@10, @68, @300, @24]}},
+        @"frames": @{@"group": @{@"a": @[@10, @20, @300, @24]}, @"later": @{@"a": @[@10, @68, @300, @24]},
+                     @"leaf": @{@"a": @[@10, @44, @150, @24], @"b": @[@160, @44, @150, @24]}}} mutableCopy];
+    NSMutableDictionary *data = [@{@"id": @"grid", @"role": @"table", @"label": @"Groups", @"value": @"", @"visible": @YES,
+        @"enabled": @YES, @"frame": @[@10, @20, @300, @140], @"grid": grid} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Outline", @"enabled": @YES, @"nodes": @[data]} mutableCopy];
+    Check([Exchange(window, 9040, 1, session, snapshot)[@"ok"] boolValue], "native outline accepts authoritative selection"); Pump();
+    AXBGridNode *outline = Provider(window).accessibilityChildren.firstObject;
+    id group = outline.accessibilityRows[0], cell = [outline accessibilityCellForColumn:0 row:0], content = [cell accessibilityChildren][0];
+    Check([outline.accessibilityRole isEqual:NSAccessibilityOutlineRole] && [outline.accessibilityRoleDescription isEqual:@"outline"], "native outline role and description agree");
+    Check(AXBAttributeIsSettable(outline, NSAccessibilitySelectedRowsAttribute), "known outline selection advertises its permitted setter");
+    Check([[content accessibilityRole] isEqual:NSAccessibilityStaticTextRole] && !AXBAttributeIsSettable(content, NSAccessibilityValueAttribute), "editable leaf columns cannot turn group labels into editors");
+    Check([group accessibilityDisclosedRows][0] == outline.accessibilityRows[1], "native outline discloses the indexed direct child");
+    NSDictionary *frames = grid[@"frames"];
+    grid[@"columns"] = [[grid[@"columns"] reverseObjectEnumerator] allObjects];
+    grid[@"frames"] = @{@"group": @{@"b": @[@10, @20, @300, @24]}, @"later": @{@"b": @[@10, @68, @300, @24]}, @"leaf": frames[@"leaf"]};
+    grid[@"order"] = @2; snapshot[@"revision"] = @2;
+    Check([Exchange(window, 9040, 1, session, snapshot)[@"ok"] boolValue], "outline columns can reorder with new label-cell geometry"); Pump();
+    Check(![cell isAccessibilityElement] && ![content isAccessibilityElement], "reordering away from the label column retires the group cell and content");
+    grid[@"columns"] = [[grid[@"columns"] reverseObjectEnumerator] allObjects]; grid[@"frames"] = frames;
+    grid[@"order"] = @3; snapshot[@"revision"] = @3;
+    Exchange(window, 9040, 1, session, snapshot); Pump();
+    Check([outline accessibilityCellForColumn:0 row:0] != cell && ![cell isAccessibilityElement], "reordering back cannot resurrect the old group cell");
+    [grid removeObjectForKey:@"outline"]; grid[@"generation"] = @"flat-replacement"; snapshot[@"revision"] = @4;
+    Check([Exchange(window, 9040, 1, session, snapshot)[@"ok"] boolValue], "new generation accepts a flat replacement"); Pump();
+    AXBGridNode *flat = Provider(window).accessibilityChildren.firstObject;
+    Check(flat != outline && !outline.isAccessibilityElement && [flat.accessibilityRole isEqual:NSAccessibilityTableRole], "table replacement retires the retained outline root");
+    [window close]; Pump();
+}
 static void RefreshDelayTest(void) {
     NSWindow *window = Window(@"AXB delayed accessibility refresh");
     NSString *session = Open(window, 9001);
@@ -890,6 +931,7 @@ int main(void) {
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
         [NSApp finishLaunching];
         StableIdentifierTest();
+        OutlineSemanticsTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();

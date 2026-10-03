@@ -35,6 +35,9 @@ jobs:
           python3 tests/test_hierarchy_probe_cleanup.py
           python3 tests/test_grouped_probe_summary.py
           python3 tests/test_hierarchy_probe_inputs.py
+          python3 tests/test_native_outline_driver.py
+          python3 tests/test_native_outline_summary.py
+          python3 test_native_outlines.py --help
           python3 test_appium_list_fixture.py --help
           python3 prepare_alp_subforms.py --help
       - name: Test session and grid models
@@ -45,6 +48,7 @@ jobs:
         run: |
           python3 build.py
           python3 test_native.py
+          python3 test_native_outlines.py
           python3 test_native_interop.py
           python3 test_grid_value_speech.py
       - name: Build compiled component with pinned tool4d

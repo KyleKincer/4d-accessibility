@@ -8,6 +8,8 @@ NSString *AXBValidateGridPage(id page);
 NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *descriptor);
 BOOL AXBGridRowAllowsEditing(NSDictionary *descriptor, NSString *row);
 BOOL AXBGridRowAllowsSelection(NSDictionary *descriptor, NSString *row);
+BOOL AXBGridSelectionKnown(NSDictionary *descriptor);
+BOOL AXBGridRowIsGroup(NSDictionary *descriptor, NSString *row);
 
 @interface AXBGrid : NSObject
 @property(nonatomic, readonly) NSString *nodeID;
@@ -20,6 +22,7 @@ BOOL AXBGridRowAllowsSelection(NSDictionary *descriptor, NSString *row);
 - (void)update:(NSDictionary *)descriptor;
 - (NSUInteger)indexOfRow:(NSString *)key;
 - (NSUInteger)indexOfColumn:(NSString *)key;
+- (NSArray<NSString *> *)disclosedChildrenOfRow:(NSString *)key;
 - (NSDictionary *)cellForRow:(NSString *)row column:(NSString *)column now:(NSTimeInterval)now;
 // Requests are read-only and separate from the single-flight action queue.
 - (NSArray *)takeRequestsAtTime:(NSTimeInterval)now;
