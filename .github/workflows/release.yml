@@ -53,6 +53,7 @@ jobs:
           python3 test_native.py
           python3 ci/download_tool4d.py
           python3 build_component.py --tool4d build/toolchain/tool4d.app
+          python3 test_form_focus.py --tool4d build/toolchain/tool4d.app
       - name: Package, sign and notarize
         env:
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}

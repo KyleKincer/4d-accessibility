@@ -1,6 +1,6 @@
 # Manual lifecycle
 
-Use this interface for a deliberately application-owned registration, or the published 0.19.7 kit. For new integrations with 0.20 matching builds, prefer [the lifecycle area](AREA-INTEGRATION.md). Use one lifecycle owner per window.
+Use this interface for a deliberately application-owned registration, or the published 0.19.7 kit. For new integrations with 0.20.0 or later matching builds, prefer [the lifecycle area](AREA-INTEGRATION.md). Use one lifecycle owner per window.
 
 1. For a manually owned ordinary form, install the three bridge parts, add start/stop calls, supply missing labels, then check its coverage diagnostics.
 2. For a record editor with editable grids, keep those calls and add a `grids` entry. Identify stable line keys, record `scope`, and loader `ready` state. Add descriptions for visual-only columns and map the existing selection controller only when selection must refresh other UI. The [grid configuration](GRIDS.md) works with either lifecycle owner.
@@ -27,3 +27,5 @@ Keep existing form and object methods. Enable the form's On Load and On Unload e
 The scheduler leaves 100 ms to one second idle after a normal refresh, based on its cost. Pending editor operations use a faster interval. No application polling hook is needed. Treat tree updates as asynchronous: after an action, wait for its receipt and verify the application's result instead of relying on a fixed delay.
 
 An ordinary dialog can pass its existing data to `DIALOG` or use the implicit `Form` object. Use application-specific names such as `RecordAX_Start` for your configuration methods. Reserve the `AXB_` method prefix, `AXB_PollGuard` and `AXB_FormRoots` for installed bridge helpers. Session ownership is per window, so named roots may share business data. Automatic children may share data too.
+
+For [duplicate-name focus observation](INTEGRATION.md#repeated-controls-with-ambiguous-focus), an area-less root cannot retain child On Load participation before registration. Prefer the area for these compound forms. A retained manual root must start after its own data is initialized but before loading those children, with its ordinary loading guard preserved. The end-of-On-Load example above does not cover children that have already loaded. Children loaded by 4D before root On Load need area-owned early retention.

@@ -4,17 +4,21 @@
 var $view; $description; $node; $other; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
 var $pageByObject : Object
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
-var $frame; $clip; $offset; $path; $lineage; $unsupported : Collection
-var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY : Integer
+var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames : Collection
+var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY; $part : Integer
 var $x; $y; $r; $b : Real
 var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
-var $pointer : Pointer
+var $pointer; $focusPointer : Pointer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
+ARRAY TEXT($parts; 0)
 $result:=New object("ok"; False; "error"; "invalidView"; "status"; "rejected"; "message"; "Form instance is unavailable")
 If ($request.paintOffset=Null)
  $request.paintOffset:=New collection(0; 0)
+End if
+If (Not(OB Is defined($request; "nativeEnabled")))
+ $request.nativeEnabled:=$request.enabled
 End if
 $reading:=$request.operation="readGrid"
 $readOnly:=$reading | ($request.operation="reveal")
@@ -304,6 +308,40 @@ $registry.bindings[$view.bindingKey]:=Form
 $registry.seen[$view.bindingKey]:=True
 $view.formName:=Current form name
 $view.origin:=New collection($originX; $originY)
+If ($request.operation="describe")
+ // Focus can name an unsupported object or a listbox part that has no
+ // ordinary node. Keep the complete native name set for ownership checks.
+ $focusNames:=Null
+ If ($registry.focusPointerName#"")
+  $focusNames:=New collection
+  $focusPointer:=OBJECT Get pointer(Object with focus)
+  For ($position; 1; Size of array($objects))
+   $name:=$objects{$position}
+   $focusNames.push($name)
+   If ((Compare strings($name; $registry.focusPointerName; sk char codes)=0) && Not(Is nil pointer($focusPointer)))
+    $pointer:=OBJECT Get pointer(Object named; $name)
+    If (($pointer=$focusPointer) && ($registry.focusPointerOwners.indexOf($view.bindingKey)<0))
+     $registry.focusPointerOwners.push($view.bindingKey)
+    End if
+   End if
+   If (OBJECT Get type(*; $name)=Object type listbox)
+    LISTBOX GET OBJECTS(*; $name; $parts)
+    For ($part; 1; Size of array($parts))
+     $focusNames.push($parts{$part})
+     If (((Compare strings($parts{$part}; $registry.focusPointerName; sk char codes)=0) | (Compare strings($name; $registry.focusPointerName; sk char codes)=0)) && Not(Is nil pointer($focusPointer)))
+      $pointer:=OBJECT Get pointer(Object named; $parts{$part})
+      If (($pointer=$focusPointer) && ($registry.focusPointerOwners.indexOf($view.bindingKey)<0))
+       $registry.focusPointerOwners.push($view.bindingKey)
+      End if
+     End if
+    End for
+   End if
+  End for
+ End if
+ // A provider may refuse mutations while its native form still owns focus.
+ $registry.formContexts[$view.bindingKey]:=New object("formName"; $view.formName; "origin"; $view.origin; "bindingKey"; $view.bindingKey; "path"; $request.path; "focusNames"; $focusNames; "enabled"; $request.nativeEnabled)
+ AXB_FormObserver("bind"; New object("bindingKey"; $view.bindingKey; "formName"; $view.formName; "origin"; $view.origin; "path"; $request.path; "data"; Form))
+End if
 $offset:=New collection($originX-$request.rootOrigin[0]; $originY-$request.rootOrigin[1])
 For each ($node; $description.nodes)
  $copy:=OB Copy($node)
@@ -332,7 +370,7 @@ For each ($node; $description.nodes)
   $copy.automationPath:=$copy.automationPath.concat($node.automationChild)
  End if
  If (Value type($node.objectName)=Is text)
-  $registry.controlContexts[$id]:=New object("formName"; $view.formName; "origin"; $view.origin; "bindingKey"; $view.bindingKey)
+  $registry.controlContexts[$id]:=New object("formName"; $view.formName; "origin"; $view.origin; "bindingKey"; $view.bindingKey; "path"; $request.path)
   // Keep host pointers outside the serializable tree. An unnamed button has
   // its own dynamic variable even in repeated instances of the same form.
   $pointer:=OBJECT Get pointer(Object named; $node.objectName)
@@ -413,6 +451,7 @@ If (Value type($description.subforms)=Is collection)
     $path:=$request.path.concat(New collection($name))
     $packet:=New object("operation"; "describe"; "path"; $path; "offset"; New collection($left+$offset[0]; $top+$offset[1]); "clip"; New collection($x; $y; New collection(0; $r-$x).max(); New collection(0; $b-$y).max()); "enabled"; $request.enabled & Not($description.enabled=False) & OBJECT Get enabled(*; $name); "depth"; $request.depth+1)
     $packet.ancestors:=$lineage
+    $packet.nativeEnabled:=$request.nativeEnabled & OBJECT Get enabled(*; $name)
     $packet.navigation:=$request.navigation.concat(New collection($top; $left))
     $packet.rootOrigin:=$request.rootOrigin
     $packet.rootView:=$request.rootView

@@ -9,7 +9,13 @@ $registry:=AXB_FormRoots[String(Current form window)]
 $registry.seen:=New object
 $registry.controlPointers:=New object
 $registry.controlContexts:=New object
+$registry.formContexts:=New object
 $registry.cellPointers:=New object
+$registry.focusPointerOwners:=New collection
+$registry.focusPointerName:=""
+If (($registry.observedFocus#Null) && ($registry.observedFocus.id=Null))
+ $registry.focusPointerName:=OBJECT Get name(Object with focus)
+End if
 CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
 $registry.origin:=New collection($x; $y)
 $result:=AXB_View(New object("operation"; "describe"; "rootView"; $registry.context.view; "path"; New collection; "ancestors"; New collection; "navigation"; New collection; "rootOrigin"; New collection($x; $y); "enabled"; True; "depth"; 0))
@@ -63,6 +69,9 @@ $keys:=OB Keys($registry.bindings)
 For each ($key; $keys)
  If (Not(OB Is defined($registry.seen; $key)))
   OB REMOVE($registry.bindings; $key)
+  If ($registry.focusObserverBindings#Null)
+   OB REMOVE($registry.focusObserverBindings; $key)
+  End if
  End if
 End for each
 OB REMOVE($registry; "seen")
