@@ -1,6 +1,6 @@
 // Native command behavior probe. These are not bridge action implementations.
 #DECLARE($request : Object) -> $result : Object
-var $ref; $child : Integer
+var $ref; $child; $i : Integer
 var $label : Text
 var $expanded : Boolean
 $result:=New object("id"; $request.id; "operation"; $request.operation; "eventsBefore"; Form.events.length)
@@ -16,6 +16,10 @@ Case of
   LISTBOX COLLAPSE(*; "Grouped"; False; lk break row; 1; 1)
  : ($request.operation="groupExpand")
   LISTBOX EXPAND(*; "Grouped"; False; lk break row; 1; 1)
+ : ($request.operation="groupCollapseAll")
+  LISTBOX COLLAPSE(*; "Grouped")
+ : ($request.operation="groupExpandAll")
+  LISTBOX EXPAND(*; "Grouped")
  : ($request.operation="groupSelect")
   LISTBOX SELECT ROW(*; "Grouped"; 4; lk replace selection)
  : ($request.operation="groupSelectRoot")
@@ -30,6 +34,38 @@ Case of
   POST KEY(Down arrow key; 0; Current process)
  : ($request.operation="focusGrouped")
   GOTO OBJECT(*; "Grouped")
+ : ($request.operation="groupCase")
+  AXHP_GroupedCase(String($request.name))
+ : ($request.operation="groupHideFirst")
+  If (Form.groupedCase="repeated")
+   For ($i; 1; 3)
+    AXHP_Control{$i}:=1
+   End for
+  Else
+   $result.error:="requiresRepeatedCase"
+  End if
+ : ($request.operation="groupShowAll")
+  For ($i; 1; Size of array(AXHP_Control))
+   AXHP_Control{$i}:=0
+  End for
+ : ($request.operation="groupSelectFirstLeaves")
+  If (Form.groupedCase="repeated")
+   LISTBOX SELECT ROW(*; "Grouped"; 1; lk replace selection)
+   LISTBOX SELECT ROW(*; "Grouped"; 2; lk add to selection)
+   LISTBOX SELECT ROW(*; "Grouped"; 3; lk add to selection)
+  Else
+   $result.error:="requiresRepeatedCase"
+  End if
+ : ($request.operation="groupCollapseNested")
+  LISTBOX COLLAPSE(*; "Grouped"; False; lk break row; 1; 2)
+ : ($request.operation="groupExpandNested")
+  LISTBOX EXPAND(*; "Grouped"; False; lk break row; 1; 2)
+ : ($request.operation="groupSelectLaterBreak")
+  If (Form.groupedCase="repeated")
+   LISTBOX SELECT BREAK(*; "Grouped"; 6; 1; lk replace selection)
+  Else
+   $result.error:="requiresRepeatedCase"
+  End if
  Else
   $result.error:="unknownProbeOperation"
 End case
