@@ -36,6 +36,22 @@ Opposite nested-child expansion states also produce identical sampled readbacks 
 
 The record contains no hierarchy adapter, VoiceOver or Symphony hierarchy workflow acceptance. It records the Python host architecture; the 4D process architecture was not independently sampled. Sorting, stable break identity, arbitrary native targets, clipping, lazy loading and action races remain separate prerequisites.
 
+## Target visible later and nested breaks
+
+After preparing the fixture, run these cases separately from `--grouped-states`. They need no Pillow dependency:
+
+```sh
+python3 test_hierarchy_probe.py --run --commands --grouped-inputs
+python3 test_hierarchy_probe.py --run --commands --grouped-inputs --compiled
+python3 summarize_grouped_inputs.py
+```
+
+The [visible native-input record](../validation/grouped-native-inputs-0.22.1.json) covers twelve checks per mode, including the earlier eight native checks. Center clicks select the later `A` break or its nested child. A refreshed public cell address, screen frame, focused window and point owner guard mouse-down. Each click runs one original click handler without disclosure. Right/Left then run one original expansion/collapse handler and change both intended descendants, while retaining the ancestor frame. Other sampled roots stay collapsed; both classic trees and backing data remain unchanged.
+
+Mouse-up runs in `finally`, including an exception during mouse-down. Separate report/image names preserve the grouped-state gate. Two flag regressions reject invalid combinations before input or evidence changes. Both publishers share source-set validation, and four CI fault regressions reject deleted or renamed canonical methods while invalidating old success. Seven cleanup regressions remain separate from the native counts.
+
+This establishes visible fixture targeting followed by native keyboard disclosure. Center clicking changes selection; selection-preserving disclosure remains unvalidated. Complete selection, arbitrary targets, offscreen reveal, clipping, lazy loading, action races and retained latent states still need work. Keyboard event row/column fields are not treated as authoritative target addresses. There is no hierarchy adapter or VoiceOver/Symphony hierarchy acceptance.
+
 ## Inspect native views and drawing
 
 The optional observer copies committed production source into an ignored directory, adds public AppKit diagnostics and builds separate binaries. It never changes production source or installs into Symphony.

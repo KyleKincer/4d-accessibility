@@ -49,6 +49,8 @@ For the remaining hierarchy adapter, use [native hierarchy probes](tests/HIERARC
 
 The optional `--grouped-states` cases and `summarize_grouped_probe.py` require Pillow 12.1 or later. They validate sampled selection/disclosure state and native image round trips; they do not add production hierarchy support.
 
+The separate `--grouped-inputs` cases and `summarize_grouped_inputs.py` check center clicks followed by native keyboard disclosure on visible later/nested breaks. They need no Pillow dependency and cannot combine with `--grouped-states`. Selection-preserving disclosure, arbitrary/offscreen targets and action races remain unvalidated. Both evidence publishers reject stale prepared method sets; CI runs four deletion/rename fault regressions.
+
 `python3 test_form_focus.py --server /path/to/4D\ Server.app` exercises production focus resolution with real 4D object identities and child paths. It covers forwarded ancestor events, shared bindings, unobserved descendants, retired/disabled controls and conflicting contexts. Run it sequentially with every other 4D compiler or graphical fixture. It complements the live event and VoiceOver checks.
 
 `test_area_pixels.py --server /path/to/4D\ Server.app --run` compares the complete rendered synthetic window with and without the area. It requires Pillow and accepts no changed pixels, masks or tolerance.
