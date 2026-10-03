@@ -6,6 +6,7 @@ import ctypes
 import uuid
 import hashlib
 import json
+import platform
 from pathlib import Path
 import subprocess
 import sys
@@ -62,9 +63,14 @@ def main():
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--compiled", action="store_true")
     parser.add_argument("--commands", action="store_true", help="Probe public mutations and native keyboard event delivery separately")
+    parser.add_argument("--grouped-states", action="store_true", help="Observe grouped selection and latent disclosure prerequisites; no adapter acceptance")
     args = parser.parse_args()
     if not args.run:
         parser.error("--run is required for the owned desktop probe")
+    if args.grouped_states and not args.commands:
+        parser.error("--grouped-states requires --commands")
+    if args.grouped_states:
+        from PIL import Image, ImageChops
     ax.require_test_input()
     for name in ("4D", "4D Server"):
         assert subprocess.run(["pgrep", "-x", name], capture_output=True).returncode != 0
@@ -73,6 +79,7 @@ def main():
     resources = fixture / "Resources"
     compile_report = json.loads((BUILD / "hierarchy-probe-compile.json").read_text())
     assert compile_report["passed"]
+    assert compile_report["preparerSHA256"] == hashlib.sha256((Path(__file__).parent / "prepare_hierarchy_probe.py").read_bytes()).hexdigest()
     for name, expected in compile_report["sources_sha256"].items():
         assert hashlib.sha256((fixture / name).read_bytes()).hexdigest() == expected, name
     for name in ("state.json", "close.json", "closed.json", "error.json", "request.json"):
@@ -88,6 +95,9 @@ def main():
     report = {"passed": False, "compiled": args.compiled, "runId": run_id,
         "scope": "Native state/geometry probe. No hierarchy accessibility adapter or action acceptance."}
     report["sourceCommit"] = compile_report.get("sourceCommit")
+    report["environment"] = {"macOS": platform.mac_ver()[0], "hostArchitecture": platform.machine()}
+    report["preparerSHA256"] = compile_report["preparerSHA256"]
+    report["preparedSourceSHA256"] = compile_report["sources_sha256"]
     report["driverSHA256"] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     report["compileReportSHA256"] = hashlib.sha256(
         (BUILD / "hierarchy-probe-compile.json").read_bytes()).hexdigest()
@@ -103,6 +113,7 @@ def main():
             ready, _ = wait_for_start(process, project, state, BUILD)
             assert ready["compiled"] is args.compiled
             app, window = activate_fixture(process, project, "AX native hierarchy probe")
+            report["window"] = {"position": window.read("AXPosition"), "size": window.read("AXSize")}
             diagnostic_hash = compile_report.get("diagnosticNativeSHA256")
             if diagnostic_hash:
                 native = fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"
@@ -118,6 +129,11 @@ def main():
             observed = ax.wait_for(state, "Native hierarchy state missing")
             assert observed["beforeA"] == observed["afterA"]
             assert observed["beforeB"] == observed["afterB"]
+            def preserved_group(snapshot):
+                assert snapshot["beforeGroup"] == snapshot["afterGroup"]
+                assert snapshot["groupSentinelBefore"] == snapshot["groupSentinelAfter"]
+                assert snapshot["groupSentinelBefore"]["ok"] == 0
+            preserved_group(observed)
             assert observed["focus"] == observed["focusAfter"]
             assert observed["okPreserved"]
             topology = observed["topology"]
@@ -149,16 +165,17 @@ def main():
             ax.capture_window(process.pid, BUILD / ("hierarchy-probe-" + mode + ".png"))
             if args.commands:
                 report["commandProbes"] = []
-                def command(operation):
+                def command(operation, **payload):
                     identifier = uuid.uuid4().hex
-                    (resources / "request.json").write_text(json.dumps({"id": identifier, "operation": operation}))
+                    (resources / "request.json").write_text(json.dumps({"id": identifier, "operation": operation, **payload}))
                     observed = ax.wait_for(lambda: (value if value and value.get("command", {}).get("id") == identifier else None) if (value := state()) else None,
                                            "Native probe request did not finish: " + operation)
                     time.sleep(0.4)
                     observed = state()
                     assert observed and not observed["command"].get("error")
                     assert observed["beforeA"] == observed["afterA"] and observed["beforeB"] == observed["afterB"]
-                    report["commandProbes"].append({"operation": operation, "state": observed})
+                    preserved_group(observed)
+                    report["commandProbes"].append({"operation": operation, "payload": payload, "state": observed})
                     return observed
                 for operation in ("treeExpand", "treeCollapse", "treeSelect", "groupCollapse", "groupExpand", "groupSelect", "treeCollapse", "treeSelectRoot", "focusTree"):
                     command(operation)
@@ -252,6 +269,154 @@ def main():
                     report["commandProbes"].append({"operation": "groupMouseExpand" if expected_event == 43 else "groupMouseCollapse",
                         "point": [x, y], "ownerVerified": True, "before": before, "state": after})
                 report["checks"].append("Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry")
+                if args.grouped_states:
+                    report["groupedStates"] = {"scope": "Synthetic repeated groups, programmatic selection/disclosure, blank backing row and empty list. No loaded-empty/lazy branch or adapter acceptance.", "snapshots": []}
+                    window_list = ax.signature(graphics, "CGWindowListCopyWindowInfo", ctypes.c_void_p, ctypes.c_uint32, ctypes.c_uint32)
+                    dictionary_value = ax.signature(ax.CF, "CFDictionaryGetValue", ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p)
+                    def raw_value(dictionary, name):
+                        key = ax.make_string(None, name.encode(), ax.UTF8)
+                        try:
+                            return dictionary_value(dictionary, key)
+                        finally:
+                            ax.release(key)
+                    def capture_probe_window(path):
+                        windows = window_list(1, 0)
+                        assert windows
+                        candidates = []
+                        try:
+                            for index in range(ax.array_count(windows)):
+                                candidate = ax.array_value(windows, index)
+                                def value(name):
+                                    pointer = raw_value(candidate, name)
+                                    return ax.convert(pointer) if pointer else None
+                                if value("kCGWindowOwnerPID") != process.pid or value("kCGWindowLayer") != 0:
+                                    continue
+                                if value("kCGWindowName") != window.read("AXTitle"):
+                                    continue
+                                bounds = raw_value(candidate, "kCGWindowBounds")
+                                assert bounds
+                                x, y, width, height = [ax.convert(raw_value(bounds, key)) for key in ("X", "Y", "Width", "Height")]
+                                if (x, y) == report["window"]["position"] and (width, height) == report["window"]["size"]:
+                                    candidates.append({"number": int(value("kCGWindowNumber")), "title": value("kCGWindowName"), "position": [x, y], "size": [width, height], "pidVerified": True})
+                            assert len(candidates) == 1, candidates
+                            selected = candidates[0]
+                            subprocess.run(["/usr/sbin/screencapture", "-x", "-o", "-l", str(selected["number"]), str(path)], check=True, timeout=10)
+                            assert window.read("AXPosition") == report["window"]["position"] and window.read("AXSize") == report["window"]["size"]
+                            return selected
+                        finally:
+                            ax.release(windows)
+                    def grouped(operation, **payload):
+                        before = state()
+                        observed = command(operation, **payload)
+                        assert observed["beforeA"] == before["beforeA"] and observed["beforeB"] == before["beforeB"]
+                        snapshot = observed["afterGroup"]
+                        index = len(report["groupedStates"]["snapshots"])
+                        focused = app.read("AXFocusedWindow")
+                        assert app.read("AXFrontmost") is True and isinstance(focused, ax.Element) and focused.same_as(window)
+                        assert window.read("AXPosition") == report["window"]["position"] and window.read("AXSize") == report["window"]["size"]
+                        image_path = BUILD / ("grouped-state-" + mode + "-" + str(index) + ".png")
+                        captured_window = capture_probe_window(image_path)
+                        report["groupedStates"]["snapshots"].append({"operation": operation, "payload": payload, "state": snapshot,
+                            "image": image_path.name, "imageSHA256": hashlib.sha256(image_path.read_bytes()).hexdigest(), "capturedWindow": captured_window})
+                        return snapshot
+                    def image_difference(first, second, allowed_rows=()):
+                        images = [Image.open(BUILD / report["groupedStates"]["snapshots"][index]["image"]).convert("RGBA") for index in (first, second)]
+                        assert images[0].size == images[1].size
+                        wx, wy = report["window"]["position"]; ww, wh = report["window"]["size"]
+                        sx, sy = images[0].width / ww, images[0].height / wh
+                        assert sx == sy
+                        regions = []
+                        for row in allowed_rows:
+                            cell = next(c for c in report["groupedStates"]["snapshots"][first]["state"]["coordinates"] if c["row"] == row and c["column"] == 1)
+                            assert cell["positive"] and cell["hit"] == [1, row]
+                            l, t, r, b = cell["screenFrame"]
+                            rect = [(l-wx)*sx, (t-wy)*sy, (r-wx)*sx, (b-wy)*sy]
+                            assert 0 <= rect[0] < rect[2] <= images[0].width and 0 <= rect[1] < rect[3] <= images[0].height
+                            regions.append(rect)
+                        changed = 0
+                        for index, (a, b) in enumerate(zip(images[0].get_flattened_data(), images[1].get_flattened_data())):
+                            if a != b:
+                                changed += 1
+                                if regions:
+                                    x, y = index % images[0].width, index // images[0].width
+                                    assert any(l <= x < r and t <= y < b for l, t, r, b in regions), (x, y, regions)
+                        return {"changedPixels": changed, "differenceBounds": ImageChops.difference(*images).convert("RGB").getbbox(), "allowedBreakRegions": regions, "wholeWindow": True, "mask": False}
+                    def frame(snapshot, row, column):
+                        return next(cell["frame"] for cell in snapshot["coordinates"]
+                            if cell["row"] == row and cell["column"] == column)
+                    def positive(rect):
+                        return rect[2] > rect[0] and rect[3] > rect[1]
+                    repeated = grouped("groupCase", name="repeated")
+                    assert repeated["case"] == "repeated" and repeated["rows"] == 8
+                    assert repeated["levels"][0]["values"] == ["A", "A", "A", "B", "B", "A", "A", "C"]
+                    assert repeated["keys"] == list(range(1, 9)) and not any(repeated["selection"])
+                    assert all(length == 8 for length in repeated["arrayLengths"].values())
+                    assert repeated["focus"] == "Close" and positive(frame(repeated, 1, 3))
+                    no_selection = grouped("groupCollapseAll")
+                    baseline_index = len(report["groupedStates"]["snapshots"])-1
+                    break_selected = grouped("groupSelectRoot")
+                    first_index = len(report["groupedStates"]["snapshots"])-1
+                    later = grouped("groupSelectLaterBreak")
+                    later_index = len(report["groupedStates"]["snapshots"])-1
+                    grouped("groupCase", name="repeated")
+                    reset = grouped("groupCollapseAll")
+                    reset_index = len(report["groupedStates"]["snapshots"])-1
+                    assert no_selection == reset
+                    assert all(s["focus"] == "Close" and s["scroll"] == no_selection["scroll"] for s in (break_selected, later, reset))
+                    report["groupedStates"]["selectionImages"] = {
+                        "baselineToFirst": image_difference(baseline_index, first_index, (1,)),
+                        "baselineToLater": image_difference(baseline_index, later_index, (6,)),
+                        "firstToLater": image_difference(first_index, later_index, (1, 6)),
+                        "baselineToReset": image_difference(baseline_index, reset_index)}
+                    assert report["groupedStates"]["selectionImages"]["baselineToFirst"]["changedPixels"] > 0
+                    assert report["groupedStates"]["selectionImages"]["baselineToLater"]["changedPixels"] > 0
+                    assert report["groupedStates"]["selectionImages"]["firstToLater"]["changedPixels"] > 0
+                    assert report["groupedStates"]["selectionImages"]["baselineToReset"]["changedPixels"] == 0
+                    grouped("groupSelectRoot")
+                    break_expanded = grouped("groupExpandAll")
+                    assert positive(frame(break_expanded, 1, 3))
+                    leaves_selected = grouped("groupSelectFirstLeaves")
+                    expected_selection = [True] * 3 + [False] * 5
+                    assert leaves_selected["selection"] == expected_selection
+                    assert len(break_selected["selection"]) == 8
+                    report["groupedStates"]["firstBreakMembership"] = [1, 2, 3]
+                    report["groupedStates"]["noSelectionVersusFirstBreakReadbackEqual"] = no_selection == break_selected
+                    report["groupedStates"]["laterBreakMembership"] = [6, 7]
+                    report["groupedStates"]["firstVersusLaterBreakReadbackEqual"] = break_selected == later
+                    report["groupedStates"]["breakVersusAllLeavesReadbackEqual"] = break_expanded == leaves_selected
+                    report["groupedStates"]["selectionObservationEqual"] = all(break_expanded[key] == leaves_selected[key]
+                        for key in ("selection", "selectionSlotZero", "levels"))
+                    report["groupedStates"]["expandedSelectionComparisonScope"] = "Select first break then expand all versus select backing rows 1, 2 and 3. Retained break highlight after expansion was not separately verified."
+                    report["checks"].append("Repeated-label first-break and same-member leaf command sequences compared without assuming selection flags")
+                    grouped("groupCase", name="repeated")
+                    nested_collapsed = grouped("groupCollapseNested")
+                    assert not positive(frame(nested_collapsed, 1, 3)) and positive(frame(nested_collapsed, 1, 2))
+                    collapsed_parent_and_child = grouped("groupCollapse")
+                    reopened_collapsed_child = grouped("groupExpand")
+                    assert positive(frame(reopened_collapsed_child, 1, 2)) and not positive(frame(reopened_collapsed_child, 1, 3))
+                    nested_expanded = grouped("groupExpandNested")
+                    assert positive(frame(nested_expanded, 1, 3))
+                    collapsed_parent_expanded_child = grouped("groupCollapse")
+                    assert not positive(frame(collapsed_parent_and_child, 1, 3)) and not positive(frame(collapsed_parent_expanded_child, 1, 3))
+                    report["groupedStates"]["latentNestedReadbackEqual"] = collapsed_parent_and_child == collapsed_parent_expanded_child
+                    reopened_expanded_child = grouped("groupExpand")
+                    assert positive(frame(reopened_expanded_child, 1, 3))
+                    report["groupedStates"]["oppositeLatentChildStatesConfirmedByReopen"] = True
+                    report["checks"].append("Paired collapsed ancestors retain known opposite latent child states; public readback ambiguity recorded")
+                    grouped("groupCase", name="repeated")
+                    hidden = grouped("groupHideFirst")
+                    assert hidden["control"] == [1] * 3 + [0] * 5
+                    assert not positive(frame(hidden, 1, 1))
+                    shown = grouped("groupShowAll")
+                    assert shown["control"] == [0] * 8 and positive(frame(shown, 1, 3))
+                    report["checks"].append("Hidden-descendant controls remain distinct from collapsed state")
+                    blank = grouped("groupCase", name="placeholder")
+                    assert blank["rows"] == 1 and blank["levels"][1]["values"] == [""] and blank["levels"][2]["values"] == [""]
+                    empty = grouped("groupCase", name="empty")
+                    assert empty["rows"] == 0 and empty["coordinates"] == [] and not empty["selection"]
+                    assert all(length == 0 for length in empty["arrayLengths"].values())
+                    report["checks"].append("Blank backing row and empty list read safely without claiming lazy or loaded-empty branches")
+                    report["checks"].append("Full grouped reader preserves independently captured selection, focus, scroll and OK")
                 ax.capture_window(process.pid, BUILD / ("hierarchy-commands-" + mode + ".png"))
             checks_finished = True
         except BaseException as error:

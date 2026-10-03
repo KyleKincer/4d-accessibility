@@ -4,6 +4,7 @@ Case of
  : (Form event code=On Load)
   Form.events:=New collection
   Form.command:=New object("id"; "")
+  Form.groupedCase:="initial"
   Form.tree:=New list
   $grand:=New list
   APPEND TO LIST($grand; "Deep leaf 🎹"; -301)
@@ -25,11 +26,13 @@ Case of
   ARRAY TEXT(AXHP_Label; 60)
   ARRAY LONGINT(AXHP_Key; 60)
   ARRAY BOOLEAN(AXHP_Selection; 60)
+  ARRAY LONGINT(AXHP_Control; 60)
   For ($i; 1; 60)
    AXHP_Group{$i}:="Group "+String(Int(($i-1)/20))
    AXHP_Subgroup{$i}:="Subgroup "+String(Int(($i-1)/5))
    AXHP_Label{$i}:="Leaf "+String($i)
    AXHP_Key{$i}:=$i
+   AXHP_Control{$i}:=0
   End for
   $hierarchy{1}:=->AXHP_Group
   $hierarchy{2}:=->AXHP_Subgroup

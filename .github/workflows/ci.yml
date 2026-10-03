@@ -33,6 +33,7 @@ jobs:
           python3 tests/test_desktop_session.py
           python3 tests/test_voiceover_stops.py
           python3 tests/test_hierarchy_probe_cleanup.py
+          python3 tests/test_grouped_probe_summary.py
           python3 test_appium_list_fixture.py --help
           python3 prepare_alp_subforms.py --help
       - name: Test session and grid models

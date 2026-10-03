@@ -47,6 +47,7 @@ ARRAY TEXT(AXHP_Subgroup; 0)
 ARRAY TEXT(AXHP_Label; 0)
 ARRAY LONGINT(AXHP_Key; 0)
 ARRAY BOOLEAN(AXHP_Selection; 0)
+ARRAY LONGINT(AXHP_Control; 0)
 C_OBJECT(AXHP_Command; $0)
 C_OBJECT(AXHP_Command; $1)
 C_OBJECT(AXHP_Topology; $0)
@@ -54,6 +55,11 @@ C_LONGINT(AXHP_Topology; $1)
 C_COLLECTION(AXHP_Topology; $2)
 C_OBJECT(AXHP_ListState; $0)
 C_TEXT(AXHP_ListState; $1)
+C_OBJECT(AXHP_GroupedRead; $0)
+C_TEXT(AXHP_GroupedRead; $1)
+C_OBJECT(AXHP_GroupedSentinel; $0)
+C_TEXT(AXHP_GroupedSentinel; $1)
+C_TEXT(AXHP_GroupedCase; $1)
 ''')
     if args.diagnostic_plugin:
         shutil.copytree(args.diagnostic_plugin, fixture / "Plugins/AccessibilityBridge.bundle")
@@ -73,7 +79,7 @@ C_TEXT(AXHP_ListState; $1)
             ("Subgroup", "AXHP_Subgroup", 160), ("Label", "AXHP_Label", 270)):
         columns.append({"name": name, "dataSource": source, "width": width,
             "enterable": name == "Label", "header": {"name": name + "Header", "text": name}})
-    objects["Grouped"] = {"type": "listbox", "dataSource": "AXHP_Selection",
+    objects["Grouped"] = {"type": "listbox", "dataSource": "AXHP_Selection", "rowControlSource": "AXHP_Control",
         "left": 20, "top": 280, "width": 630, "height": 220,
         "rowHeight": 24, "headerHeight": 24, "selectionMode": "multiple",
         "scrollbarVertical": "visible", "scrollbarHorizontal": "automatic",
