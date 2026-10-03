@@ -56,3 +56,5 @@ Renaming a form, container, object or key changes its default locator, so update
 Earlier kits exposed per-session `axb.*`, `axb.window.*` and encoded `axb-grid.*` identifiers. Replace selectors recorded from those versions with the new paths. Install plugin, component and helpers together and restart 4D. `AXB_Host("info"; New object).nativeStatus` must include `stableIdentifiers 1`.
 
 Assertions about session replacement should compare element handles and rejected stale actions, not expect public identifiers to change. Keep window scoping in recording and driver tools. The bridge supplies the locator contract; adopting it in an external automation tool is a separate change to that tool.
+
+The [Appium Mac2/XCTest fixture](../../../tests/APPIUM.md) passes stable table, button and ordinary-editor lookups in interpreted and compiled 4D on the exact 0.22.0 CI kit. Its click runs the original synthetic inspection handler once and preserves record, selection and modified state. [The evidence](../../../validation/appium-0.22.0.json) records 36 checks and slow lookup timings on 600 rows. This does not establish a real application workflow or SQUASH runner acceptance.

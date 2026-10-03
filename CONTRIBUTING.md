@@ -43,6 +43,8 @@ For classic list subforms, use [the dedicated acceptance fixture](tests/LIST-SUB
 
 For native web areas beside ordinary controls, use [web-area acceptance](tests/WEB-AREAS.md). Supply a complete matching kit and licensed `--server` compiler. The loopback fixture checks browser-owned validation/submission, 4D handler preservation, compiled VoiceOver and whole-window pixels. The system-engine fixture is accepted; embedded Chromium and visual interleaving of HTML and 4D navigation remain open.
 
+For Appium Mac2/XCTest discovery and original-handler activation, use [Appium acceptance](tests/APPIUM.md). It operates the disposable classic list parent through stable identifiers and independently verifies fixture state. This is separate from real application or SQUASH runner acceptance.
+
 `python3 test_form_focus.py --server /path/to/4D\ Server.app` exercises production focus resolution with real 4D object identities and child paths. It covers forwarded ancestor events, shared bindings, unobserved descendants, retired/disabled controls and conflicting contexts. Run it sequentially with every other 4D compiler or graphical fixture. It complements the live event and VoiceOver checks.
 
 `test_area_pixels.py --server /path/to/4D\ Server.app --run` compares the complete rendered synthetic window with and without the area. It requires Pillow and accepts no changed pixels, masks or tolerance.

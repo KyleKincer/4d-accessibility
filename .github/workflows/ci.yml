@@ -31,6 +31,7 @@ jobs:
           python3 test_install_host_methods.py
           python3 test_signing_keychain.py
           python3 tests/test_desktop_session.py
+          python3 test_appium_list_fixture.py --help
           python3 prepare_alp_subforms.py --help
       - name: Test session and grid models
         run: |
