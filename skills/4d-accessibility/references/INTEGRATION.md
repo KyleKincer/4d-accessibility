@@ -372,6 +372,8 @@ Setting a name through accessibility and typing that name must reach the same va
 
 An external AX client can read progress from the bridge root group's `AXHelp`. Locate that group by its `AXIdentifier` beginning with `axb/`. It reports `Action queued`, then `Waiting for the application to complete the action`, then the application's final receipt message. With no action history it reports `Ready`. The public attribute contains the message, not the internal `completed` or `rejected` status. Use it as a progress signal and read the target's resulting value, selection or focus to verify the outcome. For popup activation, completion means the menu opened; choosing an item is a separate native interaction. Neither transport success nor a timeout authorizes an automatic retry. The provider accepts one in-flight action per form. Coordinate input actors when switching between automation and VoiceOver, which sends automatic reveal requests. A competing action can return successful macOS AX transport without application delivery; observe progress and resulting state rather than replaying it. Concurrent read-only inspection is supported.
 
+In the [0.22.1 native web composition candidate](WEB-AREAS.md#native-composition-candidate-0221), that group is an empty status child of the native form container. Find controls within the selected window; their parent can be the native container instead of the status group. The receipt identifier and `AXHelp` behavior remain the same.
+
 ## 4. Choose the right extension
 
 | Your form contains | Integration path |

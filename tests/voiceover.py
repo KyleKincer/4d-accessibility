@@ -3,8 +3,28 @@ import ctypes as c
 from pathlib import Path
 import subprocess
 import time
+import re
 
 import mac_ax as ax
+
+
+_READING_ROLES = re.compile(r"\b(button|edit text|email field|checkbox|link|summary|heading level \d+|group|web content|html content|scroll area)\b")
+
+
+def reading_stop(step, role, *labels):
+    """Match one English leaf reading stop, excluding interaction summaries."""
+    if step["key"] not in ("right", "left") or step.get("shift") or step.get("command") or not step.get("voiceoverModifier", True):
+        return False
+    text = " ".join(step["caption"].lower().split()).rstrip(" .")
+    roles = _READING_ROLES.findall(text)
+    # Entering an HTML area announces its first heading with parent context.
+    # A separate left/right stop on that heading has just the heading role.
+    ending = role.startswith("heading level ") or role == "link" or text.endswith(", " + role) or (role == "group" and text.endswith(", empty group"))
+    return roles == [role] and ending and all(label.lower() in text for label in labels)
+
+
+def reading_stop_index(steps, role, *labels, after=-1):
+    return next((i for i, step in enumerate(steps) if i > after and reading_stop(step, role, *labels)), None)
 
 
 class VoiceOver:
