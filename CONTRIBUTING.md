@@ -73,6 +73,16 @@ python3 test_grid_value_speech.py --run
 
 This builds the production native provider in an owned synthetic window and starts its own VoiceOver session. Nine cases verify speech when a cold cell loads, navigation between pending cells, leaving the grid, unrelated AX inspection, reloading the same value and delayed checkbox/popup roles. Each case observes speech without moving the reading cursor, then checks its position. Existing user VoiceOver sessions are left alone. Reports and synthetic caption images stay under ignored `build/grid-value-speech/`. Use `--case single` for the shortest reproduction or omit `--run` to compile only. `test_native_grids.py --run --voiceover` separately tests all 50,000 logical rows and 24 columns.
 
+For VoiceOver test-session cleanup:
+
+```sh
+python3 tests/test_voiceover_cleanup.py
+swiftc tests/ReadScreen.swift -o build/ReadScreen
+python3 test_voiceover_cleanup_fixture.py --ocr build/ReadScreen
+```
+
+The unit checks block system input. The live AppKit fixture closes its own window or moves foreground to a second owned app. Cleanup must preserve the original guard failure and stop every captured VoiceOver and Quickstart process. The report records whether a hidden caption baseline needed restoration; a run with an already visible caption panel does not establish that case. Existing user VoiceOver sessions prevent the live run. Run it sequentially with other graphical fixtures.
+
 For example, after building the two packages:
 
 ```sh
