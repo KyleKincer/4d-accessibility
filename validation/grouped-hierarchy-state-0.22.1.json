@@ -1,11 +1,11 @@
 {
   "passed": true,
-  "date": "2026-10-03T16:58:13.565714+00:00",
+  "date": "2026-10-03T17:14:41.798929+00:00",
   "scope": "Native synthetic grouped-listbox state probes. No production adapter, hierarchy VoiceOver or Symphony hierarchy workflow acceptance.",
   "sourceBaseCommit": "98fc67f333781690beaff881669118f2a86a55e8",
-  "driverSHA256": "f0cce36b3c0a76708daacac5459cbc46517ead33fdb6db3d09f4900737c6d21b",
+  "driverSHA256": "764353109118fd7f99f27b79d5eb7fc6baaa6b5ba13d54dc87e4903af34d4a5b",
   "preparerSHA256": "e99f6517642c018947ac349bd4140522f278ff0905836f003b98d0766932c60c",
-  "summarySHA256": "0deceed841b6b6ec7b057f205e3be36e4ab082297842f1603742c5a1f1be9b04",
+  "summarySHA256": "42bc2ec454523ea7dcde9c3e7054c95eec735200ad11a01a88600ee9c5a1e534",
   "compileReportSHA256": "b53d583a8f610720348a65848bc353d02af02f98d047390a3c8f7c66b645c7d9",
   "preparedSourceSHA256": {
     "Project/Sources/catalog.4DCatalog": "f138ce1580761d1c0e025f6f36849b506fd9c35ad1b4c58da6d442625e83ce2e",
@@ -65,7 +65,7 @@
         "Full grouped reader preserves independently captured selection, focus, scroll and OK",
         "Owned process exits zero with a matching close marker and no error"
       ],
-      "reportSHA256": "29a336ab51431b9012565fd0e1c5ade19b65155ad67e657db888618065668e81",
+      "reportSHA256": "f63bb6c4e2cff9898e80f34807ec3d63094181ea0b2fba1d8f693b61e130b2cc",
       "hostEnvironment": {
         "macOS": "26.7.1",
         "hostArchitecture": "arm64"
@@ -182,7 +182,7 @@
             "image": "grouped-state-interpreted-0.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -398,7 +398,7 @@
             "image": "grouped-state-interpreted-1.png",
             "imageSHA256": "7037cf384fbc81756ef276372be29d8d89c810cf7870d667bab5053bd4096e94",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -592,7 +592,7 @@
             "image": "grouped-state-interpreted-2.png",
             "imageSHA256": "0d9df81041bcadf49929fd55b962561127cf466babbbbef9a5fa090c03230f00",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -786,7 +786,7 @@
             "image": "grouped-state-interpreted-3.png",
             "imageSHA256": "a7ed049781743d8083ab9f29edd264791488bbb46377a2140a1e05ec0d4f710a",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -982,7 +982,7 @@
             "image": "grouped-state-interpreted-4.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -1198,7 +1198,7 @@
             "image": "grouped-state-interpreted-5.png",
             "imageSHA256": "7037cf384fbc81756ef276372be29d8d89c810cf7870d667bab5053bd4096e94",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -1392,7 +1392,7 @@
             "image": "grouped-state-interpreted-6.png",
             "imageSHA256": "0d9df81041bcadf49929fd55b962561127cf466babbbbef9a5fa090c03230f00",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -1586,7 +1586,7 @@
             "image": "grouped-state-interpreted-7.png",
             "imageSHA256": "9173ad28fa27b7e99d33de795f3c98ccb85435c61ee0e527e5716866c2df5683",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -1802,7 +1802,7 @@
             "image": "grouped-state-interpreted-8.png",
             "imageSHA256": "16ecde9b7713c459a8e6a26854dbcd5b8d481469365bc5a38213700e6793535b",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -2020,7 +2020,7 @@
             "image": "grouped-state-interpreted-9.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -2236,7 +2236,7 @@
             "image": "grouped-state-interpreted-10.png",
             "imageSHA256": "9ccfb056453d319c4d79b8d44c910089d3429f81fa673e689259b95d26947637",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -2441,7 +2441,7 @@
             "image": "grouped-state-interpreted-11.png",
             "imageSHA256": "f2c35e22a31bec1e3708055bd9468ec942f2ef691907575d127d593c3f2b6ed1",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -2635,7 +2635,7 @@
             "image": "grouped-state-interpreted-12.png",
             "imageSHA256": "b25e17805fa816de5466ef32782616bf6c4024323d2cc9a18977c87208b719de",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -2840,7 +2840,7 @@
             "image": "grouped-state-interpreted-13.png",
             "imageSHA256": "a9452df54b9cf94d57208ab96086399c69deff35594066b466045acd47c5bdba",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -3056,7 +3056,7 @@
             "image": "grouped-state-interpreted-14.png",
             "imageSHA256": "f2c35e22a31bec1e3708055bd9468ec942f2ef691907575d127d593c3f2b6ed1",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -3250,7 +3250,7 @@
             "image": "grouped-state-interpreted-15.png",
             "imageSHA256": "a9452df54b9cf94d57208ab96086399c69deff35594066b466045acd47c5bdba",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -3468,7 +3468,7 @@
             "image": "grouped-state-interpreted-16.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -3684,7 +3684,7 @@
             "image": "grouped-state-interpreted-17.png",
             "imageSHA256": "ccc4346c6f7d0ce14b3186d48715ac79737c9c0989606877e6118bfe7d8f831a",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -3867,7 +3867,7 @@
             "image": "grouped-state-interpreted-18.png",
             "imageSHA256": "98f18d956ef02b3c2d5336277e2ec4cc5254ad1fa6ff7cbb0134a6d0e7b1dfac",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -4085,7 +4085,7 @@
             "image": "grouped-state-interpreted-19.png",
             "imageSHA256": "3d18896fc0bcc523a65062d4d97e369f40f022e5fae3a4e6b1eccea5ba0e7930",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -4239,7 +4239,7 @@
             "image": "grouped-state-interpreted-20.png",
             "imageSHA256": "15dc0e62b1e3846d0966bd206a41269c063154fed95051de8872b7ec63fdee91",
             "capturedWindow": {
-              "number": 74505,
+              "number": 74658,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -4327,7 +4327,7 @@
         "Full grouped reader preserves independently captured selection, focus, scroll and OK",
         "Owned process exits zero with a matching close marker and no error"
       ],
-      "reportSHA256": "4e7b00d614c75010e8bf4d9e7b2d79097193d1f1d1142133a6480bf4899d23a5",
+      "reportSHA256": "d27f901a67ab0233a9e98df327b1a9f5e9bf533b5643c5bc217ec234860a9ca2",
       "hostEnvironment": {
         "macOS": "26.7.1",
         "hostArchitecture": "arm64"
@@ -4444,7 +4444,7 @@
             "image": "grouped-state-compiled-0.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -4660,7 +4660,7 @@
             "image": "grouped-state-compiled-1.png",
             "imageSHA256": "7037cf384fbc81756ef276372be29d8d89c810cf7870d667bab5053bd4096e94",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -4854,7 +4854,7 @@
             "image": "grouped-state-compiled-2.png",
             "imageSHA256": "0d9df81041bcadf49929fd55b962561127cf466babbbbef9a5fa090c03230f00",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -5048,7 +5048,7 @@
             "image": "grouped-state-compiled-3.png",
             "imageSHA256": "a7ed049781743d8083ab9f29edd264791488bbb46377a2140a1e05ec0d4f710a",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -5244,7 +5244,7 @@
             "image": "grouped-state-compiled-4.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -5460,7 +5460,7 @@
             "image": "grouped-state-compiled-5.png",
             "imageSHA256": "7037cf384fbc81756ef276372be29d8d89c810cf7870d667bab5053bd4096e94",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -5654,7 +5654,7 @@
             "image": "grouped-state-compiled-6.png",
             "imageSHA256": "0d9df81041bcadf49929fd55b962561127cf466babbbbef9a5fa090c03230f00",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -5848,7 +5848,7 @@
             "image": "grouped-state-compiled-7.png",
             "imageSHA256": "9173ad28fa27b7e99d33de795f3c98ccb85435c61ee0e527e5716866c2df5683",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -6064,7 +6064,7 @@
             "image": "grouped-state-compiled-8.png",
             "imageSHA256": "16ecde9b7713c459a8e6a26854dbcd5b8d481469365bc5a38213700e6793535b",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -6282,7 +6282,7 @@
             "image": "grouped-state-compiled-9.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -6498,7 +6498,7 @@
             "image": "grouped-state-compiled-10.png",
             "imageSHA256": "9ccfb056453d319c4d79b8d44c910089d3429f81fa673e689259b95d26947637",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -6703,7 +6703,7 @@
             "image": "grouped-state-compiled-11.png",
             "imageSHA256": "f2c35e22a31bec1e3708055bd9468ec942f2ef691907575d127d593c3f2b6ed1",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -6897,7 +6897,7 @@
             "image": "grouped-state-compiled-12.png",
             "imageSHA256": "b25e17805fa816de5466ef32782616bf6c4024323d2cc9a18977c87208b719de",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -7102,7 +7102,7 @@
             "image": "grouped-state-compiled-13.png",
             "imageSHA256": "a9452df54b9cf94d57208ab96086399c69deff35594066b466045acd47c5bdba",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -7318,7 +7318,7 @@
             "image": "grouped-state-compiled-14.png",
             "imageSHA256": "f2c35e22a31bec1e3708055bd9468ec942f2ef691907575d127d593c3f2b6ed1",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -7512,7 +7512,7 @@
             "image": "grouped-state-compiled-15.png",
             "imageSHA256": "a9452df54b9cf94d57208ab96086399c69deff35594066b466045acd47c5bdba",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -7730,7 +7730,7 @@
             "image": "grouped-state-compiled-16.png",
             "imageSHA256": "cd69a39c69c2bebaa7f9fc7a3c12e0b8f8443fff372fc8c92abd7538d12d834e",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -7946,7 +7946,7 @@
             "image": "grouped-state-compiled-17.png",
             "imageSHA256": "ccc4346c6f7d0ce14b3186d48715ac79737c9c0989606877e6118bfe7d8f831a",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -8129,7 +8129,7 @@
             "image": "grouped-state-compiled-18.png",
             "imageSHA256": "98f18d956ef02b3c2d5336277e2ec4cc5254ad1fa6ff7cbb0134a6d0e7b1dfac",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -8347,7 +8347,7 @@
             "image": "grouped-state-compiled-19.png",
             "imageSHA256": "3d18896fc0bcc523a65062d4d97e369f40f022e5fae3a4e6b1eccea5ba0e7930",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,
@@ -8501,7 +8501,7 @@
             "image": "grouped-state-compiled-20.png",
             "imageSHA256": "15dc0e62b1e3846d0966bd206a41269c063154fed95051de8872b7ec63fdee91",
             "capturedWindow": {
-              "number": 74522,
+              "number": 74675,
               "title": "AX native hierarchy probe",
               "position": [
                 620.0,

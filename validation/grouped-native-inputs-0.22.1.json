@@ -1,0 +1,7534 @@
+{
+  "passed": true,
+  "date": "2026-10-03T17:14:23.710614+00:00",
+  "scope": "Visible synthetic later/nested grouped breaks, center clicks followed by native keyboard disclosure. No production adapter, VoiceOver or Symphony hierarchy acceptance.",
+  "sourceBaseCommit": "98fc67f333781690beaff881669118f2a86a55e8",
+  "driverSHA256": "764353109118fd7f99f27b79d5eb7fc6baaa6b5ba13d54dc87e4903af34d4a5b",
+  "preparerSHA256": "e99f6517642c018947ac349bd4140522f278ff0905836f003b98d0766932c60c",
+  "summarySHA256": "ed255246638da44f44791c5b957bc12a3920f942f2cc1b933c6aaccdfcfa651e",
+  "sourceValidatorSHA256": "42bc2ec454523ea7dcde9c3e7054c95eec735200ad11a01a88600ee9c5a1e534",
+  "compileReportSHA256": "b53d583a8f610720348a65848bc353d02af02f98d047390a3c8f7c66b645c7d9",
+  "preparedSourceSHA256": {
+    "Project/Sources/catalog.4DCatalog": "f138ce1580761d1c0e025f6f36849b506fd9c35ad1b4c58da6d442625e83ce2e",
+    "Project/Sources/Methods/Compiler_Hierarchy.4dm": "ce5b6aee8cebeaed8cebe07afe6a66bb237897c572176e2442e0866bf090668b",
+    "Project/Sources/Methods/AXHP_Error.4dm": "57ce45748aea4dabb43e4cf1e7afbc05f5bb3bf30d6002df16d708368f6af77e",
+    "Project/Sources/Methods/AXHP_State.4dm": "63ce0239dd1be956a0a4fc877d67339ceef9aa10063b66a4c57603881454e4a8",
+    "Project/Sources/Methods/AXHP_GroupedCase.4dm": "3dd78f320bbb79dbda6a624938310af847133119316c2825f499e4d8e7d2cdb1",
+    "Project/Sources/Methods/AXHP_ListState.4dm": "b17013a181f8f97690c1b81b1f567be47a4cb9eb9f9411e5a928efea55b1d24d",
+    "Project/Sources/Methods/AXHP_GroupedSentinel.4dm": "83006368d0dae8728a85df2ccab516869f02f8aec7fcf96475b6e3cf196e6537",
+    "Project/Sources/Methods/AXHP_Event.4dm": "b7c4e13b4c9d96b62ff3936234acde0112ea0b13affa0b5657720cd78e363044",
+    "Project/Sources/Methods/AXHP_Command.4dm": "bbc1f9a198c9a0e8a5e7c09c3064eae8add1af1f0383f7bc9044e4ad99bfbfa6",
+    "Project/Sources/Methods/AXHP_Form.4dm": "fb5fb5f7507bb25f82fd499fc9a86e3d423e863ba18472e3ee0d6130c40a8a4d",
+    "Project/Sources/Methods/AXHP_Topology.4dm": "2ea8448d2e328f2974a88093e02afb8200f8d97fabe51aab869a8c9d893e6392",
+    "Project/Sources/Methods/AXHP_GroupedRead.4dm": "4774145ca8131c1356373fc87efaee68ef8c49c56ffbd8bdfc6eed30ae982f16",
+    "Project/Sources/DatabaseMethods/onStartup.4dm": "876264f691233df1ba3262b02f5c06700b5651e25496eedf7a4660f752b091ce",
+    "Project/Sources/Forms/Probe/method.4dm": "5de75239acede2c67bffdaea308f9b3ed3e34bf9519f828968aebbdd1c752df6",
+    "Project/Sources/Forms/Probe/form.4DForm": "b524545bd6a96ca70b453d3b26ec023decd79ad89d0047811735a50639ca46ab",
+    "Project/Sources/Forms/Probe/ObjectMethods/Grouped.4dm": "a35901e6d9067fd82f6416cdcee57f23127f8d755523b3cd368b8f5b2e5caab3",
+    "Project/Sources/Forms/Probe/ObjectMethods/TreeB.4dm": "a35901e6d9067fd82f6416cdcee57f23127f8d755523b3cd368b8f5b2e5caab3",
+    "Project/Sources/Forms/Probe/ObjectMethods/TreeA.4dm": "a35901e6d9067fd82f6416cdcee57f23127f8d755523b3cd368b8f5b2e5caab3"
+  },
+  "diagnosticNativeSHA256": "cd893e93467ea5d654191403c95dcbfaa628e1129ba107f9bb111589466934d1",
+  "cleanupRegression": {
+    "passed": true,
+    "checks": 7,
+    "testSHA256": "4e5738873434b00e6aa646222d25ec4ad6c2ad1a6a1647f865fce28ca002230a"
+  },
+  "flagGuardRegression": {
+    "passed": true,
+    "checks": 2,
+    "testSHA256": "8b9c5eea8d758a56e50e33fed24ca5438812aa7220a508be7f026aef6a74611e"
+  },
+  "limitations": [
+    "Center clicking selects the intended break. Selection-preserving expansion and complete selected-row reporting remain unvalidated.",
+    "Only visible later and nested breaks in the synthetic fixture are established. Arbitrary targets, offscreen reveal, clipping, action races and lazy loading remain separate work.",
+    "Collapsed unrelated branches remain collapsed in sampled geometry; their latent descendant states were not independently reopened.",
+    "Keyboard event row/column fields are not treated as authoritative target addresses.",
+    "Host architecture is recorded; 4D process architecture was not independently sampled. Physical Intel and remote delivery remain unvalidated.",
+    "Diagnostic binaries are not a production kit or notarized distribution."
+  ],
+  "runs": [
+    {
+      "mode": "interpreted",
+      "passed": true,
+      "checks": [
+        "Both representations, selection, focus and OK preserved",
+        "All root and latent descendants read without expanding",
+        "Negative references and blank leaf preserved",
+        "Empty branch retained",
+        "Three hierarchy pointers returned",
+        "Process-targeted POST KEY matches native tree arrows and original handler sequences",
+        "Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry",
+        "laterRootRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedLeft changes its intended branch and runs one native disclosure handler",
+        "laterRootLeft changes its intended branch and runs one native disclosure handler",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "reportSHA256": "feecb50cb6e4f46125cdf6897c312ea35b4e6df5efd62011a1f39dee1ef7bb1c",
+      "hostEnvironment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "actualCompiledVerified": true,
+      "ownedProcessExitedZero": true,
+      "matchingCloseReceipt": true,
+      "window": {
+        "position": [
+          620.0,
+          285.0
+        ],
+        "size": [
+          680.0,
+          598.0
+        ]
+      },
+      "actions": [
+        {
+          "operation": "nativeGroupClick",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 4,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Group",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            },
+            {
+              "name": "Grouped",
+              "event": 31,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Group",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "target": [
+            1,
+            6
+          ],
+          "point": [
+            947.5,
+            660.0
+          ],
+          "ownerVerified": true,
+          "beforeReadbackSHA256": "6a1eeeec29787385860e970106da95af1cb7ac8637b5b688d01e38ed1763991a",
+          "afterReadbackSHA256": "288660bc3b544e9e40f975db451dbe4b814fb57446878b524036999010a29dc4",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Close",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterRootRight",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Group",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "288660bc3b544e9e40f975db451dbe4b814fb57446878b524036999010a29dc4",
+          "afterReadbackSHA256": "01e02b160b37f3cebdeac3a7caa40c8a682d6f89554cb9097f98135cea10e4b8",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "nativeGroupClick",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 4,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Subgroup",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            },
+            {
+              "name": "Grouped",
+              "event": 31,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Subgroup",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            }
+          ],
+          "target": [
+            2,
+            6
+          ],
+          "point": [
+            947.5,
+            680.0
+          ],
+          "ownerVerified": true,
+          "beforeReadbackSHA256": "01e02b160b37f3cebdeac3a7caa40c8a682d6f89554cb9097f98135cea10e4b8",
+          "afterReadbackSHA256": "743b79f87caaade6283e642f893c392a416c59400d64e45d88e94833d4808ab3",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterNestedRight",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Subgroup",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "743b79f87caaade6283e642f893c392a416c59400d64e45d88e94833d4808ab3",
+          "afterReadbackSHA256": "98f213150354d9c58264015a82281b2604dbff601414971fe1aa9394548fe011",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                800,
+                710
+              ],
+              "hit": [
+                3,
+                6
+              ],
+              "hitVariable": "AXHP_Label"
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                417
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                710,
+                800,
+                730
+              ],
+              "hit": [
+                3,
+                7
+              ],
+              "hitVariable": "AXHP_Label"
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                417,
+                635,
+                437
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                730,
+                1255,
+                750
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                437,
+                635,
+                437
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                437,
+                180,
+                437
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterNestedLeft",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Subgroup",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "98f213150354d9c58264015a82281b2604dbff601414971fe1aa9394548fe011",
+          "afterReadbackSHA256": "36310ed523f9e56df74b34981d8ceabe1c22363f40208d36bb1284da18f471e8",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                800,
+                710
+              ],
+              "hit": [
+                3,
+                6
+              ],
+              "hitVariable": "AXHP_Label"
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                417
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                710,
+                800,
+                730
+              ],
+              "hit": [
+                3,
+                7
+              ],
+              "hitVariable": "AXHP_Label"
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                417,
+                635,
+                437
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                730,
+                1255,
+                750
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                437,
+                635,
+                437
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                437,
+                180,
+                437
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "nativeGroupClick",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 4,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Group",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            },
+            {
+              "name": "Grouped",
+              "event": 31,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Group",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "target": [
+            1,
+            6
+          ],
+          "point": [
+            947.5,
+            660.0
+          ],
+          "ownerVerified": true,
+          "beforeReadbackSHA256": "36310ed523f9e56df74b34981d8ceabe1c22363f40208d36bb1284da18f471e8",
+          "afterReadbackSHA256": "6089bc71ac63765873b90fb4a0a0758bac7231948c655b97b8687c2e073765be",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterRootLeft",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_Group",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "6089bc71ac63765873b90fb4a0a0758bac7231948c655b97b8687c2e073765be",
+          "afterReadbackSHA256": "d6daf7350247a4c75d53d0482ac77b0396da313beed924e539ed43cb55a45c02",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_Subgroup"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_Group"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        }
+      ]
+    },
+    {
+      "mode": "compiled",
+      "passed": true,
+      "checks": [
+        "Both representations, selection, focus and OK preserved",
+        "All root and latent descendants read without expanding",
+        "Negative references and blank leaf preserved",
+        "Empty branch retained",
+        "Three hierarchy pointers returned",
+        "Process-targeted POST KEY matches native tree arrows and original handler sequences",
+        "Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry",
+        "laterRootRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedLeft changes its intended branch and runs one native disclosure handler",
+        "laterRootLeft changes its intended branch and runs one native disclosure handler",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "reportSHA256": "e7251a46489421a858836ee9b7dce6782e8f70630159aadbf80579d44b166b9a",
+      "hostEnvironment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "actualCompiledVerified": true,
+      "ownedProcessExitedZero": true,
+      "matchingCloseReceipt": true,
+      "window": {
+        "position": [
+          620.0,
+          285.0
+        ],
+        "size": [
+          680.0,
+          598.0
+        ]
+      },
+      "actions": [
+        {
+          "operation": "nativeGroupClick",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 4,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_GROUP",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            },
+            {
+              "name": "Grouped",
+              "event": 31,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_GROUP",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "target": [
+            1,
+            6
+          ],
+          "point": [
+            947.5,
+            660.0
+          ],
+          "ownerVerified": true,
+          "beforeReadbackSHA256": "493179c12bd9e52c4da087f5116bdae365bf352b203f993672d75feff3275e39",
+          "afterReadbackSHA256": "2b5de14f240cf467361025f511e77c2343791772656082e443b35542867fb050",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Close",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterRootRight",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_GROUP",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "2b5de14f240cf467361025f511e77c2343791772656082e443b35542867fb050",
+          "afterReadbackSHA256": "3515b88fd9c9d3f7657c407d6662d227443b987147853f042578fdb7f5132c6b",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "nativeGroupClick",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 4,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_SUBGROUP",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            },
+            {
+              "name": "Grouped",
+              "event": 31,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_SUBGROUP",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            }
+          ],
+          "target": [
+            2,
+            6
+          ],
+          "point": [
+            947.5,
+            680.0
+          ],
+          "ownerVerified": true,
+          "beforeReadbackSHA256": "3515b88fd9c9d3f7657c407d6662d227443b987147853f042578fdb7f5132c6b",
+          "afterReadbackSHA256": "790b61a443a39ba990c2d58983516e7d13077a9ca8b6d5e4e006685793510593",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterNestedRight",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_SUBGROUP",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "790b61a443a39ba990c2d58983516e7d13077a9ca8b6d5e4e006685793510593",
+          "afterReadbackSHA256": "c6431b1b79155c510aa414bf4117165fc779b2aaa2b515c130bc8c6512a5deb3",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                800,
+                710
+              ],
+              "hit": [
+                3,
+                6
+              ],
+              "hitVariable": "AXHP_LABEL"
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                417
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                710,
+                800,
+                730
+              ],
+              "hit": [
+                3,
+                7
+              ],
+              "hitVariable": "AXHP_LABEL"
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                417,
+                635,
+                437
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                730,
+                1255,
+                750
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                437,
+                635,
+                437
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                437,
+                180,
+                437
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterNestedLeft",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 6,
+              "column": 2,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_SUBGROUP",
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "c6431b1b79155c510aa414bf4117165fc779b2aaa2b515c130bc8c6512a5deb3",
+          "afterReadbackSHA256": "7a234e08175cb486ea03c4ad85a4fa929253f4f237ddfc890e9fbe53a4ee3e30",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                800,
+                710
+              ],
+              "hit": [
+                3,
+                6
+              ],
+              "hitVariable": "AXHP_LABEL"
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                417
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                710,
+                800,
+                730
+              ],
+              "hit": [
+                3,
+                7
+              ],
+              "hitVariable": "AXHP_LABEL"
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                417,
+                635,
+                437
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                730,
+                1255,
+                750
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                437,
+                635,
+                437
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                437,
+                180,
+                437
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "nativeGroupClick",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 4,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_GROUP",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            },
+            {
+              "name": "Grouped",
+              "event": 31,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_GROUP",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "target": [
+            1,
+            6
+          ],
+          "point": [
+            947.5,
+            660.0
+          ],
+          "ownerVerified": true,
+          "beforeReadbackSHA256": "7a234e08175cb486ea03c4ad85a4fa929253f4f237ddfc890e9fbe53a4ee3e30",
+          "afterReadbackSHA256": "c9d2422538739d4600f47bc66ffea806a86ce96db361c106fd8b5111380a82ee",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        },
+        {
+          "operation": "laterRootLeft",
+          "events": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 6,
+              "column": 1,
+              "selection": [
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false,
+                false
+              ],
+              "selectionSlotZero": false,
+              "columnVariable": "AXHP_GROUP",
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ]
+            }
+          ],
+          "beforeReadbackSHA256": "c9d2422538739d4600f47bc66ffea806a86ce96db361c106fd8b5111380a82ee",
+          "afterReadbackSHA256": "3bf9a0100b768744a37701e7289a7abc2e5a624e58e4ee89a56eecded93437cc",
+          "beforeCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                2,
+                6
+              ],
+              "hitVariable": "AXHP_SUBGROUP"
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                377,
+                635,
+                397
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                690,
+                1255,
+                710
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                397,
+                635,
+                397
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                397,
+                180,
+                397
+              ],
+              "positive": false
+            }
+          ],
+          "afterCoordinates": [
+            {
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                610,
+                1255,
+                630
+              ],
+              "hit": [
+                1,
+                1
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 1,
+              "column": 2,
+              "frame": [
+                20,
+                317,
+                635,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 1,
+              "column": 3,
+              "frame": [
+                20,
+                317,
+                180,
+                317
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 1,
+              "frame": [
+                20,
+                317,
+                635,
+                337
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                630,
+                1255,
+                650
+              ],
+              "hit": [
+                1,
+                4
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 4,
+              "column": 2,
+              "frame": [
+                20,
+                337,
+                635,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 4,
+              "column": 3,
+              "frame": [
+                20,
+                337,
+                180,
+                337
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 6,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 6,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 1,
+              "frame": [
+                20,
+                337,
+                635,
+                357
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                650,
+                1255,
+                670
+              ],
+              "hit": [
+                1,
+                6
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 7,
+              "column": 2,
+              "frame": [
+                20,
+                357,
+                635,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 7,
+              "column": 3,
+              "frame": [
+                20,
+                357,
+                180,
+                357
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 1,
+              "frame": [
+                20,
+                357,
+                635,
+                377
+              ],
+              "positive": true,
+              "screenFrame": [
+                640,
+                670,
+                1255,
+                690
+              ],
+              "hit": [
+                1,
+                8
+              ],
+              "hitVariable": "AXHP_GROUP"
+            },
+            {
+              "row": 8,
+              "column": 2,
+              "frame": [
+                20,
+                377,
+                635,
+                377
+              ],
+              "positive": false
+            },
+            {
+              "row": 8,
+              "column": 3,
+              "frame": [
+                20,
+                377,
+                180,
+                377
+              ],
+              "positive": false
+            }
+          ],
+          "focusBefore": "Grouped",
+          "focusAfter": "Grouped"
+        }
+      ]
+    }
+  ],
+  "totalChecks": 24,
+  "newVisibleGroupInputChecks": 8
+}
