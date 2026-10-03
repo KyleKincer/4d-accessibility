@@ -1,6 +1,6 @@
 # Classic list subforms
 
-This adapter is development work for a matching 0.22.0 kit. It is absent from published releases. Build the kit using [CONTRIBUTING.md](../../../CONTRIBUTING.md). Require `listSubforms 1` in `AXB_Host("info"; New object).nativeStatus`, then check [current acceptance](STATUS.md#classic-list-subforms-in-development).
+The 0.22.0 source and matching CI kit include this adapter. It is absent from the signed 0.19.7 release. Build the kit using [CONTRIBUTING.md](../../../CONTRIBUTING.md). Require `listSubforms 1` in `AXB_Host("info"; New object).nativeStatus`, then check [current acceptance](STATUS.md#classic-list-subforms-in-0220).
 
 A classic list subform repeats a table form for each record. The bridge exposes those records as one accessible table, including rows outside the viewport. The parent lifecycle area discovers the list. The repeated row form needs no accessibility area, row method or field hook.
 

@@ -1,4 +1,4 @@
-# 0.22.0 classic list subforms, unreleased
+# 0.22.0 classic list subforms, source and CI kit
 
 A parent lifecycle area can now discover classic list subforms and expose every logical record as an accessible table. Named project and table input parents use the same installer. The repeated row form needs no new accessibility area, row method or field hook. Native layout, editors, key filters, selection and save handlers retain control of application behavior.
 
@@ -8,7 +8,7 @@ Stored scalar fields and a stored primary key provide automatic columns and row 
 
 Confirmed grid-checkbox feedback now survives a follow-up reveal of the same cell while its changed value loads. Rejected requests, retired controls and unrelated actions still cancel success feedback. This uses the shared provider and adds no application hooks.
 
-The [current acceptance gate](skills/4d-accessibility/references/STATUS.md#classic-list-subforms-in-development) records development results and unresolved layouts. Upgrade the plugin, component, helpers and generated resource together. The adapter requires native `listSubforms 1`. Signed distribution remains subject to the exact-download gate; source and ad hoc CI artifacts are identified separately.
+The [current acceptance gate](skills/4d-accessibility/references/STATUS.md#classic-list-subforms-in-0220) records scoped acceptance and unresolved layouts. Upgrade the plugin, component, helpers and generated resource together. The adapter requires native `listSubforms 1`. Signed distribution remains subject to the exact-download gate; source and ad hoc CI artifacts are identified separately.
 
 # 0.21.1 compound-form focus
 
