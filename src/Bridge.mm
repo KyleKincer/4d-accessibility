@@ -53,7 +53,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute) {
     if ([attribute isEqual:NSAccessibilityFocusedAttribute]) selector = @selector(setAccessibilityFocused:);
     else if ([attribute isEqual:NSAccessibilityValueAttribute] && [@[NSAccessibilityTextFieldRole, NSAccessibilityTextAreaRole, NSAccessibilityComboBoxRole, NSAccessibilityCellRole] containsObject:role]) selector = @selector(setAccessibilityValue:);
     else if ([attribute isEqual:NSAccessibilitySelectedAttribute] && [role isEqual:NSAccessibilityRowRole]) selector = @selector(setAccessibilitySelected:);
-    else if ([attribute isEqual:NSAccessibilitySelectedRowsAttribute] && [role isEqual:NSAccessibilityTableRole]) selector = @selector(setAccessibilitySelectedRows:);
+    else if ([attribute isEqual:NSAccessibilitySelectedRowsAttribute] && [@[NSAccessibilityTableRole, NSAccessibilityOutlineRole] containsObject:role]) selector = @selector(setAccessibilitySelectedRows:);
     else if ([role isEqual:NSAccessibilityTextFieldRole] || [role isEqual:NSAccessibilityTextAreaRole] || [role isEqual:NSAccessibilityComboBoxRole]) {
         if ([attribute isEqual:NSAccessibilitySelectedTextAttribute]) selector = @selector(setAccessibilitySelectedText:);
         if ([attribute isEqual:NSAccessibilitySelectedTextRangeAttribute]) selector = @selector(setAccessibilitySelectedTextRange:);
@@ -916,7 +916,8 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         if ([data[@"role"] isEqual:@"textfield"] && (!data[@"editable"] || [data[@"editable"] boolValue])) kind = AXBEditableTextNode.class;
         AXBNode *node = old[data[@"id"]];
         NSString *identifier = AXBNodeIdentifier(snapshot, data);
-        if (node && (![node.identifier isEqual:identifier] || ![node.data[@"role"] isEqual:data[@"role"]] || [node.data[@"combo"] boolValue] != [data[@"combo"] boolValue] || node.class != kind)) { [retired addObject:node]; node = nil; }
+        if (node && (![node.identifier isEqual:identifier] || ![node.data[@"role"] isEqual:data[@"role"]] || [node.data[@"combo"] boolValue] != [data[@"combo"] boolValue] ||
+            (node.data[@"grid"][@"outline"] != nil) != (data[@"grid"][@"outline"] != nil) || node.class != kind)) { [retired addObject:node]; node = nil; }
         if (!node) {
             node = [kind new]; node.owner = self; node.live = YES; structureChanged = YES;
         }

@@ -22,22 +22,30 @@ static BOOL Keys(id value, NSMutableSet *known) {
     }
     return YES;
 }
-static BOOL Frame(id frame) {
+static BOOL Frame(id frame, double maximum = 100000) {
     if (![frame isKindOfClass:NSArray.class] || [frame count] != 4) return NO;
-    for (id part in frame) if (![part isKindOfClass:NSNumber.class] || Bool(part) || !std::isfinite([part doubleValue]) || fabs([part doubleValue]) > 100000) return NO;
+    for (id part in frame) if (![part isKindOfClass:NSNumber.class] || Bool(part) || !std::isfinite([part doubleValue]) || fabs([part doubleValue]) > maximum) return NO;
     return [frame[2] doubleValue] > 0 && [frame[3] doubleValue] > 0;
 }
 BOOL AXBGridRowAllowsEditing(NSDictionary *descriptor, NSString *row) {
+    if (AXBGridRowIsGroup(descriptor, row)) return NO;
     // Older providers treated nonselectable rows as noneditable. New native
     // providers report the two independently, including single-click editors.
     NSArray *blocked = descriptor[@"uneditable"] ?: descriptor[@"unselectable"];
     return ![descriptor[@"disabled"] containsObject:row] && ![blocked containsObject:row];
 }
 BOOL AXBGridRowAllowsSelection(NSDictionary *descriptor, NSString *row) {
+    if (!AXBGridSelectionKnown(descriptor)) return NO;
     // Native 4D can highlight a disabled row. Only its cells are disabled.
     // Keep the older provider contract when independent row states are absent.
     return ![descriptor[@"unselectable"] containsObject:row] &&
         (descriptor[@"uneditable"] || ![descriptor[@"disabled"] containsObject:row]);
+}
+BOOL AXBGridSelectionKnown(NSDictionary *descriptor) {
+    return !descriptor[@"selectionKnown"] || [descriptor[@"selectionKnown"] boolValue];
+}
+BOOL AXBGridRowIsGroup(NSDictionary *descriptor, NSString *row) {
+    return [descriptor[@"outline"][row][@"kind"] isEqual:@"group"];
 }
 NSString *AXBValidateGrid(id descriptor) {
     if (![descriptor isKindOfClass:NSDictionary.class]) return @"grid must be an object";
@@ -61,9 +69,43 @@ NSString *AXBValidateGrid(id descriptor) {
             !Bool(header[@"enabled"]) || !Bool(header[@"press"]) || !Bool(header[@"sortable"]) ||
             ![@[@"none", @"ascending", @"descending"] containsObject:header[@"sort"] ?: @""])) return @"invalid grid header";
     }
+    if (descriptor[@"selectionKnown"] && !Bool(descriptor[@"selectionKnown"])) return @"invalid grid selection knowledge";
+    if (!AXBGridSelectionKnown(descriptor)) {
+        if (!descriptor[@"outline"] || descriptor[@"selected"] ||
+            ([descriptor[@"actions"] isKindOfClass:NSDictionary.class] && [descriptor[@"actions"][@"select"] boolValue]))
+            return @"unknown outline selection must omit selected rows and selection actions";
+    }
     for (NSString *name in @[@"selected", @"visible"]) {
+        if ([name isEqual:@"selected"] && !AXBGridSelectionKnown(descriptor)) continue;
         NSMutableSet *subset = [NSMutableSet new];
         if (!Keys(descriptor[name], subset) || ![subset isSubsetOfSet:rows]) return @"invalid grid row subset";
+    }
+    if (descriptor[@"outline"]) {
+        NSDictionary *outline = descriptor[@"outline"];
+        if (![outline isKindOfClass:NSDictionary.class] || outline.count != rows.count) return @"incomplete outline rows";
+        if (rows.count && !definitions.count) return @"outline rows require a label column";
+        NSMutableArray *ancestors = [NSMutableArray new];
+        for (NSString *key in descriptor[@"rows"]) {
+            NSDictionary *item = outline[key];
+            if (![item isKindOfClass:NSDictionary.class] || !Text(item[@"parent"], 256) ||
+                !Integer(item[@"level"]) || [item[@"level"] unsignedIntegerValue] > 31 ||
+                ![@[@"group", @"leaf"] containsObject:item[@"kind"] ?: @""])
+                return @"invalid outline row";
+            NSUInteger level = [item[@"level"] unsignedIntegerValue];
+            if (level > ancestors.count) return @"outline rows must be in disclosed preorder";
+            if (level == 0) {
+                if ([item[@"parent"] length]) return @"outline root cannot have a parent";
+            } else {
+                NSString *parent = ancestors[level - 1];
+                if (![parent isEqual:item[@"parent"]] || ![outline[parent][@"kind"] isEqual:@"group"] ||
+                    ![outline[parent][@"expanded"] boolValue]) return @"outline parent must be disclosed and expanded";
+            }
+            if ([item[@"kind"] isEqual:@"group"]) {
+                if (!Text(item[@"label"], 512) || !Bool(item[@"expanded"]) || !Frame(item[@"frame"], 1000000000)) return @"invalid outline group state";
+            } else if (item[@"expanded"] || item[@"label"] || item[@"frame"]) return @"outline leaf cannot contain group state";
+            while (ancestors.count > level) [ancestors removeLastObject];
+            [ancestors addObject:key];
+        }
     }
     for (NSString *name in @[@"disabled", @"unselectable", @"uneditable"]) if (descriptor[name]) {
         NSMutableSet *subset = [NSMutableSet new];
@@ -74,7 +116,10 @@ NSString *AXBValidateGrid(id descriptor) {
         for (NSString *key in descriptor[@"frames"]) {
             id cells = descriptor[@"frames"][key];
             if (![descriptor[@"visible"] containsObject:key] || ![cells isKindOfClass:NSDictionary.class]) return @"invalid grid row geometry";
-            for (NSString *column in cells) if (![columns containsObject:column] || !Frame(cells[column])) return @"invalid grid cell geometry";
+            for (NSString *column in cells) {
+                if (![columns containsObject:column] || !Frame(cells[column])) return @"invalid grid cell geometry";
+                if (AXBGridRowIsGroup(descriptor, key) && ![column isEqual:definitions.firstObject[@"id"]]) return @"outline group geometry must use its label column";
+            }
         }
     }
     if (descriptor[@"headers"]) {
@@ -106,6 +151,7 @@ NSString *AXBValidateGrid(id descriptor) {
     if (descriptor[@"focused"]) {
         id focused = descriptor[@"focused"];
         if (![focused isKindOfClass:NSDictionary.class] || ![rows containsObject:focused[@"row"]] || ![columns containsObject:focused[@"column"]]) return @"invalid focused grid cell";
+        if (AXBGridRowIsGroup(descriptor, focused[@"row"])) return @"outline groups cannot expose a backing editor";
         if (focused[@"value"] && !Text(focused[@"value"], AXBLimits::text)) return @"invalid grid editor text";
         if (focused[@"selection"]) {
             id range = focused[@"selection"];
@@ -141,8 +187,20 @@ NSString *AXBValidateGridChange(NSDictionary *previous, NSDictionary *next) {
     if (![previous[@"generation"] isEqual:next[@"generation"]]) return nil;
     NSComparisonResult order = [next[@"order"] compare:previous[@"order"]];
     if (order == NSOrderedAscending) return @"grid order cannot go backwards";
-    if (order == NSOrderedSame && (![previous[@"rows"] isEqual:next[@"rows"]] || ![previous[@"columns"] isEqual:next[@"columns"]]))
-        return @"grid order must change when rows or columns change";
+    BOOL outlineChanged = [previous[@"outline"] count] != [next[@"outline"] count];
+    for (NSString *key in previous[@"outline"]) {
+        NSDictionary *before = previous[@"outline"][key], *after = next[@"outline"][key];
+        for (NSString *field in @[@"parent", @"level", @"kind", @"label", @"expanded"])
+            if ((before[field] || after[field]) && ![before[field] isEqual:after[field]]) outlineChanged = YES;
+    }
+    if (order == NSOrderedSame && (![previous[@"rows"] isEqual:next[@"rows"]] || ![previous[@"columns"] isEqual:next[@"columns"]] || outlineChanged))
+        return @"grid order must change when rows, columns or outline state change";
+    if ((previous[@"outline"] != nil) != (next[@"outline"] != nil)) return @"changing grid family requires a new generation";
+    for (NSString *key in previous[@"outline"]) {
+        NSDictionary *before = previous[@"outline"][key], *after = next[@"outline"][key];
+        if (after && (![before[@"kind"] isEqual:after[@"kind"]] || ![before[@"parent"] isEqual:after[@"parent"]]))
+            return @"changing outline identity requires a new row key or generation";
+    }
     return nil;
 }
 NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *descriptor) {
@@ -157,7 +215,15 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
     for (NSDictionary *row in page[@"rows"]) {
         if (![row[@"id"] isEqual:rows[index++]] || [row[@"cells"] count] != MIN(ColumnBatch, columns.count - column)) return @"grid page row no longer matches";
         NSUInteger c = column;
-        for (NSDictionary *cell in row[@"cells"]) if (![cell[@"column"] isEqual:columns[c++][@"id"]]) return @"grid page column no longer matches";
+        for (NSDictionary *cell in row[@"cells"]) {
+            if (![cell[@"column"] isEqual:columns[c][@"id"]]) return @"grid page column no longer matches";
+            if (AXBGridRowIsGroup(descriptor, row[@"id"])) {
+                NSString *label = c == 0 ? descriptor[@"outline"][row[@"id"]][@"label"] : @"";
+                if ([cell[@"editable"] boolValue] || ![cell[@"value"] isEqual:label] ||
+                    (cell[@"role"] && ![cell[@"role"] isEqual:@"text"])) return @"outline groups cannot expose backing cells";
+            }
+            c++;
+        }
     }
     NSData *bytes = [NSJSONSerialization dataWithJSONObject:page options:0 error:nil];
     return !bytes || bytes.length > CacheByteLimit ? @"grid page exceeds cache capacity" : nil;
@@ -166,7 +232,7 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
 @implementation AXBGrid {
     NSString *_nodeID;
     NSDictionary *_descriptor;
-    NSDictionary *_rowIndexes, *_columnIndexes;
+    NSDictionary *_rowIndexes, *_columnIndexes, *_outlineChildren;
     NSMutableDictionary *_pages, *_requested;
     NSMutableArray *_recent;
     NSMutableOrderedSet *_queued;
@@ -208,6 +274,17 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
             [descriptor[@"rows"] enumerateObjectsUsingBlock:^(NSString *key, NSUInteger index, BOOL *stop) { (void)stop; indexes[key] = @(index); }];
             _rowIndexes = indexes;
         }
+        if (![_descriptor[@"rows"] isEqual:descriptor[@"rows"]] || ![_descriptor[@"generation"] isEqual:descriptor[@"generation"]]) {
+            NSMutableDictionary *children = [NSMutableDictionary new];
+            for (NSString *key in descriptor[@"rows"]) {
+                NSString *parent = descriptor[@"outline"][key][@"parent"];
+                if (!parent.length) continue;
+                if (!children[parent]) children[parent] = [NSMutableArray new];
+                [children[parent] addObject:key];
+            }
+            for (NSString *parent in [children.allKeys copy]) children[parent] = [children[parent] copy];
+            _outlineChildren = children;
+        }
         if (![_descriptor[@"columns"] isEqual:descriptor[@"columns"]]) {
             NSMutableDictionary *indexes = [NSMutableDictionary new];
             [descriptor[@"columns"] enumerateObjectsUsingBlock:^(NSDictionary *column, NSUInteger index, BOOL *stop) { (void)stop; indexes[column[@"id"]] = @(index); }];
@@ -218,6 +295,7 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
 }
 - (NSUInteger)indexOfRow:(NSString *)key { @synchronized(self) { return _active && _rowIndexes[key] ? [_rowIndexes[key] unsignedIntegerValue] : NSNotFound; } }
 - (NSUInteger)indexOfColumn:(NSString *)key { @synchronized(self) { return _active && _columnIndexes[key] ? [_columnIndexes[key] unsignedIntegerValue] : NSNotFound; } }
+- (NSArray<NSString *> *)disclosedChildrenOfRow:(NSString *)key { @synchronized(self) { return _active ? _outlineChildren[key] ?: @[] : @[]; } }
 - (NSArray *)pageKeyForRow:(NSUInteger)row column:(NSUInteger)column { return @[@(row / RowBatch * RowBatch), @(column / ColumnBatch * ColumnBatch)]; }
 - (void)expireRequestsAtTime:(NSTimeInterval)now {
     for (id key in [_requested.allKeys copy]) if (now - [_requested[key] doubleValue] > 3) [_requested removeObjectForKey:key];
@@ -226,6 +304,8 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
     @synchronized(self) {
         NSUInteger r = [self indexOfRow:row], c = [self indexOfColumn:column];
         if (r == NSNotFound || c == NSNotFound) return nil;
+        if (AXBGridRowIsGroup(_descriptor, row)) return c == 0 ?
+            @{@"column": column, @"value": _descriptor[@"outline"][row][@"label"], @"enabled": @YES, @"editable": @NO} : nil;
         [self expireRequestsAtTime:now];
         NSArray *key = [self pageKeyForRow:r column:c];
         NSDictionary *cached = _pages[key];
@@ -283,7 +363,7 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
 - (void)invalidate {
     @synchronized(self) {
         _active = NO; [_pages removeAllObjects]; [_queued removeAllObjects]; [_requested removeAllObjects]; [_recent removeAllObjects];
-        _descriptor = nil; _rowIndexes = nil; _columnIndexes = nil; _cacheBytes = 0;
+        _descriptor = nil; _rowIndexes = nil; _columnIndexes = nil; _outlineChildren = nil; _cacheBytes = 0;
     }
 }
 @end
