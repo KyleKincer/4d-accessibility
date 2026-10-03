@@ -47,6 +47,18 @@ BOOL AXBGridSelectionKnown(NSDictionary *descriptor) {
 BOOL AXBGridRowIsGroup(NSDictionary *descriptor, NSString *row) {
     return [descriptor[@"outline"][row][@"kind"] isEqual:@"group"];
 }
+BOOL AXBGridRowAllowsDisclosure(NSDictionary *descriptor, NSString *row) {
+    return AXBGridRowIsGroup(descriptor, row) && [descriptor[@"actions"][@"disclose"] boolValue] &&
+        ![descriptor[@"disabled"] containsObject:row];
+}
+NSDictionary *AXBGridGroupActionState(NSDictionary *descriptor, NSString *row) {
+    if (!AXBGridRowIsGroup(descriptor, row)) return nil;
+    NSDictionary *group = descriptor[@"outline"][row];
+    // Geometry is translated when publishing a nested form. The host checks
+    // this semantic identity against its current local capture instead.
+    return @{@"parent": group[@"parent"], @"level": group[@"level"], @"kind": group[@"kind"],
+        @"label": group[@"label"], @"expanded": group[@"expanded"]};
+}
 NSString *AXBValidateGrid(id descriptor) {
     if (![descriptor isKindOfClass:NSDictionary.class]) return @"grid must be an object";
     if (!Text(descriptor[@"generation"], 128, YES) || !Integer(descriptor[@"order"], 1)) return @"invalid grid generation or order";
@@ -145,7 +157,8 @@ NSString *AXBValidateGrid(id descriptor) {
     }
     if (descriptor[@"actions"]) {
         if (![descriptor[@"actions"] isKindOfClass:NSDictionary.class]) return @"invalid grid capabilities";
-        for (NSString *operation in descriptor[@"actions"]) if (![@[@"select", @"reveal", @"edit"] containsObject:operation] || !Bool(descriptor[@"actions"][operation])) return @"invalid grid capability";
+        for (NSString *operation in descriptor[@"actions"]) if (![@[@"select", @"reveal", @"edit", @"disclose"] containsObject:operation] || !Bool(descriptor[@"actions"][operation])) return @"invalid grid capability";
+        if (descriptor[@"actions"][@"disclose"] && !descriptor[@"outline"]) return @"disclosure requires an outline";
     }
     if (descriptor[@"selectionMode"] && ![@[@"none", @"single", @"multiple"] containsObject:descriptor[@"selectionMode"]]) return @"invalid grid selection mode";
     if (descriptor[@"focused"]) {

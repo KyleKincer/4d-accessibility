@@ -10,6 +10,8 @@ BOOL AXBGridRowAllowsEditing(NSDictionary *descriptor, NSString *row);
 BOOL AXBGridRowAllowsSelection(NSDictionary *descriptor, NSString *row);
 BOOL AXBGridSelectionKnown(NSDictionary *descriptor);
 BOOL AXBGridRowIsGroup(NSDictionary *descriptor, NSString *row);
+BOOL AXBGridRowAllowsDisclosure(NSDictionary *descriptor, NSString *row);
+NSDictionary *AXBGridGroupActionState(NSDictionary *descriptor, NSString *row);
 
 @interface AXBGrid : NSObject
 @property(nonatomic, readonly) NSString *nodeID;

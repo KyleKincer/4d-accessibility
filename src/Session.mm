@@ -644,6 +644,14 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 ([operation isEqual:@"gridHeaderReveal"] && ![grid.descriptor[@"actions"][@"reveal"] boolValue]) ||
                 ([operation isEqual:@"gridHeaderPress"] && (![header[@"enabled"] boolValue] || ![header[@"press"] boolValue]))) return NO;
             value = @{@"column": value[@"column"], @"generation": grid.descriptor[@"generation"], @"expectedHeader": header};
+        } else if ([operation isEqual:@"gridSetExpanded"]) {
+            AXBGrid *grid = _grids[nodeID];
+            if (![role isEqual:@"table"] || ![value isKindOfClass:NSDictionary.class] || !Text(value[@"row"], 256) ||
+                !Bool(value[@"expanded"]) || [grid indexOfRow:value[@"row"]] == NSNotFound ||
+                !AXBGridRowAllowsDisclosure(grid.descriptor, value[@"row"])) return NO;
+            // Discard all caller-supplied guards, coordinates and callback data.
+            value = @{@"row": value[@"row"], @"expanded": value[@"expanded"], @"generation": grid.descriptor[@"generation"],
+                @"expectedGroup": AXBGridGroupActionState(grid.descriptor, value[@"row"])};
         } else if ([operation isEqual:@"gridSelect"]) {
             AXBGrid *grid = _grids[nodeID];
             if (![role isEqual:@"table"] || !AXBGridSelectionKnown(grid.descriptor) || ![grid.descriptor[@"actions"][@"select"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] > [grid.descriptor[@"rows"] count]) return NO;

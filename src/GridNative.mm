@@ -50,7 +50,7 @@ static NSString *Identifier(AXBGridNode *table, NSString *kind, NSString *row, N
     } else segments = @[kind];
     return AXBIdentifierAppend(table.accessibilityIdentifier, segments);
 }
-@class AXBGridRow, AXBGridCell, AXBGridColumn, AXBGridHeader, AXBGridContent, AXBGridWidget, AXBGridHeaderGroup;
+@class AXBGridRow, AXBGridCell, AXBGridColumn, AXBGridHeader, AXBGridContent, AXBGridWidget, AXBGridDisclosure, AXBGridHeaderGroup;
 @protocol AXBGridContentElement <NSObject, NSAccessibility>
 @property(nonatomic) BOOL live;
 - (void)invalidate;
@@ -89,6 +89,8 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @property(nonatomic, copy) NSString *key;
 @property(nonatomic, strong) NSMutableDictionary<NSString *, AXBGridCell *> *cells;
 - (AXBGridCell *)cell:(NSString *)column;
+- (BOOL)canDisclose;
+- (BOOL)requestExpanded:(BOOL)expanded;
 @end
 @interface AXBGridCell : AXBGridPart
 @property(nonatomic, weak) AXBGridRow *row;
@@ -100,6 +102,7 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @property(nonatomic, copy) NSString *contentRole;
 - (NSDictionary *)value;
 - (BOOL)canEdit;
+- (BOOL)canDisclose;
 - (BOOL)canFocus;
 - (BOOL)isWidget;
 @end
@@ -110,6 +113,9 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @interface AXBGridWidget : AXBGridPart <AXBGridContentElement>
 @property(nonatomic, weak) AXBGridCell *cell;
 @property(nonatomic, copy) NSString *role;
+@end
+@interface AXBGridDisclosure : AXBGridPart <AXBGridContentElement>
+@property(nonatomic, weak) AXBGridCell *cell;
 @end
 @interface AXBGridColumn : AXBGridPart
 @property(nonatomic, copy) NSString *key;
@@ -163,7 +169,11 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
         NSAccessibilityPostNotification(self, NSAccessibilityLayoutChangedNotification);
     }
     if (!self.content) {
-        if ([self isWidget]) {
+        if ([role isEqual:@"disclosure"]) {
+            AXBGridDisclosure *disclosure = [AXBGridDisclosure new]; disclosure.cell = self; disclosure.table = self.table;
+            disclosure.identifier = Identifier(self.table, @"disclosure", self.row.key, self.columnKey);
+            self.content = disclosure;
+        } else if ([self isWidget]) {
             AXBGridWidget *widget = [AXBGridWidget new]; widget.cell = self; widget.table = self.table; widget.role = role;
             widget.identifier = Identifier(self.table, role, self.row.key, self.columnKey);
             self.content = widget;
@@ -179,7 +189,8 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 - (NSDictionary *)value {
     if (!self.isAccessibilityElement) return nil;
     if (AXBGridRowIsGroup(self.table.grid.descriptor, self.row.key))
-        return @{@"value": self.table.grid.descriptor[@"outline"][self.row.key][@"label"], @"enabled": @YES, @"editable": @NO};
+        return @{@"value": self.table.grid.descriptor[@"outline"][self.row.key][@"label"], @"enabled": @YES, @"editable": @NO,
+                 @"role": [self.table.grid.descriptor[@"actions"][@"disclose"] boolValue] ? @"disclosure" : @"text"};
     return [self.table.grid cellForRow:self.row.key column:self.columnKey now:NSProcessInfo.processInfo.systemUptime];
 }
 - (id)accessibilityValue {
@@ -203,6 +214,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 }
 - (BOOL)isWidget { return [@[@"checkbox", @"popup"] containsObject:self.value[@"role"] ?: @""]; }
 - (BOOL)canFocus { return [self canEdit] && (!self.value[@"focusable"] || [self.value[@"focusable"] boolValue]); }
+- (BOOL)canDisclose { return self.isAccessibilityEnabled && [self.row canDisclose]; }
 - (BOOL)isAccessibilityFocused {
     NSDictionary *focused = self.table.grid.descriptor[@"focused"];
     return self.isAccessibilityElement && self.table.owner.window.isKeyWindow && [focused[@"row"] isEqual:self.row.key] && [focused[@"column"] isEqual:self.columnKey];
@@ -238,6 +250,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 }
 - (BOOL)accessibilityPerformPress {
     if (![self.table synchronizeForAction] || !self.isAccessibilityEnabled) return NO;
+    if ([self canDisclose]) return [self.row requestExpanded:!self.row.isAccessibilityDisclosed];
     if ([self canEdit]) {
         NSDictionary *before = self.value;
         BOOL accepted = [self.table queue:[self isWidget] ? @"gridPress" : @"gridEdit" value:@{@"row": self.row.key, @"column": self.columnKey}];
@@ -253,7 +266,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     if (selector == @selector(isAccessibilitySelected) && !AXBGridSelectionKnown(self.table.grid.descriptor)) return NO;
     if (selector == @selector(setAccessibilityFocused:)) return [self canFocus];
     if (selector == @selector(setAccessibilityValue:)) return ![self isWidget] && [self canEdit];
-    if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled && ([self canEdit] || ([self.table.grid.descriptor[@"actions"][@"select"] boolValue] && AXBGridRowAllowsSelection(self.table.grid.descriptor, self.row.key)));
+    if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled && ([self canDisclose] || [self canEdit] || ([self.table.grid.descriptor[@"actions"][@"select"] boolValue] && AXBGridRowAllowsSelection(self.table.grid.descriptor, self.row.key)));
     return [super isAccessibilitySelectorAllowed:selector];
 }
 - (NSRange)accessibilityRowIndexRange {
@@ -321,6 +334,37 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     return [super isAccessibilitySelectorAllowed:selector];
 }
 @end
+// A disclosure control supplies its standard role without changing the native
+// drawing or claiming a separately discovered triangle hit region.
+@implementation AXBGridDisclosure
+- (BOOL)isAccessibilityElement {
+    return [super isAccessibilityElement] && self.cell.isAccessibilityElement &&
+        AXBGridRowIsGroup(self.table.grid.descriptor, self.cell.row.key) && [self.table.grid.descriptor[@"actions"][@"disclose"] boolValue];
+}
+- (BOOL)isAccessibilityEnabled { return self.isAccessibilityElement && [self.cell canDisclose]; }
+- (NSString *)accessibilityRole { return NSAccessibilityDisclosureTriangleRole; }
+- (id)accessibilityParent { return self.cell; }
+- (NSString *)accessibilityLabel { return self.isAccessibilityElement ? self.table.grid.descriptor[@"outline"][self.cell.row.key][@"label"] : nil; }
+- (id)accessibilityValue { return self.isAccessibilityElement ? @([self.cell.row isAccessibilityDisclosed]) : nil; }
+- (NSRect)accessibilityFrame { return self.cell.accessibilityFrame; }
+- (BOOL)accessibilityPerformPress {
+    return [self.table synchronizeForAction] && self.isAccessibilityElement && self.isAccessibilityEnabled && [self.cell accessibilityPerformPress];
+}
+- (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled;
+    if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilityValue:) ||
+        selector == @selector(setAccessibilitySelected:) || selector == @selector(setAccessibilitySelectedText:) ||
+        selector == @selector(setAccessibilitySelectedTextRange:)) return NO;
+    return [super isAccessibilitySelectorAllowed:selector];
+}
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+- (NSArray *)accessibilityActionNames { return self.isAccessibilityEnabled ? @[NSAccessibilityPressAction] : @[]; }
+- (void)accessibilityPerformAction:(NSString *)action {
+    if ([action isEqual:NSAccessibilityPressAction]) (void)[self accessibilityPerformPress];
+}
+#pragma clang diagnostic pop
+@end
 // A cell is structural. Its text/editor child supplies what VoiceOver reads,
 // just as a native view-based table cell contains a label or text field.
 @implementation AXBGridContent
@@ -381,7 +425,8 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
     if (selector == @selector(isAccessibilitySelected) && !AXBGridSelectionKnown(self.table.grid.descriptor)) return NO;
-    if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilityValue:) || selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement && [self.cell canEdit];
+    if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement && ([self.cell canDisclose] || [self.cell canEdit]);
+    if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilityValue:)) return self.isAccessibilityElement && [self.cell canEdit];
     return [super isAccessibilitySelectorAllowed:selector];
 }
 @end
@@ -403,7 +448,27 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     return [[AXBGridArray alloc] initWithCount:keys.count resolve:^id(NSUInteger index) { return [self.table row:keys[index]]; }];
 }
 - (BOOL)isAccessibilityDisclosed { return [self.table.grid.descriptor[@"outline"][self.key][@"expanded"] boolValue]; }
-- (BOOL)accessibilityPerformPress { return [self.table synchronizeForAction] && [self isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)] && [self.table queue:@"gridSelect" value:@[self.key]]; }
+- (BOOL)canDisclose { return self.isAccessibilityEnabled && AXBGridRowAllowsDisclosure(self.table.grid.descriptor, self.key); }
+- (BOOL)requestExpanded:(BOOL)expanded {
+    if (![self canDisclose]) return NO;
+    NSNumber *previous = @(self.isAccessibilityDisclosed);
+    BOOL accepted = [self.table queue:@"gridSetExpanded" value:@{@"row": self.key, @"expanded": @(expanded)}];
+    if (accepted && previous.boolValue != expanded) {
+        NSString *column = self.table.grid.descriptor[@"columns"][0][@"id"];
+        id control = [self cell:column].accessibilityChildren.firstObject;
+        [self.table.owner expectDisclosureFrom:control previousValue:previous];
+    }
+    return accepted;
+}
+- (BOOL)accessibilityPerformPress {
+    if (![self.table synchronizeForAction] || ![self isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)]) return NO;
+    if ([self canDisclose]) return [self requestExpanded:!self.isAccessibilityDisclosed];
+    return [self.table queue:@"gridSelect" value:@[self.key]];
+}
+- (void)setAccessibilityDisclosed:(BOOL)disclosed {
+    if ([self.table synchronizeForAction] && [self canDisclose])
+        (void)[self requestExpanded:disclosed];
+}
 - (void)setAccessibilitySelected:(BOOL)selected {
     if (![self.table synchronizeForAction] || !self.isAccessibilityEnabled) return;
     if (!AXBGridSelectionKnown(self.table.grid.descriptor)) return;
@@ -419,8 +484,8 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
         return self.isAccessibilityElement && self.table.grid.descriptor[@"outline"] != nil;
     if (selector == @selector(isAccessibilityDisclosed) || selector == @selector(accessibilityDisclosedRows))
         return self.isAccessibilityElement && AXBGridRowIsGroup(self.table.grid.descriptor, self.key);
-    if (selector == @selector(setAccessibilityDisclosed:)) return NO;
-    if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled && [self.table.grid.descriptor[@"actions"][@"select"] boolValue] && AXBGridRowAllowsSelection(self.table.grid.descriptor, self.key);
+    if (selector == @selector(setAccessibilityDisclosed:)) return [self canDisclose];
+    if (selector == @selector(accessibilityPerformPress)) return [self canDisclose] || (self.isAccessibilityEnabled && [self.table.grid.descriptor[@"actions"][@"select"] boolValue] && AXBGridRowAllowsSelection(self.table.grid.descriptor, self.key));
     if (selector == @selector(setAccessibilitySelected:)) return self.isAccessibilityEnabled && [self.table.grid.descriptor[@"actions"][@"select"] boolValue] && (self.isAccessibilitySelected || AXBGridRowAllowsSelection(self.table.grid.descriptor, self.key));
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -813,6 +878,17 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
                 [row.cells[key] invalidate]; [row.cells removeObjectForKey:key];
             }
     }
+    if (self.lastDescriptor && [self.lastDescriptor[@"actions"][@"disclose"] boolValue] != [descriptor[@"actions"][@"disclose"] boolValue]) {
+        // Capability changes can arrive without an order or generation change.
+        // Retire instantiated group children now, even if no client enumerates
+        // children before the capability returns. Old handles stay retired.
+        NSString *role = [descriptor[@"actions"][@"disclose"] boolValue] ? @"disclosure" : @"text";
+        for (AXBGridRow *row in self.rowRegistry.allValues) if (AXBGridRowIsGroup(descriptor, row.key))
+            for (AXBGridCell *cell in row.cells.allValues) if (cell.content && ![cell.contentRole isEqual:role]) {
+                [cell.content invalidate]; cell.content = nil; cell.contentRole = nil;
+                NSAccessibilityPostNotification(cell, NSAccessibilityLayoutChangedNotification);
+            }
+    }
     NSMutableArray<AXBGridCell *> *loaded = [NSMutableArray new];
     NSDictionary *cache = grid.cacheSnapshot;
     if (self.lastCacheSerial != [cache[@"serial"] unsignedIntegerValue]) {
@@ -862,13 +938,19 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
             if (before && after && ![before isEqual:after]) {
                 AXBGridRow *row = self.rowRegistry[key];
                 NSAccessibilityPostNotification(row, NSAccessibilityLayoutChangedNotification);
-                if (before[@"expanded"] && ![before[@"expanded"] isEqual:after[@"expanded"]])
+                if (before[@"expanded"] && ![before[@"expanded"] isEqual:after[@"expanded"]]) {
                     NSAccessibilityPostNotification(row, [after[@"expanded"] boolValue] ? NSAccessibilityRowExpandedNotification : NSAccessibilityRowCollapsedNotification);
+                    AXBGridCell *cell = row.cells[descriptor[@"columns"][0][@"id"]];
+                    if ([cell.content isKindOfClass:AXBGridDisclosure.class]) NSAccessibilityPostNotification(cell.content, NSAccessibilityValueChangedNotification);
+                }
                 if (before[@"label"] && ![before[@"label"] isEqual:after[@"label"]]) {
                     NSAccessibilityPostNotification(row, NSAccessibilityValueChangedNotification);
                     AXBGridCell *cell = row.cells[descriptor[@"columns"][0][@"id"]];
                     if (cell) NSAccessibilityPostNotification(cell, NSAccessibilityValueChangedNotification);
-                    if (cell.content) NSAccessibilityPostNotification(cell.content, NSAccessibilityValueChangedNotification);
+                    if (cell.content) {
+                        NSAccessibilityPostNotification(cell.content, NSAccessibilityValueChangedNotification);
+                        if ([cell.content isKindOfClass:AXBGridDisclosure.class]) NSAccessibilityPostNotification(cell.content, NSAccessibilityTitleChangedNotification);
+                    }
                 }
             }
         }

@@ -92,6 +92,13 @@ For each ($name; $configured)
    If (Not($view.nativeOutlines=True))
     return New object("ok"; False; "error"; "nativeOutlinesUnavailable")
    End if
+   If ($view.nativeOutlineDisclosure=Null)
+    $reply:=AXB_Host("info"; New object)
+    $view.nativeOutlineDisclosure:=($reply.ok=True) && (Value type($reply.nativeStatus)=Is text) && (Position("; nativeOutlineDisclosure 1;"; $reply.nativeStatus)>0)
+   End if
+   If (Not($view.nativeOutlineDisclosure=True))
+    return New object("ok"; False; "error"; "nativeOutlineDisclosureUnavailable")
+   End if
   End if
   If ($options.kind="listSubform")
    If (($request.operation="describe") | ($request.node=$id))

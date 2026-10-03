@@ -17,6 +17,17 @@ If ($operation#"describe")
 End if
 $state.valid:=False
 $state.editingIssues:=New collection
+If ($grouped)
+ // Keep the actual Formula reference. Replacing or removing application
+ // authority must retire requests queued against the earlier controller.
+ If (($state.disclosureConfigured=True) && (New collection($options.setExpanded).indexOf($state.setExpanded)#0))
+  $state.generation:=Generate UUID
+  $state.outlinePrevious:=Null
+  $state.valueIssues:=New object
+ End if
+ $state.disclosureConfigured:=True
+ $state.setExpanded:=$options.setExpanded
+End if
 ARRAY TEXT($parts; 0)
 ARRAY LONGINT($headerEvents; 0)
 ARRAY LONGINT($columnEvents; 0)
@@ -486,7 +497,7 @@ If ($grouped)
  $descriptor.outline:=$outline.outline
  $descriptor.selectionKnown:=False
  OB REMOVE($descriptor; "selected")
- $descriptor.actions:=New object("select"; False; "reveal"; False; "edit"; False)
+ $descriptor.actions:=New object("select"; False; "reveal"; False; "edit"; False; "disclose"; $state.setExpanded#Null)
 End if
 // Cell position alone survives loss of focus. The root resolves this table's
 // exact live instance before adopting its non-text cell position.

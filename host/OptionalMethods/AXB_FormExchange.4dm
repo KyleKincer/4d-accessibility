@@ -128,7 +128,7 @@ If (($action.session=$context.session) & ($action.revision=$context.revision) & 
   End if
   If ($allowed)
    $packet:=New object("operation"; "apply"; "rootView"; $context.view; "path"; $route.path; "lineage"; $route.lineage; "instance"; $route.instance; "scope"; $route.scope; "action"; $local; "depth"; 0)
-   If ($route.node.revealable=True)
+   If (($route.node.revealable=True) & ($action.operation#"gridSetExpanded"))
     $packet.operation:="reveal"
     $result:=AXB_View($packet)
     If ($result.ok=True)

@@ -9,6 +9,14 @@
 #include <cstdlib>
 #include <thread>
 
+#undef NSAccessibilityPostNotificationWithUserInfo
+static NSMutableArray<NSDictionary *> *Announcements;
+void AXBTestPostNotificationWithUserInfo(id element, NSAccessibilityNotificationName notification, NSDictionary *userInfo) {
+    if ([notification isEqual:NSAccessibilityAnnouncementRequestedNotification] && Announcements)
+        [Announcements addObject:@{@"element": element, @"info": userInfo ?: @{}}];
+    NSAccessibilityPostNotificationWithUserInfo(element, notification, userInfo);
+}
+
 @interface AXBGridNode (ValueNotificationTests)
 - (void)scheduleValueNotifications;
 - (void)drainValueNotificationsAtTime:(NSTimeInterval)now;
@@ -174,6 +182,142 @@ static void OutlineSemanticsTest(void) {
     AXBGridNode *flat = Provider(window).accessibilityChildren.firstObject;
     Check(flat != outline && !outline.isAccessibilityElement && [flat.accessibilityRole isEqual:NSAccessibilityTableRole], "table replacement retires the retained outline root");
     [window close]; Pump();
+}
+static void OutlineDisclosureTest(void) {
+    Announcements = [NSMutableArray new];
+    NSWindow *window = Window(@"AXB outline disclosure");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9041);
+    NSMutableDictionary *groupData = [@{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Group", @"expanded": @NO,
+        @"frame": @[@10, @20, @300, @24]} mutableCopy];
+    NSMutableDictionary *grid = [@{@"generation": @"disclosure-first", @"order": @1, @"rows": @[@"group", @"leaf"],
+        @"columns": @[@{@"id": @"item", @"label": @"Item", @"enabled": @YES, @"editable": @NO}],
+        @"visible": @[@"group", @"leaf"], @"selectionKnown": @NO,
+        @"actions": @{@"disclose": @YES},
+        @"outline": @{@"group": groupData, @"leaf": @{@"parent": @"", @"level": @0, @"kind": @"leaf"}},
+        @"frames": @{@"group": @{@"item": @[@10, @20, @300, @24]}, @"leaf": @{@"item": @[@10, @44, @300, @24]}}} mutableCopy];
+    NSMutableDictionary *data = [@{@"id": @"grid", @"role": @"table", @"label": @"Groups", @"value": @"", @"visible": @YES,
+        @"enabled": @YES, @"frame": @[@10, @20, @300, @140], @"grid": grid} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Disclosure", @"enabled": @YES, @"nodes": @[data]} mutableCopy];
+    Check([Exchange(window, 9041, 1, session, snapshot)[@"ok"] boolValue], "native disclosure accepts its independent outline capability"); Pump();
+    AXBGridNode *outline = Provider(window).accessibilityChildren.firstObject;
+    id group = outline.accessibilityRows[0], leaf = outline.accessibilityRows[1];
+    id cell = [outline accessibilityCellForColumn:0 row:0], content = [cell accessibilityChildren][0];
+    Check([[content accessibilityRole] isEqual:NSAccessibilityDisclosureTriangleRole] && [[content accessibilityLabel] isEqual:@"Group"] &&
+        [[content accessibilityValue] isEqual:@NO] && [[cell accessibilityValue] isEqual:@"Group"],
+        "interactive group child exposes a labeled Boolean disclosure control while its cell retains the caption");
+    Check(AXBAttributeIsSettable(group, NSAccessibilityDisclosingAttribute) && !AXBAttributeIsSettable(leaf, NSAccessibilityDisclosingAttribute),
+        "external mutability routing permits live group disclosure and omits leaves");
+    Check([group isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)] && [cell isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)] &&
+        [content isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)] && ![leaf isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)],
+        "group row, cell and disclosure child permit disclosure without leaf selection");
+    Check(!AXBAttributeIsSettable(content, NSAccessibilityValueAttribute) && !AXBAttributeIsSettable(content, NSAccessibilityFocusedAttribute) &&
+        !AXBAttributeIsSettable(group, NSAccessibilitySelectedAttribute), "disclosure cannot enable group editing, keyboard focus or unknown selection");
+    Check([content accessibilityPerformPress] && [[content accessibilityValue] isEqual:@NO], "disclosure-child activation queues intent without optimistically changing its value");
+    NSDictionary *action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Check(outline.owner.actionFeedback[@"control"] == content && [outline.owner.actionFeedback[@"id"] isEqual:action[@"id"]],
+        "disclosure feedback belongs to the retained control and its exact queued action");
+    Check(Announcements.count == 0, "queued disclosure cannot announce an optimistic state");
+    Check([action[@"operation"] isEqual:@"gridSetExpanded"] && [action[@"value"][@"expanded"] boolValue] && !action[@"value"][@"expectedGroup"][@"frame"],
+        "native press resolves the desired state and semantic guard from the refreshed group");
+    groupData[@"expanded"] = @YES; grid[@"order"] = @2; snapshot[@"revision"] = @2;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check(outline.owner.actionFeedback != nil, "disclosure publication cannot announce success before its host receipt");
+    Check(Announcements.count == 0, "published state alone produces no disclosure success announcement");
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check([cell accessibilityChildren][0] == content && [[content accessibilityValue] isEqual:@YES], "expansion retains the disclosure child and updates its Boolean from application state");
+    Check(outline.owner.actionFeedback == nil, "confirmed disclosure consumes feedback exactly once");
+    Check(Announcements.count == 1 && Announcements[0][@"element"] == window &&
+        [Announcements[0][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: expanded"],
+        "confirmed expansion posts the exact caption and state to its owning window once");
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(outline.owner.actionFeedback == nil, "disclosure receipt replay cannot recreate feedback");
+    Check(Announcements.count == 1, "receipt replay produces no additional disclosure announcement");
+    [group setAccessibilityDisclosed:NO];
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"gridSetExpanded"] && [action[@"value"][@"expanded"] isEqual:@NO],
+        "group setter requests the explicit Boolean instead of toggling");
+    groupData[@"expanded"] = @NO; grid[@"order"] = @3; snapshot[@"revision"] = @3;
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(Announcements.count == 2 && [Announcements[1][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: collapsed"],
+        "confirmed row-setter collapse announces the authoritative collapsed state");
+    [group setAccessibilityDisclosed:NO];
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Check(action && outline.owner.actionFeedback == nil, "idempotent disclosure retains host validation without creating speech feedback");
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"already collapsed"}); Pump();
+    Check(Announcements.count == 2, "idempotent completion cannot repeat the collapsed announcement");
+    grid[@"disabled"] = @[@"group"]; snapshot[@"revision"] = @4;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check(!AXBAttributeIsSettable(group, NSAccessibilityDisclosingAttribute) && ![content accessibilityPerformPress] && [cell accessibilityChildren][0] == content &&
+        [content isAccessibilityElement] && ![content isAccessibilityEnabled],
+        "disabled group disclosure rejects through both native entry paths");
+    grid[@"disabled"] = @[]; snapshot[@"revision"] = @5;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check([cell accessibilityChildren][0] == content && [content isAccessibilityEnabled], "reenabling a group keeps the same disclosure representation");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [content accessibilityPerformAction:NSAccessibilityPressAction];
+#pragma clang diagnostic pop
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"gridSetExpanded"] && [action[@"value"][@"expanded"] isEqual:@YES], "legacy disclosure press routes through the same guarded intent");
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"cancelled"}); Pump();
+    Check(outline.owner.actionFeedback == nil && Announcements.count == 2, "rejected disclosure produces no success announcement");
+    Check([content accessibilityPerformPress], "disclosure accepts an intent before delayed state publication");
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(outline.owner.actionFeedback != nil && Announcements.count == 2, "receipt before state waits without announcing the old value");
+    groupData[@"expanded"] = @YES; grid[@"order"] = @4; snapshot[@"revision"] = @6;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check(outline.owner.actionFeedback == nil && Announcements.count == 3 &&
+        [Announcements[2][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: expanded"],
+        "delayed state consumes the retained exact receipt and announces once");
+    Check([content accessibilityPerformPress], "disclosure accepts an intent before its feedback expires");
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    NSMutableDictionary *expired = [outline.owner.actionFeedback mutableCopy]; expired[@"deadline"] = @0;
+    outline.owner.actionFeedback = expired;
+    groupData[@"expanded"] = @NO; grid[@"order"] = @5; snapshot[@"revision"] = @7;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check(outline.owner.actionFeedback == nil && Announcements.count == 3, "state arriving after the feedback deadline cannot announce an expired request");
+    Check([content accessibilityPerformPress], "disclosure accepts an intent before a newer accepted action");
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(outline.owner.actionFeedback != nil, "confirmed disclosure retains feedback while its state is unchanged");
+    [group setAccessibilityDisclosed:NO];
+    NSDictionary *newer = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Check(newer && ![newer[@"id"] isEqual:action[@"id"]] && outline.owner.actionFeedback == nil,
+        "a newer accepted action cancels the older disclosure feedback");
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": newer[@"id"], @"status": @"completed", @"message": @"unchanged"}); Pump();
+    Check(Announcements.count == 3, "newer idempotent completion cannot revive an older announcement");
+    Check([content accessibilityPerformPress], "disclosure accepts an intent before its caption changes");
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    groupData[@"label"] = @"Renamed"; groupData[@"expanded"] = @YES; grid[@"order"] = @6; snapshot[@"revision"] = @8;
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(outline.owner.actionFeedback == nil && Announcements.count == 3, "changed captions cancel disclosure feedback without speaking a replacement target");
+    Check([content accessibilityPerformPress], "disclosure accepts an intent before capability retirement");
+    action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
+    Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    Check(outline.owner.actionFeedback != nil, "confirmed disclosure awaits state before capability retirement");
+    grid[@"actions"] = @{@"disclose": @NO}; snapshot[@"revision"] = @9;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check(outline.owner.actionFeedback == nil && Announcements.count == 3, "capability retirement cancels confirmed feedback without announcing success");
+    grid[@"actions"] = @{@"disclose": @YES}; snapshot[@"revision"] = @10;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    Check(![content isAccessibilityElement] && ![content accessibilityPerformPress],
+        "capability revoke and restore permanently retire the old child without an intervening children query");
+    content = [cell accessibilityChildren][0];
+    grid[@"actions"] = @{@"disclose": @NO}; snapshot[@"revision"] = @11;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    id text = [cell accessibilityChildren][0];
+    Check(text != content && [[text accessibilityRole] isEqual:NSAccessibilityStaticTextRole] && ![content isAccessibilityElement] && ![content accessibilityPerformPress],
+        "capability removal without generation replacement retires the disclosure child and restores read-only text");
+    grid[@"generation"] = @"controller-removed"; snapshot[@"revision"] = @12;
+    Exchange(window, 9041, 1, session, snapshot); Pump();
+    [group setAccessibilityDisclosed:YES];
+    Check(![group isAccessibilityElement] && !AXBAttributeIsSettable(group, NSAccessibilityDisclosingAttribute) && ![content accessibilityPerformPress] &&
+        !Exchange(window, 9041, 1, session, snapshot)[@"action"], "controller removal retires retained group, cell and disclosure actions");
+    [window close]; Pump();
+    Announcements = nil;
 }
 static void RefreshDelayTest(void) {
     NSWindow *window = Window(@"AXB delayed accessibility refresh");
@@ -993,6 +1137,7 @@ int main(void) {
         [NSApp finishLaunching];
         StableIdentifierTest();
         OutlineSemanticsTest();
+        OutlineDisclosureTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();
