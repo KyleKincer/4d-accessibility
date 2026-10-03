@@ -62,9 +62,12 @@ def main():
         assert baseline == bridge, "Original browser event sequence changed in " + mode
         event_checks.append({"mode": mode, "passed": True, "events": baseline})
     captions = [step["caption"] for step in reports["bridge-voiceover-compiled"]["voiceover"]]
-    close_index = next(index for index, caption in enumerate(captions) if "Close fixture" in caption and "button" in caption)
-    web_index = next(index for index, caption in enumerate(captions) if caption.lower().rstrip().endswith("native web fixture, web content"))
-    heading_index = next(index for index, caption in enumerate(captions) if "Native web fixture" in caption and "heading level 1" in caption)
+    close_index = next((index for index, caption in enumerate(captions) if "Close fixture" in caption and "button" in caption), None)
+    web_index = next((index for index, caption in enumerate(captions) if caption.lower().rstrip().endswith("native web fixture, web content")), None)
+    heading_index = next((index for index, caption in enumerate(captions) if "Native web fixture" in caption and "heading level 1" in caption), None)
+    assert close_index is not None, "VoiceOver did not speak the ordinary Close fixture button"
+    assert web_index is not None, "VoiceOver did not speak the native web content group"
+    assert heading_index is not None, "VoiceOver did not speak the native HTML heading with its role"
     assert close_index < web_index < heading_index, "Reassess the documented ordinary-group then native-web reading order"
     reading_order = {"passed": True, "closeIndex": close_index, "webGroupIndex": web_index,
                      "headingIndex": heading_index, "captions": captions,
