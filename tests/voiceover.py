@@ -2,10 +2,60 @@
 import ctypes as c
 from pathlib import Path
 import subprocess
+import os
+import signal
 import time
 import re
 
 import mac_ax as ax
+
+
+class OwnedApplication:
+    """Retain the specific running app, including after its PID is reused."""
+    def __init__(self, pid):
+        self.pid = pid
+        self.identity = self.process_identity()
+        self.pointer = None
+        if self.identity is None:
+            return
+        c.CDLL("/System/Library/Frameworks/AppKit.framework/AppKit")
+        self.objc = c.CDLL("/usr/lib/libobjc.A.dylib")
+        self.selector = ax.signature(self.objc, "sel_registerName", c.c_void_p, c.c_char_p)
+        get_class = ax.signature(self.objc, "objc_getClass", c.c_void_p, c.c_char_p)
+        pool = self.call(get_class(b"NSAutoreleasePool"), "new")
+        try:
+            self.pointer = self.call(get_class(b"NSRunningApplication"),
+                                     "runningApplicationWithProcessIdentifier:", c.c_void_p, (c.c_int, pid))
+            if self.pointer:
+                self.call(self.pointer, "retain")
+        finally:
+            self.call(pool, "drain", None)
+
+    def call(self, receiver, selector, result=c.c_void_p, *arguments):
+        function = c.CFUNCTYPE(result, c.c_void_p, c.c_void_p, *(kind for kind, _ in arguments))(
+            c.cast(self.objc.objc_msgSend, c.c_void_p).value)
+        return function(receiver, self.selector(selector.encode()), *(value for _, value in arguments))
+
+    def stop(self):
+        if self.alive():
+            if self.pointer:
+                assert self.call(self.pointer, "terminate", c.c_bool), "Owned assistive application refused normal quit"
+            else:
+                # Welcome helpers can exist before LaunchServices exposes a
+                # running-app object. Recheck the captured PID/birth/command.
+                assert self.process_identity() == self.identity, "Owned assistive process changed"
+                os.kill(self.pid, signal.SIGTERM)
+
+    def alive(self):
+        return bool(self.identity) and self.process_identity() == self.identity and (not self.pointer or not self.call(self.pointer, "isTerminated", c.c_bool))
+
+    def process_identity(self):
+        result = subprocess.run(["ps", "-p", str(self.pid), "-o", "lstart=,comm="], capture_output=True, text=True)
+        return result.stdout.strip() if result.returncode == 0 else None
+
+    def __del__(self):
+        if getattr(self, "pointer", None):
+            self.call(self.pointer, "release", None)
 
 
 _READING_ROLES = re.compile(r"\b(button|edit text|email field|checkbox|link|summary|heading level \d+|group|web content|html content|scroll area)\b")
@@ -36,8 +86,11 @@ class VoiceOver:
         self.steps = []
         self.owned = False
         self.changed_caption = False
+        self.caption_restoration_verified = False
         self.accepted_quickstart = False
         self.quickstart_pids = set()
+        self.owned_applications = {}
+        self.voiceover_pid = None
 
     def guard(self):
         assert self.process.poll() is None, "Owned fixture has exited"
@@ -63,9 +116,16 @@ class VoiceOver:
         # alone does not mean the user has reached an active reading session.
         def running():
             quickstart = self.pids("VoiceOver Quickstart")
+            voiceover_pids = self.pids("VoiceOver")
             self.quickstart_pids.update(quickstart)
+            for pid in quickstart + voiceover_pids:
+                if pid not in self.owned_applications:
+                    self.owned_applications[pid] = OwnedApplication(pid)
+            if voiceover_pids:
+                assert len(voiceover_pids) == 1, "Ambiguous started VoiceOver session"
+                self.voiceover_pid = voiceover_pids[0]
             if self.accepted_quickstart:
-                return bool(self.pids("VoiceOver"))
+                return bool(voiceover_pids) and self.owned_applications[self.voiceover_pid].alive() and self.pids("VoiceOver") == voiceover_pids
             if not quickstart:
                 return False
             for pid in quickstart:
@@ -85,14 +145,23 @@ class VoiceOver:
         ax.wait_for(lambda: app.read("AXFrontmost") is True, "Fixture did not regain foreground", timeout=10)
         time.sleep(1)
         try:
-            ax.capture_window(self.pids("VoiceOver")[0], self.output / "initial-caption.png")
-        except RuntimeError:
+            self.guard_owned_voiceover()
+            ax.capture_window(self.voiceover_pid, self.output / "initial-caption.png")
+        except RuntimeError as error:
+            if str(error) != "The fixture has no onscreen window to capture":
+                raise
             self.key("f10", command=True, fn=True, capture=False)
             self.changed_caption = True
 
-    def key(self, name, shift=False, command=False, toggle=False, fn=False, capture=True, voiceover=True):
-        self.guard()
-        assert self.pids("VoiceOver"), "VoiceOver is not running"
+    def key(self, name, shift=False, command=False, toggle=False, fn=False, capture=True, voiceover=True, _cleanup=False):
+        guard = self.guard
+        if _cleanup:
+            caption_shortcut = name == "f10" and command and fn and voiceover and not (shift or toggle or capture)
+            stop_shortcut = name == "f5" and toggle and not (shift or command or fn)
+            assert caption_shortcut or stop_shortcut, "Invalid owned VoiceOver cleanup shortcut"
+            guard = self.guard_owned_voiceover
+        guard()
+        self.guard_owned_voiceover()
         codes = {"right": 124, "left": 123, "down": 125, "up": 126, "space": 49, "return": 36, "escape": 53, "home": 115, "end": 119, "f5": 96, "f4": 118, "f10": 109}
         graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
         create = ax.signature(graphics, "CGEventCreateKeyboardEvent", c.c_void_p, c.c_void_p, c.c_uint16, c.c_bool)
@@ -118,7 +187,8 @@ class VoiceOver:
             ax.release(event)
             time.sleep(0.08)
         try:
-            self.guard()
+            guard()
+            self.guard_owned_voiceover()
             for down in (True, False):
                 event = create(None, codes[name], down)
                 flags(event, active)
@@ -152,27 +222,79 @@ class VoiceOver:
     def read_caption(self):
         """Observe speech after an asynchronous action without moving the VO cursor."""
         self.guard()
-        pids = self.pids("VoiceOver")
-        assert len(pids) == 1, "Owned VoiceOver session is unavailable"
+        self.guard_owned_voiceover()
         image = self.output / f"step-{len(self.steps):03}.png"
-        ax.capture_window(pids[0], image)
+        ax.capture_window(self.voiceover_pid, image)
         return " ".join(subprocess.check_output([str(self.ocr), str(image)], text=True).split())
 
+    def guard_owned_voiceover(self):
+        assert self.owned and self.pids("VoiceOver") == [self.voiceover_pid], "Owned VoiceOver session changed"
+        assert self.owned_applications[self.voiceover_pid].alive(), "Owned VoiceOver process has exited"
+
+    def restore_caption(self, *, cleanup=False):
+        def hidden():
+            self.guard_owned_voiceover()
+            try:
+                ax.capture_window(self.voiceover_pid, self.output / "caption-restoration.png")
+            except RuntimeError as error:
+                if str(error) == "The fixture has no onscreen window to capture":
+                    return True
+                raise
+            return False
+
+        # A prior attempt can hide the panel before its verification fails.
+        # Observe first so retrying cannot toggle it back into view.
+        if not hidden():
+            self.key("f10", command=True, fn=True, capture=False, _cleanup=cleanup)
+            ax.wait_for(hidden, "Owned caption panel did not return to its hidden baseline", timeout=5)
+        self.caption_restoration_verified = True
+        self.changed_caption = False
+
     def stop(self):
-        if self.owned and self.pids("VoiceOver"):
+        failure = None
+        try:
+            if self.owned and self.pids("VoiceOver"):
+                if self.changed_caption:
+                    self.restore_caption()
+                self.key("f5", toggle=True)
+        except BaseException as caught:
+            failure = caught
+            # These two shortcuts belong to VoiceOver itself. Only its captured
+            # process may receive them; they do not require the fixture window.
             if self.changed_caption:
-                self.key("f10", command=True, fn=True, capture=False)
-                self.changed_caption = False
-            self.key("f5", toggle=True)
-        for pid in self.quickstart_pids.intersection(self.pids("VoiceOver Quickstart")):
-            app = ax.application(pid)
-            for menu_bar in app.read("AXChildren") or []:
-                if menu_bar.read("AXRole") != "AXMenuBar":
-                    continue
-                for item in menu_bar.read("AXChildren") or []:
-                    if item.read("AXTitle") != "VoiceOver Quickstart":
-                        continue
-                    for menu in item.read("AXChildren") or []:
-                        for action in menu.read("AXChildren") or []:
-                            if action.read("AXTitle") == "Quit VoiceOver Quickstart":
-                                action.press()
+                try:
+                    self.restore_caption(cleanup=True)
+                except BaseException as caption_error:
+                    failure.add_note("Caption restoration failed: " + repr(caption_error))
+            try:
+                self.key("f5", toggle=True, _cleanup=True)
+            except BaseException as toggle_error:
+                failure.add_note("Owned VoiceOver shortcut failed: " + repr(toggle_error))
+        # Attempt every captured app even if an earlier one refuses to quit.
+        # Retained running-app objects and PID/birth/command guards protect any
+        # replacement or preexisting user session. This also verifies Quickstart.
+        for application in self.owned_applications.values():
+            try:
+                application.stop()
+            except BaseException as cleanup_error:
+                if failure is None:
+                    failure = cleanup_error
+                else:
+                    failure.add_note("Owned assistive application quit failed: " + repr(cleanup_error))
+        try:
+            ax.wait_for(lambda: not any(app.alive() for app in self.owned_applications.values()),
+                        "Owned assistive applications did not stop", timeout=10)
+            self.owned = False
+        except BaseException as wait_error:
+            if failure is None:
+                failure = wait_error
+            else:
+                failure.add_note("Owned assistive cleanup verification failed: " + repr(wait_error))
+        if self.changed_caption:
+            caption_error = AssertionError("Owned caption setting was not restored")
+            if failure is None:
+                failure = caption_error
+            else:
+                failure.add_note(str(caption_error))
+        if failure is not None:
+            raise failure
