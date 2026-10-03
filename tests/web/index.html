@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Native web fixture</title>
+  <style>body { font: 16px system-ui; margin: 20px; } label { display: block; margin: 12px 0; } button { margin-right: 12px; }</style>
+</head>
+<body>
+  <h1>Native web fixture</h1>
+  <form action="/submit" method="get">
+    <label>Name <input name="name" value="Before" required></label>
+    <label>Email <input name="email" type="email" value="before@example.test" required></label>
+    <label><input name="enabled" type="checkbox" checked> Enabled</label>
+    <button type="reset">Reset fixture</button>
+    <button type="submit">Submit fixture</button>
+  </form>
+  <details><summary>More information</summary><p>Expanded content.</p></details>
+  <p><a href="/next">Next page</a></p>
+</body>
+</html>
