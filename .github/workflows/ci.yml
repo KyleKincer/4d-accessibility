@@ -32,6 +32,7 @@ jobs:
           python3 test_signing_keychain.py
           python3 tests/test_desktop_session.py
           python3 tests/test_voiceover_stops.py
+          python3 tests/test_voiceover_cleanup.py
           python3 tests/test_hierarchy_probe_cleanup.py
           python3 tests/test_grouped_probe_summary.py
           python3 tests/test_hierarchy_probe_inputs.py

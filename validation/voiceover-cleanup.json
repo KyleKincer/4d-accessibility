@@ -1,0 +1,41 @@
+{
+  "passed": true,
+  "scope": "Owned VoiceOver test cleanup after fixture window loss or foreground loss. Hidden-caption restoration is covered by pure regression checks, not these live cases.",
+  "environment": {
+    "macOS": "26.7.1",
+    "architecture": "arm64"
+  },
+  "unitChecks": {
+    "ownedCleanup": 12,
+    "readingStops": 7,
+    "systemInputBlocked": true
+  },
+  "cases": [
+    {
+      "case": "window-missing",
+      "passed": true,
+      "guardFailurePreserved": "Owned fixture window missing",
+      "captionRestorationExercised": false,
+      "captionHiddenBaselineVerified": false,
+      "ownedAssistiveProcessesExited": true
+    },
+    {
+      "case": "foreground-lost",
+      "passed": true,
+      "guardFailurePreserved": "Owned fixture lost foreground",
+      "captionRestorationExercised": false,
+      "captionHiddenBaselineVerified": false,
+      "ownedAssistiveProcessesExited": true
+    }
+  ],
+  "sourceSHA256": {
+    "tests/voiceover.py": "59d7885c27e4d7ac4208f48fe96a483bd8a5f3435553c4c6ac879bc665ba2562",
+    "tests/mac_ax.py": "22bbc7a2a5ef520197cc05724991daa2cc659f34f8811bb132eeaa459d8d1747",
+    "tests/VoiceOverCleanupFixture.swift": "77028d2999e49c1e36a2a6a539ff46db88d9403e5ade0733ee387d640f89b51a",
+    "test_voiceover_cleanup_fixture.py": "9e6eeea67e8356e57fb1c8e90c1e288b7c7d3d9c43db918dafc181c2c11a2453",
+    "tests/test_voiceover_cleanup.py": "3fcd19965f79fb532c37b7d98cb9e427839ba6dbf1aa7fa1ec7071c6230ec641",
+    "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62"
+  },
+  "fixtureBinarySHA256": "4bee3bf5ea714021048bd89d387187986d124ba1bb08b026a58bb03b5df7d4cc",
+  "ocrBinarySHA256": "574be3485142c5a4641b0848566924c8ed5749eaa31daf442a70672fe988f87b"
+}
