@@ -42,6 +42,48 @@ static NSDictionary *Snapshot(NSDictionary *descriptor, NSUInteger revision) {
 }
 int main(void) {
     @autoreleasepool {
+        NSMutableDictionary *clickGrid = Copy(Descriptor(2));
+        NSString *row0 = clickGrid[@"rows"][0], *row1 = clickGrid[@"rows"][1];
+        clickGrid[@"selectionMode"] = @"multiple";
+        clickGrid[@"actions"] = @{@"select": @YES, @"edit": @NO, @"reveal": @YES};
+        clickGrid[@"columns"][0][@"selectionTarget"] = @YES;
+        clickGrid[@"visible"] = @[row0, row1];
+        clickGrid[@"frames"] = @{row0: @{@"column-0": @[@0, @0, @100, @24]}, row1: @{@"column-0": @[@0, @24, @100, @24]}};
+        AXBSession *clickSession = [[AXBSession alloc] initWithIdentifier:@"selection-click" windowID:71];
+        [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1)} now:0];
+        Check([clickSession enqueueNode:@"grid" revision:@1 operation:@"gridSelect" value:@[row0, row1] now:0], "native selection captures its complete desired key set");
+        NSString *clickAction = [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1)} now:0][@"action"][@"id"];
+        NSDictionary *firstClick = @{@"action": clickAction, @"point": @[@10, @10], @"serial": @1};
+        NSDictionary *secondClick = @{@"action": clickAction, @"point": @[@10, @34], @"serial": @2};
+        Check([[clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1), @"controlInput": firstClick} now:0][@"controlInput"] isEqual:firstClick], "first native selection click dispatches once");
+        Check([[clickSession controlInputNode:firstClick][@"target"][@"row"] isEqual:row0], "native selection point identifies the exact requested row");
+        Check(![[clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1), @"controlInput": secondClick} now:0][@"ok"] boolValue], "selection cannot advance before native acknowledgement");
+        [clickSession finishControlInput:firstClick accepted:YES];
+        clickGrid[@"selected"] = @[row0];
+        Check([[clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 2), @"controlInput": secondClick} now:0][@"controlInput"] isEqual:secondClick], "acknowledged selection can dispatch the next distinct step");
+        Check(![clickSession controlInputNode:firstClick] && [[clickSession controlInputNode:secondClick][@"target"][@"row"] isEqual:row1], "an old step cannot act after a newer selection step");
+        [clickSession finishControlInput:firstClick accepted:YES];
+        Check(![clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 2)} now:0][@"controlInputResult"], "an old acknowledgement cannot finish the next step");
+        [clickSession finishControlInput:secondClick accepted:YES];
+        Check([[clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 2)} now:0][@"controlInputResult"][@"serial"] isEqual:@2], "native acknowledgement identifies its selection step");
+        clickGrid[@"selected"] = @[row0, row1];
+        NSDictionary *redundantClick = @{@"action": clickAction, @"point": @[@10, @34], @"serial": @3};
+        [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 3), @"controlInput": redundantClick} now:0];
+        Check(![clickSession controlInputNode:redundantClick], "a satisfied desired selection cannot receive another toggle");
+        for (id serial in @[@0, @(-1), @YES, @1.5, @10001])
+            Check(AXBValidateEnvelope(@{@"snapshot": Snapshot(clickGrid, 3), @"controlInput": @{@"action": clickAction, @"point": @[@10, @10], @"serial": serial}}) != nil, "selection serial rejects malformed and unbounded values");
+        clickGrid[@"selected"] = @[row1];
+        clickGrid[@"selectionMode"] = @"single";
+        clickSession = [[AXBSession alloc] initWithIdentifier:@"single-selection-clear" windowID:72];
+        [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1)} now:0];
+        Check([clickSession enqueueNode:@"grid" revision:@1 operation:@"gridSelect" value:@[] now:0], "single-selection list accepts clearing its selected row");
+        clickAction = [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1)} now:0][@"action"][@"id"];
+        NSDictionary *clearClick = @{@"action": clickAction, @"point": @[@10, @34], @"serial": @1};
+        [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 1), @"controlInput": clearClick} now:0];
+        Check([[clickSession controlInputNode:clearClick][@"toggleSelection"] boolValue], "clearing single selection uses the native command-click toggle");
+        clickGrid[@"generation"] = @"replacement-list";
+        [clickSession exchange:@{@"snapshot": Snapshot(clickGrid, 2)} now:0];
+        Check(![clickSession controlInputNode:clearClick], "replacing the grid retires an in-flight selection click");
         NSDictionary *descriptor = Descriptor(50000);
         NSMutableDictionary *locatorGrid = Copy(Descriptor(2));
         locatorGrid[@"columns"][0][@"automationKey"] = @"Description";

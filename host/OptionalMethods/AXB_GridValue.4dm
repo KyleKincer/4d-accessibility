@@ -47,6 +47,27 @@ Else
   return
  End if
  $value:=$item[$column.property]
+ // List fields retain their native type even when objects store dates as
+ // strings or times as numbers. ORDA always expresses time in seconds;
+ // native snapshots follow the application's object compatibility setting.
+ If (($column.fieldType#Null) & ($value#Null))
+  If ($column.fieldType=Is time)
+   If (Value type($state.binding.source)=Is collection)
+    $value:=OB Get($item; $column.property; Is time)
+   Else
+    $value:=Time($value)
+   End if
+  End if
+  If (($column.fieldType=Is date) & (Value type($state.binding.source)=Is collection))
+   $value:=OB Get($item; $column.property; Is date)
+  End if
+ End if
+ If (($state.liveValues#Null) && ($state.binding.records#Null) && ($state.liveValues.record=$state.binding.records[$row-1]) && OB Is defined($state.liveValues.values; $column.name))
+  $value:=$state.liveValues.values[$column.name]
+  If (New collection(Is date; Is time).indexOf($column.fieldType)>=0)
+   $value:=OB Get($state.liveValues.values; $column.name; $column.fieldType)
+  End if
+ End if
 End if
 If (($value=Null) || (New collection(Is text; Is real; Is integer; Is longint; Is date; Is time; Is Boolean).indexOf(Value type($value))>=0))
  OB REMOVE($state.valueIssues; $issue)
@@ -54,7 +75,23 @@ If (($value=Null) || (New collection(Is text; Is real; Is integer; Is longint; I
  $result.value:=AXB_ControlValue($value; $column.format)
  // Null collection/entity expressions cannot enter a native cell editor.
  $result.editable:=$value#Null
- If ($type=Is Boolean)
+ If (($column.controlRole="checkbox") & ($type#Is Boolean))
+  If ((New collection(Is real; Is integer; Is longint).indexOf($type)<0) || ($value=Null) || ($column.threeStates & (New collection(0; 1; 2).indexOf($value)<0)))
+   $result.ok:=False
+   $result.editable:=False
+   $state.valueIssues[$issue]:=$column.name
+   return
+  End if
+  $checked:=Choose($value=0; 0; 1)
+  If ($column.threeStates)
+   $checked:=$value
+  End if
+  $result.role:="checkbox"
+  $result.checked:=$checked
+  $result.value:=String($checked)
+  return
+ End if
+ If (($type=Is Boolean) & ($column.controlRole#"text"))
   $result.boolean:=True
   If (($column.display=lk numeric format) & (Position(";"; $column.format)>0))
    $result.role:="popup"

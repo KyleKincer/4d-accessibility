@@ -18,19 +18,87 @@ AREA_KIND = "%AXB Area"
 AREA = {"type": "plugin", "pluginAreaKind": AREA_KIND, "dataSource": "",
         "left": 0, "top": 0, "width": 1, "height": 1, "enterable": False,
         "focusable": False, "printable": False}
+METADATA_NAME = "AXB.FormMetadata.json"
+METADATA_OWNER = "AccessibilityBridge/install_host_methods.py"
 
 
-def area_form(form, configuration=""):
-    """Return a copy with one lifecycle area; never change existing objects."""
-    if not isinstance(form, dict):
-        raise ValueError("Form must be an object")
-    if configuration and not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,63}", configuration):
-        raise ValueError("Invalid area configuration key")
-    if form.get("destination") not in (None, "", "detailScreen"):
-        raise ValueError("Lifecycle areas require a detail screen or unspecified destination")
-    result = json.loads(json.dumps(form))
-    area_name = AREA_NAME + ("." + configuration if configuration else "")
-    pages = result.get("pages")
+def metadata_digest(forms):
+    return hashlib.sha256(json.dumps(forms, ensure_ascii=False, sort_keys=True,
+                                    separators=(",", ":")).encode()).hexdigest()
+
+
+def form_metadata_changes(project, enabled):
+    """Package list-row markers, which 4D cannot query from compiled project forms.
+
+    Source refreshes also refresh an existing generated resource. Ordinary
+    method-only installs without that resource never inspect application forms.
+    """
+    target = project.parent / "Resources" / METADATA_NAME
+    if not enabled and not target.exists():
+        return {}
+    if target.exists():
+        old = json.loads(target.read_text())
+        if (old.get("generatedBy") != METADATA_OWNER or old.get("schema") != 1 or
+                old.get("sha256") != metadata_digest(old.get("forms"))):
+            raise ValueError("Refusing to replace non-generated or edited form metadata: " + str(target))
+    paths = sorted((project / "Sources/Forms").glob("*/form.4DForm"))
+    paths += sorted((project / "Sources/TableForms").glob("*/*/form.4DForm"))
+    definitions = {str(p.parent.relative_to(project / "Sources")): json.loads(p.read_text()) for p in paths}
+    table_names = {}
+    catalog = project / "Sources/catalog.4DCatalog"
+    if catalog.is_file():
+        table_names = {t.get("name"): t.get("id") for t in ET.parse(catalog).iter("table")}
+
+    def metadata(key, chain):
+        if key in chain or key not in definitions:
+            return {}  # Unknown layout remains unavailable at runtime.
+        form = definitions[key]
+        inherited = form.get("inheritedForm")
+        result = {}
+        if isinstance(inherited, str) and inherited.strip() and "/" not in inherited and "\\" not in inherited:
+            table = form.get("inheritedFormTable")
+            parent = "Forms/" + inherited
+            if table not in (None, "", " ", 0):
+                parent = "TableForms/" + str(table_names.get(str(table), table)) + "/" + inherited
+            result.update(metadata(parent, [*chain, key]))
+        result.update({name: form[name] for name in ("markerHeader", "markerBody") if name in form})
+        lists = result.get("lists", {}).copy()
+        for page in form.get("pages", []):
+            for name, control in (page or {}).get("objects", {}).items():
+                if control.get("type") == "subform" and control.get("listForm"):
+                    mode = control.get("selectionMode", "none")
+                    lists[name] = {"selection": mode if mode in ("none", "single", "multiple") else "none",
+                                   "enterable": control.get("enterableInList") is True}
+        if lists:
+            result["lists"] = lists
+        return result
+
+    forms = {}
+    for key in definitions:
+        layout = metadata(key, [])
+        header, body = layout.get("markerHeader", 0), layout.get("markerBody")
+        item = {}
+        if (type(header) is int and type(body) is int and 0 <= header < body <= 32767):
+            item.update(header=header, body=body)
+        if layout.get("lists"):
+            item["lists"] = layout["lists"]
+        if not item:
+            continue
+        if key.startswith("TableForms/"):
+            _, table, name = key.split("/", 2)
+        else:
+            table, name = "0", key[len("Forms/"):]
+        forms.setdefault(table, {})[name] = item
+    if not forms and not target.exists():
+        return {}
+    content = {"generatedBy": METADATA_OWNER, "schema": 1,
+               "sha256": metadata_digest(forms), "forms": forms}
+    return {target: json.dumps(content, ensure_ascii=False, sort_keys=True, indent=2) + "\n"}
+
+
+def lifecycle_areas(form):
+    """Find all reserved areas, validating their containing pages first."""
+    pages = form.get("pages")
     if not isinstance(pages, list) or not pages:
         raise ValueError("Form must have a pages collection")
     found = []
@@ -44,6 +112,21 @@ def area_form(form, configuration=""):
                 raise ValueError("Invalid form object: " + name)
             if name == AREA_NAME or name.startswith(AREA_NAME + ".") or obj.get("pluginAreaKind") == AREA_KIND:
                 found.append((number, name, obj))
+    return found
+
+
+def area_form(form, configuration=""):
+    """Return a copy with one lifecycle area; never change existing objects."""
+    if not isinstance(form, dict):
+        raise ValueError("Form must be an object")
+    if configuration and not re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,63}", configuration):
+        raise ValueError("Invalid area configuration key")
+    if form.get("destination") not in (None, "", "detailScreen"):
+        raise ValueError("Lifecycle areas require a detail screen or unspecified destination")
+    result = json.loads(json.dumps(form))
+    area_name = AREA_NAME + ("." + configuration if configuration else "")
+    pages = result.get("pages")
+    found = lifecycle_areas(result)
     if found:
         if found != [(0, area_name, AREA)]:
             raise ValueError("Existing lifecycle area differs from the installer-owned area")
@@ -94,13 +177,58 @@ def form_changes(project, names, all_forms):
             raise ValueError("Unknown inherited form " + key + " in " + str(path.relative_to(project)))
         return by_name[key]
 
+    # Row forms can have an unspecified/detail destination. Their actual use,
+    # rather than that property alone, determines lifecycle ownership. Protect
+    # their inherited bases too, placing areas in separate detail branches.
+    row_forms = set()
+    for path, form in forms.items():
+        for page in form.get("pages", []):
+            for control in (page or {}).get("objects", {}).values():
+                row = control.get("listForm")
+                if control.get("type") != "subform" or not isinstance(row, str) or not row:
+                    continue
+                table = control.get("table")
+                if table in (None, "", " ", 0) and path.parent.parent.parent.name == "TableForms":
+                    table = path.parent.parent.name
+                table = table_names.get(str(table), str(table))
+                target = by_name.get("TableForms/" + table + "/" + row)
+                if target:
+                    row_forms.add(target)
+    row_bases = set(row_forms)
+    for path in row_forms:
+        seen = {path}
+        try:
+            while (path := parent(path)) is not None and path not in seen:
+                row_bases.add(path)
+                seen.add(path)
+        except ValueError:
+            pass  # Unselected unresolved row inheritance is not modified.
+
+    # Older bulk installers could instrument an unspecified row destination or
+    # a shared base. Move only our exact area, with all detail branches selected
+    # so removing inherited ownership cannot silently retire another window.
+    migrated = set()
+    for path in sorted(row_bases):
+        found = lifecycle_areas(forms[path])
+        if not found:
+            continue
+        if found != [(0, AREA_NAME, AREA)]:
+            raise ValueError("Existing lifecycle area differs from the installer-owned area: " + str(path.relative_to(project)))
+        if not all_forms:
+            raise ValueError("Use --all-forms to migrate legacy list-row lifecycle areas before selecting individual forms")
+        del forms[path]["pages"][0]["objects"][AREA_NAME]
+        migrated.add(path)
+        print("Removed legacy list-row lifecycle: " + str(path.relative_to(project)))
+
     def base(path, chain):
         if path in chain:
             raise ValueError("Inherited form cycle: " + str(path.relative_to(project)))
+        if path in row_bases:
+            raise ValueError("Lifecycle belongs in the list's detail parent, not its row form or shared row base: " + str(path.relative_to(project)))
         # Validate any local area before considering inherited ownership.
         checked = area_form(forms[path])
         inherited = parent(path)
-        if inherited is None:
+        if inherited is None or inherited in row_bases:
             return path
         owner = base(inherited, [*chain, path])
         if checked == forms[path]:
@@ -109,6 +237,9 @@ def form_changes(project, names, all_forms):
 
     owners = set()
     for path in sorted(set(selected)):
+        if all_forms and path in row_bases:
+            print(("Skipped list-row form: " if path in row_forms else "Skipped shared list-row base: ") + str(path.relative_to(project)))
+            continue
         if all_forms and forms[path].get("destination") not in (None, "", "detailScreen"):
             print("Skipped non-detail form: " + str(path.relative_to(project)))
             continue
@@ -136,11 +267,11 @@ def form_changes(project, names, all_forms):
             for name in affected:
                 print("  Inherited by: " + name)
     changes = {}
-    for path in sorted(owners):
+    for path in sorted(owners | migrated):
         original = originals[path]
         form = forms[path]
-        updated = area_form(form)
-        if updated != form:
+        updated = area_form(form) if path in owners else form
+        if updated != json.loads(original):
             # Preserve the existing project's tab/space convention. All layout,
             # events, methods and existing object values remain identical.
             indent = "\t" if re.search(r"\n\t+\S", original) else 2
@@ -157,8 +288,10 @@ def main(argv=None, *, transform=None):
     selection = parser.add_mutually_exclusive_group()
     selection.add_argument("--form", action="append", default=[], help="Add an area to a named form (repeatable); use TableForms/<table>/<form> for table forms")
     selection.add_argument("--all-forms", action="store_true", help="Add areas to detail forms, once per inheritance chain; skip list/print forms")
+    parser.add_argument("--form-metadata", action="store_true", help="Refresh list-form metadata without adding lifecycle areas")
     parser.add_argument("--dry-run", action="store_true", help="Validate and list changes without writing")
     args = parser.parse_args(argv)
+    args.project_dir = args.project_dir.resolve()
     methods = args.project_dir / "Sources/Methods"
     if not methods.is_dir():
         parser.error("--project-dir must already contain Sources/Methods")
@@ -211,18 +344,22 @@ def main(argv=None, *, transform=None):
         changes[compiler] = old.rstrip() + "\n\n" + block + "\n"
     try:
         forms = form_changes(args.project_dir, args.form, args.all_forms)
+        metadata = form_metadata_changes(args.project_dir, bool(args.form or args.all_forms or args.form_metadata))
     except (ValueError, OSError, ET.ParseError) as failure:
         parser.error(str(failure))
     changes.update(forms)
+    changes.update(metadata)
     if args.dry_run:
         for target, content in changes.items():
             if not target.exists() or target.read_text() != content:
-                print(target.relative_to(args.project_dir))
+                print(target.relative_to(args.project_dir) if target.is_relative_to(args.project_dir)
+                      else "../" + str(target.relative_to(args.project_dir.parent)))
         return
     for target, content in changes.items():
         if not target.exists() or target.read_text() != content:
+            target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(content)
-    print(f"Installed {len(sources)} host methods and declarations in {compiler}; added {len(forms)} lifecycle areas; no packages or data changed.")
+    print(f"Installed {len(sources)} host methods and declarations in {compiler}; updated {len(forms)} form definitions; no packages or data changed.")
 
 
 if __name__ == "__main__":

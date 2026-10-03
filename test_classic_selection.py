@@ -12,13 +12,12 @@ import uuid
 
 from build_component import BUILD, ROOT, literal, project_at, run_utility, sha
 
-
 BODY = """var $i : Integer
 var $entity; $saved; $before; $after; $case; $worker : Object
 var $started : Real
 var $process : Integer
 var $read; $mode; $json : Text
-var $values : Collection
+var $values; $fields : Collection
 var $setName : Text
 var $entities : 4D.EntitySelection
 ARRAY LONGINT($records; 0)
@@ -37,7 +36,7 @@ If (ds.AXBCRecord.all().length=0)
   End if
  End for
 End if
-For each ($read; New collection("recordNumbers"; "namedRecordNumbers"; "rangeRecordNumbers"; "rangeFields"; "entitySelection"; "entityValues"; "selectionFields"; "selectionJSON"; "workerEntities"; "workerValues"; "workerHighlight"; "workerFailure"))
+For each ($read; New collection("recordNumbers"; "namedRecordNumbers"; "rangeRecordNumbers"; "rangeFields"; "entitySelection"; "entityValues"; "selectionFields"; "selectionJSON"; "workerEntities"; "workerValues"; "workerHighlight"; "workerFailure"; "workerNativeValues"))
  For each ($mode; New collection("saved"; "modified"; "unloaded"; "new"))
   UNLOAD RECORD([AXBCRecord])
   QUERY([AXBCRecord]; [AXBCRecord]id>=4)
@@ -91,6 +90,12 @@ For each ($read; New collection("recordNumbers"; "namedRecordNumbers"; "rangeRec
      $values:=New collection(2147483647)
     End if
     $worker:=New shared object("done"; False; "table"; 1; "records"; $values.copy(ck shared); "highlight"; $setName)
+    If ($read="workerNativeValues")
+     $fields:=New collection(New object("name"; "id"; "field"; 1); New object("name"; "name"; "field"; 2))
+     Use ($worker)
+      $worker.readFields:=$fields.copy(ck shared; $worker)
+     End use
+    End if
     COPY SET("AXBC_Highlight"; $worker.highlight)
     $process:=New process("AXB_SelectionRead"; 0; "AXBC isolated read"; $worker)
     $started:=Milliseconds
@@ -105,8 +110,11 @@ For each ($read; New collection("recordNumbers"; "namedRecordNumbers"; "rangeRec
      $result.error:=$worker.error
      return
     End if
-    $entities:=$worker.source
-    If ($read="workerFailure")
+    If ($read="workerNativeValues")
+     $values:=$worker.source.extract("name"; ck keep null)
+    Else
+     $entities:=$worker.source
+     If ($read="workerFailure")
      $values:=New collection(($worker.error#Null) & ($worker.highlight="") & ($worker.source=Null))
     Else
      If ($read="workerEntities")
@@ -123,6 +131,7 @@ For each ($read; New collection("recordNumbers"; "namedRecordNumbers"; "rangeRec
         End if
        End for
       End if
+     End if
      End if
     End if
    : ($read="selectionFields")
@@ -141,6 +150,67 @@ For each ($read; New collection("recordNumbers"; "namedRecordNumbers"; "rangeRec
 End for each
 UNLOAD RECORD([AXBCRecord])
 $result.savedNames:=ds.AXBCRecord.all().orderBy("id asc").extract("name")
+$result.typedValues:=New collection
+var $originalDate; $originalTime; $dateMode; $timeMode : Integer
+var $kind : Text
+var $binding; $column; $cell; $typed; $live : Object
+var $typedSource : Variant
+$originalDate:=Get database parameter(Dates inside objects)
+$originalTime:=Get database parameter(Times inside objects)
+ALL RECORDS([AXBCRecord])
+For ($i; 1; Records in selection([AXBCRecord]))
+ GOTO SELECTED RECORD([AXBCRecord]; $i)
+ [AXBCRecord]day:=!2024-01-02!
+ [AXBCRecord]clock:=?13:37:00?
+ SAVE RECORD([AXBCRecord])
+End for
+For each ($dateMode; New collection(String type without time zone; String type with time zone; Date type))
+ SET DATABASE PARAMETER(Dates inside objects; $dateMode)
+ For each ($timeMode; New collection(Times in seconds; Times in milliseconds))
+  SET DATABASE PARAMETER(Times inside objects; $timeMode)
+  LONGINT ARRAY FROM SELECTION([AXBCRecord]; $records)
+  $values:=New collection
+  ARRAY TO COLLECTION($values; $records)
+  $worker:=New shared object("done"; False; "table"; 1; "records"; $values.copy(ck shared); "highlight"; "")
+  $fields:=New collection(New object("name"; "day"; "field"; 3; "type"; Is date); New object("name"; "clock"; "field"; 4; "type"; Is time))
+  Use ($worker)
+   $worker.readFields:=$fields.copy(ck shared; $worker)
+  End use
+  $process:=New process("AXB_SelectionRead"; 0; "AXBC typed read"; $worker)
+  $started:=Milliseconds
+  While (Not($worker.done) & ((Milliseconds-$started)<5000))
+   DELAY PROCESS(Current process; 1)
+  End while
+  If (Not($worker.done) | ($worker.error#Null))
+   $result.error:="Typed snapshot failed"
+   return
+  End if
+  For each ($kind; New collection("native"; "orda"; "live"))
+   If ($kind="native")
+    $typedSource:=$worker.source
+   Else
+    $typedSource:=Create entity selection([AXBCRecord])
+    $typedSource.refresh()
+   End if
+   $binding:=New object("binding"; New object("source"; $typedSource; "records"; New collection(Record number([AXBCRecord]))))
+   If ($kind="live")
+    $binding.liveValues:=New object("record"; Record number([AXBCRecord]); "values"; New object("Clock"; [AXBCRecord]clock; "Day"; [AXBCRecord]day))
+   End if
+   $typed:=New object("dateMode"; $dateMode; "timeMode"; $timeMode; "source"; $kind)
+   $column:=New object("name"; "Clock"; "property"; "clock"; "fieldType"; Is time; "controlRole"; "text"; "protected"; False; "format"; ""; "display"; lk numeric format)
+   $cell:=AXB_GridValue($binding; $column; 1)
+   $typed.timeOK:=$cell.ok & ($cell.value=String(?13:37:00?))
+   $typed.timeValue:=$cell.value
+   $column:=New object("name"; "Day"; "property"; "day"; "fieldType"; Is date; "controlRole"; "text"; "protected"; False; "format"; ""; "display"; lk numeric format)
+   $cell:=AXB_GridValue($binding; $column; 1)
+   $typed.dateOK:=$cell.ok & ($cell.value=String(!2024-01-02!))
+   $typed.dateValue:=$cell.value
+   $result.typedValues.push($typed)
+  End for each
+ End for each
+End for each
+SET DATABASE PARAMETER(Dates inside objects; $originalDate)
+SET DATABASE PARAMETER(Times inside objects; $originalTime)
 """
 
 SNAPSHOT = """#DECLARE() -> $state : Object
@@ -180,18 +250,26 @@ def main():
         f'<table name="AXBCRecord" uuid="{table_id}" id="1">'
         f'<field name="id" uuid="{primary_id}" type="4" unique="true" never_null="true" id="1"/>'
         f'<field name="name" uuid="{uuid.uuid4().hex.upper()}" type="10" id="2"/>'
+        f'<field name="day" uuid="{uuid.uuid4().hex.upper()}" type="8" id="3"/>'
+        f'<field name="clock" uuid="{uuid.uuid4().hex.upper()}" type="9" id="4"/>'
         f'<primary_key field_name="id" field_uuid="{primary_id}"/></table>'
         f'<index kind="regular" unique_keys="true" name="AXBC_PK" uuid="{uuid.uuid4().hex.upper()}" type="7">'
         f'<field_ref uuid="{primary_id}" name="id"><table_ref uuid="{table_id}" name="AXBCRecord"/></field_ref></index></base>\n'
     )
     methods = driver / "Project/Sources/Methods"
     (methods / "AXBC_Snapshot.4dm").write_text(SNAPSHOT)
-    for name in ("AXB_SelectionRead", "AXB_SelectionError"):
+    for name in (
+        "AXB_SelectionRead",
+        "AXB_SelectionError",
+        "AXB_GridValue",
+        "AXB_ControlValue",
+    ):
         shutil.copy2(
             ROOT / "host/OptionalMethods" / (name + ".4dm"), methods / (name + ".4dm")
         )
     (methods / "Compiler_AXBC.4dm").write_text(
         "C_OBJECT(AXBC_Snapshot; $0)\nC_OBJECT(AXB_SelectionRead; $1)\nC_OBJECT(AXB_SelectionWorkerReply)\n"
+        "C_OBJECT(AXB_GridValue; $0; $1; $2)\nC_LONGINT(AXB_GridValue; $3)\nC_TEXT(AXB_ControlValue; $0; $2)\nC_VARIANT(AXB_ControlValue; $1)\n"
     )
     (methods / "AXBC_Run.4dm").write_text(
         'var $result : Object\nON ERR CALL("AXBC_Error")\n'
@@ -256,9 +334,31 @@ def main():
     checks = [
         {
             "name": "all candidate reads and record states returned in both modes",
-            "passed": len(cases) == 96,
+            "passed": len(cases) == 104,
         }
     ]
+    for run in results:
+        typed = run.get("typedValues", [])
+        checks.append(
+            {
+                "name": ("compiled" if run["compiled"] else "interpreted")
+                + ": all date/time compatibility cases returned",
+                "passed": len(typed) == 18,
+            }
+        )
+        for case in typed:
+            checks.append(
+                {
+                    "name": ("compiled" if run["compiled"] else "interpreted")
+                    + ": typed values "
+                    + str(case["dateMode"])
+                    + "/"
+                    + str(case["timeMode"])
+                    + "/"
+                    + case["source"],
+                    "passed": case["dateOK"] and case["timeOK"],
+                }
+            )
     safe = {
         "recordNumbers",
         "namedRecordNumbers",
@@ -268,6 +368,7 @@ def main():
         "workerValues",
         "workerHighlight",
         "workerFailure",
+        "workerNativeValues",
     }
     for case in cases:
         if case["read"] in safe:
@@ -332,6 +433,16 @@ def main():
                     + ": isolated named selection preserves order and shared entity values",
                     "passed": by_read["workerEntities"]["values"] == [2]
                     and by_read["workerValues"]["values"] == expected_names[-2:][::-1],
+                }
+            )
+            checks.append(
+                {
+                    "name": ("compiled" if run["compiled"] else "interpreted")
+                    + "/"
+                    + mode
+                    + ": isolated native snapshot preserves order and stored values",
+                    "passed": by_read["workerNativeValues"]["values"]
+                    == expected_names[-2:][::-1],
                 }
             )
             checks.append(

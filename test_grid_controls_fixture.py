@@ -98,6 +98,8 @@ def main():
 
         def find(label, role=None):
             current = root()
+            if current is None:
+                return None
             for node in current.read("AXChildren") or []:
                 labels = [node.read("AXDescription"), node.read("AXTitle")]
                 if label in [s.removeprefix("Grid: ") if isinstance(s, str) else s for s in labels] and (role is None or node.read("AXRole") == role):
@@ -303,8 +305,9 @@ def main():
 
         before = len(state()["widgets"]["events"])
         popup_selection = state()["selected"]
-        check(content(3, 0, "AXPopUpButton").perform("AXShowMenu") == 0, "popup opens its real native choices")
+        check(content(3, 0, "AXPopUpButton").perform("AXShowMenu") == 0, "popup accepts the menu-opening request")
         choices = ax.wait_for(menu, "Native popup choices did not open")
+        check(True, "popup opens its real native choices")
         parent = choices.read("AXParent")
         check(parent and parent.read("AXIdentifier") == content(3, 0, "AXPopUpButton").read("AXIdentifier"), "native menu is a child of the exact popup cell")
         time.sleep(2.2)
@@ -337,6 +340,9 @@ def main():
             (FIXTURE / "Resources/widget-command.json").write_text(json.dumps({"action": "configure", "sequence": sequence, **flags}))
             ax.wait_for(lambda: state()["widgets"]["sequence"] == sequence, "Application validation configuration was not consumed")
             acknowledged_at = time.monotonic()
+            if "format" in flags:
+                expected_caption = flags["format"] or "Approved"
+                ax.wait_for(lambda: content(2, 0, "AXCheckBox").read("AXDescription") == expected_caption, "Updated checkbox caption was not published")
             time.sleep(.2)
             # The fixture command restores enterability before the bridge's
             # next page refresh. Wait for that capability before one press;
@@ -356,7 +362,13 @@ def main():
                 toggle(2, False)
                 for expected in (1, 2, 0):
                     toggle(4, expected)
-            configure(layout={"alignment": 1, "padding": 0, "columnPadding": -255})
+            for caption, column_padding in [("Y", 0), ("", 0), ("Y", 8)]:
+                layout = {"alignment": 4, "padding": 12, "columnPadding": column_padding}
+                configure(layout=layout, format=caption)
+                report["actions"].append({"layout": layout, "caption": caption})
+                toggle(2, True)
+                toggle(2, False)
+            configure(layout={"alignment": 1, "padding": 0, "columnPadding": -255}, format="Approved")
 
         check(content(2, 0, "AXCheckBox").set_boolean("AXFocused", True) == 0, "focus a checkbox before changing its entry validation")
         ax.wait_for(lambda: content(2, 0, "AXCheckBox").read("AXFocused") is True, "Checkbox did not retain keyboard focus")

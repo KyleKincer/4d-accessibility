@@ -12,7 +12,11 @@ python3 install_host_methods.py --project-dir /path/to/MyApp/Project --form Cust
 
 Repeat `--form` for selected forms, or use `--all-forms` for detail-screen and unspecified-destination forms. Bulk installation reports and skips list and print forms. A table form is addressed as `--form TableForms/1/RecordEditor`. Add `--area-list` for AreaList Pro. Run with `--dry-run` first to list proposed files. Repeating the command is idempotent. A conflicting object, edited generated helper or conflicting area stops preflight before any source is written.
 
-For named inheritance, the installer adds the area once in the shared base, leaving derived definitions unchanged. It resolves project forms and table forms by number or catalog name. Cycles, unresolved external/inline bases, and a local area in a derived form stop preflight. Preflight lists every known form inheriting an affected base, including unselected list/print forms.
+For named inheritance, the installer adds the area once in the shared base, leaving derived definitions unchanged. It resolves project forms and table forms by number or catalog name. A referenced list-row form and its inherited bases stay free of areas, even with an unspecified destination. A separate detail branch inheriting one of those bases owns its area locally. Cycles, unresolved external/inline bases, and a redundant local area in another derived form stop preflight. Preflight lists every known form inheriting an affected base, including unselected list/print forms.
+
+If an older bulk installation put an area in a list row or its shared base, preview `--all-forms` to migrate ownership. It removes only the exact canonical area and instruments the detail branches. An edited area stops all writes. A named-only installation reports that bulk migration is required, so it cannot silently remove accessibility from an unselected detail form. Review this migration as a whole.
+
+Method-only and `--form-metadata` refreshes do not inspect areas. After an older bulk installation, preview `--all-forms` once before returning to those update commands.
 
 Review those other uses too; use central opt-out where another inherited form should remain unregistered. List-screen uses inherited from that base must return `New object("enabled"; False)` from `AXB_Configure`, identified by `Current form name` and, for table forms, `Current form table`. Do not claim their accessibility through this detail-form path.
 
@@ -23,6 +27,8 @@ The installer adds `__AXB_Bridge`, a non-enterable 1×1 `%AXB Area`, at (0,0) on
 The [0.21.1 early-focus and close-during-load tests](../../../validation/compound-form-focus-0.21.1.json) verify area reservation before On Load on the tested runtime, so the existing [focus observer](INTEGRATION.md#repeated-controls-with-ambiguous-focus) can retain early events. Root registration and `AXB_Configure` still wait until the form reaches its ordinary event loop. Closing during On Load retires the reservation without starting a provider.
 
 For an ordinary form with clear existing labels, there is no application method to write. Its form method keeps its existing initialization, timer and business code. The area queues startup after initialization and retires its own captured lifetime when destroyed.
+
+Matching 0.22.0 development kits generate `Resources/AXB.FormMetadata.json` beside `Project`, including metadata from forms outside the selected set. This can happen during ordinary area installation even when that form has no list. Commit and ship the generated resource. Follow the [resource ownership and update contract](LIST-SUBFORMS.md#install-a-parent-form), keeping your existing installer options.
 
 ## One optional configuration method
 
