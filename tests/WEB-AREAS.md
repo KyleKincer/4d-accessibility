@@ -45,6 +45,15 @@ The pixel driver requires Pillow in the current Python environment, and prepares
 
 Preparation defaults to `--engine system`. Use `--engine embedded` for the Chromium case and begin with `test_web_fixture.py --run --read-only`. A missing `AXWebArea` is a failure, including when its content remains visible. Native system-engine evidence does not cover the embedded engine.
 
+Reproduce the bridge-free post-load VoiceOver probe with:
+
+```sh
+python3 prepare_web_fixture.py --server '/path/to/4D Server.app' --kit /path/to/complete-kit --engine embedded --baseline
+python3 test_web_fixture.py --run --read-only --voiceover
+```
+
+The recorded embedded probe is historical and has its own driver hash. Prelaunch VoiceOver is untested. `--read-only` skips browser editing and submission; adding `--voiceover` still toggles the checkbox and disclosure, then restores both. The integrated fixture's timer polls bridge diagnostics every six ticks as test instrumentation; ordinary host integration needs no such timer calls.
+
 The driver archives each successful or failed report under ignored `build/`, including requests, original handler state, tree observations, source/package hashes and owned-process exit. Rerun the full matrix after changing the driver. Compare `browserEvents` between baseline and bridge action runs before the integrated case's extra 4D editing, and require the same original event sequence for each execution mode. The integrated timer also reads bridge diagnostics and kit information; those calls are absent from the baseline.
 
 [Published evidence](../validation/native-web-areas.json) is the authority for accepted cases and known gaps, including the native web content's sibling reading order. The fixture does not validate arbitrary scripts, browser popups, cross-origin frames, engine switching, remote delivery or third-party plugin editors.

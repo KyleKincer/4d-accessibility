@@ -61,6 +61,14 @@ def main():
         bridge = reports["bridge-actions-" + mode]["browserEvents"]
         assert baseline == bridge, "Original browser event sequence changed in " + mode
         event_checks.append({"mode": mode, "passed": True, "events": baseline})
+    captions = [step["caption"] for step in reports["bridge-voiceover-compiled"]["voiceover"]]
+    close_index = next(index for index, caption in enumerate(captions) if "Close fixture" in caption and "button" in caption)
+    web_index = next(index for index, caption in enumerate(captions) if caption.lower().rstrip().endswith("native web fixture, web content"))
+    heading_index = next(index for index, caption in enumerate(captions) if "Native web fixture" in caption and "heading level 1" in caption)
+    assert close_index < web_index < heading_index, "Reassess the documented ordinary-group then native-web reading order"
+    reading_order = {"passed": True, "closeIndex": close_index, "webGroupIndex": web_index,
+                     "headingIndex": heading_index, "captions": captions,
+                     "scope": "Close visually below the web area is read before native web content; visual interleaving remains incomplete"}
     pixel_path = BUILD / "web-system-pixels.json"
     pixels = json.loads(pixel_path.read_text())
     assert pixels["passed"] and pixels["changedPixels"] == 0 and pixels["differenceBounds"] is None
@@ -69,9 +77,10 @@ def main():
         assert pixels["reports"][variant] == sha(BUILD / ("web-system-" + variant + "-pixels-compiled.json"))
     result = {"passed": True, "driver_sha256": driver, "runs": runs,
               "liveChecks": sum(len(run["checks"]) for run in runs), "browserEventChecks": event_checks,
+              "voiceoverReadingOrder": reading_order,
               "pixels": pixels, "pixels_report_sha256": sha(pixel_path)}
     (BUILD / "web-system-matrix.json").write_text(json.dumps(result, indent=2) + "\n")
-    print("PASS: seven current-driver runs, original browser event sequences and complete-window pixels")
+    print("PASS: seven current-driver runs, original browser events, recorded VoiceOver order and complete-window pixels")
 
 
 if __name__ == "__main__":

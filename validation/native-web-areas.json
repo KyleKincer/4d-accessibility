@@ -1112,7 +1112,8 @@
       }
     ],
     "report_sha256": "1b4b5ae13145dadee54e5d521ca43b7df5009e46d6805def6d0310852a885967",
-    "driver_sha256": "4a4fe344ba9adf3433254479f1b487ead1b6d43743dd576fb426d8d11ac3d1c4"
+    "driver_sha256": "4a4fe344ba9adf3433254479f1b487ead1b6d43743dd576fb426d8d11ac3d1c4",
+    "scope": "Historical bridge-free interpreted probe using its recorded older driver; post-load VoiceOver activation only, not part of the accepted system-engine matrix"
   },
   "browserEventChecks": [
     {
@@ -1216,8 +1217,8 @@
       ]
     }
   ],
-  "matrix_report_sha256": "fefebd97566583635d088000b15519c039f49a2baa6fa38765439498a9add88b",
-  "matrix_driver_sha256": "973131c4d7675a1433b09c14cf4ee59ee1d83facbe93dc6b1a54173538a8081a",
+  "matrix_report_sha256": "cb5df1b4ba7479c3c7c7badf8925b5f70b7e5843fce02a381dfe6127776f99fc",
+  "matrix_driver_sha256": "1f743c201c6a3249dd4679196459ec5cafea9dcf1720696e4e013babebb95b1f",
   "prepare_driver_sha256": "5c12c203c9a4ee44cb6ffd27b73b27c3982bd889a0a03de3a5ec7032b5f9f17f",
   "driver_sha256": "04fbedd1abb64556136eb988977b7e1fad475740c5d43b2fb416236f551d3a0f",
   "detailsGroupProbe": {
@@ -1231,5 +1232,42 @@
     "exitCode": 0,
     "report_sha256": "9ccb5fefc2adf3aa2f01071b9c82f1cc7937603a35558249262d154bff0af65e",
     "scope": "Historical native probe; transport succeeded while expansion did not occur, not part of the accepted seven-case matrix"
+  },
+  "voiceoverReadingOrder": {
+    "passed": true,
+    "closeIndex": 8,
+    "webGroupIndex": 10,
+    "headingIndex": 11,
+    "captions": [
+      "\u00d7 close, button",
+      "X minimize, button",
+      "X full screen, button",
+      "X AX native web fixture",
+      "X AX native web fixture, group",
+      "\u00d7 In AX native web fixture, group, 4 items Native field",
+      "\u00d7 Native field, Insertion at beginning of text., Native field, edit text",
+      "\u00d7 Count, button",
+      "\u00d7 Close fixture, button",
+      "X Out of AX native web fixture, group",
+      "X Native web fixture, web content",
+      "X In Native web fixture, web content, heading level 1, Native web fixture",
+      "X You are currently on a selectable text, inside of web content. To exit this web area, press Control-Option- Shift-Up Arrow.",
+      "\u00d7 Before, contents selected, Name, required, edit text",
+      "X Email",
+      "x before@example.test, contents selected, Email, required, email field",
+      "\u00d7 Enabled, checked, checkbox",
+      "X unchecked",
+      "X checked",
+      "X Enabled",
+      "\u00d7 Reset fixture, button",
+      "\u00d7 Submit fixture, button",
+      "\u00d7 More information, collapsed, summary",
+      "X expanded",
+      "\u00d7 Expanded content.",
+      "\u00d7 More information, expanded, summary",
+      "X collapsed",
+      "X link, Next page"
+    ],
+    "scope": "Close visually below the web area is read before native web content; visual interleaving remains incomplete"
   }
 }
