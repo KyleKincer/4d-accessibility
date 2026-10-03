@@ -96,6 +96,12 @@ Real 4D command tests pass 241 private-read and date/time checks, including proc
 
 Automatic relations, nonzero pages, page-nested lists, several lists in one parent and complete application workflows remain separate acceptance cases. This development gate does not establish every list layout or full UI coverage.
 
+## Appium Mac2/XCTest
+
+The exact 0.22.0 main CI binaries pass 18 checks in interpreted 4D and 18 in compiled 4D with one unchanged driver. XCTest exports the stable table, button and ordinary-editor identifiers; window-scoped lookups resolve each once. A native XCTest click runs the original synthetic inspection handler once, completes its saved-data read and preserves record, selection and modified state. [Commands and scope](../../../tests/APPIUM.md), [measured evidence](../../../validation/appium-0.22.0.json).
+
+This is a local 600-row classic-list fixture, with no runtime change. Identifier queries take roughly 34–36 seconds here. Real application workflows, SQUASH runner execution, editing, distant-row actions, replacement/reopen reacquisition, larger-form performance and remote delivery remain separate gates.
+
 ## Native web areas
 
 The matching 0.22.0 CI kit preserves the macOS system web area's native HTML provider beside ordinary 4D controls. Seven live runs with one unchanged driver pass 123 checks: native baseline and integrated actions in interpreted/compiled execution, compiled VoiceOver reading/checkbox/disclosure activation, and both pixel captures. The complete compiled window has zero changed pixels. The browser rejects invalid email and submits the actual edited values to a local endpoint; the original 4D handler runs once after navigation. No production code or new host hook is needed. Read [integration and engine limits](WEB-AREAS.md) and [exact evidence](../../../validation/native-web-areas.json). Native web content remains a sibling of the 4D group, so visual interleaving in VoiceOver navigation is still open. This does not cover arbitrary web applications or the embedded Chromium engine, whose bridge-free post-load VoiceOver probe remains without an `AXWebArea`.

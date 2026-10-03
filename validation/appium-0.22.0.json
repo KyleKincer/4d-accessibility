@@ -1,0 +1,473 @@
+{
+  "schema": 1,
+  "date": "2026-10-03",
+  "scope": "Local synthetic named scalar list parent through Appium Mac2/XCTest; stable identifiers and one original inspection-handler click. No runtime changes.",
+  "runtime": {
+    "4D": "20.0.8",
+    "macOS": "26.7.1",
+    "hostArchitecture": "arm64",
+    "fourDProcessArchitecture": "Not measured",
+    "Appium": "3.8.0",
+    "Mac2": "4.3.6"
+  },
+  "kit": {
+    "version": "0.22.0",
+    "sourceCommit": "94532f7a1cdca2a5b9651a109f61c94d7056f3f1",
+    "distribution": "Exact ad hoc main CI kit; not notarized",
+    "native_sha256": "b35b2edccdb8b9f9c0f35ba1c225df71f383345c77d55eddeb8760ce3cf8550a",
+    "component_sha256": "9c606404ffdcdab1e510f80ced6e7219dbb7083139f8260ffd5220cd23c65bc6",
+    "metadata_sha256": "75be9236d1b564237465e3e5fb26f0fc94614fa606c084c2313e16574f6131a4"
+  },
+  "runs": [
+    {
+      "compiled": false,
+      "runId": "7dc7714805ac49409964ebdac0c9c73a",
+      "startedAt": "2026-10-03T13:14:02.762673+00:00",
+      "driver_sha256": "94902bf52e110c82a502da0754bc4eecefafb72f437ad00d746a0412b14ef3e2",
+      "compile_sha256": "0425053511a7804f5fd1f6acb5c543c0fb960955012b057f59eb6c007765eaf1",
+      "source_sha256": "39488ea5649fb355c34a4ff811c43de41b762978f888113994fcaa73bb2a95a9",
+      "element_count": 5716,
+      "checks": [
+        {
+          "name": "The owned fixture runs in the requested 4D execution mode",
+          "passed": true
+        },
+        {
+          "name": "The loaded plugin and compiled component match the fixture version and mode",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one owned fixture window",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one Items with its stable identifier and role",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one Inspect with its stable identifier and role",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one Note with its stable identifier and role",
+          "passed": true
+        },
+        {
+          "name": "Appium scopes identifier queries to the owned fixture window",
+          "passed": true
+        },
+        {
+          "name": "The owned window has one Appium match for Items",
+          "passed": true
+        },
+        {
+          "name": "Appium finds Items by accessibility identifier",
+          "passed": true
+        },
+        {
+          "name": "The owned window has one Appium match for Inspect",
+          "passed": true
+        },
+        {
+          "name": "Appium finds Inspect by accessibility identifier",
+          "passed": true
+        },
+        {
+          "name": "The owned window has one Appium match for Note",
+          "passed": true
+        },
+        {
+          "name": "Appium finds Note by accessibility identifier",
+          "passed": true
+        },
+        {
+          "name": "Fresh fixture state confirms XCTest discovery preserves original handlers and record buffer",
+          "passed": true
+        },
+        {
+          "name": "The fixture continues publishing during the handler quiet period",
+          "passed": true
+        },
+        {
+          "name": "Appium activation preserves loaded record, selection and modified buffer",
+          "passed": true
+        },
+        {
+          "name": "Appium activation runs the original handler once and reads saved fixture data",
+          "passed": true
+        },
+        {
+          "name": "XCTest leaves focus in the owned fixture window",
+          "passed": true
+        }
+      ],
+      "dependencies": {
+        "ok": true,
+        "hostAPI": 1,
+        "nativeStatus": "Accessibility Bridge 0.22.0; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; macOS",
+        "componentInfo": {
+          "version": "0.22.0",
+          "protocol": 1,
+          "hostAPI": 1,
+          "automaticControls": 1,
+          "nativeFocus": 1,
+          "formOwnership": 1,
+          "rootDataOwnership": 1,
+          "sessionAllocation": 1,
+          "capturedStop": 1,
+          "compiled": true,
+          "hostCompiled": false
+        }
+      },
+      "before": {
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "events": [],
+        "inspections": 0
+      },
+      "final": {
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "events": [],
+        "inspections": 1,
+        "privateRead": {
+          "done": true,
+          "count": 600,
+          "first": "Record 0001",
+          "second": "Record 0002",
+          "last": "Record 0600",
+          "approved": false
+        }
+      },
+      "exitCode": 0,
+      "mode": "interpreted",
+      "passed": true,
+      "report_sha256": "298024ae29903045c218ed65832a5dc938b32aab8e549f64fd8a13d370188130",
+      "requestTimings": [
+        {
+          "method": "GET",
+          "path": "/status",
+          "seconds": 0.002
+        },
+        {
+          "method": "POST",
+          "path": "/session",
+          "seconds": 3.183
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/source",
+          "seconds": 15.484
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/elements",
+          "seconds": 6.982
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/title",
+          "seconds": 22.323
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/elements",
+          "seconds": 36.208
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/identifier",
+          "seconds": 22.16
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/elements",
+          "seconds": 34.21
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/identifier",
+          "seconds": 13.764
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/elements",
+          "seconds": 34.188
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/identifier",
+          "seconds": 13.81
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/click",
+          "seconds": 14.461
+        },
+        {
+          "method": "DELETE",
+          "path": "/session/<session>",
+          "seconds": 0.004
+        }
+      ]
+    },
+    {
+      "compiled": true,
+      "runId": "fcc122b6ad81444fba8b26c644156d35",
+      "startedAt": "2026-10-03T13:18:02.000738+00:00",
+      "driver_sha256": "94902bf52e110c82a502da0754bc4eecefafb72f437ad00d746a0412b14ef3e2",
+      "compile_sha256": "0425053511a7804f5fd1f6acb5c543c0fb960955012b057f59eb6c007765eaf1",
+      "source_sha256": "39488ea5649fb355c34a4ff811c43de41b762978f888113994fcaa73bb2a95a9",
+      "element_count": 5716,
+      "checks": [
+        {
+          "name": "The owned fixture runs in the requested 4D execution mode",
+          "passed": true
+        },
+        {
+          "name": "The loaded plugin and compiled component match the fixture version and mode",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one owned fixture window",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one Items with its stable identifier and role",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one Inspect with its stable identifier and role",
+          "passed": true
+        },
+        {
+          "name": "XCTest exports one Note with its stable identifier and role",
+          "passed": true
+        },
+        {
+          "name": "Appium scopes identifier queries to the owned fixture window",
+          "passed": true
+        },
+        {
+          "name": "The owned window has one Appium match for Items",
+          "passed": true
+        },
+        {
+          "name": "Appium finds Items by accessibility identifier",
+          "passed": true
+        },
+        {
+          "name": "The owned window has one Appium match for Inspect",
+          "passed": true
+        },
+        {
+          "name": "Appium finds Inspect by accessibility identifier",
+          "passed": true
+        },
+        {
+          "name": "The owned window has one Appium match for Note",
+          "passed": true
+        },
+        {
+          "name": "Appium finds Note by accessibility identifier",
+          "passed": true
+        },
+        {
+          "name": "Fresh fixture state confirms XCTest discovery preserves original handlers and record buffer",
+          "passed": true
+        },
+        {
+          "name": "The fixture continues publishing during the handler quiet period",
+          "passed": true
+        },
+        {
+          "name": "Appium activation preserves loaded record, selection and modified buffer",
+          "passed": true
+        },
+        {
+          "name": "Appium activation runs the original handler once and reads saved fixture data",
+          "passed": true
+        },
+        {
+          "name": "XCTest leaves focus in the owned fixture window",
+          "passed": true
+        }
+      ],
+      "dependencies": {
+        "ok": true,
+        "hostAPI": 1,
+        "nativeStatus": "Accessibility Bridge 0.22.0; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; macOS",
+        "componentInfo": {
+          "version": "0.22.0",
+          "protocol": 1,
+          "hostAPI": 1,
+          "automaticControls": 1,
+          "nativeFocus": 1,
+          "formOwnership": 1,
+          "rootDataOwnership": 1,
+          "sessionAllocation": 1,
+          "capturedStop": 1,
+          "compiled": true,
+          "hostCompiled": true
+        }
+      },
+      "before": {
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "events": [],
+        "inspections": 0
+      },
+      "final": {
+        "before": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "after": {
+          "loaded": false,
+          "record": -1,
+          "position": 1,
+          "count": 600,
+          "modified": false,
+          "selection": "43247994f312db0507bab510cc55aa7b81c5347c9035a977f8fd0e0547e9fe4b"
+        },
+        "events": [],
+        "inspections": 1,
+        "privateRead": {
+          "done": true,
+          "count": 600,
+          "first": "Record 0001",
+          "second": "Record 0002",
+          "last": "Record 0600",
+          "approved": false
+        }
+      },
+      "exitCode": 0,
+      "mode": "compiled",
+      "passed": true,
+      "report_sha256": "0df951a1569205777c73d69b1d1d2648b86b3d2cf92940f50e82eb13ff7468d3",
+      "requestTimings": [
+        {
+          "method": "GET",
+          "path": "/status",
+          "seconds": 0.002
+        },
+        {
+          "method": "POST",
+          "path": "/session",
+          "seconds": 3.202
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/source",
+          "seconds": 15.355
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/elements",
+          "seconds": 6.925
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/title",
+          "seconds": 22.536
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/elements",
+          "seconds": 35.614
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/identifier",
+          "seconds": 22.488
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/elements",
+          "seconds": 33.933
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/identifier",
+          "seconds": 13.855
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/elements",
+          "seconds": 34.148
+        },
+        {
+          "method": "GET",
+          "path": "/session/<session>/element/<element>/attribute/identifier",
+          "seconds": 13.73
+        },
+        {
+          "method": "POST",
+          "path": "/session/<session>/element/<element>/click",
+          "seconds": 14.167
+        },
+        {
+          "method": "DELETE",
+          "path": "/session/<session>",
+          "seconds": 0.004
+        }
+      ]
+    }
+  ],
+  "liveChecks": 36,
+  "timingScope": "Measured requests on a 600-row fixture. Paths replace session and element handles with placeholders. No general performance acceptance.",
+  "limitations": [
+    "No AXPress/completion-receipt claim from XCTest click",
+    "No grid editing or distant-row activation",
+    "No save/reopen or replacement locator reacquisition",
+    "No Symphony workflow, QA-Driver or SQUASH runner execution",
+    "No remote client or physical Intel acceptance",
+    "Identifier queries take roughly 34-36 seconds here; larger-form performance remains open"
+  ]
+}
