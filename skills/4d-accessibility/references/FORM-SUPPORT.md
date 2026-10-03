@@ -6,7 +6,7 @@ Use the [current support status](STATUS.md) and [validation record](VALIDATION.m
 
 ## Subforms and repeated instances
 
-With the automatic provider, start and stop only the root. Visible page subforms are discovered recursively. Supply child labels in `options.children`, and call `AXB_Form("invalidate"; New object("subform"; containerName))` at the shared replacement boundary. Children can share a business-data object. The bridge owns their distinct identities outside that data. Repeated forms with shared control bindings may need the [form-level focus observer](INTEGRATION.md#repeated-controls-with-ambiguous-focus). See [the automatic subform example](examples/AUTOMATIC-FORM.md#repeated-and-nested-page-subforms).
+With the automatic provider, start and stop only the root. Visible page subforms are discovered recursively. Supply child labels in `options.children`, and call `AXB_Form("invalidate"; New object("subform"; containerName))` at the shared replacement boundary. Children can share a business-data object. The bridge owns their distinct identities outside that data. Duplicate-named editors, including separately bound generated children, may need the [form-level focus observer](INTEGRATION.md#repeated-controls-with-ambiguous-focus). See [the automatic subform example](examples/AUTOMATIC-FORM.md#repeated-and-nested-page-subforms).
 
 ### Explicit child providers
 

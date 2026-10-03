@@ -3,6 +3,7 @@
 var $reply; $view; $context; $registry; $area; $candidate : Object
 var $x; $y : Integer
 var $aliases : Boolean
+var $focusObservers : Collection
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
 If (New collection("start"; "register"; "stop"; "invalidate"; "diagnostics"; "event").indexOf($operation)<0)
  return
@@ -172,6 +173,9 @@ If (($area#Null) && ($area.context.active=True) && (Position("; tabs 1;"; $resul
  // canvas geometry. Normal close/replacement still retires it completely.
  $reply:=AXB_Host("layout"; New object("operation"; "restart"))
 End if
+If (($operation="start") && (AXB_FormContext#Null))
+ $focusObservers:=AXB_FormObserver("snapshot"; Null)
+End if
 $reply:=AXB_Form("stop"; New object)
 If ($aliases)
  OB REMOVE(Form; "axbError")
@@ -194,6 +198,7 @@ If ($operation="start")
  End if
  CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
  AXB_FormRoots[String(Current form window)]:=New object("context"; $context; "data"; Form; "formName"; Current form name; "origin"; New collection($x; $y); "bindings"; New object)
+ AXB_FormRoots[String(Current form window)].focusObservers:=$focusObservers
  $result:=AXB_Host("start"; New object("poll"; Formula(AXB_FormPoll)))
  If ($result.ok=True)
   $context.session:=$result.session

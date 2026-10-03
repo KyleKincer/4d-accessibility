@@ -44,7 +44,12 @@ def activate_fixture(process, project, title):
         # activates this existing instance after window creation has finished.
         subprocess.run(["/usr/bin/open", "-a", "/Applications/4D/4D.app"], check=True, timeout=10)
     ax.wait_for(lambda: app.read("AXFrontmost") is True, "Owned fixture did not activate")
-    ax.wait_for(lambda: app.read("AXFocusedWindow") and app.read("AXFocusedWindow").read("AXTitle") == title, "Owned fixture window did not receive keyboard focus")
+    focused = app.read("AXFocusedWindow")
+    if not focused or not focused.same_as(window):
+        # Returning from a nonblocking startup can activate the design toolbar.
+        # Raise only the verified owned window, then retain the focus guard.
+        assert window.perform("AXRaise") == 0, "Owned fixture window could not be raised"
+    ax.wait_for(lambda: app.read("AXFocusedWindow") and app.read("AXFocusedWindow").same_as(window), "Owned fixture window did not receive keyboard focus")
     return app, window
 
 

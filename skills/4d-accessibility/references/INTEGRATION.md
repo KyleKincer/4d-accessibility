@@ -4,13 +4,13 @@ Install the bridge once per application. Prefer the [lifecycle area](AREA-INTEGR
 
 This guide applies to any 4D project. Start with the [automatic ordinary-form example](examples/AUTOMATIC-FORM.md). The explicit [custom-provider example](examples/SIMPLE-FORM.md) and [legacy explicit AreaList example](examples/AREALIST-FORM.md) explain the existing extension contract.
 
-The working source is an implementation checkpoint. Build both packages and install the host source from one commit. Mismatched parts fail at startup with a capability error; see the startup-result table below.
+The working source is an implementation checkpoint. Build both packages and install the host source from one commit. Startup rejects missing capabilities; compare both runtime versions with the kit version as well. See [setup checks](SETUP.md) and the startup-result table below.
 
 | Current status | Coverage |
 | --- | --- |
 | Previously exercised in isolated live fixtures; rerun in your host | Ordinary inputs/buttons, checkboxes/radios, typed dropdowns and hierarchical popup menus, editable combos, automatic page subforms with scrolling and reveal on macOS 26, semantic groups, described images, numeric/date/time progress, rulers and steppers, and all logical rows and columns of flat native array, collection, entity-selection and AreaList grids. AreaList text editing is limited to BMP text; further cell types remain open. Editable progress uses the shared-controller mapping below; other tested controls retain their existing editors and handlers. See [validation scope](VALIDATION.md) for the evidence boundaries and required reruns. |
 | Previously exercised native cell controls; rerun in your host | Boolean checkbox/popup and numeric mixed-state cells, including repeated child grids and VoiceOver. See [validation scope](VALIDATION.md). |
-| Compatibility branch | Tabs pass their scoped gate; ordinary styled fields have live evidence. Classic-selection grids are implemented with acceptance in progress. Check [current status](STATUS.md) and install matching branch packages. |
+| Current source | Tabs, ordinary styled fields and flat classic-selection grids pass their scoped gates. Compound generated focus adds initial-event, restart and replacement checks in 0.21.1. Check [current status](STATUS.md) and install matching packages. |
 | Still required | Dials, editable pictures, hierarchical lists and further grid layouts/cell types, AreaList supplementary Unicode and protected editing, IME and exact text geometry, further assistive-technology testing, standard-action dropdown menus, `AXScrollToVisible` before macOS 26, root forms larger than their window, expanded compiled desktop coverage, client/server delivery, and complete application workflows. |
 
 The [full accessibility requirements](REQUIREMENTS.md) define completion. Resolve every unsupported control before calling its screen accessible.
@@ -135,7 +135,7 @@ $bridge:=AXB_Form("invalidate"; New object("subform"; "ShippingAddress"))
 // Existing data binding and OBJECT SET SUBFORM follow.
 ```
 
-If the bridge cannot identify the calling parent, it retires all child identities. Repeated children with shared bindings may also need the [focus observer](#repeated-controls-with-ambiguous-focus) in their reusable form method. See the [automatic child example](examples/AUTOMATIC-FORM.md#repeated-and-nested-page-subforms) for configuration, and the separate recipes for [generated forms](examples/DYNAMIC-FORM.md) and [explicit child providers](FORM-SUPPORT.md#explicit-child-providers).
+If the bridge cannot identify the calling parent, it retires all child identities. Duplicate-named editors, including separately bound generated children, may also need the [focus observer](#repeated-controls-with-ambiguous-focus) in their reusable form method. See the [automatic child example](examples/AUTOMATIC-FORM.md#repeated-and-nested-page-subforms) for configuration, and the separate recipes for [generated forms](examples/DYNAMIC-FORM.md) and [explicit child providers](FORM-SUPPORT.md#explicit-child-providers).
 
 ### Scrolling and reading order
 
@@ -149,21 +149,31 @@ The bridge scrolls page subforms only. It never scrolls or resizes the root wind
 
 ### Repeated controls with ambiguous focus
 
-Most area-integrated forms need no lifecycle hooks. Repeated instances of one form can need one additional form-level observer when their controls share an object name and the same binding: a process or interprocess variable, or `Form.<property>` on a shared data object. The observer also handles an application handler moving focus between repeated editors. In 4D 20.8, a list-box data-change handler can move to an ordinary editor while the native caret API still reports the old grid's position. The bridge must identify the actual focused instance before it can publish focus or confirm an action.
+Start without a focus observer. Native caret and pointer handling already identify most editors, including many forms with duplicate object names.
 
-Add this call at the top of each affected reusable form's method, before its event dispatch and any early return:
+Focus each duplicate-named editor with the keyboard and an external AX client. Compare the reported focused control with the actual editor, and read the root's `AXB_Form("diagnostics"; New object)`. Add an observer if focus is wrong or reports `ambiguousFocus`. Known cases include repeated shared bindings, generated nonblocking parent/child forms with `Form.<property>` editors, and a list-box handler moving focus while the native caret still reports the previous cell.
+
+Add this call at the top of the affected form's method, before its event dispatch and any early return. Create a form method if it has none:
 
 ```4d
 var $observed : Object
 $observed:=AXB_Form("event"; New object)
-// Existing Case of / form-event handling follows unchanged.
+// Existing form-event handling follows.
 ```
 
-Enable that form's On Load event. The observer then enables its On Getting Focus and On Losing Focus events, preserving the other event settings. It observes every control in that form; object methods need no hooks. Each affected nested form needs its own call. The call also works when `Form` is Null, so place it before any application guard that returns for missing form data.
+For a generated form, put the call in the method named by its JSON `method` property and include `"onLoad"` in its `events` list through the existing builder.
 
-The observer does not start a bridge or change values. Existing form branches for the newly enabled focus events will also run, including when the root has not started accessibility. Retain their ordinary behavior. Focus events are enabled whenever both packages are present and the component is compatible, even if the root later fails to start because a native capability is missing. With absent or incompatible packages, the observer returns `dependencyUnavailable` or `incompatibleComponent` and leaves event settings alone. Handling that result is optional where accessibility packages are optional.
+Enable that form's On Load event. The call enables On Getting Focus and On Losing Focus for its controls, preserving the other event settings. Review catch-all or event-agnostic application code before enabling these events; existing handlers will also receive them. Object methods need no hooks. The call accepts Null `Form` data, so put it before an application guard for missing data.
 
-After the complete tree refreshes, the bridge resolves the event against current form instances. An observation that cannot identify one instance is discarded. Check the root's `AXB_Form("diagnostics"; New object)` report for `ambiguousFocus`; each issue gives the candidate control's child path. With shared data, the bridge distinguishes instances by position. If scrolling moves another instance into that position before the next refresh, it discards the observation and focus can remain ambiguous until it changes again. The diagnostic appears only while a repeated control has keyboard focus during a poll. Focus each candidate in turn, and exercise scrolling, record changes and child replacement.
+Complete the affected branch. Every descendant form that could contain the same native object or column name needs the observer too, even if its own handlers already enable focus events. Forms above it need one only if their own editors are ambiguous. A parent-only observer can make a previously readable parent editor ambiguous when a same-named child lacks an observer. The bridge then accepts only an exact native binding or an adapter identifying its active editor. Variables and stored fields can provide binding pointers; generated dynamic variables normally have a distinct pointer per instance. `Form.<property>` editors have no such pointer. Children whose native names are all distinct need no extra call for this check.
+
+Focus each candidate again, including the parent. If it reports `ambiguousFocus`, inspect descendant form definitions and list-box part names for that name and verify their form methods have the call and On Load enabled. Coverage issues list supported candidate controls, not necessarily the child missing an observer. Shared instances that move into another instance's previous position can also remain ambiguous. This is expected; more observer calls do not resolve it. Move focus away and back to capture the current owner. Test scrolling, intentional restart, record changes and child replacement. Keep [invalidation before replacement](#child-forms).
+
+Initial focus retention in generated nonblocking forms needs the complete 0.21.1 kit. Verify both versions through `AXB_Host("info"; New object)` as described in [setup](SETUP.md). Startup capability checks alone do not detect an older plugin that lacks early area reservation. The [acceptance record](../../../validation/compound-form-focus-0.21.1.json) includes early focus, restart, replacement and unique-pointer fallback.
+
+An area-less manual registration cannot retain observer participation before the root starts. For duplicate-named parent/child editors, prefer the area. If keeping manual ownership, start the initialized root before loading those children and retain the loading guard when initialization yields. If 4D loads the children before root On Load, use the area to capture that ordering. See [manual lifecycle](MANUAL-LIFECYCLE.md).
+
+The observer changes neither values nor lifecycle ownership. With absent or incompatible packages, it returns `dependencyUnavailable` or `incompatibleComponent` and leaves event settings alone. Handling that result is optional when the packages are optional. With compatible packages, it enables focus events even if root startup later fails for another missing capability.
 
 ### Map editable progress bars to a controller
 
@@ -218,7 +228,7 @@ This is an optional debugging/verification call, not another lifecycle hook. Do 
 | --- | --- |
 | `missingLabel` | Supply a meaningful control label. |
 | `ambiguousGroup` | Set the intended group explicitly in control metadata. |
-| `ambiguousFocus` | Add the [form-level focus observer](#repeated-controls-with-ambiguous-focus) to the affected repeated forms and validate focus through their lifecycle. |
+| `ambiguousFocus` | Follow the [focus decision and branch checks](#repeated-controls-with-ambiguous-focus), then validate every affected editor through its lifecycle. |
 | `providerPending` | Verify a complete native provider, or implement the missing bridge family. |
 | `popupValueTypePending` | The popup can open, but its selected value needs a supported reader. |
 | `adjustmentCallbackRequired` | Map the editable progress bar to its existing shared controller using [`controls.<name>.adjust`](#map-editable-progress-bars-to-a-controller). |
