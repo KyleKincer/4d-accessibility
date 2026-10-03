@@ -1,54 +1,17 @@
 // Run only after the same view has refreshed its provider state. Returning a
 // page never scrolls, selects, enters an editor or evaluates a source expression.
 #DECLARE($operation : Text; $options : Object; $state : Object; $request : Object) -> $result : Object
-var $descriptor; $query; $page; $rowData; $column; $definition; $cell; $action; $data; $value : Object
-var $rows; $cells; $positions : Collection
+var $descriptor; $column; $cell; $action; $data; $value : Object
+var $positions : Collection
 var $key; $columnID; $text : Text
-var $r; $c; $start; $end; $firstColumn; $lastColumn; $position; $scrollRow; $scrollColumn : Integer
+var $start; $end; $position; $scrollRow; $scrollColumn; $alignment : Integer
 $result:=New object("ok"; True; "pages"; New collection; "status"; "rejected"; "message"; "Grid changed before the request")
 If (Not($state.valid=True))
  return
 End if
 $descriptor:=$state.descriptor
 If ($operation="readGrid")
- For each ($query; $request.requests)
-  If (($query.generation=$descriptor.generation) & ($query.order=$descriptor.order))
-   $start:=$query.row
-   $end:=$start+$query.rowCount
-   $firstColumn:=$query.column
-   $lastColumn:=$firstColumn+$query.columnCount
-   If (($start<0) | ($end>$descriptor.rows.length) | ($query.rowCount<1) | ($query.rowCount>16) | ($firstColumn<0) | ($lastColumn>$descriptor.columns.length) | ($query.columnCount<1) | ($query.columnCount>8))
-    return
-   End if
-   $rows:=New collection
-   For ($r; $start; $end-1)
-    $key:=$descriptor.rows[$r]
-    $position:=$state.positions[$key]
-    $cells:=New collection
-    For ($c; $firstColumn; $lastColumn-1)
-     $definition:=$descriptor.columns[$c]
-     $columnID:=$definition.id
-     $column:=$state.columns[$columnID]
-     $value:=AXB_GridValue($state; $column; $position)
-     $cell:=New object("column"; $columnID; "value"; $value.value; "enabled"; $value.ok & $definition.enabled & $value.enabled & (AXB_KeyIndex($descriptor.disabled; $key)<0); "editable"; $value.editable & $definition.editable & (AXB_KeyIndex($descriptor.uneditable; $key)<0))
-     If ($value.role#Null)
-      $cell.role:=$value.role
-      If ($value.checked#Null)
-       $cell.checked:=$value.checked
-      End if
-      If ($value.label#Null)
-       $cell.label:=$value.label
-      End if
-     End if
-     $cells.push($cell)
-    End for
-    $rows.push(New object("id"; $key; "cells"; $cells))
-   End for
-   $page:=New object("node"; $query.node; "generation"; $descriptor.generation; "order"; $descriptor.order; "row"; $start; "column"; $firstColumn; "rows"; $rows)
-   $result.pages.push($page)
-  End if
- End for each
- return
+ return AXB_GridReadPages($state; $request.requests)
 End if
 If (($operation#"apply") | (Current form window#Frontmost window))
  return
@@ -145,8 +108,18 @@ If (New collection("gridReveal"; "gridEdit"; "gridPress"; "gridSetValue"; "gridS
   If ($action.value.expectedEditor=Null)
    If ($action.operation="gridPress")
     // EDIT ITEM changes row selection when the cell later loses focus.
-    // Reveal first; activation uses the same native click as the visible widget.
-    OBJECT SET SCROLL POSITION(*; $options.objectName; $position; $column.number)
+    $alignment:=OBJECT Get horizontal alignment(*; $column.name)
+    If (($value.role="checkbox") & Not(($value.boolean=True) & ($alignment=Align right)))
+     // In 4D 20.8 a minimally revealed checkbox can ignore activation
+     // after focus and blur. Place its own column first before clicking.
+     OBJECT SET SCROLL POSITION(*; $options.objectName; $position; $column.number; *)
+    Else
+     // Returning from another column can leave the native popup or
+     // trailing Boolean hit region at the old horizontal origin. Reset and reveal within this callback;
+     // confirmation uses its fresh cell bounds without entering an editor.
+     OBJECT SET SCROLL POSITION(*; $options.objectName; $position; 1; *)
+     OBJECT SET SCROLL POSITION(*; $options.objectName; $position; $column.number)
+    End if
    Else
     EDIT ITEM(*; $column.name; $position)
    End if

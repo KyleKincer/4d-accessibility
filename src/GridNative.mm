@@ -117,6 +117,13 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @interface AXBGridHeaderGroup : AXBGridPart
 @end
 
+BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
+    if (![element isKindOfClass:AXBGridWidget.class] || ![activity[@"operation"] isEqual:@"gridReveal"]) return NO;
+    AXBGridCell *cell = ((AXBGridWidget *)element).cell;
+    return [activity[@"node"] isEqual:cell.table.data[@"id"]] &&
+        [activity[@"row"] isEqual:cell.row.key] && [activity[@"column"] isEqual:cell.columnKey];
+}
+
 @implementation AXBGridPart
 - (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute { return AXBAttributeIsSettable(self, attribute); }
 - (BOOL)isAccessibilityElement { return self.live && self.table.isAccessibilityElement && self.table.grid.active; }

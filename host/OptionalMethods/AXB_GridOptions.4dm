@@ -20,7 +20,7 @@ For each ($name; $grids)
    return
   End if
  End if
- If (New collection("array"; "areaList"; "collection"; "entity"; "selection").indexOf($options.kind)<0)
+ If (New collection("array"; "areaList"; "collection"; "entity"; "selection"; "listSubform").indexOf($options.kind)<0)
   return
  End if
  If ($options.kind="array")
@@ -85,6 +85,11 @@ For each ($name; $grids)
   End for each
  End if
  If (OB Is defined($options; "meta") & (New collection("collection"; "entity").indexOf($options.kind)<0))
+  return
+ End if
+ // A list subform owns its native current selection and selection events.
+ // Do not silently accept listbox callbacks which this provider cannot use.
+ If (($options.kind="listSubform") & (OB Is defined($options; "selection") | OB Is defined($options; "onSelection")))
   return
  End if
  For each ($property; New collection("ready"; "onSelection"; "selection"; "meta"))

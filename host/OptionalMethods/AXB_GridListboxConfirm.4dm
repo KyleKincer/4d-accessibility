@@ -179,16 +179,24 @@ Else
    If ($padding=lk inherited)
     $padding:=LISTBOX Get property(*; $data.options.objectName; lk cell horizontal padding)
    End if
-   // 4D 20.8 places the native indicator center 11 logical pixels inside
-   // its padded edge. Live left/center/right and inherited-padding cases
-   // verify this; the native dispatcher also checks the clipped cell hit.
-   $inset:=New collection(11+New collection(0; $padding).max(); ($right-$left)/2).min()
+   // Use the native hit region, which differs from the painted indicator's
+   // center in 4D 20.8. Leading and centered indicators accept their trailing
+   // half; numeric trailing indicators accept the padded edge. A trailing
+   // Boolean uses the same trailing edge after its origin is reset.
+   // The dispatcher verifies the clipped hit.
+   $inset:=New collection(17+New collection(0; $padding).max(); ($right-$left)/2).min()
    If ($alignment=Align left)
     $x:=$left+$inset
    End if
-   If ($alignment=Align right)
-    $x:=$right-$inset
+   If ($alignment=Align center)
+    $x:=$x+New collection(6; (($right-$left)/2)-1).min()
    End if
+   If ($alignment=Align right)
+    $x:=$right-New collection(2+New collection(0; $padding).max(); ($right-$left)/2).min()
+   End if
+  End if
+  If ($value.role="popup")
+   $x:=$right-New collection(11; ($right-$left)/2).min()
   End if
   CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
   $data.inputSent:=True

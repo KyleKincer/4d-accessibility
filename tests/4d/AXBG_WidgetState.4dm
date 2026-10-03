@@ -16,6 +16,9 @@ If (Not(Form.widgetReadOnly=True) && File("/RESOURCES/widget-command.json").exis
   Form.widgetAfterRedirect:=$command.afterRedirect=True
   Form.widgetAfterDisable:=$command.afterDisable=True
   OBJECT SET ENTERABLE(*; "Approved"; True)
+  If ($command.format#Null)
+   OBJECT SET FORMAT(*; "Approved"; $command.format)
+  End if
   If ($command.layout#Null)
    LISTBOX SET PROPERTY(*; "Items"; lk cell horizontal padding; $command.layout.padding)
    For each ($name; New collection("Approved"; "Mixed"))

@@ -4,11 +4,13 @@
 var $view; $description; $node; $other; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
 var $pageByObject : Object
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
+var $detailForm; $listForm : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames : Collection
 var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY; $part : Integer
 var $x; $y; $r; $b : Real
 var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
 var $pointer; $focusPointer : Pointer
+var $subformTable : Pointer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
@@ -112,7 +114,7 @@ If ($view.automatic=True)
  $unsupported:=New collection
  For each ($issue; $description.unsupported)
   $allowed:=False
-  If ($issue.reason="providerPending")
+  If (New collection("providerPending"; "listSubformPending").indexOf($issue.reason)>=0)
    For each ($node; $grids.nodes)
     If (Compare strings($node.objectName; $issue.object; sk char codes)=0)
      $allowed:=True
@@ -203,6 +205,11 @@ If (($request.operation="apply") | ($request.operation="confirm") | ($request.op
    return
   End if
   If ((OBJECT Get type(*; $name)#Object type subform) | Not(OBJECT Get visible(*; $name)) | (Not(OBJECT Get enabled(*; $name)) & Not($readOnly)))
+   return
+  End if
+  OBJECT GET SUBFORM(*; $name; $subformTable; $detailForm; $listForm)
+  If ($listForm#"")
+   $result.error:="listSubformPending"
    return
   End if
   // Keep deferred formulas and their form-owned data by reference. Only this
@@ -449,6 +456,12 @@ If (Value type($description.subforms)=Is collection)
      $b:=New collection($b; $clip[1]+$clip[3]).min()
     End if
     $path:=$request.path.concat(New collection($name))
+    OBJECT GET SUBFORM(*; $name; $subformTable; $detailForm; $listForm)
+    If ($listForm#"")
+     // Explicit child discovery must not publish a repeated list as one row.
+     $result.issues.push(New object("path"; $path; "object"; $name; "reason"; "listSubformPending"))
+     continue
+    End if
     $packet:=New object("operation"; "describe"; "path"; $path; "offset"; New collection($left+$offset[0]; $top+$offset[1]); "clip"; New collection($x; $y; New collection(0; $r-$x).max(); New collection(0; $b-$y).max()); "enabled"; $request.enabled & Not($description.enabled=False) & OBJECT Get enabled(*; $name); "depth"; $request.depth+1)
     $packet.ancestors:=$lineage
     $packet.nativeEnabled:=$request.nativeEnabled & OBJECT Get enabled(*; $name)
