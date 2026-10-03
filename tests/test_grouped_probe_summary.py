@@ -10,10 +10,11 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import summarize_grouped_probe as summary
+import summarize_grouped_inputs as inputs
 
 
 class SummaryTests(unittest.TestCase):
-    def check_changed_method(self, *, rename):
+    def check_changed_method(self, producer, *, rename):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             build = root / "build"
@@ -48,15 +49,15 @@ class SummaryTests(unittest.TestCase):
             pillow.Image = ModuleType("Image")
             pillow.ImageChops = ModuleType("ImageChops")
             with (
-                patch.object(summary, "ROOT", root),
-                patch.object(summary, "BUILD", build),
+                patch.object(producer, "ROOT", root),
+                patch.object(producer, "BUILD", build),
                 patch.object(sys, "argv", ["summarize_grouped_probe.py", "--output", str(output)]),
                 patch.dict(sys.modules, {"PIL": pillow}),
                 patch("subprocess.Popen", side_effect=AssertionError("No subprocess may start")) as popen,
-                patch.object(summary.unittest.defaultTestLoader, "discover", side_effect=AssertionError("Source validation must reject first")) as discover,
+                patch.object(producer.unittest.defaultTestLoader, "discover", side_effect=AssertionError("Source validation must reject first")) as discover,
             ):
                 with self.assertRaisesRegex(AssertionError, "Canonical, prepared and manifest AXHP methods differ"):
-                    summary.main()
+                    producer.main()
             record = json.loads(output.read_text())
             self.assertFalse(record["passed"])
             self.assertNotEqual(record["date"], "old")
@@ -65,10 +66,16 @@ class SummaryTests(unittest.TestCase):
             discover.assert_not_called()
 
     def test_deleted_method_invalidates_old_success(self):
-        self.check_changed_method(rename=False)
+        self.check_changed_method(summary, rename=False)
 
     def test_renamed_method_invalidates_old_success(self):
-        self.check_changed_method(rename=True)
+        self.check_changed_method(summary, rename=True)
+
+    def test_inputs_deleted_method_invalidates_old_success(self):
+        self.check_changed_method(inputs, rename=False)
+
+    def test_inputs_renamed_method_invalidates_old_success(self):
+        self.check_changed_method(inputs, rename=True)
 
 
 if __name__ == "__main__":

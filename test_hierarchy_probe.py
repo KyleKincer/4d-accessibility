@@ -64,7 +64,10 @@ def main():
     parser.add_argument("--compiled", action="store_true")
     parser.add_argument("--commands", action="store_true", help="Probe public mutations and native keyboard event delivery separately")
     parser.add_argument("--grouped-states", action="store_true", help="Observe grouped selection and latent disclosure prerequisites; no adapter acceptance")
+    parser.add_argument("--grouped-inputs", action="store_true", help="Probe visible later/nested break center clicks and native keyboard disclosure; selection-preserving disclosure remains unvalidated")
     args = parser.parse_args()
+    if args.grouped_inputs and (not args.commands or args.grouped_states):
+        parser.error("--grouped-inputs requires --commands and cannot combine with --grouped-states")
     if not args.run:
         parser.error("--run is required for the owned desktop probe")
     if args.grouped_states and not args.commands:
@@ -102,10 +105,11 @@ def main():
     report["compileReportSHA256"] = hashlib.sha256(
         (BUILD / "hierarchy-probe-compile.json").read_bytes()).hexdigest()
     mode = "compiled" if args.compiled else "interpreted"
-    report_path = BUILD / ("hierarchy-probe-" + mode + ".json")
+    prefix = "hierarchy-input-probe-" if args.grouped_inputs else "hierarchy-probe-"
+    report_path = BUILD / (prefix + mode + ".json")
     report_path.write_text(json.dumps(report, indent=2) + "\n")
     checks_finished = False
-    with (BUILD / ("hierarchy-probe-" + mode + ".log")).open("w") as log:
+    with (BUILD / (prefix + mode + ".log")).open("w") as log:
         process = subprocess.Popen(["/Applications/4D/4D.app/Contents/MacOS/4D",
             "--project", str(project), "--dataless", "--opening-mode", mode,
             "--webadmin-auto-start", "false"], stdout=log, stderr=log)
@@ -162,7 +166,7 @@ def main():
                 result["children"] = [tree(x, depth+1) for x in element.read("AXChildren") or [] if isinstance(x, ax.Element)]
                 return result
             report["nativeAX"] = tree(window)
-            ax.capture_window(process.pid, BUILD / ("hierarchy-probe-" + mode + ".png"))
+            ax.capture_window(process.pid, BUILD / (prefix + mode + ".png"))
             if args.commands:
                 report["commandProbes"] = []
                 def command(operation, **payload):
@@ -417,7 +421,89 @@ def main():
                     assert all(length == 0 for length in empty["arrayLengths"].values())
                     report["checks"].append("Blank backing row and empty list read safely without claiming lazy or loaded-empty branches")
                     report["checks"].append("Full grouped reader preserves independently captured selection, focus, scroll and OK")
-                ax.capture_window(process.pid, BUILD / ("hierarchy-commands-" + mode + ".png"))
+                ax.capture_window(process.pid, BUILD / (("hierarchy-input-commands-" if args.grouped_inputs else "hierarchy-commands-") + mode + ".png"))
+            if args.grouped_inputs:
+                report["groupedInputScope"] = "Exploratory native later/nested group keyboard routing. No adapter or VoiceOver acceptance."
+                command("groupCase", name="repeated")
+                command("groupCollapseAll")
+                reference = state()
+                def sample_cell(snapshot, row, column):
+                    return next(c for c in snapshot["afterGroup"]["coordinates"] if c["row"] == row and c["column"] == column)
+                def is_positive(snapshot, row, column):
+                    return sample_cell(snapshot, row, column)["positive"]
+                def group_click(row, column):
+                    before = state()
+                    cell = sample_cell(before, row, column)
+                    assert cell["positive"] and cell["hit"] == [column, row], cell
+                    l, t, r, b = cell["screenFrame"]
+                    x, y = (l+r)/2, (t+b)/2
+                    wx, wy = window.read("AXPosition"); ww, wh = window.read("AXSize")
+                    assert wx <= x < wx+ww and wy <= y < wy+wh
+                    assert app.read("AXFrontmost") is True and app.read("AXFocusedWindow").same_as(window)
+                    owner = ctypes.c_int()
+                    hit = ax.system().at_position(x, y)
+                    assert get_pid(hit.pointer, ctypes.byref(owner)) == 0 and owner.value == process.pid
+                    def send_mouse(kind):
+                        event = mouse(None, kind, Point(x, y), 0)
+                        try:
+                            flags(event, 0); clicks(event, 1, 1); post_mouse(1, event)
+                        finally:
+                            ax.release(event)
+                    send_mouse(5)
+                    time.sleep(0.1)
+                    fresh = state()
+                    assert sample_cell(fresh,row,column) == cell
+                    assert window.read("AXPosition") == report["window"]["position"] and window.read("AXSize") == report["window"]["size"]
+                    assert app.read("AXFrontmost") is True and app.read("AXFocusedWindow").same_as(window)
+                    hit = ax.system().at_position(x,y)
+                    assert get_pid(hit.pointer,ctypes.byref(owner)) == 0 and owner.value == process.pid
+                    ax.require_test_input()
+                    try:
+                        send_mouse(1)
+                        time.sleep(0.1)
+                    finally:
+                        send_mouse(2)
+                    after = ax.wait_for(lambda: value if (value := state()) and value["focus"] == "Grouped" and len(value["events"]) > len(before["events"]) else None, "Native group click did not finish")
+                    events = after["events"][len(before["events"]):]
+                    target_clicks = [e for e in events if e["event"] == 4]
+                    assert len(target_clicks) == 1 and target_clicks[0]["name"] == "Grouped" and target_clicks[0]["row"] == row and target_clicks[0]["column"] == column, events
+                    assert not any(e["event"] in (43,44) for e in events), events
+                    assert after["beforeA"] == before["beforeA"] == reference["beforeA"] and after["beforeB"] == before["beforeB"] == reference["beforeB"]
+                    for field in ("levels","keys","control","arrayLengths"):
+                        assert after["afterGroup"][field] == before["afterGroup"][field] == reference["afterGroup"][field]
+                    preserved_group(after)
+                    assert before["afterGroup"]["coordinates"] == after["afterGroup"]["coordinates"]
+                    report["commandProbes"].append({"operation": "nativeGroupClick", "target": [column, row], "point": [x,y], "ownerVerified": True, "before": before, "state": after})
+                    return after
+                def verify_key(label, key, expected_event, row, column, opened):
+                    before = state()
+                    for member in (6,7):
+                        assert is_positive(before,member,column) is (not opened)
+                    ancestor_column = column-1
+                    ancestor_before = [sample_cell(before,member,ancestor_column) for member in (6,7)]
+                    assert all(c["positive"] for c in ancestor_before)
+                    entry = native_key(label, key, "Grouped")
+                    events = entry["state"]["events"][len(entry["before"]["events"]):]
+                    disclosure = [e for e in events if e["event"] in (43,44)]
+                    assert len(disclosure) == 1 and disclosure[0]["event"] == expected_event and disclosure[0]["name"] == "Grouped", events
+                    for member in (6,7):
+                        assert is_positive(entry["state"],member,column) is opened
+                    assert [sample_cell(entry["state"],member,ancestor_column) for member in (6,7)] == ancestor_before
+                    for other in (1,4,8):
+                        assert not is_positive(entry["state"], other, 2)
+                    assert entry["state"]["beforeA"] == reference["beforeA"] and entry["state"]["beforeB"] == reference["beforeB"]
+                    assert entry["state"]["afterGroup"]["levels"] == reference["afterGroup"]["levels"]
+                    assert entry["state"]["afterGroup"]["keys"] == reference["afterGroup"]["keys"]
+                    preserved_group(entry["state"])
+                    report["checks"].append(label + " changes its intended branch and runs one native disclosure handler")
+                group_click(6,1)
+                verify_key("laterRootRight",124,43,6,2,True)
+                assert not is_positive(state(),6,3)
+                group_click(6,2)
+                verify_key("laterNestedRight",124,43,6,3,True)
+                verify_key("laterNestedLeft",123,44,6,3,False)
+                group_click(6,1)
+                verify_key("laterRootLeft",123,44,6,2,False)
             checks_finished = True
         except BaseException as error:
             report["failure"] = repr(error)

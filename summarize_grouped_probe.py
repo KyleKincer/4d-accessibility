@@ -14,6 +14,27 @@ from pathlib import Path
 from build_component import BUILD, ROOT, sha
 
 
+def validate_sources(root, build):
+    compiled_path = build / "hierarchy-probe-compile.json"
+    compiled = json.loads(compiled_path.read_text())
+    assert compiled["passed"] and compiled["compiler"]["success"] and not compiled["compiler"].get("errors")
+    assert not compiled["changed_during_compile"]
+    assert compiled["preparerSHA256"] == sha(root / "prepare_hierarchy_probe.py")
+    fixture = build / "hierarchy-probe"
+    for name, digest in compiled["sources_sha256"].items():
+        assert sha(fixture / name) == digest, name
+    canonical_names = {path.name for path in (root / "tests/4d").glob("AXHP_*.4dm")}
+    prepared_names = {path.name for path in (fixture / "Project/Sources/Methods").glob("AXHP_*.4dm")}
+    manifest_names = {Path(name).name for name in compiled["sources_sha256"] if Path(name).parent == Path("Project/Sources/Methods") and Path(name).name.startswith("AXHP_") and Path(name).suffix == ".4dm"}
+    assert canonical_names == prepared_names == manifest_names, "Canonical, prepared and manifest AXHP methods differ"
+    for source in (root / "tests/4d").glob("AXHP_*.4dm"):
+        expected = source.read_text()
+        if source.name == "AXHP_State.4dm" and compiled.get("diagnosticNativeSHA256"):
+            expected = expected.replace("// Native probe result, when installed.", '$state.native:=JSON Parse(AXB Native layout(Current form window; "hierarchyProbe"))')
+        assert (fixture / "Project/Sources/Methods" / source.name).read_text() == expected, source.name
+    return compiled_path, compiled
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, default=BUILD / "grouped-hierarchy-state.json")
@@ -26,23 +47,7 @@ def main():
         import PIL
         from PIL import Image, ImageChops
 
-        compiled_path = BUILD / "hierarchy-probe-compile.json"
-        compiled = json.loads(compiled_path.read_text())
-        assert compiled["passed"] and compiled["compiler"]["success"] and not compiled["compiler"].get("errors")
-        assert not compiled["changed_during_compile"]
-        assert compiled["preparerSHA256"] == sha(ROOT / "prepare_hierarchy_probe.py")
-        fixture = BUILD / "hierarchy-probe"
-        for name, digest in compiled["sources_sha256"].items():
-            assert sha(fixture / name) == digest, name
-        canonical_names = {path.name for path in (ROOT / "tests/4d").glob("AXHP_*.4dm")}
-        prepared_names = {path.name for path in (fixture / "Project/Sources/Methods").glob("AXHP_*.4dm")}
-        manifest_names = {Path(name).name for name in compiled["sources_sha256"] if Path(name).parent == Path("Project/Sources/Methods") and Path(name).name.startswith("AXHP_") and Path(name).suffix == ".4dm"}
-        assert canonical_names == prepared_names == manifest_names, "Canonical, prepared and manifest AXHP methods differ"
-        for source in (ROOT / "tests/4d").glob("AXHP_*.4dm"):
-            expected = source.read_text()
-            if source.name == "AXHP_State.4dm" and compiled.get("diagnosticNativeSHA256"):
-                expected = expected.replace("// Native probe result, when installed.", '$state.native:=JSON Parse(AXB Native layout(Current form window; "hierarchyProbe"))')
-            assert (fixture / "Project/Sources/Methods" / source.name).read_text() == expected, source.name
+        compiled_path, compiled = validate_sources(ROOT, BUILD)
 
         suite = unittest.defaultTestLoader.discover(str(ROOT / "tests"), pattern="test_hierarchy_probe_cleanup.py")
         result = unittest.TextTestRunner(stream=io.StringIO()).run(suite)
