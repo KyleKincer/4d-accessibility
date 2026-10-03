@@ -1,6 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import "Session.h"
 @class AXBWindowView;
+@class AXBNativeRoot;
 BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 
 @interface AXBNode : NSAccessibilityElement
@@ -26,6 +27,8 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @end
 
 @interface AXBWindowView : NSView
+@property(nonatomic, strong) AXBNativeRoot *nativeRoot;
+@property(nonatomic, readonly) NSView *rootContainer;
 @property(nonatomic, strong) AXBSession *session;
 @property(nonatomic, strong) AXBWindowElement *element;
 @property(nonatomic, strong) NSArray<AXBNode *> *nodes;
@@ -44,6 +47,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic, strong) id menuNativeParent;
 @property(nonatomic) BOOL live;
 - (void)refresh;
+- (void)refreshNativeRoot;
 - (void)refreshComboPopup;
 - (void)invalidate;
 - (BOOL)canAct;

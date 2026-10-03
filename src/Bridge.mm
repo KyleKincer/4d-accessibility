@@ -5,6 +5,7 @@
 #import "Identifiers.h"
 #include "Limits.h"
 #import "NativeLayout.h"
+#import <objc/runtime.h>
 
 static NSMutableDictionary<NSString *, AXBSession *> *sessions;
 static NSMutableDictionary<NSString *, NSMutableDictionary *> *bindings;
@@ -119,7 +120,14 @@ NSString *AXBNativeFocus(void *nativeWindow) {
 }
 @end
 
+static id DeepestHit(id element, NSPoint point);
+static id DeepestFormHit(AXBWindowView *view, NSPoint point);
+static NSArray *TopLevelNodes(AXBWindowView *view);
+
 @implementation AXBNode
+- (id)accessibilityHitTest:(NSPoint)point {
+    return self.owner.rootContainer && !self.data[@"parent"] ? DeepestFormHit(self.owner, point) : DeepestHit(self, point);
+}
 - (BOOL)accessibilityIsAttributeSettable:(NSString *)attribute { return AXBAttributeIsSettable(self, attribute); }
 - (void)invalidate {
     if (!self.live) return;
@@ -168,7 +176,7 @@ NSString *AXBNativeFocus(void *nativeWindow) {
 - (void)setAccessibilityFocused:(BOOL)focused { if (focused) (void)[self queue:@"focus" value:@YES]; }
 - (id)accessibilityParent {
     if (self.data[@"parent"]) for (AXBNode *node in self.owner.nodes) if ([node.data[@"id"] isEqual:self.data[@"parent"]]) return node;
-    return self.owner.element;
+    return self.owner.rootContainer ?: self.owner.element;
 }
 - (NSArray *)accessibilityChildren {
     if ([self.data[@"combo"] boolValue] && self.live) {
@@ -485,12 +493,9 @@ NSString *AXBNativeFocus(void *nativeWindow) {
 - (void)setAccessibilitySelectedText:(NSString *)text { (void)[self queue:@"replaceSelection" value:text]; }
 @end
 
-static id DeepestHit(id element, NSPoint point) {
-    NSRect frame = [element isKindOfClass:AXBNode.class] ? [(AXBNode *)element hitFrame] : [element accessibilityFrame];
-    if (![element isAccessibilityElement] || !NSPointInRect(point, frame)) return nil;
-    if ([element isKindOfClass:AXBGridNode.class]) return [element accessibilityHitTest:point];
+static id DeepestChildrenHit(NSArray *children, NSPoint point) {
     id caption = nil;
-    for (id child in [[element accessibilityChildren] reverseObjectEnumerator]) {
+    for (id child in [children reverseObjectEnumerator]) {
         id found = DeepestHit(child, point);
         if (!found) continue;
         // Static captions and grouping boxes do not intercept 4D mouse input.
@@ -503,7 +508,26 @@ static id DeepestHit(id element, NSPoint point) {
         }
         return found;
     }
-    return caption ?: element;
+    return caption;
+}
+
+static id DeepestHit(id element, NSPoint point) {
+    NSRect frame = [element isKindOfClass:AXBNode.class] ? [(AXBNode *)element hitFrame] : [element accessibilityFrame];
+    if (![element isAccessibilityElement] || !NSPointInRect(point, frame)) return nil;
+    if ([element isKindOfClass:AXBGridNode.class]) return [element accessibilityHitTest:point];
+    return DeepestChildrenHit([element accessibilityChildren], point) ?: element;
+}
+
+static NSArray *TopLevelNodes(AXBWindowView *view) {
+    if (!view.live) return @[];
+    return [view.nodes filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(AXBNode *node, NSDictionary *bindings) {
+        (void)bindings; return node.isAccessibilityElement && !node.data[@"parent"];
+    }]];
+}
+
+static id DeepestFormHit(AXBWindowView *view, NSPoint point) {
+    if (!view.live || !view.session.snapshot || !NSPointInRect(point, view.accessibilityFrame)) return nil;
+    return DeepestChildrenHit(TopLevelNodes(view), point) ?: (view.rootContainer ?: view.element);
 }
 
 static BOOL IsNativeControl(NSView *view) {
@@ -513,7 +537,7 @@ static BOOL IsNativeControl(NSView *view) {
 // AppKit starts AX position lookup at the physical view beneath the point.
 // Put virtual children under the common native drawing container, rather than
 // beside it, so an opaque form view cannot hide them from that lookup.
-static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
+static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot, NSView *managedRoot) {
     NSView *content = window.contentView;
     NSView *common = nil;
     for (NSDictionary *data in snapshot[@"nodes"]) {
@@ -532,8 +556,164 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
         while (common && ![hit isDescendantOf:common]) common = common.superview;
     }
     // Never turn a native control into the parent of a second representation.
-    while (common && common != content && IsNativeControl(common)) common = common.superview;
+    while (common && common != content && common != managedRoot && IsNativeControl(common)) common = common.superview;
     return common ?: content;
+}
+
+// Keep the transparent hit-test anchor under the original drawing container.
+// A separate common ancestor can group its virtual children with native web
+// views without moving any host view or replacing WebKit's accessibility tree.
+static NSView *NativeWebContainer(NSView *anchor) {
+    NSView *content = anchor.window.contentView;
+    if (!content) return nil;
+    NSView *common = anchor;
+    BOOL hasWeb = NO;
+    NSMutableArray<NSView *> *pending = [NSMutableArray arrayWithObject:content];
+    NSUInteger visited = 0;
+    while (pending.count && visited++ < 4096) {
+        NSView *view = pending.lastObject; [pending removeLastObject];
+        if (view.hiddenOrHasHiddenAncestor) continue;
+        if ([view isKindOfClass:NSClassFromString(@"WKWebView")]) {
+            if (NSIsEmptyRect(NSIntersectionRect([view convertRect:view.bounds toView:content], content.bounds))) continue;
+            hasWeb = YES;
+            while (common && ![view isDescendantOf:common]) common = common.superview;
+        } else [pending addObjectsFromArray:view.subviews];
+    }
+    // Partial or excessively large view trees keep the original separate root.
+    if (!hasWeb || pending.count || !common || [common isKindOfClass:NSControl.class]) return nil;
+    return NSEqualRects([common convertRect:common.bounds toView:content], content.bounds) ? common : nil;
+}
+
+// Only an ignored NSView using inherited accessibility behavior is composed.
+// Restore that role value explicitly, never with nil. Other nullable metadata
+// can have computed defaults that no public setter restores. Keep labels,
+// identifiers and action receipts on the bridge-owned status element.
+@interface AXBNativeRoot : NSObject
+@property(nonatomic, weak) NSView *container;
+@property(nonatomic, weak) NSView *yieldedContainer;
+@property(nonatomic, strong) NSArray *writtenOrder;
+- (BOOL)attachTo:(NSView *)container;
+- (BOOL)validateChildren:(NSArray *)nodes;
+- (BOOL)writeOrder:(NSArray *)order;
+- (void)restore;
+@end
+
+static BOOL InheritsViewMethod(NSView *view, SEL selector) {
+    Method base = class_getInstanceMethod(NSView.class, selector);
+    Method actual = class_getInstanceMethod(object_getClass(view), selector);
+    return base && actual && method_getImplementation(base) == method_getImplementation(actual);
+}
+
+@implementation AXBNativeRoot
+- (void)restore {
+    NSView *container = self.container;
+    if (container) {
+        if (self.writtenOrder && [container.accessibilityChildrenInNavigationOrder isEqual:self.writtenOrder])
+            container.accessibilityChildrenInNavigationOrder = nil;
+        if (container.isAccessibilityElement) container.accessibilityElement = NO;
+        if ([container.accessibilityRole isEqual:NSAccessibilityGroupRole])
+            container.accessibilityRole = NSAccessibilityUnknownRole;
+    }
+    self.container = nil; self.writtenOrder = nil;
+}
+- (BOOL)validateChildren:(NSArray *)nodes {
+    NSView *container = self.container;
+    if (!container) return NO;
+    NSArray *children = container.accessibilityChildren ?: @[];
+    NSSet *childSet = [NSSet setWithArray:children];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    id legacyChildren = [container accessibilityAttributeValue:NSAccessibilityChildrenAttribute];
+#pragma clang diagnostic pop
+    BOOL compatible = [legacyChildren isKindOfClass:NSArray.class] &&
+        [[NSSet setWithArray:legacyChildren] isEqual:childSet] && childSet.count == children.count;
+    id parent = container.accessibilityParent;
+    compatible = compatible && [parent respondsToSelector:@selector(accessibilityChildren)] &&
+        [[parent accessibilityChildren] containsObject:container];
+    for (id node in nodes) if (![childSet containsObject:node]) compatible = NO;
+    for (id child in children) {
+        if (![child respondsToSelector:@selector(accessibilityParent)] || [child accessibilityParent] != container ||
+            ![child respondsToSelector:@selector(accessibilityFrame)]) compatible = NO;
+    }
+    if (!compatible) { self.yieldedContainer = container; [self restore]; }
+    return compatible;
+}
+- (BOOL)attachTo:(NSView *)container {
+    if (container != self.container) {
+        [self restore];
+        // Inspect actual methods, including an observation subclass, without
+        // replacing a host class or depending on any private class name.
+        if (!container || container == self.yieldedContainer ||
+            container.isAccessibilityElement || ![container.accessibilityRole isEqual:NSAccessibilityUnknownRole]) return NO;
+        static BOOL defaultRoleUnknown;
+        static dispatch_once_t once;
+        dispatch_once(&once, ^{ defaultRoleUnknown = [[[NSView new] accessibilityRole] isEqual:NSAccessibilityUnknownRole]; });
+        if (!defaultRoleUnknown) return NO;
+        // Custom providers keep their original integration path. In particular,
+        // an explicit legacy ignored getter can disagree with the modern BOOL.
+        NSArray<NSString *> *selectors = @[@"isAccessibilityElement", @"setAccessibilityElement:",
+            @"accessibilityRole", @"setAccessibilityRole:", @"accessibilityRoleDescription", @"accessibilityChildren",
+            @"accessibilityChildrenInNavigationOrder", @"accessibilityIsIgnored",
+            @"setAccessibilityChildrenInNavigationOrder:", @"accessibilityAttributeValue:", @"accessibilityAttributeNames"];
+        for (NSString *name in selectors) if (!InheritsViewMethod(container, NSSelectorFromString(name))) return NO;
+        NSArray *original = container.accessibilityChildrenInNavigationOrder;
+        // NSView's navigation setter accepts nil as a return to computed order.
+        // This fixed policy is checked by the baseline and dynamic-child tests.
+        container.accessibilityChildrenInNavigationOrder = nil;
+        NSArray *computed = container.accessibilityChildrenInNavigationOrder;
+        if (original && ![original isEqual:computed]) {
+            container.accessibilityChildrenInNavigationOrder = original;
+            self.yieldedContainer = container;
+            return NO;
+        }
+        self.container = container;
+        container.accessibilityRole = NSAccessibilityGroupRole;
+        container.accessibilityElement = YES;
+        if (!container.isAccessibilityElement || ![container.accessibilityRole isEqual:NSAccessibilityGroupRole]) {
+            self.yieldedContainer = container; [self restore]; return NO;
+        }
+    }
+    return container != nil;
+}
+- (BOOL)writeOrder:(NSArray *)order {
+    NSView *container = self.container;
+    if (!container) return NO;
+    if (!container.isAccessibilityElement || ![container.accessibilityRole isEqual:NSAccessibilityGroupRole] || (self.writtenOrder &&
+        ![container.accessibilityChildrenInNavigationOrder isEqual:self.writtenOrder])) {
+        self.yieldedContainer = container;
+        [self restore];
+        return NO;
+    }
+    if (![order isEqual:self.writtenOrder]) {
+        container.accessibilityChildrenInNavigationOrder = order;
+        self.writtenOrder = order;
+        if (![container.accessibilityChildrenInNavigationOrder isEqual:order]) {
+            self.yieldedContainer = container; [self restore]; return NO;
+        }
+    }
+    return YES;
+}
+@end
+
+static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
+    NSArray *(^position)(id) = ^NSArray *(id child) {
+        if ([child isKindOfClass:AXBNode.class]) {
+            AXBNode *node = child;
+            NSArray *navigation = node.data[@"navigation"];
+            return navigation.count >= 2 ? navigation : @[node.data[@"frame"][1], node.data[@"frame"][0]];
+        }
+        NSRect frame = [window.contentView convertRect:[window convertRectFromScreen:[child accessibilityFrame]] fromView:nil];
+        CGFloat top = window.contentView.isFlipped ? NSMinY(frame) - NSMinY(window.contentView.bounds) : NSMaxY(window.contentView.bounds) - NSMaxY(frame);
+        return @[@(top), @(NSMinX(frame) - NSMinX(window.contentView.bounds))];
+    };
+    return [children sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(id a, id b) {
+        NSArray *left = position(a), *right = position(b);
+        for (NSUInteger i = 0; i < MIN(left.count, right.count); i++) {
+            NSComparisonResult result = [left[i] compare:right[i]];
+            if (result != NSOrderedSame) return result;
+        }
+        return left.count < right.count ? NSOrderedAscending : left.count > right.count ? NSOrderedDescending : NSOrderedSame;
+    }];
 }
 
 @implementation AXBWindowElement
@@ -544,7 +724,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
 - (id)accessibilityParent { return self.owner.superview ? NSAccessibilityUnignoredAncestor(self.owner.superview) : nil; }
 - (id)accessibilityWindow { return self.owner.window; }
 - (id)accessibilityTopLevelUIElement { return self.owner.window; }
-- (NSRect)accessibilityFrame { return self.owner ? self.owner.accessibilityFrame : NSZeroRect; }
+- (NSRect)accessibilityFrame { return self.owner && !self.owner.rootContainer ? self.owner.accessibilityFrame : NSZeroRect; }
 - (id)accessibilityFocusedUIElement { return [self.owner accessibilityFocusedUIElement]; }
 - (NSString *)accessibilityHelp {
     NSDictionary *activity = self.owner.session.activity;
@@ -552,16 +732,29 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     return activity[@"result"][@"message"] ?: @"Ready";
 }
 - (NSArray *)accessibilityChildren {
-    if (!self.owner.live) return @[];
-    return [self.owner.nodes filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(AXBNode *node, NSDictionary *bindings) {
-        (void)bindings; return node.isAccessibilityElement && !node.data[@"parent"];
-    }]];
+    return self.owner.rootContainer ? @[] : TopLevelNodes(self.owner);
 }
-- (id)accessibilityHitTest:(NSPoint)point { return DeepestHit(self, point); }
+- (id)accessibilityHitTest:(NSPoint)point { return self.isAccessibilityElement ? DeepestFormHit(self.owner, point) : nil; }
 - (NSArray *)accessibilityChildrenInNavigationOrder { return NavigationChildren(self.accessibilityChildren); }
 @end
 
 @implementation AXBWindowView
+- (NSView *)rootContainer { return self.nativeRoot.container; }
+- (void)refreshNativeRoot {
+    if (!self.live || !self.session.snapshot || !self.window) return;
+    NSView *previous = self.rootContainer;
+    NSView *container = NativeWebContainer(self.superview);
+    if (container && !self.nativeRoot) self.nativeRoot = [AXBNativeRoot new];
+    if ([self.nativeRoot attachTo:container] &&
+        [self.nativeRoot validateChildren:[@[self.element] arrayByAddingObjectsFromArray:TopLevelNodes(self)]]) {
+        NSMutableArray *children = [container.accessibilityChildren mutableCopy] ?: [NSMutableArray new];
+        // Keep the empty receipt group after all controls, while retaining the
+        // complete child set required by AppKit's navigation-order contract.
+        [children removeObjectIdenticalTo:self.element];
+        [self.nativeRoot writeOrder:[MixedNavigationChildren(children, self.window) arrayByAddingObject:self.element]];
+    }
+    if (previous != self.rootContainer) NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
+}
 - (void)expectCheckboxFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value {
     NSString *action = self.session.activity[@"id"];
     if (action && element && value)
@@ -603,8 +796,10 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
         // application AX focus override still points at our previous node.
         NSWindow *window = NSApp.keyWindow;
         id native = [window accessibilityFocusedUIElement];
-        if ([native isKindOfClass:AXBNode.class] || AXBGridElementBelongsToView(native, self) || native == self || native == self.element || native == self.menuFocus) native = nil;
-        if (!native && self.nativeFocus && [self.nativeFocus respondsToSelector:@selector(accessibilityWindow)] &&
+        if ([native isKindOfClass:AXBNode.class] || AXBGridElementBelongsToView(native, self) || native == self || native == self.element || native == self.rootContainer || native == self.menuFocus) native = nil;
+        if (!native && self.nativeFocus && self.nativeFocus != self.rootContainer &&
+            [self.nativeFocus respondsToSelector:@selector(isAccessibilityElement)] && [self.nativeFocus isAccessibilityElement] &&
+            [self.nativeFocus respondsToSelector:@selector(accessibilityWindow)] &&
             [self.nativeFocus accessibilityWindow] == window) native = self.nativeFocus;
         NSApp.accessibilityApplicationFocusedUIElement = native ?: window;
     }
@@ -618,7 +813,10 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
 // Keep physical mouse routing untouched. AppKit can hit-test a non-view
 // accessibility child even though it skips this transparent geometry anchor.
 - (BOOL)isAccessibilityElement { return NO; }
-- (NSArray *)accessibilityChildren { return self.live && self.session.snapshot && self.element ? @[self.element] : @[]; }
+- (NSArray *)accessibilityChildren {
+    if (!self.live || !self.session.snapshot || !self.element) return @[];
+    return self.rootContainer ? [@[self.element] arrayByAddingObjectsFromArray:TopLevelNodes(self)] : @[self.element];
+}
 - (NSView *)hitTest:(NSPoint)point { (void)point; return nil; }
 - (BOOL)canAct {
     if ([NSRunLoop.currentRunLoop.currentMode isEqual:NSEventTrackingRunLoopMode]) return NO;
@@ -695,8 +893,8 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (!snapshot) return;
     NSWindow *window = self.window;
     AXBLayoutObserve(window);
-    NSView *container = NativeContainer(window, snapshot);
-    if (container != self.superview) { [self removeFromSuperview]; [container addSubview:self]; }
+    NSView *container = NativeContainer(window, snapshot, self.rootContainer);
+    if (container != self.superview) { [self.nativeRoot restore]; [self removeFromSuperview]; [container addSubview:self]; }
     self.frame = [container convertRect:window.contentView.bounds fromView:window.contentView];
     self.bounds = NSMakeRect(0, 0, NSWidth(window.contentView.bounds), NSHeight(window.contentView.bounds));
     NSMutableDictionary *old = [NSMutableDictionary new];
@@ -756,11 +954,14 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (focused && self.window.isKeyWindow && NSApp.isActive && [self canAct]) {
         if (NSApp.accessibilityApplicationFocusedUIElement != focused) {
             id previous = NSApp.accessibilityApplicationFocusedUIElement;
-            if (![previous isKindOfClass:AXBNode.class] && !AXBGridElementBelongsToView(previous, self) && previous != self.menuFocus) self.nativeFocus = previous;
+            if (![previous isKindOfClass:AXBNode.class] && !AXBGridElementBelongsToView(previous, self) &&
+                previous != self.menuFocus && previous != self.rootContainer && previous != self.element && previous != self &&
+                [previous respondsToSelector:@selector(isAccessibilityElement)] && [previous isAccessibilityElement]) self.nativeFocus = previous;
             NSApp.accessibilityApplicationFocusedUIElement = focused;
             focusChanged = YES;
         }
     } else [self restoreNativeFocus];
+    [self refreshNativeRoot];
     // Observers may read immediately. Install the entire tree and focus first,
     // then publish semantic changes without treating ordinary typing as layout.
     for (AXBNode *node in retired) [node invalidate];
@@ -872,6 +1073,7 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     [self restoreNativeFocus];
     [self restorePopupMenu];
     self.popupRequest = nil;
+    [self.nativeRoot restore];
     [self.session invalidate];
     for (AXBNode *node in self.nodes) [node invalidate];
     NSAccessibilityPostNotification(self.element, NSAccessibilityUIElementDestroyedNotification);
@@ -927,7 +1129,8 @@ static void ScheduleRefresh(AXBSession *session, void *nativeWindow) {
             __weak AXBWindowView *weakView = view;
             view.focusObservers = @[
                 [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidUpdateNotification object:nil queue:nil usingBlock:^(NSNotification *notification) {
-                    (void)notification; [weakView refreshComboPopup];
+                    if (notification.object == weakView.window) [weakView refreshNativeRoot];
+                    [weakView refreshComboPopup];
                 }],
                 [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidResignKeyNotification object:window queue:nil usingBlock:^(NSNotification *notification) {
                     (void)notification; [weakView restoreNativeFocus]; [weakView restorePopupMenu]; weakView.popupRequest = nil;
@@ -1036,7 +1239,7 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                 if (button) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 NSPoint point = [view convertPoint:local toView:nil];
                 NSPoint screen = [view.window convertPointToScreen:point];
-                if (!NSPointInRect(screen, [target accessibilityFrame]) || DeepestHit(view.element, screen) != target) return;
+                if (!NSPointInRect(screen, [target accessibilityFrame]) || DeepestFormHit(view, screen) != target) return;
                 NSView *content = view.window.contentView;
                 NSPoint physicalPoint = [content.superview convertPoint:point fromView:nil];
                 NSView *physical = [content hitTest:physicalPoint];
@@ -1044,7 +1247,7 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                 // A native control or web view over the drawing canvas owns
                 // this point. Never redirect its mouse input to a virtual node.
                 for (NSView *ancestor = physical; ancestor && ancestor != content; ancestor = ancestor.superview)
-                    if (IsNativeControl(ancestor)) return;
+                    if (ancestor != view.rootContainer && IsNativeControl(ancestor)) return;
                 if (view.popupRequest[@"element"] == target && [view.popupRequest[@"id"] isEqual:controlInput[@"action"]])
                     view.popupRequest = @{@"element": target, @"id": controlInput[@"action"], @"nativeInput": @YES};
                 NSEventModifierFlags flags = [data[@"toggleSelection"] boolValue] ? NSEventModifierFlagCommand : 0;

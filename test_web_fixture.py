@@ -97,7 +97,7 @@ def main():
               "scope": "Local semantic HTML and ordinary 4D controls; native browser owns HTML semantics and input",
               "runId": run_id, "kitVersion": prepared["kitVersion"], "native_sha256": prepared["native_sha256"],
               "component_sha256": prepared["component_sha256"], "compile_sha256": sha(BUILD / "web-compile-report.json"),
-              "driver_sha256": sha(Path(__file__)), "checks": []}
+              "driver_sha256": sha(Path(__file__)), "voiceover_helper_sha256": sha(ROOT / "tests/voiceover.py"), "checks": []}
     last = {}
 
     def state():
@@ -123,7 +123,7 @@ def main():
             check(ready["compiled"] is args.compiled, "Actual 4D execution mode matches the requested mode")
             app, window = activate_fixture(process, project, TITLE)
             if args.voiceover:
-                from voiceover import VoiceOver
+                from voiceover import VoiceOver, reading_stop, reading_stop_index
                 vo = VoiceOver(process, project, TITLE, BUILD / "web-voiceover", BUILD / "read-fixture-screen")
                 report["voiceover"] = vo.steps
                 vo.start()
@@ -190,16 +190,37 @@ def main():
             check(sum(e.read("AXRole") == "AXWebArea" for e in descendants(window)) == 1, "The actual window contains one native web accessibility tree")
             check(not any((e.read("AXIdentifier") or "").startswith("axb/Root/Web") for e in descendants(window)), "The bridge does not publish duplicate HTML controls")
             bridge_root = window.find("/Root")
-            check((bridge_root is None) is prepared["baseline"], "Only the integrated fixture has a virtual 4D root")
+            check((bridge_root is None) is prepared["baseline"], "Only the integrated fixture has a bridge accessibility root")
             if not prepared["baseline"]:
                 registered = ax.wait_for(lambda: state() if state().get("diagnostics", {}).get("ready") else None, "The bridge did not publish a ready snapshot")
                 areas = registered["areas"]
                 check(areas.get("ok") is True and len(areas["areas"]) == 1 and areas["areas"][0]["state"] == "active" and areas["areas"][0]["registered"] is True and areas["areas"][0]["failure"] is None, "The lifecycle area has one active registration")
                 check(registered["diagnostics"]["ok"] is True and registered["diagnostics"]["issues"] == [{"path": [], "object": "Web", "reason": "providerPending"}], "Discovery leaves only the browser-owned web area pending")
                 info = registered["info"]
-                check(info.get("ok") is True and info.get("hostAPI") == 1 and info["componentInfo"]["compiled"] is True and info["componentInfo"]["version"] == prepared["kitVersion"] and info["componentInfo"]["capturedStop"] == 1 and info["nativeStatus"].startswith("Accessibility Bridge " + prepared["kitVersion"] + ";") and all("; " + capability + " 1;" in info["nativeStatus"] for capability in ("areaLifecycle", "stableIdentifiers", "buttonInput")), "The loaded native plugin and compiled component match the kit and lifecycle contract")
-                virtual = [e for e in descendants(bridge_root) if not e.same_as(bridge_root) and (e.read("AXIdentifier") or "").startswith("axb/")]
+                check(info.get("ok") is True and info.get("hostAPI") == 1 and info["componentInfo"]["compiled"] is True and info["componentInfo"]["version"] == prepared["kitVersion"] and info["componentInfo"]["capturedStop"] == 1 and info["nativeStatus"].startswith("Accessibility Bridge " + prepared["kitVersion"] + ";") and all("; " + capability + " 1;" in info["nativeStatus"] for capability in ("areaLifecycle", "stableIdentifiers", "buttonInput", "nativeWebComposition")), "The loaded native plugin and compiled component match the kit and lifecycle contract")
+                mixed_parent = bridge_root.read("AXParent")
+                virtual = [e for e in descendants(mixed_parent) if not e.same_as(bridge_root) and (e.read("AXIdentifier") or "").startswith("axb/")]
                 check(not any(e.read("AXRole") == "AXWebArea" or (e.read("AXPosition") == native_web.read("AXPosition") and e.read("AXSize") == native_web.read("AXSize")) for e in virtual), "No virtual 4D descendant duplicates the native web role or frame")
+                check(not (bridge_root.read("AXChildren") or []) and any(e.same_as(native_web) for e in descendants(mixed_parent)), "The bridge status and native web tree share the native form container")
+                check(sum(e.read("AXIdentifier") == bridge_root.read("AXIdentifier") for e in descendants(window)) == 1, "The mixed form root has one stable identifier occurrence")
+                all_children = mixed_parent.read("AXChildren") or []
+                children = all_children
+                order = mixed_parent.read("AXChildrenInNavigationOrder") or []
+                check(len(children) == len(order) and all(sum(e.same_as(child) for e in order) == 1 for child in children) and order[-1].same_as(bridge_root), "Mixed navigation orders every child once and leaves the empty status group last")
+                check(all(child.read("AXParent").same_as(mixed_parent) for child in all_children), "Native and virtual children report the same form parent")
+
+            def check_composition(phase):
+                if prepared["baseline"]:
+                    return
+                status = window.find("/Root")
+                field = window.find("/Root/Name")
+                parent = field.read("AXParent")
+                children = parent.read("AXChildren") or []
+                order = parent.read("AXChildrenInNavigationOrder") or []
+                check(not parent.same_as(status) and status.read("AXParent").same_as(parent) and
+                      any(e.same_as(web()) for e in descendants(parent)) and len(children) == len(order) and
+                      all(sum(e.same_as(child) for e in order) == 1 for child in children) and order[-1].same_as(status),
+                      phase + ": native web and ordinary controls retain complete mixed navigation")
             ax.capture_window(process.pid, BUILD / ("web-" + prepared["engine"] + "-" + variant + "-" + mode + "-initial.png"), include_shadow=False)
 
             def find(role, title):
@@ -272,11 +293,14 @@ def main():
                 ax.wait_for(lambda: sum(event["code"] == 49 for event in state()["events"] if event["kind"] == "web") == 3, "Original web handlers did not receive all completed navigations")
                 report["browserEvents"] = [event for event in state()["events"] if event["kind"] == "web"]
                 check(sum(event["code"] == 1 for event in report["browserEvents"]) == 1, "Original web load and navigation handlers complete without a reported error")
+                check_composition("After browser submission and navigation")
                 if not prepared["baseline"]:
                     field = window.find("/Name")
                     count = window.find("/Count")
                     check(field.set_text("Host edit") == 0, "Ordinary 4D text accepts an AX edit after web navigation")
                     ax.wait_for(lambda: field.read("AXValue") == "Host edit" and bridge_root.read("AXHelp") == "Text entered in the editor; normal validation runs when editing ends", "Ordinary native editor replacement did not finish")
+                    ax.wait_for(lambda: app.read("AXFocusedUIElement").same_as(field), "4D editing focus remained on the native container")
+                    check(True, "Ordinary 4D editing exposes the editor as the focused element")
                     check(count.press() == 0, "Ordinary 4D button accepts AX activation after web navigation")
                     ax.wait_for(lambda: state()["clicks"] == 1 and state()["name"] == "Host edit", "Original 4D handler or editor commit did not complete")
                     check([event for event in state()["events"] if event["kind"] == "button"] == [{"kind": "button", "code": 4, "object": "Count"}], "The original 4D button handler runs exactly once")
@@ -287,17 +311,54 @@ def main():
                 caption = vo.key("home", command=True)
                 captions = [caption]
                 inside_ordinary = False
+                web_finished = False
                 checkbox_done = disclosure_done = False
+                heading_probed = count_done = False
                 for _ in range(32):
                     captions.append(vo.key("right"))
-                    if "Close fixture" in captions[-1] and inside_ordinary:
+                    if reading_stop(vo.steps[-1], "button", "close fixture") and inside_ordinary:
+                        if web_finished:
+                            captions.append(vo.key("right"))
+                            right_index = len(vo.steps) - 1
+                            # A boundary can leave its previous caption visible.
+                            # Moving left must produce a fresh sibling caption.
+                            captions.append(vo.key("left"))
+                            boundary = reading_stop(vo.steps[-1], "web content", "native web fixture")
+                            status = reading_stop(vo.steps[right_index], "group", "AX native web fixture") and reading_stop(vo.steps[-1], "button", "close fixture")
+                            check(boundary or status,
+                                  "After Close, reverse navigation verifies the group boundary or the empty status group")
+                            report["afterLastControl"] = {"branch": "boundary" if boundary else "status",
+                                                          "rightIndex": right_index, "leftIndex": len(vo.steps) - 1}
                         captions.append(vo.key("up", shift=True))
                         inside_ordinary = False
+                        if web_finished:
+                            break
                         continue
-                    if any(captions[-1].lower().rstrip().endswith(kind) for kind in ("group", "scroll area", "html content", "web content")):
+                    # After leaving HTML, VoiceOver's automatic interaction
+                    # can speak the parent group summary while its cursor is
+                    # already on the first child. Continue ordinary navigation;
+                    # another interact command would enter text review there.
+                    if not web_finished and any(captions[-1].lower().rstrip().endswith(kind) for kind in ("group", "scroll area", "html content", "web content")):
+                        native_web_group = captions[-1].lower().rstrip().endswith("web content") and "native web fixture" in captions[-1].lower()
                         inside_ordinary = "AX native web fixture" in captions[-1]
                         captions.append(vo.key("down", shift=True))
-                    if "Enabled" in captions[-1] and "checkbox" in captions[-1] and not checkbox_done:
+                        if native_web_group and not heading_probed:
+                            # Entering HTML speaks parent context and its first
+                            # heading together. Move away and back to verify an
+                            # individual heading stop instead of that summary.
+                            captions.append(vo.key("right"))
+                            captions.append(vo.key("left"))
+                            check(reading_stop(vo.steps[-1], "heading level 1", "native web fixture"),
+                                  "VoiceOver reaches the HTML heading as an individual reading stop")
+                            heading_probed = True
+                    if not prepared["baseline"] and not count_done and reading_stop(vo.steps[-1], "button", "count"):
+                        check(state()["clicks"] == 0, "VoiceOver Count action starts with no earlier activation")
+                        captions.append(vo.key("space"))
+                        ax.wait_for(lambda: state()["clicks"] == 1, "VoiceOver did not run the ordinary Count handler")
+                        check([event for event in state()["events"] if event["kind"] == "button"] == [{"kind": "button", "code": 4, "object": "Count"}],
+                              "VoiceOver activates the original ordinary 4D Count handler exactly once")
+                        count_done = True
+                    if reading_stop(vo.steps[-1], "checkbox", "enabled") and not checkbox_done:
                         enabled = require("AXCheckBox", "Enabled")
                         captions.append(vo.key("space"))
                         ax.wait_for(lambda: enabled.read("AXValue") == 0, "VoiceOver did not uncheck the native HTML checkbox")
@@ -305,7 +366,7 @@ def main():
                         captions.append(vo.key("space"))
                         ax.wait_for(lambda: enabled.read("AXValue") == 1, "VoiceOver did not restore the native HTML checkbox")
                         checkbox_done = True
-                    if "More information" in captions[-1] and "summary" in captions[-1] and not disclosure_done:
+                    if reading_stop(vo.steps[-1], "summary", "more information") and not disclosure_done:
                         more = require("AXDisclosureTriangle", "More information")
                         captions.append(vo.key("space"))
                         ax.wait_for(lambda: more.read("AXValue") is True, "VoiceOver did not expand the native HTML disclosure")
@@ -316,14 +377,25 @@ def main():
                         captions.append(vo.key("space"))
                         ax.wait_for(lambda: more.read("AXValue") is False, "VoiceOver did not collapse the native HTML disclosure")
                         disclosure_done = True
-                    if "Next page" in captions[-1]:
-                        break
-                def spoken(*parts):
-                    return any(all(part.lower() in caption.lower() for part in parts) for caption in captions)
-                check(all(spoken(*parts) for parts in (("Native web fixture", "heading level 1"), ("Name", "edit text"), ("Email", "email field"), ("Enabled", "checkbox"), ("Submit fixture", "button"))), "VoiceOver reads the HTML heading, editors, checkbox and submit button with their roles")
-                check(spoken("Native field", "edit text") and spoken("Count", "button") and spoken("Close fixture", "button"), "VoiceOver also reaches the ordinary 4D editor and buttons in the same window")
-                report["readingOrder"] = "Ordinary 4D group, including Close below the web area, precedes the sibling native web content; visual interleaving is not supported"
-                check(checkbox_done and disclosure_done, "VoiceOver restores the original HTML checkbox and disclosure states")
+                    if reading_stop(vo.steps[-1], "link", "next page"):
+                        captions.append(vo.key("up", shift=True))
+                        inside_ordinary = True
+                        web_finished = True
+                        continue
+                check(all(reading_stop_index(vo.steps, *parts) is not None for parts in
+                          (("heading level 1", "native web fixture"), ("edit text", "name"), ("email field", "email"), ("checkbox", "enabled"), ("button", "submit fixture"))),
+                      "VoiceOver reaches individual HTML heading, editor, checkbox and submit reading stops")
+                field_index = reading_stop_index(vo.steps, "edit text", "native field")
+                count_index = reading_stop_index(vo.steps, "button", "count")
+                web_index = reading_stop_index(vo.steps, "web content", "native web fixture")
+                heading_index = reading_stop_index(vo.steps, "heading level 1", "native web fixture")
+                close_index = reading_stop_index(vo.steps, "button", "close fixture")
+                check(all(i is not None for i in (field_index, count_index, web_index, heading_index, close_index)),
+                      "VoiceOver reaches individual ordinary 4D and native web reading stops")
+                check(field_index < count_index < web_index < heading_index < close_index, "VoiceOver interleaves native HTML between its neighboring 4D controls")
+                report["readingOrder"] = {"fieldIndex": field_index, "countIndex": count_index, "webGroupIndex": web_index, "headingIndex": heading_index, "closeIndex": close_index}
+                check(heading_probed and count_done and checkbox_done and disclosure_done, "VoiceOver verifies the heading and original Count action and restores HTML checkbox/disclosure states")
+                check_composition("After VoiceOver browser actions")
                 vo.stop()
             report["finalState"] = state()
             report["passed"] = True

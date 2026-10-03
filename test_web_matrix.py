@@ -8,6 +8,8 @@ import sys
 
 from build_component import sha
 from prepare_web_fixture import BUILD, ROOT
+sys.path.insert(0, str(ROOT / "tests"))
+from voiceover import reading_stop, reading_stop_index
 
 
 CASES = (
@@ -38,16 +40,18 @@ def main():
 
     reports, runs = {}, []
     driver = sha(ROOT / "test_web_fixture.py")
+    voiceover_helper = sha(ROOT / "tests/voiceover.py")
     for case in CASES:
         path = BUILD / ("web-system-" + case + ".json")
         data = json.loads(path.read_text())
         assert data["passed"] and data["exitCode"] == 0 and data["closed"]["runId"] == data["runId"], case
         assert data["engine"] == "system" and data["driver_sha256"] == driver, "Rerun the full matrix with the current driver: " + case
+        assert data["voiceover_helper_sha256"] == voiceover_helper, "Rerun the full matrix with the current VoiceOver helper: " + case
         assert data["baseline"] is case.startswith("baseline-") and data["compiled"] is case.endswith("-compiled"), case
         assert all(check["passed"] for check in data["checks"]), case
         reports[case] = data
         runs.append({"case": "web-system-" + case, "passed": True, "report_sha256": sha(path),
-                     **{key: data[key] for key in ("driver_sha256", "compile_sha256", "checks", "closed", "requests")},
+                     **{key: data[key] for key in ("driver_sha256", "voiceover_helper_sha256", "compile_sha256", "checks", "closed", "requests")},
                      "voiceoverSteps": len(data.get("voiceover", [])), "browserEvents": data.get("browserEvents"),
                      "bridgeInfo": data["finalState"].get("info"), "readingOrder": data.get("readingOrder")})
     reference = reports["bridge-actions-compiled"]
@@ -61,24 +65,39 @@ def main():
         bridge = reports["bridge-actions-" + mode]["browserEvents"]
         assert baseline == bridge, "Original browser event sequence changed in " + mode
         event_checks.append({"mode": mode, "passed": True, "events": baseline})
-    captions = [step["caption"] for step in reports["bridge-voiceover-compiled"]["voiceover"]]
-    close_index = next((index for index, caption in enumerate(captions) if "Close fixture" in caption and "button" in caption), None)
-    web_index = next((index for index, caption in enumerate(captions) if caption.lower().rstrip().endswith("native web fixture, web content")), None)
-    heading_index = next((index for index, caption in enumerate(captions) if "Native web fixture" in caption and "heading level 1" in caption), None)
+    steps = reports["bridge-voiceover-compiled"]["voiceover"]
+    captions = [step["caption"] for step in steps]
+    close_index = reading_stop_index(steps, "button", "close fixture")
+    web_index = reading_stop_index(steps, "web content", "native web fixture")
+    heading_index = reading_stop_index(steps, "heading level 1", "native web fixture")
     assert close_index is not None, "VoiceOver did not speak the ordinary Close fixture button"
     assert web_index is not None, "VoiceOver did not speak the native web content group"
     assert heading_index is not None, "VoiceOver did not speak the native HTML heading with its role"
-    assert close_index < web_index < heading_index, "Reassess the documented ordinary-group then native-web reading order"
+    order = reports["bridge-voiceover-compiled"]["readingOrder"]
+    assert order == {"fieldIndex": reading_stop_index(steps, "edit text", "native field"),
+                     "countIndex": reading_stop_index(steps, "button", "count"), "webGroupIndex": web_index,
+                     "headingIndex": heading_index, "closeIndex": close_index}, "Fixture and collector must use the same individual-stop oracle"
+    assert order["fieldIndex"] < order["countIndex"] < web_index < heading_index < close_index, "Mixed native/4D reading order regressed"
+    after_last = reports["bridge-voiceover-compiled"]["afterLastControl"]
+    right_index, left_index = after_last["rightIndex"], after_last["leftIndex"]
+    assert close_index < right_index and left_index == right_index + 1, "Boundary probe must follow Close"
+    assert steps[right_index]["key"] == "right" and steps[left_index]["key"] == "left", "Boundary probe must reverse navigation"
+    if after_last["branch"] == "boundary":
+        assert reading_stop(steps[left_index], "web content", "native web fixture"), "Reverse navigation did not return to the previous sibling"
+    else:
+        assert after_last["branch"] == "status" and reading_stop(steps[right_index], "group", "AX native web fixture") and reading_stop(steps[left_index], "button", "close fixture"), "Reverse navigation did not return from the status group"
     reading_order = {"passed": True, "closeIndex": close_index, "webGroupIndex": web_index,
                      "headingIndex": heading_index, "captions": captions,
-                     "scope": "Close visually below the web area is read before native web content; visual interleaving remains incomplete"}
+                     "fieldIndex": order["fieldIndex"], "countIndex": order["countIndex"],
+                     "afterLastControl": after_last,
+                     "scope": "Native HTML follows the controls above it and precedes Close below it"}
     pixel_path = BUILD / "web-system-pixels.json"
     pixels = json.loads(pixel_path.read_text())
     assert pixels["passed"] and pixels["changedPixels"] == 0 and pixels["differenceBounds"] is None
     assert pixels["driver_sha256"] == sha(ROOT / "test_web_pixels.py"), "Repeat pixel comparison with the current driver"
     for variant in ("baseline", "bridge"):
         assert pixels["reports"][variant] == sha(BUILD / ("web-system-" + variant + "-pixels-compiled.json"))
-    result = {"passed": True, "driver_sha256": driver, "runs": runs,
+    result = {"passed": True, "driver_sha256": driver, "voiceover_helper_sha256": voiceover_helper, "runs": runs,
               "liveChecks": sum(len(run["checks"]) for run in runs), "browserEventChecks": event_checks,
               "voiceoverReadingOrder": reading_order,
               "pixels": pixels, "pixels_report_sha256": sha(pixel_path)}
