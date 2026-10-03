@@ -40,8 +40,91 @@ static NSDictionary *Snapshot(NSDictionary *descriptor, NSUInteger revision) {
         @{@"id": @"grid", @"role": @"table", @"label": @"Items", @"value": @"", @"visible": @YES, @"enabled": @YES, @"frame": @[@0, @0, @400, @300], @"grid": descriptor},
         @{@"id": @"button", @"role": @"button", @"label": @"Close", @"value": @"", @"visible": @YES, @"enabled": @YES, @"frame": @[@0, @310, @100, @30]}]};
 }
+static NSMutableDictionary *Outline(void) {
+    NSMutableDictionary *grid = Copy(Descriptor(4));
+    grid[@"rows"] = @[@"first", @"nested", @"leaf", @"later"];
+    grid[@"selectionKnown"] = @NO; [grid removeObjectForKey:@"selected"];
+    grid[@"actions"] = @{@"select": @NO, @"edit": @YES, @"reveal": @NO};
+    grid[@"outline"] = Copy(@{
+        @"first": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Repeated", @"expanded": @YES, @"frame": @[@0, @0, @400, @24]},
+        @"nested": @{@"parent": @"first", @"level": @1, @"kind": @"group", @"label": @"Nested", @"expanded": @YES, @"frame": @[@0, @24, @400, @24]},
+        @"leaf": @{@"parent": @"nested", @"level": @2, @"kind": @"leaf"},
+        @"later": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Repeated", @"expanded": @NO, @"frame": @[@0, @72, @400, @24]}
+    });
+    return grid;
+}
+static void OutlineTests(void) {
+    NSDictionary *valid = Outline();
+    Check(AXBValidateGrid(valid) == nil, "nested outline accepts explicit unknown selection and repeated labels");
+    Check(!AXBGridSelectionKnown(valid) && !AXBGridRowAllowsSelection(valid, @"leaf"), "unknown selection cannot permit complete selection mutations");
+    Check(!AXBGridRowAllowsEditing(valid, @"first") && AXBGridRowAllowsEditing(valid, @"leaf"), "group labels have no backing editor while leaf permissions stay independent");
+    for (NSDictionary *change in @[
+        @{@"row": @"first", @"field": @"parent", @"value": @"leaf"},
+        @{@"row": @"nested", @"field": @"parent", @"value": @"missing"},
+        @{@"row": @"nested", @"field": @"level", @"value": @2},
+        @{@"row": @"first", @"field": @"expanded", @"value": @NO},
+        @{@"row": @"leaf", @"field": @"expanded", @"value": @NO},
+        @{@"row": @"leaf", @"field": @"label", @"value": @"Backing data"},
+        @{@"row": @"later", @"field": @"expanded", @"value": @0},
+        @{@"row": @"later", @"field": @"frame", @"value": @[@0, @0, @400, @0]}
+    ]) {
+        NSMutableDictionary *grid = Copy(valid);
+        grid[@"outline"][change[@"row"]][change[@"field"]] = change[@"value"];
+        Check(AXBValidateGrid(grid) != nil, "malformed outline relationships and unknown group state reject");
+    }
+    NSMutableDictionary *grid = Copy(valid);
+    [grid[@"outline"] removeObjectForKey:@"later"];
+    Check(AXBValidateGrid(grid) != nil, "outline metadata must cover every disclosed row");
+    grid = Copy(valid); grid[@"rows"] = @[@"first", @"later", @"nested", @"leaf"];
+    Check(AXBValidateGrid(grid) != nil, "outline subtrees cannot resume after another root");
+    grid = Copy(valid); grid[@"selected"] = @[];
+    Check(AXBValidateGrid(grid) != nil, "unknown selection cannot masquerade as an empty selection");
+    grid = Copy(valid); grid[@"actions"][@"select"] = @YES;
+    Check(AXBValidateGrid(grid) != nil, "unknown selection cannot advertise selection actions");
+    grid = Copy(valid); grid[@"selectionKnown"] = @0;
+    Check(AXBValidateGrid(grid) != nil, "selection knowledge must be a Boolean");
+    grid = Copy(valid); grid[@"visible"] = @[@"first"]; grid[@"frames"] = @{@"first": @{@"column-1": @[@0, @0, @400, @24]}};
+    Check(AXBValidateGrid(grid) != nil, "group geometry cannot expose a secondary backing cell");
+    grid = Copy(valid); grid[@"focused"] = @{@"row": @"first", @"column": @"column-0", @"value": @"Leaf editor"};
+    Check(AXBValidateGrid(grid) != nil, "a group cannot expose a first-leaf editor");
+    grid = Copy(Descriptor(1)); grid[@"selectionKnown"] = @NO; [grid removeObjectForKey:@"selected"];
+    Check(AXBValidateGrid(grid) != nil, "flat grids retain their complete selection contract");
+    grid = Copy(valid); grid[@"outline"][@"later"][@"expanded"] = @YES;
+    Check(AXBValidateGrid(grid) == nil && AXBValidateGridChange(valid, grid) != nil, "loaded empty expanded groups are valid and disclosure changes require a new order");
+    grid[@"order"] = @2;
+    Check(AXBValidateGridChange(valid, grid) == nil, "disclosure changes preserve group identity with a new order");
+    grid = Copy(valid); grid[@"order"] = @2; grid[@"outline"][@"later"] = @{@"parent": @"", @"level": @0, @"kind": @"leaf"};
+    Check(AXBValidateGrid(grid) == nil && AXBValidateGridChange(valid, grid) != nil, "retained row identities cannot change group semantics");
+    grid[@"generation"] = @"replacement";
+    Check(AXBValidateGridChange(valid, grid) == nil, "a replacement generation can change row semantics");
+    AXBGrid *model = [[AXBGrid alloc] initWithNode:@"grid" descriptor:valid];
+    Check([[model disclosedChildrenOfRow:@"first"] isEqual:@[@"nested"]] && [[model disclosedChildrenOfRow:@"nested"] isEqual:@[@"leaf"]],
+        "model indexes direct disclosed children in native order");
+    Check([[model cellForRow:@"first" column:@"column-0" now:0][@"value"] isEqual:@"Repeated"] &&
+        ![model cellForRow:@"first" column:@"column-1" now:0] && [model takeRequestsAtTime:0].count == 0,
+        "group labels read immediately without backing cells or cache requests");
+    [model cellForRow:@"leaf" column:@"column-0" now:0];
+    NSDictionary *request = [model takeRequestsAtTime:0].firstObject;
+    NSMutableDictionary *page = Copy(Page(request, valid));
+    for (NSMutableDictionary *row in page[@"rows"]) if (AXBGridRowIsGroup(valid, row[@"id"]))
+        for (NSUInteger c = 0; c < [row[@"cells"] count]; c++) row[@"cells"][c][@"value"] = c == 0 ? valid[@"outline"][row[@"id"]][@"label"] : @"";
+    Check([model acceptPage:page now:0], "mixed group and leaf pages accept only explicit label slots for groups");
+    grid = Copy(valid); grid[@"outline"][@"first"][@"frame"] = @[@0, @100, @400, @24];
+    Check(AXBValidateGridChange(valid, grid) == nil, "group geometry changes do not require a new logical order");
+    [model update:grid];
+    Check(model.cachedPageCount == 1 && [model cellForRow:@"leaf" column:@"column-0" now:0], "group movement preserves the leaf page cache");
+    page[@"rows"][0][@"cells"][0][@"value"] = @"First leaf data";
+    Check(![model acceptPage:page now:0], "a mixed page cannot leak a first-leaf value through a group");
+    page[@"rows"][0][@"cells"][0][@"value"] = @"Repeated";
+    page[@"rows"][0][@"cells"][0][@"editable"] = @YES;
+    Check(![model acceptPage:page now:0], "group page slots cannot acquire an editor");
+    AXBSession *session = [[AXBSession alloc] initWithIdentifier:@"unknown-outline-selection" windowID:88];
+    [session exchange:@{@"snapshot": Snapshot(valid, 1)} now:0];
+    Check(![session enqueueNode:@"grid" revision:@1 operation:@"gridSelect" value:@[@"first"] now:0], "session rejects unknown outline selection independently of AX setters");
+}
 int main(void) {
     @autoreleasepool {
+        OutlineTests();
         NSMutableDictionary *clickGrid = Copy(Descriptor(2));
         NSString *row0 = clickGrid[@"rows"][0], *row1 = clickGrid[@"rows"][1];
         clickGrid[@"selectionMode"] = @"multiple";

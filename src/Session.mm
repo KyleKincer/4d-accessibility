@@ -645,7 +645,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             value = @{@"column": value[@"column"], @"generation": grid.descriptor[@"generation"], @"expectedHeader": header};
         } else if ([operation isEqual:@"gridSelect"]) {
             AXBGrid *grid = _grids[nodeID];
-            if (![role isEqual:@"table"] || ![grid.descriptor[@"actions"][@"select"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] > [grid.descriptor[@"rows"] count]) return NO;
+            if (![role isEqual:@"table"] || !AXBGridSelectionKnown(grid.descriptor) || ![grid.descriptor[@"actions"][@"select"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] > [grid.descriptor[@"rows"] count]) return NO;
             NSMutableSet *selected = [NSMutableSet new];
             for (id key in value) {
                 if (!Text(key, 256) || [selected containsObject:key] || [grid indexOfRow:key] == NSNotFound ||
