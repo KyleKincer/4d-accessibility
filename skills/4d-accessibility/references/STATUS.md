@@ -114,6 +114,8 @@ Version 0.22.1 orders ordinary bridge controls and the native web provider under
 
 ## Implemented and exercised
 
+Hierarchy remains unsupported. [Native investigation](../../../tests/HIERARCHY-PROBES.md) compares process-targeted tree keys with native handler sequences and verifies grouped mouse disclosure in both desktop modes. The wider public AppKit inventory supplies no usable outline or classic-tree row geometry. [The probe evidence](../../../validation/native-hierarchy-probes-0.22.1.json) uses separate diagnostic binaries, with no bridge or VoiceOver acceptance claim.
+
 Synthetic live 4D 20.8 fixtures on Apple Silicon/macOS 26 cover ordinary text, buttons, checkboxes/radios, typed dropdowns, hierarchical popup menus, editable combos, semantic groups, described images, progress, numeric/date/time rulers and steppers, automatic repeated/nested page subforms, generated forms and custom providers. Editable progress uses a shared-controller mapping.
 
 Flat grids expose all logical rows and columns for native arrays, collections, entity selections and AreaList Pro. AreaList text editing supports BMP text only; supplementary text is an accepted vendor limitation, and further cell types remain open. Native array and AreaList stable keys may use existing Text, Integer or LongInt arrays, so integer line IDs need no extra column. Tests cover distant rows, stable identity, sorting, selection, native editors, validation, Undo/Redo, stale requests, repeated child grids, native checkbox/popup cells and AreaList checkboxes. Coverage and execution modes differ by family. Licensed compiled AreaList navigation/reveal and explicit VO-Space selection pass separately. See [validation](VALIDATION.md).
