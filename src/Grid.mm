@@ -52,6 +52,7 @@ NSString *AXBValidateGrid(id descriptor) {
             [columns containsObject:column[@"id"]]) return @"invalid grid column";
         [columns addObject:column[@"id"]];
         if (column[@"automationKey"] && !Text(column[@"automationKey"], 256, YES)) return @"invalid grid column automation key";
+        if (column[@"selectionTarget"] && !Bool(column[@"selectionTarget"])) return @"invalid grid selection target";
         NSString *locator = column[@"automationKey"] ?: column[@"id"];
         if ([locators containsObject:locator]) return @"duplicate grid column automation key";
         [locators addObject:locator];
@@ -101,6 +102,7 @@ NSString *AXBValidateGrid(id descriptor) {
         if (![descriptor[@"actions"] isKindOfClass:NSDictionary.class]) return @"invalid grid capabilities";
         for (NSString *operation in descriptor[@"actions"]) if (![@[@"select", @"reveal", @"edit"] containsObject:operation] || !Bool(descriptor[@"actions"][operation])) return @"invalid grid capability";
     }
+    if (descriptor[@"selectionMode"] && ![@[@"none", @"single", @"multiple"] containsObject:descriptor[@"selectionMode"]]) return @"invalid grid selection mode";
     if (descriptor[@"focused"]) {
         id focused = descriptor[@"focused"];
         if (![focused isKindOfClass:NSDictionary.class] || ![rows containsObject:focused[@"row"]] || ![columns containsObject:focused[@"column"]]) return @"invalid focused grid cell";

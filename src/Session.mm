@@ -259,7 +259,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         NSArray *point = controlInput[@"point"];
         if (point && (![point isKindOfClass:NSArray.class] || point.count != 2 || !Number(point[0]) || !Number(point[1])))
             return @"invalid control input point";
-        if (controlInput.count != (point ? 2 : 1)) return @"invalid control input";
+        id serial = controlInput[@"serial"];
+        if (serial && (!point || !Number(serial) || [serial doubleValue] < 1 || [serial doubleValue] > 10000 || floor([serial doubleValue]) != [serial doubleValue])) return @"invalid control input serial";
+        if (controlInput.count != (point ? 2 : 1) + (serial ? 1 : 0)) return @"invalid control input";
     }
     return nil;
 }
@@ -272,6 +274,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     BOOL _active;
     NSDictionary *_pending;
     NSDictionary *_pendingState;
+    NSString *_pendingSelectionGeneration;
     NSDictionary *_pendingGridValue;
     BOOL _delivered;
     NSTimeInterval _queuedAt;
@@ -297,7 +300,14 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
 - (NSDictionary *)activity {
     @synchronized(self) {
         NSMutableDictionary *result = [@{@"busy": @(_pending != nil), @"delivered": @(_delivered)} mutableCopy];
-        if (_pending) result[@"id"] = _pending[@"id"];
+        if (_pending) {
+            result[@"id"] = _pending[@"id"];
+            result[@"operation"] = _pending[@"operation"];
+            result[@"node"] = _pending[@"node"];
+            if ([_pending[@"value"] isKindOfClass:NSDictionary.class])
+                for (NSString *key in @[@"row", @"column"])
+                    if (_pending[@"value"][key]) result[key] = _pending[@"value"][key];
+        }
         if (_lastResult) result[@"result"] = _lastResult;
         return [result copy];
     }
@@ -305,7 +315,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
 - (AXBGrid *)gridForNode:(NSString *)nodeID { @synchronized(self) { return _grids[nodeID]; } }
 - (void)invalidate {
     @synchronized(self) {
-        _active = NO; _pending = nil; _pendingState = nil; _pendingGridValue = nil; _delivered = NO; _snapshot = nil; _lastInput = nil; _inputResult = nil; _controlInput = nil; _controlInputState = nil; _controlInputResult = nil;
+        _active = NO; _pending = nil; _pendingState = nil; _pendingGridValue = nil; _pendingSelectionGeneration = nil; _delivered = NO; _snapshot = nil; _lastInput = nil; _inputResult = nil; _controlInput = nil; _controlInputState = nil; _controlInputResult = nil;
         for (AXBGrid *grid in _grids.allValues) [grid invalidate];
         [_grids removeAllObjects];
     }
@@ -351,6 +361,30 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 return [column[@"enabled"] boolValue] && [column[@"editable"] boolValue] ? node : nil;
             return nil;
         }
+        if ([_pending[@"operation"] isEqual:@"gridSelect"]) {
+            NSDictionary *grid = node[@"grid"];
+            NSArray *point = input[@"point"], *desired = _pending[@"value"];
+            if (!point || !input[@"serial"] || ![grid[@"actions"][@"select"] boolValue] ||
+                ![grid[@"generation"] isEqual:_pendingSelectionGeneration]) return nil;
+            for (NSString *row in grid[@"frames"]) {
+                BOOL selected = [grid[@"selected"] containsObject:row], wanted = [desired containsObject:row];
+                BOOL multiple = [grid[@"selectionMode"] isEqual:@"multiple"];
+                BOOL single = [grid[@"selectionMode"] isEqual:@"single"];
+                if ((!multiple && !single) || (single && (desired.count > 1 || (desired.count == 1 && !wanted))) || selected == wanted || !AXBGridRowAllowsSelection(grid, row)) continue;
+                for (NSDictionary *column in grid[@"columns"]) {
+                    if (![column[@"selectionTarget"] boolValue] || ![column[@"enabled"] boolValue]) continue;
+                    NSArray *frame = grid[@"frames"][row][column[@"id"]];
+                    double x = [point[0] doubleValue], y = [point[1] doubleValue];
+                    if (!frame || x < [frame[0] doubleValue] || y < [frame[1] doubleValue] ||
+                        x >= [frame[0] doubleValue] + [frame[2] doubleValue] || y >= [frame[1] doubleValue] + [frame[3] doubleValue]) continue;
+                    NSMutableDictionary *selectionNode = [node mutableCopy];
+                    selectionNode[@"target"] = @{@"row": row, @"column": column[@"id"]};
+                    selectionNode[@"toggleSelection"] = @(multiple || desired.count == 0);
+                    return selectionNode;
+                }
+            }
+            return nil;
+        }
         return !input[@"point"] && [@[@"increment", @"decrement"] containsObject:_pending[@"operation"]] &&
             ([node[@"role"] isEqual:@"stepper"] && (!node[@"adjustment"] || [node[@"adjustment"] isEqual:@"pointer"])) &&
             [node[@"adjustable"] boolValue] ? node : nil;
@@ -362,8 +396,10 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (![_controlInput isEqual:input] || _controlInputResult || ![_controlInputState isEqual:ActionState(_snapshot, _pending)]) return nil;
         NSDictionary *node = [self controlInputNode:input snapshot:_snapshot];
         if (!node) return nil;
-        NSDictionary *expected = _pending[@"value"][@"expectedCell"];
-        if ([_pending[@"operation"] isEqual:@"gridPress"] && ![expected isEqual:[_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:NSProcessInfo.processInfo.systemUptime]]) return nil;
+        if ([_pending[@"operation"] isEqual:@"gridPress"]) {
+            NSDictionary *expected = _pending[@"value"][@"expectedCell"];
+            if (![expected isEqual:[_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:NSProcessInfo.processInfo.systemUptime]]) return nil;
+        }
         NSMutableDictionary *result = [node mutableCopy];
         result[@"operation"] = _pending[@"operation"];
         if ([@[@"gridPress", @"gridHeaderPress"] containsObject:_pending[@"operation"]]) result[@"target"] = _pending[@"value"];
@@ -373,7 +409,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
 - (void)finishControlInput:(NSDictionary *)input accepted:(BOOL)accepted {
     @synchronized(self) {
         if (!_active || !_delivered || ![_pending[@"id"] isEqual:input[@"action"]] || ![_controlInput isEqual:input] || _controlInputResult) return;
-        _controlInputResult = @{@"action": input[@"action"], @"accepted": @(accepted), @"menuOpened": @(_controlMenuOpened)};
+        NSMutableDictionary *result = [@{@"action": input[@"action"], @"accepted": @(accepted), @"menuOpened": @(_controlMenuOpened)} mutableCopy];
+        if (input[@"serial"]) result[@"serial"] = input[@"serial"];
+        _controlInputResult = result;
     }
 }
 - (void)noteMenuForControlInput:(NSString *)action {
@@ -473,6 +511,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             _pending = nil;
             _pendingState = nil;
             _pendingGridValue = nil;
+            _pendingSelectionGeneration = nil;
             _delivered = NO;
             _lastInput = nil;
             _inputResult = nil;
@@ -483,12 +522,18 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (input && [input[@"serial"] integerValue] <= _lastInputSerial && ![input isEqual:_lastInput])
             return @{@"ok": @NO, @"error": @"editor input replay changed its contents"};
         NSDictionary *controlInput = envelope[@"controlInput"];
-        BOOL gridInput = controlInput[@"point"] && _delivered && [_pending[@"id"] isEqual:controlInput[@"action"]] && [@[@"gridPress", @"gridHeaderPress"] containsObject:_pending[@"operation"] ?: @""];
+        BOOL gridInput = controlInput[@"point"] && _delivered && [_pending[@"id"] isEqual:controlInput[@"action"]] && [@[@"gridPress", @"gridHeaderPress", @"gridSelect"] containsObject:_pending[@"operation"] ?: @""];
         // A target can move or become unavailable between host confirmation
         // and this snapshot. Let the native dispatcher acknowledge that grid
         // input as rejected without disabling the entire accessibility session.
         if (controlInput && !gridInput && ![self controlInputNode:controlInput snapshot:next]) return @{@"ok": @NO, @"error": @"control input does not match the active control action"};
-        if (controlInput && _controlInput && ![_controlInput isEqual:controlInput]) return @{@"ok": @NO, @"error": @"control input replay changed its contents"};
+        BOOL selectionStep = controlInput[@"serial"] && [_pending[@"operation"] isEqual:@"gridSelect"];
+        BOOL nextSelectionStep = selectionStep && _controlInput &&
+            [controlInput[@"serial"] unsignedIntegerValue] == [_controlInput[@"serial"] unsignedIntegerValue] + 1 &&
+            [_controlInputResult[@"accepted"] boolValue];
+        if (controlInput[@"serial"] && (!selectionStep || (!_controlInput && [controlInput[@"serial"] unsignedIntegerValue] != 1)))
+            return @{@"ok": @NO, @"error": @"control input serial does not match selection"};
+        if (controlInput && _controlInput && ![_controlInput isEqual:controlInput] && !nextSelectionStep) return @{@"ok": @NO, @"error": @"control input replay changed its contents"};
         _snapshot = next;
         NSMutableSet *seenGrids = [NSMutableSet new];
         for (NSDictionary *node in next[@"nodes"]) if (node[@"grid"]) {
@@ -517,8 +562,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 result[@"editorInput"] = input;
             }
         }
-        if (controlInput && !_controlInput) {
+        if (controlInput && (!_controlInput || nextSelectionStep)) {
             _controlInput = controlInput;
+            _controlInputResult = nil;
             _controlMenuOpened = NO;
             _controlInputState = ActionState(next, _pending);
             result[@"controlInput"] = controlInput;
@@ -535,6 +581,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 _pending = nil;
                 _pendingState = nil;
                 _pendingGridValue = nil;
+                _pendingSelectionGeneration = nil;
             } else {
                 // Dispatch against the state just checked by both the session
                 // and host. Keep the original revision for diagnostics only.
@@ -670,6 +717,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (!actionBytes || actionBytes.length > AXBLimits::payload) return NO;
         _pending = [NSJSONSerialization JSONObjectWithData:actionBytes options:0 error:nil];
         _pendingState = ActionState(_snapshot, _pending);
+        _pendingSelectionGeneration = [operation isEqual:@"gridSelect"] ? node[@"grid"][@"generation"] : nil;
         _pendingGridValue = gridValue;
         _lastInputSerial = 0;
         _lastInput = nil;

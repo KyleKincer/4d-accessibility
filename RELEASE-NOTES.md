@@ -1,3 +1,15 @@
+# 0.22.0 classic list subforms, unreleased
+
+A parent lifecycle area can now discover classic list subforms and expose every logical record as an accessible table. Named project and table input parents use the same installer. The repeated row form needs no new accessibility area, row method or field hook. Native layout, editors, key filters, selection and save handlers retain control of application behavior.
+
+The installer also generates `Resources/AXB.FormMetadata.json` beside `Project`. Commit and ship this resource, and regenerate it after form-definition changes. Updating an existing area integration can add it with `--form-metadata`, keeping the application's existing installer options. Until that resource is present, an existing list subform appears as a disabled table with `listSubformDefinitionRequired`, replacing the earlier one-row child description. See [installation, configuration and limits](skills/4d-accessibility/references/LIST-SUBFORMS.md).
+
+Stored scalar fields and a stored primary key provide automatic columns and row identity. A table without a declared primary key can use an existing unique text or integer field through central `keyProperty` configuration. Inspection uses a private read-only process and preserves the current record buffer and selection. Actions use verified native clicks and editors; they never assign or save fields directly. Unsupported row controls remain explicit diagnostics.
+
+Confirmed grid-checkbox feedback now survives a follow-up reveal of the same cell while its changed value loads. Rejected requests, retired controls and unrelated actions still cancel success feedback. This uses the shared provider and adds no application hooks.
+
+The [current acceptance gate](skills/4d-accessibility/references/STATUS.md#classic-list-subforms-in-development) records development results and unresolved layouts. Upgrade the plugin, component, helpers and generated resource together. The adapter requires native `listSubforms 1`. Signed distribution remains subject to the exact-download gate; source and ad hoc CI artifacts are identified separately.
+
 # 0.21.1 compound-form focus
 
 Generated nonblocking forms can have identically named parent/child editors. Version 0.21.1 fixes initial focus, intentional restart and child replacement through the existing form observer. Native editors, business handlers, timers and layout retain their behavior.

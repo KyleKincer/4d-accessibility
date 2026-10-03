@@ -97,7 +97,7 @@ If ($node.gridCell#Null)
  $i:=$editor.start
  $code:=$editor.end
  If (($i#$start) | ($code#$end))
-  $data:=New object("action"; $action; "node"; $node; "options"; $options; "text"; $before; "start"; $start; "end"; $end; "deadline"; Milliseconds+120000; "selecting"; False)
+  $data:=New object("action"; $action; "node"; $node; "options"; $options; "text"; $before; "start"; $start; "end"; $end; "deadline"; Milliseconds+120000; "selecting"; False; "selectAll"; ($action.operation="setValue") & ($node.gridCell.selectAll=True))
   return AXB_TextSelect($data)
  End if
 End if

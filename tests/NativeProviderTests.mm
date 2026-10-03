@@ -198,13 +198,53 @@ static void GridRefreshDelayTest(void) {
 @property(nonatomic) NSUInteger presses;
 @property(nonatomic) NSUInteger releases;
 @property(nonatomic) NSPoint lastPoint;
+@property(nonatomic) NSEventModifierFlags lastFlags;
 @end
 @implementation AXBStepperTestView
 - (BOOL)isFlipped { return YES; }
-- (void)mouseDown:(NSEvent *)event { self.presses++; self.lastPoint = [self convertPoint:event.locationInWindow fromView:nil];
+- (void)mouseDown:(NSEvent *)event { self.presses++; self.lastFlags = event.modifierFlags; self.lastPoint = [self convertPoint:event.locationInWindow fromView:nil];
     if (self.menu) [NSNotificationCenter.defaultCenter postNotificationName:NSMenuDidBeginTrackingNotification object:self.menu]; }
 - (void)mouseUp:(NSEvent *)event { (void)event; self.releases++; }
 @end
+static void SelectionInputTest(void) {
+    NSWindow *window = Window(@"AXB native row selection");
+    AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
+    [window.contentView addSubview:canvas];
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9026);
+    NSMutableDictionary *grid = [@{@"generation": @"row-click", @"order": @1, @"rows": @[@"one", @"two"],
+        @"columns": @[@{@"id": @"name", @"label": @"Name", @"enabled": @YES, @"editable": @NO, @"selectionTarget": @YES}],
+        @"visible": @[@"one", @"two"], @"selected": @[], @"selectionMode": @"multiple",
+        @"frames": @{@"one": @{@"name": @[@10, @30, @200, @24]}, @"two": @{@"name": @[@10, @54, @200, @24]}},
+        @"actions": @{@"select": @YES, @"reveal": @YES, @"edit": @NO}} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Native selection", @"enabled": @YES,
+        @"nodes": @[@{@"id": @"items", @"role": @"table", @"label": @"Items", @"value": @"", @"visible": @YES,
+            @"enabled": @YES, @"frame": @[@10, @20, @300, @140], @"grid": grid}]} mutableCopy];
+    Exchange(window, 9026, 1, session, snapshot); Pump();
+    AXBGridNode *table = Provider(window).accessibilityChildren.firstObject;
+    [table setAccessibilitySelectedRows:[table accessibilityRows]];
+    NSDictionary *action = Exchange(window, 9026, 1, session, snapshot)[@"action"];
+    NSDictionary *first = @{@"action": action[@"id"], @"serial": @1, @"point": @[@30, @42]};
+    Exchange(window, 9026, 1, session, snapshot, nil, nil, first); Pump(); Pump();
+    Check(canvas.presses == 1 && canvas.releases == 1 && (canvas.lastFlags & NSEventModifierFlagCommand), "multiple row selection dispatches a complete native command-click");
+    Check([Exchange(window, 9026, 1, session, snapshot)[@"controlInputResult"][@"serial"] isEqual:@1], "first native selection click has its own acknowledgement");
+    grid[@"selected"] = @[@"one"]; snapshot[@"revision"] = @2;
+    NSDictionary *second = @{@"action": action[@"id"], @"serial": @2, @"point": @[@30, @66]};
+    Exchange(window, 9026, 1, session, snapshot, nil, nil, second); Pump(); Pump();
+    Check(canvas.presses == 2 && canvas.releases == 2, "a second selection step delivers one additional mouse pair");
+    Exchange(window, 9026, 1, session, snapshot, nil, nil, second); Pump();
+    Check(canvas.presses == 2, "replaying a selection step cannot toggle the row twice");
+    grid[@"selected"] = @[@"one", @"two"]; snapshot[@"revision"] = @3;
+    Exchange(window, 9026, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    grid[@"selectionMode"] = @"single"; grid[@"selected"] = @[@"one"]; snapshot[@"revision"] = @4;
+    Exchange(window, 9026, 1, session, snapshot); Pump();
+    [table setAccessibilitySelectedRows:@[[table accessibilityRows][1]]];
+    action = Exchange(window, 9026, 1, session, snapshot)[@"action"];
+    NSDictionary *single = @{@"action": action[@"id"], @"serial": @1, @"point": @[@30, @66]};
+    Exchange(window, 9026, 1, session, snapshot, nil, nil, single); Pump(); Pump();
+    Check(canvas.presses == 3 && !(canvas.lastFlags & NSEventModifierFlagCommand), "single row selection uses the normal unmodified click");
+    [window close]; Pump();
+}
 static void ButtonInputTest(void) {
     NSWindow *window = Window(@"AXB guarded button delivery");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -274,11 +314,28 @@ static void GridControlsTest(void) {
     Check(canvas.presses == 1, "grid input replay cannot repeat the native click");
     Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
     Check(table.owner.actionFeedback != nil, "grid checkbox receipt waits for its updated value page");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [cell accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+#pragma clang diagnostic pop
+    NSDictionary *reveal = Exchange(window, 9012, 1, session, snapshot)[@"action"]; Pump();
+    Check([reveal[@"operation"] isEqual:@"gridReveal"] && table.owner.actionFeedback != nil,
+        "same-cell automatic reveal preserves confirmed checkbox feedback while its page loads");
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"}); Pump();
+    Check(table.owner.actionFeedback != nil, "later reveal receipt cannot erase confirmed checkbox feedback");
     value[@"checked"] = @1; value[@"value"] = @"1";
     Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
     Check([[checkbox accessibilityValue] isEqual:@1] && table.owner.actionFeedback == nil, "published checkbox state consumes confirmed feedback once");
-    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}, nil, nil, @[page]); Pump();
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"}, nil, nil, @[page]); Pump();
     Check(table.owner.actionFeedback == nil, "grid checkbox receipt replay cannot repeat feedback");
+    Check([checkbox accessibilityPerformPress], "grid checkbox accepts activation before an unrelated selection");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
+    [table setAccessibilitySelectedRows:@[[table accessibilityRows][0]]];
+    NSDictionary *selection = Exchange(window, 9012, 1, session, snapshot)[@"action"]; Pump();
+    Check([selection[@"operation"] isEqual:@"gridSelect"] && table.owner.actionFeedback == nil,
+        "unrelated selection cancels delayed checkbox feedback");
+    Exchange(window, 9012, 1, session, snapshot, @{@"id": selection[@"id"], @"status": @"completed", @"message": @"selected"}); Pump();
     Check([checkbox accessibilityPerformPress], "grid checkbox accepts a separately rejected request");
     action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
     Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"validation rejected"}); Pump();
@@ -846,6 +903,7 @@ int main(void) {
         CheckboxFeedbackTest();
         AdjustableTest();
         ButtonInputTest();
+        SelectionInputTest();
         ComboPopupTest();
         NSWindow *first = Window(@"AXB native test 1");
         NSString *session = Open(first, 101);

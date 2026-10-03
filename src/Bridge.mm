@@ -231,7 +231,8 @@ NSString *AXBNativeFocus(void *nativeWindow) {
     if (!NSThread.isMainThread || (!self.isAccessibilityEnabled && !readable) || ![self isAccessibilityElement]) return NO;
     BOOL accepted = [self.owner.session enqueueNode:self.data[@"id"] revision:self.revision operation:operation value:value observedSnapshot:self.owner.publishedSnapshot now:Now()];
     if (accepted) {
-        self.owner.actionFeedback = nil;
+        if (!AXBGridRevealMatchesElement(self.owner.actionFeedback[@"control"], self.owner.session.activity))
+            self.owner.actionFeedback = nil;
         // VoiceOver can read the old value before 4D applies an action. These
         // controls need feedback after the exact host completion receipt.
         NSString *action = self.owner.session.activity[@"id"];
@@ -791,9 +792,25 @@ static NSView *NativeContainer(NSWindow *window, NSDictionary *snapshot) {
     if (self.popupRequest && (![activity[@"busy"] boolValue] || ![activity[@"id"] isEqual:self.popupRequest[@"id"]])) self.popupRequest = nil;
     if (self.adoptedMenu && ![self.adoptedMenu.accessibilityParent isAccessibilityElement]) [self restorePopupMenu];
     NSDictionary *result = activity[@"result"];
+    BOOL sameCellReveal = feedback[@"control"] && AXBGridRevealMatchesElement(feedback[@"control"], activity);
+    if (feedback[@"control"] && [activity[@"busy"] boolValue] &&
+        ![feedback[@"id"] isEqual:activity[@"id"]] && !sameCellReveal) {
+        self.actionFeedback = nil; feedback = nil;
+    }
+    if (feedback[@"control"] && [feedback[@"id"] isEqual:result[@"id"]] &&
+        [result[@"status"] isEqual:@"completed"] && !feedback[@"result"]) {
+        // VoiceOver can reveal the same cell again while its changed value page
+        // arrives. Retain the exact completed receipt across that harmless
+        // request, but cancel for any other action and keep the bounded wait.
+        NSMutableDictionary *confirmed = [feedback mutableCopy];
+        confirmed[@"result"] = result;
+        confirmed[@"deadline"] = @(Now()+2);
+        self.actionFeedback = confirmed; feedback = confirmed;
+    }
+    if (feedback[@"result"]) result = feedback[@"result"];
     if (feedback && [feedback[@"id"] isEqual:result[@"id"]]) {
         self.actionFeedback = nil; // A receipt replay must never repeat speech.
-        if (![activity[@"busy"] boolValue] && [result[@"status"] isEqual:@"completed"] && NSApp.isActive && self.window.isKeyWindow && [self canAct]) {
+        if ((![activity[@"busy"] boolValue] || sameCellReveal) && [result[@"status"] isEqual:@"completed"] && NSApp.isActive && self.window.isKeyWindow && [self canAct]) {
             id<NSAccessibility> control = feedback[@"control"];
             if (control) {
                 // A grid's native click can complete before its value page
@@ -1008,7 +1025,7 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                 CGFloat direction = [data[@"operation"] isEqual:@"increment"] ? -1 : 1;
                 NSPoint local = NSMakePoint(NSMinX(rect)+MIN(6, NSWidth(rect)/2), NSMidY(rect)+direction*MIN(4, NSHeight(rect)/4));
                 id target = node;
-                if ([@[@"gridPress", @"gridHeaderPress"] containsObject:data[@"operation"]]) {
+                if ([@[@"gridPress", @"gridHeaderPress", @"gridSelect"] containsObject:data[@"operation"]]) {
                     if (![node isKindOfClass:AXBGridNode.class]) return;
                     target = [data[@"operation"] isEqual:@"gridHeaderPress"] ? [(AXBGridNode *)node headerForColumn:data[@"target"][@"column"]] :
                         [(AXBGridNode *)node controlForRow:data[@"target"][@"row"] column:data[@"target"][@"column"]];
@@ -1030,9 +1047,10 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     if (IsNativeControl(ancestor)) return;
                 if (view.popupRequest[@"element"] == target && [view.popupRequest[@"id"] isEqual:controlInput[@"action"]])
                     view.popupRequest = @{@"element": target, @"id": controlInput[@"action"], @"nativeInput": @YES};
-                NSEvent *down = [NSEvent mouseEventWithType:NSEventTypeLeftMouseDown location:point modifierFlags:0 timestamp:Now()
+                NSEventModifierFlags flags = [data[@"toggleSelection"] boolValue] ? NSEventModifierFlagCommand : 0;
+                NSEvent *down = [NSEvent mouseEventWithType:NSEventTypeLeftMouseDown location:point modifierFlags:flags timestamp:Now()
                     windowNumber:view.window.windowNumber context:nil eventNumber:0 clickCount:1 pressure:1];
-                NSEvent *up = [NSEvent mouseEventWithType:NSEventTypeLeftMouseUp location:point modifierFlags:0 timestamp:Now()
+                NSEvent *up = [NSEvent mouseEventWithType:NSEventTypeLeftMouseUp location:point modifierFlags:flags timestamp:Now()
                     windowNumber:view.window.windowNumber context:nil eventNumber:0 clickCount:1 pressure:0];
                 // Mouse-down may enter AppKit's tracking loop. Queue its matching
                 // release first, then synchronously dispatch to this exact window.
