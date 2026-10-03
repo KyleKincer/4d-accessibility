@@ -3,6 +3,12 @@ ARRAY POINTER($hierarchy; 3)
 Case of
  : (Form event code=On Load)
   Form.events:=New collection
+  Form.stateSerial:=0
+  Form.disclosureCalls:=New collection
+  Form.disclosureMode:="normal"
+  Form.ready:=True
+  Form.scope:="Record A"
+  Form.note:="Unrelated native editor"
   Form.command:=New object("id"; "")
   Form.groupedCase:="initial"
   Form.tree:=New list

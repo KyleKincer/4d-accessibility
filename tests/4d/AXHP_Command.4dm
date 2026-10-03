@@ -1,10 +1,31 @@
 // Native command behavior probe. These are not bridge action implementations.
 #DECLARE($request : Object) -> $result : Object
-var $ref; $child; $i : Integer
+var $ref; $child; $i; $vertical; $horizontal : Integer
 var $label : Text
 var $expanded : Boolean
 $result:=New object("id"; $request.id; "operation"; $request.operation; "eventsBefore"; Form.events.length)
 Case of
+ : ($request.operation="groupScroll")
+  $vertical:=$request.vertical
+  $horizontal:=$request.horizontal
+  OBJECT SET SCROLL POSITION(*; "Grouped"; $vertical; $horizontal; *)
+ : ($request.operation="groupControllerMode")
+  Form.disclosureMode:=$request.mode
+ : ($request.operation="groupControllerRestore")
+  Form.ready:=True
+  AXHP_Options.grids.Grouped.setExpanded:=Formula(AXHP_SetExpanded($1))
+ : ($request.operation="groupControllerRemove")
+  OB REMOVE(AXHP_Options.grids.Grouped; "setExpanded")
+ : ($request.operation="groupReady")
+  Form.ready:=$request.ready
+ : ($request.operation="groupEditLeaf")
+  EDIT ITEM(*; "Label"; 1)
+ : ($request.operation="groupTargetDisclosure")
+  If ($request.expanded)
+   LISTBOX EXPAND(*; "Grouped"; False; lk break row; $request.row; $request.level)
+  Else
+   LISTBOX COLLAPSE(*; "Grouped"; False; lk break row; $request.row; $request.level)
+  End if
  : (($request.operation="treeExpand") | ($request.operation="treeCollapse"))
   GET LIST ITEM(Form.tree; 1; $ref; $label; $child; $expanded)
   SET LIST ITEM(*; "TreeA"; 101; $label; 101; $child; $request.operation="treeExpand")

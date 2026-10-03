@@ -54,6 +54,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 - (void)restoreNativeFocus;
 - (void)expectPopupFrom:(id)element;
 - (void)expectCheckboxFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value;
+- (void)expectDisclosureFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value;
 - (void)adoptPopupMenu:(NSMenu *)menu;
 - (void)restorePopupMenu;
 @end

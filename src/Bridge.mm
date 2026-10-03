@@ -53,6 +53,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute) {
     if ([attribute isEqual:NSAccessibilityFocusedAttribute]) selector = @selector(setAccessibilityFocused:);
     else if ([attribute isEqual:NSAccessibilityValueAttribute] && [@[NSAccessibilityTextFieldRole, NSAccessibilityTextAreaRole, NSAccessibilityComboBoxRole, NSAccessibilityCellRole] containsObject:role]) selector = @selector(setAccessibilityValue:);
     else if ([attribute isEqual:NSAccessibilitySelectedAttribute] && [role isEqual:NSAccessibilityRowRole]) selector = @selector(setAccessibilitySelected:);
+    else if ([attribute isEqual:NSAccessibilityDisclosingAttribute] && [role isEqual:NSAccessibilityRowRole]) selector = @selector(setAccessibilityDisclosed:);
     else if ([attribute isEqual:NSAccessibilitySelectedRowsAttribute] && [@[NSAccessibilityTableRole, NSAccessibilityOutlineRole] containsObject:role]) selector = @selector(setAccessibilitySelectedRows:);
     else if ([role isEqual:NSAccessibilityTextFieldRole] || [role isEqual:NSAccessibilityTextAreaRole] || [role isEqual:NSAccessibilityComboBoxRole]) {
         if ([attribute isEqual:NSAccessibilitySelectedTextAttribute]) selector = @selector(setAccessibilitySelectedText:);
@@ -760,6 +761,12 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     if (action && element && value)
         self.actionFeedback = @{@"id": action, @"control": element, @"value": value};
 }
+- (void)expectDisclosureFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value {
+    NSString *action = self.session.activity[@"id"];
+    if (action && element && value && [[element accessibilityRole] isEqual:NSAccessibilityDisclosureTriangleRole])
+        self.actionFeedback = @{@"id": action, @"control": element, @"value": value,
+            @"role": NSAccessibilityDisclosureTriangleRole, @"label": [element accessibilityLabel] ?: @""};
+}
 - (void)expectPopupFrom:(id)element {
     NSString *action = self.session.activity[@"id"];
     if (action) self.popupRequest = @{@"id": action, @"element": element};
@@ -1015,9 +1022,14 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         if ((![activity[@"busy"] boolValue] || sameCellReveal) && [result[@"status"] isEqual:@"completed"] && NSApp.isActive && self.window.isKeyWindow && [self canAct]) {
             id<NSAccessibility> control = feedback[@"control"];
             if (control) {
-                // A grid's native click can complete before its value page
-                // arrives. Speak only this live control's changed state, once.
-                if ([control isAccessibilityElement] && [[control accessibilityRole] isEqual:NSAccessibilityCheckBoxRole]) {
+                // A native click can complete before its value page arrives.
+                // Disclosure also needs receipt-backed feedback when VoiceOver
+                // ignores the stationary triangle's value notification.
+                BOOL disclosure = [feedback[@"role"] isEqual:NSAccessibilityDisclosureTriangleRole];
+                BOOL matchingDisclosure = disclosure && [[control accessibilityRole] isEqual:NSAccessibilityDisclosureTriangleRole] &&
+                    [control isAccessibilityEnabled] && [[control accessibilityLabel] isEqual:feedback[@"label"]];
+                if ([control isAccessibilityElement] && (matchingDisclosure ||
+                    (!disclosure && [[control accessibilityRole] isEqual:NSAccessibilityCheckBoxRole]))) {
                     NSNumber *value = [control accessibilityValue];
                     if ([value isKindOfClass:NSNumber.class] && [value isEqual:feedback[@"value"]]) {
                         NSNumber *deadline = feedback[@"deadline"] ?: @(Now()+2);
@@ -1026,7 +1038,8 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
                             self.actionFeedback = waiting;
                         }
                     } else if ([value isKindOfClass:NSNumber.class]) {
-                        NSString *key = value.integerValue == 2 ? @"mixed" : value.boolValue ? @"checked" : @"unchecked";
+                        NSString *key = disclosure ? (value.boolValue ? @"expanded" : @"collapsed") :
+                            value.integerValue == 2 ? @"mixed" : value.boolValue ? @"checked" : @"unchecked";
                         NSString *state = [[NSBundle bundleForClass:AXBNode.class] localizedStringForKey:key value:key table:@"AccessibilityBridge"];
                         NSAccessibilityPostNotificationWithUserInfo(self.window, NSAccessibilityAnnouncementRequestedNotification,
                             @{NSAccessibilityAnnouncementKey: [NSString stringWithFormat:@"%@: %@", [control accessibilityLabel] ?: @"", state],

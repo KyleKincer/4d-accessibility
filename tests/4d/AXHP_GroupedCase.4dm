@@ -3,6 +3,8 @@
 var $i; $count : Integer
 ARRAY POINTER($hierarchy; 3)
 Case of
+ : ($name="longRepeated")
+  $count:=60
  : (New collection("repeated"; "singleText"; "singleDate").indexOf($name)>=0)
   $count:=8
  : ($name="placeholder")
@@ -29,6 +31,10 @@ For ($i; 1; $count)
  AXHP_Date{$i}:=!2026-10-01!+Choose($i<=3; 0; Choose($i<=5; 1; Choose($i<=7; 0; 2)))
  AXHP_Selection{$i}:=False
  AXHP_Control{$i}:=0
+ If ($name="longRepeated")
+  AXHP_Group{$i}:=Choose($i<=20; "A"; Choose($i<=40; "B"; "A"))
+  AXHP_Subgroup{$i}:="Part "+String(Int(($i-1)/5))
+ End if
 End for
 If ($name="placeholder")
  AXHP_Subgroup{1}:=""

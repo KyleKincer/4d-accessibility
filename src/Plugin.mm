@@ -54,7 +54,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 break;
             }
             case 2: AXBDetach(TextParameter(parameters, 1, 128), PA_GetCurrentProcessNumber()); break;
-            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; macOS", AXB_VERSION]); break;
+            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; macOS", AXB_VERSION]); break;
             case 4:
             case 7: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
