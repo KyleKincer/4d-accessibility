@@ -65,11 +65,15 @@ static NSString *Identifier(AXBGridNode *table, NSString *kind, NSString *row, N
 @property(nonatomic) NSTimeInterval lastWaitingAt;
 @property(nonatomic, strong) NSArray *pendingDestroyed;
 @property(nonatomic, strong) AXBGridHeaderGroup *headerGroup;
+@property(nonatomic, strong) NSMapTable<AXBGridCell *, NSDictionary *> *pendingValueNotifications;
+@property(nonatomic) BOOL valueNotificationScheduled;
 - (AXBGridRow *)row:(NSString *)key;
 - (AXBGridColumn *)column:(NSString *)key;
 - (BOOL)synchronizeForAction;
 - (NSRect)screenFrame:(NSArray *)frame;
 - (NSRect)layoutFrameForRow:(NSString *)row column:(NSString *)column;
+- (void)scheduleValueNotifications;
+- (void)drainValueNotificationsAtTime:(NSTimeInterval)now;
 @end
 @interface AXBGridPart : NSAccessibilityElement
 @property(nonatomic, weak) AXBGridNode *table;
@@ -91,6 +95,7 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @property(nonatomic, copy) NSString *columnKey;
 @property(nonatomic, strong) NSDictionary *lastValue;
 @property(nonatomic) BOOL waitingForValue;
+@property(nonatomic) NSUInteger valueNotificationSerial;
 @property(nonatomic, strong) id<AXBGridContentElement> content;
 @property(nonatomic, copy) NSString *contentRole;
 - (NSDictionary *)value;
@@ -508,14 +513,15 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     NSMutableArray *actions = [NSMutableArray new];
     if ([self isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)]) [actions addObject:NSAccessibilityPressAction];
     if (@available(macOS 26.0, *)) {
-        if (self.metadata && self.isAccessibilityElement && [self.table.owner canAct]) [actions addObject:NSAccessibilityScrollToVisibleAction];
+        if (self.metadata && self.isAccessibilityElement && [self.table.grid.descriptor[@"actions"][@"reveal"] boolValue] &&
+            [self.table.owner canAct]) [actions addObject:NSAccessibilityScrollToVisibleAction];
     }
     return actions;
 }
 - (void)accessibilityPerformAction:(NSString *)action {
     if (@available(macOS 26.0, *)) {
         if ([action isEqual:NSAccessibilityScrollToVisibleAction]) {
-            if ([self.table synchronizeForAction] && self.isAccessibilityElement)
+            if ([self.table synchronizeForAction] && self.isAccessibilityElement && [self.table.grid.descriptor[@"actions"][@"reveal"] boolValue])
                 (void)[self.table queue:@"gridHeaderReveal" value:@{@"column": self.column.key}];
             return;
         }
@@ -730,10 +736,53 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
         if (self.headerGroup) [retired addObject:self.headerGroup];
         for (AXBGridPart *part in retired) part.live = NO;
         self.pendingDestroyed = retired;
+        [self.pendingValueNotifications removeAllObjects];
         self.rowRegistry = [NSMutableDictionary new]; self.columnRegistry = [NSMutableDictionary new];
         self.grid = grid; self.lastDescriptor = nil; self.lastCacheSerial = 0;
         self.headerGroup = nil;
     }
+}
+- (void)scheduleValueNotifications {
+    if (self.valueNotificationScheduled || !self.pendingValueNotifications.count) return;
+    NSArray *cells = self.pendingValueNotifications.keyEnumerator.allObjects;
+    if (!cells.count) { [self.pendingValueNotifications removeAllObjects]; return; }
+    NSTimeInterval deadline = DBL_MAX;
+    for (AXBGridCell *cell in cells) {
+        NSDictionary *pending = [self.pendingValueNotifications objectForKey:cell];
+        if (pending[@"deadline"]) deadline = MIN(deadline, [pending[@"deadline"] doubleValue]);
+    }
+    if (deadline == DBL_MAX) return;
+    self.valueNotificationScheduled = YES;
+    __weak AXBGridNode *weakTable = self;
+    NSTimeInterval delay = MAX(0, deadline - NSProcessInfo.processInfo.systemUptime);
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        AXBGridNode *table = weakTable;
+        if (!table) return;
+        table.valueNotificationScheduled = NO;
+        [table drainValueNotificationsAtTime:NSProcessInfo.processInfo.systemUptime];
+    });
+}
+- (void)drainValueNotificationsAtTime:(NSTimeInterval)now {
+    for (AXBGridCell *cell in self.pendingValueNotifications.keyEnumerator.allObjects) {
+        NSDictionary *pending = [self.pendingValueNotifications objectForKey:cell];
+        if (!pending[@"deadline"] || [pending[@"deadline"] doubleValue] > now) continue;
+        if (!cell.isAccessibilityElement || cell.waitingForValue || cell.table != self ||
+            self.rowRegistry[cell.row.key].cells[cell.columnKey] != cell ||
+            cell.valueNotificationSerial != [pending[@"serial"] unsignedIntegerValue] ||
+            ![self.grid.descriptor[@"generation"] isEqual:pending[@"generation"]] || ![self.grid.descriptor[@"order"] isEqual:pending[@"order"]] ||
+            ![self.grid cachedCellForRow:cell.row.key column:cell.columnKey]) {
+            [self.pendingValueNotifications removeObjectForKey:cell]; continue;
+        }
+        if (![[self.grid cachedCellForRow:cell.row.key column:cell.columnKey] isEqual:cell.lastValue]) {
+            // A page can reach the model before the queued native refresh.
+            // Keep its notification dormant until that refresh publishes it.
+            NSMutableDictionary *waiting = [pending mutableCopy]; [waiting removeObjectForKey:@"deadline"];
+            [self.pendingValueNotifications setObject:waiting forKey:cell]; continue;
+        }
+        [self.pendingValueNotifications removeObjectForKey:cell];
+        NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[cell]});
+    }
+    [self scheduleValueNotifications];
 }
 - (void)refreshGrid {
     for (AXBGridPart *part in self.pendingDestroyed) NSAccessibilityPostNotification(part, NSAccessibilityUIElementDestroyedNotification);
@@ -767,17 +816,38 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     NSMutableArray<AXBGridCell *> *loaded = [NSMutableArray new];
     NSDictionary *cache = grid.cacheSnapshot;
     if (self.lastCacheSerial != [cache[@"serial"] unsignedIntegerValue]) {
+        // Pending records contain weak cells and scalar tokens only. Prune
+        // evicted or retired cells so the map stays within the bounded cache.
+        NSMapTable *retained = [NSMapTable weakToStrongObjectsMapTable];
+        for (AXBGridCell *cell in self.pendingValueNotifications.keyEnumerator.allObjects)
+            if (cell.isAccessibilityElement && [grid cachedCellForRow:cell.row.key column:cell.columnKey])
+                [retained setObject:[self.pendingValueNotifications objectForKey:cell] forKey:cell];
+        self.pendingValueNotifications = retained;
         for (NSDictionary *page in cache[@"pages"]) for (NSDictionary *row in page[@"rows"]) for (NSDictionary *value in row[@"cells"]) {
             AXBGridCell *cell = self.rowRegistry[row[@"id"]].cells[value[@"column"]];
             // Loading -> value also changes the exposed value when a retained
             // cell reloads an identical page after sorting or cache eviction.
             if (cell && (cell.waitingForValue || ![cell.lastValue isEqual:value])) {
+                cell.valueNotificationSerial++;
                 cell.lastValue = value; NSAccessibilityPostNotification(cell, NSAccessibilityValueChangedNotification);
                 if (cell.content) (void)cell.accessibilityChildren;
                 if (cell.content) NSAccessibilityPostNotification(cell.content, NSAccessibilityValueChangedNotification);
                 if (cell.waitingForValue) {
                     cell.waitingForValue = NO;
                     if (cell.isAccessibilityElement) [loaded addObject:cell];
+                }
+            }
+            NSDictionary *pending = cell ? [self.pendingValueNotifications objectForKey:cell] : nil;
+            if (pending) {
+                if ([@[@"checkbox", @"popup"] containsObject:value[@"role"] ?: @""])
+                    [self.pendingValueNotifications removeObjectForKey:cell];
+                else {
+                    // A model value can change and return before publication.
+                    // Its dormant Loading notification still needs reactivation.
+                    NSMutableDictionary *latest = [pending mutableCopy]; latest[@"serial"] = @(cell.valueNotificationSerial);
+                    if (!latest[@"deadline"]) latest[@"deadline"] = @(NSProcessInfo.processInfo.systemUptime);
+                    [self.pendingValueNotifications setObject:latest forKey:cell];
+                    [self scheduleValueNotifications];
                 }
             }
         }
@@ -837,15 +907,25 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     if (self.lastDescriptor && (orderChanged || ![self.lastDescriptor[@"visible"] isEqual:descriptor[@"visible"]])) NSAccessibilityPostNotification(self, NSAccessibilityLayoutChangedNotification);
     // ValueChanged alone can leave a stationary VoiceOver cursor saying Loading.
     // Identify each changed cell separately; a batch says only "N updated items".
+    // Coalesce the settled layout after Loading so a fast page does not notify
+    // before the client has finished identifying its cold cell. Values remain
+    // available immediately. Retirement, reload and eviction cancel this post.
     // For a recently requested checkbox, a low-priority announcement supplies
     // its new state without moving focus or speaking every cell in the page.
     for (AXBGridCell *cell in loaded) {
         BOOL recentlyRequested = cell == self.lastWaitingCell &&
             NSProcessInfo.processInfo.systemUptime - self.lastWaitingAt < 20 && self.owner.window.isKeyWindow;
         if (cell == self.lastWaitingCell) self.lastWaitingCell = nil;
-        NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[cell]});
+        NSDictionary *value = cell.lastValue;
+        if ([@[@"checkbox", @"popup"] containsObject:value[@"role"] ?: @""])
+            NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[cell]});
+        else {
+            if (!self.pendingValueNotifications) self.pendingValueNotifications = [NSMapTable weakToStrongObjectsMapTable];
+            [self.pendingValueNotifications setObject:@{@"generation": descriptor[@"generation"], @"order": descriptor[@"order"],
+                @"serial": @(cell.valueNotificationSerial), @"deadline": @(NSProcessInfo.processInfo.systemUptime + 1)} forKey:cell];
+            [self scheduleValueNotifications];
+        }
         if (!recentlyRequested) continue;
-        NSDictionary *value = cell.value;
         if ([value[@"role"] isEqual:@"checkbox"]) {
             NSString *label = value[@"label"] ?: [self column:cell.columnKey].accessibilityLabel;
             NSString *state = [value[@"checked"] boolValue] ? @"checked" : @"unchecked";
@@ -859,6 +939,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 - (void)invalidate {
     [super invalidate];
     self.lastWaitingCell = nil;
+    [self.pendingValueNotifications removeAllObjects];
     for (AXBGridRow *row in self.rowRegistry.allValues) [row invalidate];
     for (AXBGridColumn *column in self.columnRegistry.allValues) [column invalidate];
     [self.headerGroup invalidate]; self.headerGroup = nil;

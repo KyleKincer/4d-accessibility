@@ -1,10 +1,23 @@
 // Translate actual layout bounds separately from clipped viewport geometry.
 #DECLARE($grid : Object; $offset : Collection; $clip : Collection) -> $result : Object
-var $frames; $headers; $cells : Object
+var $frames; $headers; $cells; $outline; $item : Object
 var $row; $column : Text
 var $frame; $rows; $columns : Collection
 var $left; $top; $right; $bottom : Real
 $result:=OB Copy($grid)
+If ($grid.outline#Null)
+ $outline:=New object
+ For each ($row; $grid.outline)
+  $item:=OB Copy($grid.outline[$row])
+  If ($item.frame#Null)
+   $frame:=$item.frame
+   // Logical group bounds stay unclipped, including disclosed offscreen rows.
+   $item.frame:=New collection($frame[0]+$offset[0]; $frame[1]+$offset[1]; $frame[2]; $frame[3])
+  End if
+  $outline[$row]:=$item
+ End for each
+ $result.outline:=$outline
+End if
 If ($grid.layout#Null)
  $rows:=New collection
  $columns:=New collection

@@ -3,6 +3,7 @@ var $savedOK; $rows; $cols; $column; $row; $left; $top; $right; $bottom; $scroll
 var $hierarchical : Boolean
 var $hitX; $hitY : Real
 var $item; $address : Object
+var $fault : Text
 ARRAY POINTER($hierarchy; 0)
 ARRAY BOOLEAN($selection; 0)
 $state:=New object("command"; Form.command; "runId"; Form.runId; "compiled"; Is compiled mode; "events"; Form.events; "focus"; OBJECT Get name(Object with focus))
@@ -82,5 +83,46 @@ If ($state.grouped.rows>0)
 End if
 $state.grouped.selected:=New collection
 ARRAY TO COLLECTION($state.grouped.selected; AXHP_Selection)
+// Pure host capture, without a production accessibility package or UI input.
+var $binding; $capture : Object
+var $controlPointer : Pointer
+var $modelKeys; $modelHierarchy : Collection
+$modelKeys:=New collection
+For ($row; 1; Size of array(AXHP_Key))
+ $modelKeys.push(String(AXHP_Key{$row}; "&xml"))
+End for
+$controlPointer:=LISTBOX Get array(*; "Grouped"; lk control array)
+$binding:=New object("count"; Size of array(AXHP_Key); "keys"; $modelKeys; "controlPointer"; $controlPointer)
+$modelHierarchy:=New collection
+For ($row; 1; Size of array($hierarchy))
+ $modelHierarchy.push($hierarchy{$row})
+End for
+$binding.hierarchy:=$modelHierarchy
+$binding.coordinateOffset:=Choose(Size of array($hierarchy)=1; 0; Size of array($hierarchy)-1)
+$binding.keyPointer:=->AXHP_Key
+$binding.keyType:=Type(AXHP_Key)
+$binding.selectionPointer:=->AXHP_Selection
+If (Not(Is nil pointer(OBJECT Get pointer(Object named; "RowKey"))))
+ $binding.keyObjectName:="RowKey"
+End if
+$state.modelSentinelBefore:=AXHP_GroupedSentinel("Grouped")
+$savedOK:=OK
+OK:=0
+$capture:=AXB_OutlineCapture("Grouped"; $binding)
+$state.capturePreservesOK:=OK=0
+OK:=$savedOK
+$state.capture:=$capture
+OB REMOVE($state.capture; "hierarchy")
+If (Form.command.operation="groupFaultBinding")
+ $state.bindingFaults:=New collection
+ For each ($fault; New collection("key"; "keyType"; "hierarchy"; "selection"; "missingHierarchy"; "missingKey"; "missingSelection"; "missingControl"; "controlType"; "controlNull"))
+  $state.bindingFaults.push(AXHP_CaptureFault($binding; $fault))
+ End for each
+End if
+If ($capture.ok)
+ Form.outlinePrevious:=AXB_OutlineRows($capture.snapshot; Form.outlinePrevious)
+ $state.outline:=Form.outlinePrevious
+End if
+$state.modelSentinelAfter:=AXHP_GroupedSentinel("Grouped")
 // Native probe result, when installed.
 File("/RESOURCES/state.json").setText(JSON Stringify($state))

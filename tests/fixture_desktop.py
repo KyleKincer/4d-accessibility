@@ -7,6 +7,49 @@ import time
 import mac_ax as ax
 
 
+def capture_fixture_window(process, window, destination):
+    """Match PID, title and full AX window bounds before taking a screenshot."""
+    ax.require_unlocked()
+    assert process.poll() is None and ax.application(process.pid).read("AXFrontmost")
+    graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+    window_list = ax.signature(graphics, "CGWindowListCopyWindowInfo", c.c_void_p, c.c_uint32, c.c_uint32)
+    dictionary_value = ax.signature(ax.CF, "CFDictionaryGetValue", c.c_void_p, c.c_void_p, c.c_void_p)
+    windows = window_list(1, 0)
+    assert windows, "Cannot enumerate owned fixture windows"
+
+    def raw_value(dictionary, name):
+        key = ax.make_string(None, name.encode(), ax.UTF8)
+        try:
+            return dictionary_value(dictionary, key)
+        finally:
+            ax.release(key)
+
+    def value(dictionary, name):
+        pointer = raw_value(dictionary, name)
+        return ax.convert(pointer) if pointer else None
+
+    try:
+        candidates = []
+        for index in range(ax.array_count(windows)):
+            candidate = ax.array_value(windows, index)
+            if value(candidate, "kCGWindowOwnerPID") != process.pid or value(candidate, "kCGWindowLayer") != 0:
+                continue
+            if value(candidate, "kCGWindowName") != window.read("AXTitle"):
+                continue
+            bounds = raw_value(candidate, "kCGWindowBounds")
+            position = [value(bounds, name) for name in ("X", "Y")]
+            size = [value(bounds, name) for name in ("Width", "Height")]
+            if position == list(window.read("AXPosition")) and size == list(window.read("AXSize")):
+                candidates.append({"number": int(value(candidate, "kCGWindowNumber")), "pid": process.pid,
+                                   "title": window.read("AXTitle"), "position": position, "size": size, "pidVerified": True})
+        assert len(candidates) == 1, "Screenshot requires one exact owned fixture window"
+        captured = candidates[0]
+        subprocess.run(["/usr/sbin/screencapture", "-x", "-l", str(captured["number"]), str(destination)], check=True, timeout=10)
+        return captured
+    finally:
+        ax.release(windows)
+
+
 def press_key(process, project, title, expected_focus, key_code, modifiers=0):
     """Send a test key only to the still-focused editor of the owned fixture."""
     ax.require_test_input()

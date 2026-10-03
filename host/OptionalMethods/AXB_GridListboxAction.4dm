@@ -13,6 +13,12 @@ $descriptor:=$state.descriptor
 If ($operation="readGrid")
  return AXB_GridReadPages($state; $request.requests)
 End if
+If ($options.kind="outline")
+ // Until native disclosure/reveal is accepted, reject every action path,
+ // including headers which otherwise precede the cell-action guards.
+ $result.message:="Grouped grid actions are unavailable"
+ return
+End if
 If (($operation#"apply") | (Current form window#Frontmost window))
  return
 End if

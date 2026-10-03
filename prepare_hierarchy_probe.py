@@ -10,17 +10,30 @@ import subprocess
 import tempfile
 import uuid
 
-from build_component import BUILD, ROOT, literal, project_at, run_utility, sha
+from build_component import BUILD, PACKAGE, ROOT, literal, project_at, run_utility, sha, verify_package
+from install_host_methods import main as install_host
+
+
+def canonical_sources(root=ROOT):
+    paths = sorted((root / "host/OptionalMethods").glob("*.4dm")) + sorted((root / "tests/4d").glob("AXHP_*.4dm"))
+    paths += [root / "prepare_hierarchy_probe.py", root / "install_host_methods.py", root / "VERSION"]
+    return {str(path.relative_to(root)): sha(path) for path in paths}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", type=Path, required=True)
     parser.add_argument("--diagnostic-plugin", type=Path)
+    parser.add_argument("--bridge", action="store_true", help="Install the development grouped outline provider")
     args = parser.parse_args()
+    if args.bridge and args.diagnostic_plugin:
+        parser.error("Choose the production development bridge or the diagnostic plugin")
     for name in ("4D", "4D Server"):
         if subprocess.run(["pgrep", "-x", name], capture_output=True).returncode == 0:
             parser.error("Close 4D before this sequential probe")
+    BUILD.mkdir(exist_ok=True)
+    (BUILD / "hierarchy-probe-compile.json").write_text(json.dumps({"passed": False, "state": "preparing"}) + "\n")
+    canonical = canonical_sources()
     fixture = BUILD / "hierarchy-probe"
     if fixture.exists():
         fixture.rename(BUILD / ("hierarchy-probe-previous-" + uuid.uuid4().hex))
@@ -42,14 +55,20 @@ QUIT 4D
 ''')
     for path in (ROOT / "tests/4d").glob("AXHP_*.4dm"):
         shutil.copy2(path, methods / path.name)
+    if not args.bridge:
+        for name in ("AXB_OutlineCapture", "AXB_OutlineRows", "AXB_OutlineToken"):
+            shutil.copy2(ROOT / "host/OptionalMethods" / (name + ".4dm"), methods / (name + ".4dm"))
     (methods / "Compiler_Hierarchy.4dm").write_text('''ARRAY TEXT(AXHP_Group; 0)
 ARRAY TEXT(AXHP_Subgroup; 0)
 ARRAY TEXT(AXHP_Label; 0)
+ARRAY DATE(AXHP_Date; 0)
 ARRAY LONGINT(AXHP_Key; 0)
 ARRAY BOOLEAN(AXHP_Selection; 0)
 ARRAY LONGINT(AXHP_Control; 0)
 C_OBJECT(AXHP_Command; $0)
 C_OBJECT(AXHP_Command; $1)
+C_OBJECT(AXHP_CaptureFault; $0; $1)
+C_TEXT(AXHP_CaptureFault; $2)
 C_OBJECT(AXHP_Topology; $0)
 C_LONGINT(AXHP_Topology; $1)
 C_COLLECTION(AXHP_Topology; $2)
@@ -60,12 +79,22 @@ C_TEXT(AXHP_GroupedRead; $1)
 C_OBJECT(AXHP_GroupedSentinel; $0)
 C_TEXT(AXHP_GroupedSentinel; $1)
 C_TEXT(AXHP_GroupedCase; $1)
+C_OBJECT(AXB_OutlineRows; $0; $1; $2)
+C_OBJECT(AXB_OutlineCapture; $0; $2)
+C_TEXT(AXB_OutlineCapture; $1)
+C_TEXT(AXB_OutlineToken; $0)
+C_VARIANT(AXB_OutlineToken; $1)
+C_LONGINT(AXB_OutlineToken; $2)
 ''')
     if args.diagnostic_plugin:
         shutil.copytree(args.diagnostic_plugin, fixture / "Plugins/AccessibilityBridge.bundle")
         state = methods / "AXHP_State.4dm"
         state.write_text(state.read_text().replace("// Native probe result, when installed.",
             '$state.native:=JSON Parse(AXB Native layout(Current form window; "hierarchyProbe"))'))
+    if args.bridge:
+        verify_package(PACKAGE)
+        shutil.copytree(BUILD / "AccessibilityBridge.bundle", fixture / "Plugins/AccessibilityBridge.bundle")
+        shutil.copytree(PACKAGE, fixture / "Components/AccessibilityBridge.4dbase")
     objects = {}
     for name, left in (("TreeA", 20), ("TreeB", 350)):
         objects[name] = {"type": "list", "dataSource": "Form.tree", "left": left,
@@ -85,6 +114,12 @@ C_TEXT(AXHP_GroupedCase; $1)
         "scrollbarVertical": "visible", "scrollbarHorizontal": "automatic",
         "columns": columns, "events": ["onClick", "onSelectionChange", "onExpand", "onCollapse", "onDataChange"],
         "method": "ObjectMethods/Grouped.4dm"}
+    if args.bridge:
+        # Exercise the ordinary native case with no optional row-control
+        # array. The driver attaches one later for hidden-row/fault checks.
+        objects["Grouped"].pop("rowControlSource")
+        columns.append({"name": "RowKey", "dataSource": "AXHP_Key", "width": 80, "visibility": "hidden",
+                        "header": {"name": "RowKeyHeader", "text": "Row key"}})
     objects["Close"] = {"type": "button", "text": "Close probe", "action": "cancel",
         "left": 520, "top": 520, "width": 130, "height": 28}
     form = {"windowTitle": "AX native hierarchy probe", "width": 680, "height": 570,
@@ -96,6 +131,19 @@ C_TEXT(AXHP_GroupedCase; $1)
     for name in ("TreeA", "TreeB", "Grouped"):
         (form_path / "ObjectMethods" / (name + ".4dm")).write_text("AXHP_Event\n")
     (form_path / "form.4DForm").write_text(json.dumps(form, indent=2) + "\n")
+    if args.bridge:
+        compiler = methods / "Compiler_Hierarchy.4dm"
+        compiler.write_text("\n".join(line for line in compiler.read_text().splitlines()
+                           if not any("(" + name + ";" in line for name in ("AXB_OutlineRows", "AXB_OutlineCapture", "AXB_OutlineToken"))) + "\n")
+        install_host(["--project-dir", str(project.parent), "--compiler-method", "Compiler_Hierarchy", "--form", "Probe"])
+        (methods / "AXB_Configure.4dm").write_text('''#DECLARE($name : Text) -> $options : Object
+$options:=New object("label"; "Hierarchy probe"; "grids"; New object("Grouped"; New object("kind"; "outline"; "keyColumn"; "RowKey"; "label"; "Grouped items")))
+''')
+        compiler = methods / "Compiler_Hierarchy.4dm"
+        compiler.write_text(compiler.read_text() + "C_OBJECT(AXB_Configure; $0)\nC_TEXT(AXB_Configure; $1)\n")
+        state = methods / "AXHP_State.4dm"
+        state.write_text(state.read_text().replace("// Native probe result, when installed.",
+            '$state.bridge:=AXB_Area("diagnostics"; ""; "")\n$state.info:=AXB_Host("info"; New object)'))
     (fixture / "Resources/run-id.txt").write_text(uuid.uuid4().hex)
     before = {str(p.relative_to(fixture)): sha(p) for p in sources.rglob("*") if p.is_file()}
     server = args.server.expanduser().resolve()
@@ -104,20 +152,44 @@ C_TEXT(AXHP_GroupedCase; $1)
         driver = Path(temporary)
         project_at(driver, "Driver")
         body = '$options:=New object("targets"; New collection("arm64_macOS_lib"; "x86_64_generic"); "typeInference"; "none")\n'
-        if args.diagnostic_plugin:
+        if args.diagnostic_plugin or args.bridge:
             body += '$options.plugins:=Folder(' + literal(fixture / "Plugins") + ')\n'
+        if args.bridge:
+            body += '$options.components:=New collection(File(' + literal(fixture / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ") + '))\n'
         body += '$result:=Compile project(File(' + literal(project) + '); $options)'
         compiled = run_utility(server / "Contents/MacOS" / info["CFBundleExecutable"], driver, body, 90)
     changed = [name for name, digest in before.items() if sha(fixture / name) != digest]
-    passed = compiled.get("success") is True and not compiled.get("errors") and not changed
+    passed = compiled.get("success") is True and not compiled.get("errors") and not changed and canonical == canonical_sources()
     report = {"passed": passed, "compiler": compiled, "sources_sha256": before,
         "changed_during_compile": changed, "scope": "Native command and control probe, no bridge adapter acceptance"}
     report["sourceCommit"] = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     report["preparerSHA256"] = sha(Path(__file__))
+    report["canonicalSourceSHA256"] = canonical
+    report["compiledHostSHA256"] = {str(p.relative_to(fixture)): sha(p)
+        for directory in (fixture / "Libraries", fixture / "Project/DerivedData/CompiledCode")
+        for p in directory.rglob("*") if p.is_file()}
+    if passed:
+        assert report["compiledHostSHA256"], "Compiled host artifacts are missing"
     if args.diagnostic_plugin:
         report["diagnosticNativeSHA256"] = sha(
             fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")
+    report["bridge"] = args.bridge
+    if args.bridge:
+        report["nativeSHA256"] = sha(fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")
+        report["componentSHA256"] = sha(fixture / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ")
+        native_report = json.loads((BUILD / "build-report.json").read_text())
+        component_report = json.loads((BUILD / "component-build-report.json").read_text())
+        assert component_report["passed"] and native_report["binary_sha256"] == component_report["native_sha256"] == report["nativeSHA256"]
+        component = fixture / "Components/AccessibilityBridge.4dbase"
+        package = {str(p.relative_to(component)): sha(p) for p in component.rglob("*") if p.is_file()}
+        assert package == component_report["package_sha256"], "Copied component package differs from its build report"
+        report["componentPackageSHA256"] = package
+        for artifact in (native_report, component_report):
+            for name, expected in artifact["sources_sha256"].items():
+                assert sha(ROOT / name) == expected, name
+        report["nativeSourceSHA256"] = native_report["sources_sha256"]
+        report["componentSourceSHA256"] = component_report["sources_sha256"]
     (BUILD / "hierarchy-probe-compile.json").write_text(json.dumps(report, indent=2) + "\n")
     print("PASS" if passed else json.dumps(report, indent=2))
     raise SystemExit(0 if passed else 1)

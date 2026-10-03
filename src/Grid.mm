@@ -300,6 +300,16 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
 - (void)expireRequestsAtTime:(NSTimeInterval)now {
     for (id key in [_requested.allKeys copy]) if (now - [_requested[key] doubleValue] > 3) [_requested removeObjectForKey:key];
 }
+- (NSDictionary *)cachedCellForRow:(NSString *)row column:(NSString *)column {
+    @synchronized(self) {
+        NSUInteger r = [self indexOfRow:row], c = [self indexOfColumn:column];
+        if (r == NSNotFound || c == NSNotFound) return nil;
+        if (AXBGridRowIsGroup(_descriptor, row)) return c == 0 ?
+            @{@"column": column, @"value": _descriptor[@"outline"][row][@"label"], @"enabled": @YES, @"editable": @NO} : nil;
+        NSArray *key = [self pageKeyForRow:r column:c];
+        return _pages[key][@"page"][@"rows"][r - [key[0] unsignedIntegerValue]][@"cells"][c - [key[1] unsignedIntegerValue]];
+    }
+}
 - (NSDictionary *)cellForRow:(NSString *)row column:(NSString *)column now:(NSTimeInterval)now {
     @synchronized(self) {
         NSUInteger r = [self indexOfRow:row], c = [self indexOfColumn:column];

@@ -20,6 +20,10 @@ Case of
   LISTBOX COLLAPSE(*; "Grouped")
  : ($request.operation="groupExpandAll")
   LISTBOX EXPAND(*; "Grouped")
+ : ($request.operation="groupHeight37")
+  LISTBOX SET ROWS HEIGHT(*; "Grouped"; 37; lk pixels)
+ : ($request.operation="groupVariableHeight")
+  LISTBOX SET ROW HEIGHT(*; "Grouped"; 2; 45)
  : ($request.operation="groupSelect")
   LISTBOX SELECT ROW(*; "Grouped"; 4; lk replace selection)
  : ($request.operation="groupSelectRoot")
@@ -36,6 +40,7 @@ Case of
   GOTO OBJECT(*; "Grouped")
  : ($request.operation="groupCase")
   AXHP_GroupedCase(String($request.name))
+  Form.outlinePrevious:=Null
  : ($request.operation="groupHideFirst")
   If (Form.groupedCase="repeated")
    For ($i; 1; 3)
@@ -48,6 +53,27 @@ Case of
   For ($i; 1; Size of array(AXHP_Control))
    AXHP_Control{$i}:=0
   End for
+ : ($request.operation="groupFormatNested")
+  Form.faultFormat:=OBJECT Get format(AXHP_Subgroup)
+  OBJECT SET FORMAT(AXHP_Subgroup; "(######)")
+ : ($request.operation="groupProtectNested")
+  Form.faultFont:=OBJECT Get font(AXHP_Subgroup)
+  OBJECT SET FONT(AXHP_Subgroup; "%password")
+ : ($request.operation="groupRestoreCaption")
+  If (Form.faultFormat#Null)
+   OBJECT SET FORMAT(AXHP_Subgroup; Form.faultFormat)
+   OB REMOVE(Form; "faultFormat")
+  End if
+  If (Form.faultFont#Null)
+   OBJECT SET FONT(AXHP_Subgroup; Form.faultFont)
+   OB REMOVE(Form; "faultFont")
+  End if
+ : ($request.operation="groupCaseVariants")
+  AXHP_Group{2}:="a"
+ : ($request.operation="groupFaultBinding")
+  // AXHP_State exercises the caller's retained binding without UI input.
+ : ($request.operation="groupControlRestore")
+  LISTBOX SET ARRAY(*; "Grouped"; lk control array; ->AXHP_Control)
  : ($request.operation="groupSelectFirstLeaves")
   If (Form.groupedCase="repeated")
    LISTBOX SELECT ROW(*; "Grouped"; 1; lk replace selection)

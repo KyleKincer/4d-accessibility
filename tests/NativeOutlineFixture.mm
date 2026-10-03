@@ -8,7 +8,10 @@
 @property(nonatomic, strong) NSMutableDictionary *grid;
 @property(nonatomic, strong) NSMutableArray *requests;
 @property(nonatomic) NSInteger revision, command, pages;
-@property(nonatomic) BOOL expanded, selectionKnown;
+@property(nonatomic) NSInteger viewportRows, targetPages;
+@property(nonatomic) BOOL expanded, selectionKnown, deferredPages;
+@property(nonatomic) BOOL fastUpdate, finalValueUpdated;
+@property(nonatomic) NSTimeInterval updateAt;
 - (void)describe;
 - (void)tick;
 @end
@@ -33,7 +36,7 @@
         }
         outline[key] = item;
         [layout addObject:@[@(20 + n * 28), @28]];
-        if (n < 10) {
+        if (n < (NSUInteger)self.viewportRows) {
             [visible addObject:key];
             frames[key] = group ? @{@"label": frame} : @{@"label": @[@20, @(20 + n * 28), @300, @28], @"value": @[@320, @(20 + n * 28), @200, @28]};
         }
@@ -56,7 +59,7 @@
             NSString *value;
             if ([item[@"kind"] isEqual:@"group"]) value = c == 0 ? item[@"label"] : @"";
             else if (c == 0) value = [key isEqual:@"root/19"] ? @"Distant leaf" : [NSString stringWithFormat:@"Item %@", key];
-            else value = [NSString stringWithFormat:@"Value %@", key];
+            else value = self.finalValueUpdated && [key isEqual:@"root/19"] ? @"Updated final value" : [NSString stringWithFormat:@"Value %@", key];
             [cells addObject:@{@"column": self.grid[@"columns"][c][@"id"], @"value": value, @"enabled": @YES, @"editable": @NO}];
         }
         [rows addObject:@{@"id": key, @"cells": cells}];
@@ -80,16 +83,35 @@
         if ([operation isEqual:@"knownSelection"]) self.selectionKnown = YES;
         if ([operation isEqual:@"unknownSelection"]) self.selectionKnown = NO;
         if ([operation isEqual:@"replace"]) self.grid[@"generation"] = NSUUID.UUID.UUIDString;
-        self.grid[@"order"] = @([self.grid[@"order"] integerValue] + 1); self.revision++; [self describe];
+        if ([operation isEqual:@"releasePages"]) self.deferredPages = NO;
+        else {
+            self.grid[@"order"] = @([self.grid[@"order"] integerValue] + 1); self.revision++; [self describe];
+        }
+    }
+    if (self.updateAt > 0 && NSProcessInfo.processInfo.systemUptime >= self.updateAt) {
+        self.updateAt = 0; self.finalValueUpdated = YES;
+        [self.requests addObject:@{@"node": @"outline", @"generation": self.grid[@"generation"], @"order": self.grid[@"order"],
+            @"row": @16, @"rowCount": @9, @"column": @0, @"columnCount": @2}];
     }
     NSMutableArray *pages = [NSMutableArray new];
-    for (NSUInteger n = 0; n < 2 && self.requests.count; n++) {
+    NSUInteger pending = self.requests.count;
+    for (NSUInteger n = 0; n < pending && pages.count < 2; n++) {
         NSDictionary *request = self.requests.firstObject; [self.requests removeObjectAtIndex:0];
-        NSDictionary *page = [self page:request]; if (page) [pages addObject:page];
+        if (self.deferredPages && [request[@"row"] unsignedIntegerValue] >= 16) {
+            [self.requests addObject:request]; continue;
+        }
+        NSDictionary *page = [self page:request];
+        if (page) {
+            [pages addObject:page];
+            if ([request[@"row"] unsignedIntegerValue] >= 16) {
+                self.targetPages++;
+                if (self.fastUpdate && self.targetPages == 1) self.updateAt = NSProcessInfo.processInfo.systemUptime + 0.05;
+            }
+        }
     }
     NSDictionary *snapshot = @{@"version": @1, @"revision": @(self.revision), @"label": @"Outline fixture", @"enabled": @YES,
         @"nodes": @[@{@"id": @"outline", @"role": @"table", @"label": @"Grouped items", @"value": @"", @"visible": @YES,
-            @"enabled": @YES, @"frame": @[@20, @20, @500, @280], @"grid": self.grid}]};
+            @"enabled": @YES, @"frame": @[@20, @20, @500, @(self.viewportRows * 28)], @"grid": self.grid}]};
     NSData *bytes = [NSJSONSerialization dataWithJSONObject:@{@"snapshot": snapshot, @"gridPages": pages} options:0 error:nil];
     NSString *json = AXBExchange(811, 1, (__bridge void *)self.window, self.session, [[NSString alloc] initWithData:bytes encoding:NSUTF8StringEncoding]);
     NSDictionary *reply = [NSJSONSerialization JSONObjectWithData:[json dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
@@ -97,24 +119,31 @@
     [self.requests addObjectsFromArray:reply[@"gridRequests"] ?: @[]];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSDictionary *state = @{@"runID": self.runID, @"pid": @(NSProcessInfo.processInfo.processIdentifier), @"command": @(self.command),
-            @"pages": @(self.pages), @"revision": @(self.revision), @"expanded": @(self.expanded), @"rows": self.grid[@"rows"], @"selectionKnown": @(self.selectionKnown)};
+            @"pages": @(self.pages), @"revision": @(self.revision), @"expanded": @(self.expanded), @"rows": self.grid[@"rows"], @"selectionKnown": @(self.selectionKnown),
+            @"deferredPages": @(self.deferredPages), @"targetPages": @(self.targetPages), @"pendingPages": @(self.requests.count),
+            @"generation": self.grid[@"generation"], @"order": self.grid[@"order"], @"viewportRows": @(self.viewportRows), @"finalValueUpdated": @(self.finalValueUpdated)};
         [[NSJSONSerialization dataWithJSONObject:state options:0 error:nil] writeToFile:[self.directory stringByAppendingPathComponent:@"state.json"] atomically:YES];
     });
 }
 @end
 int main(int argc, const char *argv[]) {
     @autoreleasepool {
-        if (argc != 3) return 2;
+        if (argc != 3 && argc != 4) return 2;
         [NSApplication sharedApplication]; [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory]; [NSApp finishLaunching];
         OutlineFixture *fixture = [OutlineFixture new]; fixture.directory = @(argv[1]); fixture.runID = @(argv[2]);
         fixture.revision = 1; fixture.expanded = YES; fixture.requests = [NSMutableArray new];
+        NSString *mode = argc == 4 ? @(argv[3]) : @"";
+        if (mode.length && ![@[@"--deferred-values", @"--deferred-onscreen", @"--fast-update"] containsObject:mode]) return 2;
+        fixture.deferredPages = [mode hasPrefix:@"--deferred"];
+        fixture.fastUpdate = [mode isEqual:@"--fast-update"];
+        fixture.viewportRows = [mode hasSuffix:@"-onscreen"] ? 25 : 10;
         fixture.grid = [@{@"generation": @"outline-a", @"order": @1, @"columns": @[
             @{@"id": @"label", @"label": @"Item", @"enabled": @YES, @"editable": @NO},
             @{@"id": @"value", @"label": @"Value", @"enabled": @YES, @"editable": @NO}],
             @"actions": @{@"select": @NO, @"edit": @NO, @"reveal": @NO}} mutableCopy];
         [fixture describe];
-        fixture.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(200, 200, 560, 340)
-            styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable backing:NSBackingStoreBuffered defer:NO];
+        fixture.window = [[NSWindow alloc] initWithContentRect:NSMakeRect(200, 100, 560, fixture.viewportRows * 28 + 60)
+            styleMask:NSWindowStyleMaskTitled | NSWindowStyleMaskClosable | NSWindowStyleMaskMiniaturizable backing:NSBackingStoreBuffered defer:NO];
         fixture.window.releasedWhenClosed = NO; fixture.window.title = @"AXB native outline fixture";
         [fixture.window makeKeyAndOrderFront:nil]; [NSApp activateIgnoringOtherApps:YES];
         NSDictionary *opened = [NSJSONSerialization JSONObjectWithData:[AXBOpen(811, 1, (__bridge void *)fixture.window) dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];

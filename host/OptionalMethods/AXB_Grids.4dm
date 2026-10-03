@@ -84,6 +84,15 @@ For each ($name; $configured)
    continue
   End if
   $state.suspended:=False
+  If ($options.kind="outline")
+   If ($view.nativeOutlines=Null)
+    $reply:=AXB_Host("info"; New object)
+    $view.nativeOutlines:=($reply.ok=True) && (Value type($reply.nativeStatus)=Is text) && (Position("; nativeOutlines 1;"; $reply.nativeStatus)>0)
+   End if
+   If (Not($view.nativeOutlines=True))
+    return New object("ok"; False; "error"; "nativeOutlinesUnavailable")
+   End if
+  End if
   If ($options.kind="listSubform")
    If (($request.operation="describe") | ($request.node=$id))
     $reply:=AXB_ListSubform($request.operation; $options; $state; $request)
@@ -125,6 +134,9 @@ For each ($name; $configured)
      return $reply
     End if
     $result.nodes:=$result.nodes.concat($reply.nodes)
+    If ($options.kind="outline")
+     $result.unsupported.push(New object("object"; $name; "reason"; "groupedActionsPending"))
+    End if
     If ($state.editingIssues#Null)
      For each ($column; $state.editingIssues)
       $result.unsupported.push(New object("object"; $name; "column"; $column; "reason"; "gridCellEditingPending"))

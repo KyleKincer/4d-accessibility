@@ -5,12 +5,13 @@ Install matching packages and add the root [lifecycle area](AREA-INTEGRATION.md)
 | Grid | Read |
 | --- | --- |
 | Native array list box | [Array list box](#add-a-native-array-list-box-without-replacing-discovery) |
+| Grouped array listbox, read-only development | [Grouped reading](#read-a-grouped-array-listbox) |
 | Collection or entity-selection list box | [Collection/entity list box](#use-a-collection-or-entity-selection-list-box) |
 | Classic current or named selection | [Classic selection](#use-a-classic-current-or-named-selection) |
 | AreaList Pro | [AreaList grids](AREALIST-GRIDS.md) |
 | Record editor combining fields, an editable grid and subforms | [Record-editor example](examples/RECORD-EDITOR.md) |
 
-Every kind shares the [loading guard](#gate-loading-and-record-changes), [temporary keys for unsaved rows](#give-unsaved-rows-temporary-keys), [stable column locators](#describe-custom-native-grid-columns) and the [selection callback contract](#reuse-the-existing-selection-controller). This file is the authority for those contracts.
+Every kind shares the [loading guard](#gate-loading-and-record-changes), [temporary keys for unsaved rows](#give-unsaved-rows-temporary-keys) and [stable column locators](#describe-custom-native-grid-columns). Flat selectable grids also use the [selection callback contract](#reuse-the-existing-selection-controller). This file is the authority for those contracts.
 
 ## Add a native array list box without replacing discovery
 
@@ -34,6 +35,21 @@ The provider discovers the displayed columns, reads their existing scalar format
 If selection needs the application's existing dependent-UI refresh, add `"onSelection"; Formula(YourExistingSelectionHandler)`. See the [selection callback contract](#reuse-the-existing-selection-controller).
 
 The validated fixture covers flat array list boxes with scalar text, number, date, time or Boolean values and VoiceOver navigation through all logical rows. [Column descriptions](#describe-custom-native-grid-columns) make picture and object-array displays readable. Native checkbox and Boolean popup cells use the [existing control path](#native-checkbox-and-popup-cells). Hierarchical/custom cell editing and cold-cache announcements remain required work.
+
+## Read a grouped array listbox
+
+Matching 0.23.0 development packages add read-only text/date array groups through the parent lifecycle area. The stable 0.22.1 packages do not include this adapter. Configure the existing hierarchical listbox with `kind: "outline"`, its hidden row-key column and a label:
+
+```4d
+$options.grids:=New object("Grouped"; New object(\
+ "kind"; "outline"; "keyColumn"; "RowKey"; "label"; "Grouped items"))
+```
+
+Use one unique, nonempty text or integer key per backing row. Text keys allow at most 254 UTF-16 units because logical leaves add an internal prefix. Keep the ordinary Boolean selection array and all backing arrays aligned. Group identity follows native geometry, parent/level, the exact typed caption value and the exact member-key set. It does not use the displayed caption as a unique key.
+
+The adapter reads one-pointer text/date and nested text groups, including disclosed leaves outside the viewport. It preserves the native blank first leaf column in a one-pointer hierarchy. Group captions are immediate read-only text. Hidden backing rows, formatted text captions and protected captions disable the grouped provider until their unsupported state is removed. Other caption types, lazy branches and ancestor clipping need further acceptance.
+
+Complete break selection is unavailable through the ordinary leaf-selection array. Omit `selection` and `onSelection`; those options are rejected for this read-only kind. The provider omits selected attributes and all selection, disclosure, reveal and editing actions, and reports `groupedActionsPending`. This does not make an interactive grouped form accessible. See [the development gate](../../../tests/GROUPED-OUTLINES.md) for source/package checks, both-mode reading, VoiceOver and unchanged appearance.
 
 ## Use a collection or entity-selection list box
 

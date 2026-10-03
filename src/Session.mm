@@ -641,6 +641,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 [grid indexOfColumn:value[@"column"]] == NSNotFound) return NO;
             NSDictionary *header = grid.descriptor[@"columns"][[grid indexOfColumn:value[@"column"]]][@"header"];
             if (![header[@"visible"] boolValue] ||
+                ([operation isEqual:@"gridHeaderReveal"] && ![grid.descriptor[@"actions"][@"reveal"] boolValue]) ||
                 ([operation isEqual:@"gridHeaderPress"] && (![header[@"enabled"] boolValue] || ![header[@"press"] boolValue]))) return NO;
             value = @{@"column": value[@"column"], @"generation": grid.descriptor[@"generation"], @"expectedHeader": header};
         } else if ([operation isEqual:@"gridSelect"]) {

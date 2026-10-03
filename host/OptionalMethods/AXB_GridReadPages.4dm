@@ -24,21 +24,27 @@ For each ($query; $requests)
  $rows:=New collection
  For ($r; $start; $end-1)
   $key:=$descriptor.rows[$r]
-  $position:=$state.positions[$key]
   $cells:=New collection
   For ($c; $first; $last-1)
    $definition:=$descriptor.columns[$c]
    $columnID:=$definition.id
-   $column:=$state.columns[$columnID]
-   $value:=AXB_GridValue($state; $column; $position)
-   $cell:=New object("column"; $columnID; "value"; $value.value; "enabled"; $value.ok & $definition.enabled & $value.enabled & (AXB_KeyIndex($descriptor.disabled; $key)<0); "editable"; $value.editable & $definition.editable & (AXB_KeyIndex($descriptor.uneditable; $key)<0))
-   If ($value.role#Null)
-    $cell.role:=$value.role
-    If ($value.checked#Null)
-     $cell.checked:=$value.checked
-    End if
-    If ($value.label#Null)
-     $cell.label:=$value.label
+   If (($descriptor.outline#Null) && ($descriptor.outline[$key].kind="group"))
+    // A break has no backing cell. Never dereference a representative leaf
+    // or invoke its application value Formula while serving a mixed page.
+    $cell:=New object("column"; $columnID; "value"; Choose($c=0; $descriptor.outline[$key].label; ""); "enabled"; $definition.enabled & (AXB_KeyIndex($descriptor.disabled; $key)<0); "editable"; False; "role"; "text")
+   Else
+    $position:=$state.positions[$key]
+    $column:=$state.columns[$columnID]
+    $value:=AXB_GridValue($state; $column; $position)
+    $cell:=New object("column"; $columnID; "value"; $value.value; "enabled"; $value.ok & $definition.enabled & $value.enabled & (AXB_KeyIndex($descriptor.disabled; $key)<0); "editable"; $value.editable & $definition.editable & (AXB_KeyIndex($descriptor.uneditable; $key)<0))
+    If ($value.role#Null)
+     $cell.role:=$value.role
+     If ($value.checked#Null)
+      $cell.checked:=$value.checked
+     End if
+     If ($value.label#Null)
+      $cell.label:=$value.label
+     End if
     End if
    End if
    $cells.push($cell)

@@ -2,23 +2,34 @@
 // row or evaluating a column expression. Values remain in the owning host.
 #DECLARE($options : Object; $state : Object) -> $binding : Object
 var $name; $property; $key; $metaExpression; $metaProperty; $flag : Text
-var $count; $row; $flags : Integer
+var $count; $row; $flags; $level : Integer
 var $keys; $selection; $control : Pointer
 var $source; $selected; $item; $value; $meta : Variant
 var $dataClass; $attribute; $sourceStore; $selectedStore : Object
 var $rawKeys; $selectedKeys; $selectedTextKeys : Collection
 var $hierarchical; $entity : Boolean
 $binding:=New object("ok"; False; "message"; "Unsupported list box binding"; "keys"; New collection; "selected"; New collection)
+ARRAY POINTER($hierarchy; 0)
 If ($options.kind="selection")
  return AXB_SelectionSource($options; $state)
 End if
 $name:=$options.objectName
 $count:=LISTBOX Get number of rows(*; $name)
 $binding.count:=$count
-If ($options.kind="array")
- LISTBOX GET HIERARCHY(*; $name; $hierarchical)
- If ($hierarchical)
+If (New collection("array"; "outline").indexOf($options.kind)>=0)
+ LISTBOX GET HIERARCHY(*; $name; $hierarchical; $hierarchy)
+ If ($hierarchical#($options.kind="outline"))
   return
+ End if
+ If ($hierarchical)
+  If ((Size of array($hierarchy)<1) | (Size of array($hierarchy)>10))
+   return
+  End if
+  $binding.hierarchy:=New collection
+  For ($level; 1; Size of array($hierarchy))
+   $binding.hierarchy.push($hierarchy{$level})
+  End for
+  $binding.coordinateOffset:=Choose(Size of array($hierarchy)=1; 0; Size of array($hierarchy)-1)
  End if
  $keys:=OBJECT Get pointer(Object named; $options.keyColumn)
  $selection:=OBJECT Get pointer(Object named; $name)
@@ -33,7 +44,7 @@ If ($options.kind="array")
   return
  End if
  If (Not(Is nil pointer($control)))
-  If ((New collection(Boolean array; LongInt array).indexOf(Type($control->))<0) | (Size of array($control->)#$count))
+  If ((New collection(Boolean array; LongInt array).indexOf(Type($control->))<0) || (Size of array($control->)#$count))
    return
   End if
  End if
@@ -45,9 +56,11 @@ If ($options.kind="array")
  End if
  ARRAY TO COLLECTION($binding.selected; $selection->)
  $binding.keyPointer:=$keys
+ $binding.keyType:=Type($keys->)
+ $binding.keyObjectName:=$options.keyColumn
  $binding.selectionPointer:=$selection
  $binding.controlPointer:=$control
- $binding.identity:="array:"+String(Type($keys->))
+ $binding.identity:=$options.kind+":"+String(Type($keys->))+":"+String(Size of array($hierarchy))
  $binding.ok:=True
  return
 End if
