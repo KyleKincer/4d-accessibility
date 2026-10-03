@@ -4,7 +4,7 @@ Text/date array hierarchies can use a stable `setExpanded` Formula to collapse o
 
 Rows and their disclosure triangles support VoiceOver activation. A receipt-backed English announcement reports the confirmed caption and expanded/collapsed state when stationary value notifications do not speak it. Capability removal permanently retires old triangle handles. Disclosure skips ancestor reveal, preserving scrolling in repeated nested forms and pending text in an unrelated resolved editor.
 
-Read [configuration and gate reproduction](tests/GROUPED-DISCLOSURE.md). Complete break selection, reveal, editing, classic trees and actual Symphony hierarchy workflows remain pending. Upgrade the plugin, component and helpers together; this is a development build, with signed distribution separate.
+[The acceptance record](validation/grouped-disclosure-development.json) passes 904 live 4D checks, 37 whole-window comparisons with zero changed RGBA pixels, 37 pure host checks and nine fresh flat-grid speech cases with 135 checks. Read [configuration and gate reproduction](tests/GROUPED-DISCLOSURE.md). Complete break selection, reveal, editing, classic trees and actual Symphony hierarchy workflows remain pending. Upgrade the plugin, component and helpers together; this is a development build, with signed distribution separate.
 
 # 0.23.0 development, read-only grouped arrays
 

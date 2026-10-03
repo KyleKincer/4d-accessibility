@@ -1,0 +1,3405 @@
+{
+  "passed": true,
+  "date": "2026-10-03T20:58:18.763592+00:00",
+  "version": "0.24.0",
+  "runs": [
+    {
+      "mode": "interpreted",
+      "reportSHA256": "726f9bafee4156da868b1d91e261d3be0a28ce81f6d96bca3c15e7f3cf8f00e9",
+      "checks": [
+        "actual desktop mode matches the requested disclosure run",
+        "singleText permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "singleText disclosure-child activation confirms collapse without transferring focus",
+        "singleText ordinary command starts at the identical scroll position",
+        "singleText accessibility disclosure retains the native command's scroll adjustment",
+        "singleText accessibility collapse matches every pixel of the original targeted native command",
+        "singleText retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "singleDate permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "singleDate disclosure-child activation confirms collapse without transferring focus",
+        "singleDate ordinary command starts at the identical scroll position",
+        "singleDate accessibility disclosure retains the native command's scroll adjustment",
+        "singleDate accessibility collapse matches every pixel of the original targeted native command",
+        "singleDate retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "repeated permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "repeated disclosure-child activation confirms collapse without transferring focus",
+        "repeated ordinary command starts at the identical scroll position",
+        "repeated accessibility disclosure retains the native command's scroll adjustment",
+        "repeated accessibility collapse matches every pixel of the original targeted native command",
+        "repeated retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "grouped listbox owns keyboard focus without a text editor",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "disclosure preserves nonediting grouped keyboard focus",
+        "ordinary Close focus ends the grouped-focus case",
+        "later repeated-caption target begins offscreen",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "offscreen disclosure leaves sampled unrelated roots expanded",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nested collapse retires disclosed leaf references",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nested reopening publishes fresh leaf references",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nonrecursive root disclosure preserves opposite latent child states",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "native collapse retains its ordinary hidden-descendant deselection",
+        "unrelated editor accepts its ordinary AX focus",
+        "unrelated editor accepts pending Unicode text through its ordinary input path",
+        "unrelated pending editor accepts a nontrivial text selection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "disclosure preserves pending native text, highlight, uncommitted value and handlers",
+        "ordinary Undo remains available in the preserved native editor",
+        "ordinary focus ends the unrelated editor case",
+        "active-editor disclosure reaches the application guard",
+        "native grid editing rejects disclosure without committing or invoking the controller",
+        "ordinary focus ends the native grid editor case",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "ignore rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "membership rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "caption rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "reparent rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "scope rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "loading changes the actual published provider generation",
+        "loading rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "replace changes the actual published provider generation",
+        "replace rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "remove changes the actual published provider generation",
+        "controller removal actually withdraws current disclosure authority",
+        "remove rejection never replays the controller",
+        "loading and recovery retire old disclosure handles",
+        "canonical methods and all imported driver sources remain unchanged during the live gate",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "pixels": [
+        {
+          "case": "singleText",
+          "baseline": {
+            "path": "disclosure-interpreted-singleTextnative-b04203d60cb947a1b5ccb996f271e4fb.png",
+            "sha256": "8c1e378b84294f155f1c668da9e2760739e5cd9de7e57e4fdae8080cd209e304",
+            "capturedWindow": {
+              "number": 77823,
+              "pid": 40931,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-interpreted-singleText-integrated-02251fdcd7d248b38c5cbf93a900997a.png",
+            "sha256": "8c1e378b84294f155f1c668da9e2760739e5cd9de7e57e4fdae8080cd209e304",
+            "capturedWindow": {
+              "number": 77823,
+              "pid": 40931,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "case": "singleDate",
+          "baseline": {
+            "path": "disclosure-interpreted-singleDatenative-794d0b3a4c3c48e3867a2d558d3abd1e.png",
+            "sha256": "3c8f466712f10fee3e6731c316a1b54646ebb24e17ddfd258878d52ae0ed5173",
+            "capturedWindow": {
+              "number": 77823,
+              "pid": 40931,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-interpreted-singleDate-integrated-eb33be2f70a44e06ab3c3e784d6dd96c.png",
+            "sha256": "3c8f466712f10fee3e6731c316a1b54646ebb24e17ddfd258878d52ae0ed5173",
+            "capturedWindow": {
+              "number": 77823,
+              "pid": 40931,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "case": "repeated",
+          "baseline": {
+            "path": "disclosure-interpreted-repeatednative-d1f7c5967c1e439092ba182a7379c12f.png",
+            "sha256": "dd5b5e0de01b879279001a981fcd1164de456e19f1a911120b54e2e00e929cb7",
+            "capturedWindow": {
+              "number": 77823,
+              "pid": 40931,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-interpreted-repeated-integrated-969e9faf2e9344d7a30f235a026a5593.png",
+            "sha256": "dd5b5e0de01b879279001a981fcd1164de456e19f1a911120b54e2e00e929cb7",
+            "capturedWindow": {
+              "number": 77823,
+              "pid": 40931,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "normalClose": true
+    },
+    {
+      "mode": "compiled",
+      "reportSHA256": "742c9065bfc0ba011243347b4c69c350c4c0620cc4da91c7584794002b5a5735",
+      "checks": [
+        "actual desktop mode matches the requested disclosure run",
+        "singleText permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "singleText disclosure-child activation confirms collapse without transferring focus",
+        "singleText ordinary command starts at the identical scroll position",
+        "singleText accessibility disclosure retains the native command's scroll adjustment",
+        "singleText accessibility collapse matches every pixel of the original targeted native command",
+        "singleText retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "singleDate permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "singleDate disclosure-child activation confirms collapse without transferring focus",
+        "singleDate ordinary command starts at the identical scroll position",
+        "singleDate accessibility disclosure retains the native command's scroll adjustment",
+        "singleDate accessibility collapse matches every pixel of the original targeted native command",
+        "singleDate retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "repeated permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "repeated disclosure-child activation confirms collapse without transferring focus",
+        "repeated ordinary command starts at the identical scroll position",
+        "repeated accessibility disclosure retains the native command's scroll adjustment",
+        "repeated accessibility collapse matches every pixel of the original targeted native command",
+        "repeated retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "grouped listbox owns keyboard focus without a text editor",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "disclosure preserves nonediting grouped keyboard focus",
+        "ordinary Close focus ends the grouped-focus case",
+        "later repeated-caption target begins offscreen",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "offscreen disclosure leaves sampled unrelated roots expanded",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nested collapse retires disclosed leaf references",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nested reopening publishes fresh leaf references",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nonrecursive root disclosure preserves opposite latent child states",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "native collapse retains its ordinary hidden-descendant deselection",
+        "unrelated editor accepts its ordinary AX focus",
+        "unrelated editor accepts pending Unicode text through its ordinary input path",
+        "unrelated pending editor accepts a nontrivial text selection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "disclosure preserves pending native text, highlight, uncommitted value and handlers",
+        "ordinary Undo remains available in the preserved native editor",
+        "ordinary focus ends the unrelated editor case",
+        "active-editor disclosure reaches the application guard",
+        "native grid editing rejects disclosure without committing or invoking the controller",
+        "ordinary focus ends the native grid editor case",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "ignore rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "membership rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "caption rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "reparent rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "scope rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "loading changes the actual published provider generation",
+        "loading rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "replace changes the actual published provider generation",
+        "replace rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "remove changes the actual published provider generation",
+        "controller removal actually withdraws current disclosure authority",
+        "remove rejection never replays the controller",
+        "loading and recovery retire old disclosure handles",
+        "canonical methods and all imported driver sources remain unchanged during the live gate",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "pixels": [
+        {
+          "case": "singleText",
+          "baseline": {
+            "path": "disclosure-compiled-singleTextnative-c3f16fb68a944d118deb2f2fc78afd37.png",
+            "sha256": "8c1e378b84294f155f1c668da9e2760739e5cd9de7e57e4fdae8080cd209e304",
+            "capturedWindow": {
+              "number": 77840,
+              "pid": 42875,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-compiled-singleText-integrated-c75b271c765b4784a47638d85326f1ed.png",
+            "sha256": "8c1e378b84294f155f1c668da9e2760739e5cd9de7e57e4fdae8080cd209e304",
+            "capturedWindow": {
+              "number": 77840,
+              "pid": 42875,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "case": "singleDate",
+          "baseline": {
+            "path": "disclosure-compiled-singleDatenative-75a8c0ef3d634509b757d143ab95b138.png",
+            "sha256": "3c8f466712f10fee3e6731c316a1b54646ebb24e17ddfd258878d52ae0ed5173",
+            "capturedWindow": {
+              "number": 77840,
+              "pid": 42875,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-compiled-singleDate-integrated-89d563a9e66d4d688cef80346f26f446.png",
+            "sha256": "3c8f466712f10fee3e6731c316a1b54646ebb24e17ddfd258878d52ae0ed5173",
+            "capturedWindow": {
+              "number": 77840,
+              "pid": 42875,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "case": "repeated",
+          "baseline": {
+            "path": "disclosure-compiled-repeatednative-6974e1cede954d049390449bb8f99a6b.png",
+            "sha256": "dd5b5e0de01b879279001a981fcd1164de456e19f1a911120b54e2e00e929cb7",
+            "capturedWindow": {
+              "number": 77840,
+              "pid": 42875,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-compiled-repeated-integrated-a11ead848ad043d2a976ef1428b5ee52.png",
+            "sha256": "dd5b5e0de01b879279001a981fcd1164de456e19f1a911120b54e2e00e929cb7",
+            "capturedWindow": {
+              "number": 77840,
+              "pid": 42875,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "normalClose": true
+    },
+    {
+      "mode": "compiled-voiceover",
+      "reportSHA256": "baa65c31b16346acddf44877fb82eaab69c3f59b6a32b7f9a53676aa58ad112c",
+      "checks": [
+        "actual desktop mode matches the requested disclosure run",
+        "singleText permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "singleText disclosure-child activation confirms collapse without transferring focus",
+        "singleText ordinary command starts at the identical scroll position",
+        "singleText accessibility disclosure retains the native command's scroll adjustment",
+        "singleText accessibility collapse matches every pixel of the original targeted native command",
+        "singleText retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "singleDate permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "singleDate disclosure-child activation confirms collapse without transferring focus",
+        "singleDate ordinary command starts at the identical scroll position",
+        "singleDate accessibility disclosure retains the native command's scroll adjustment",
+        "singleDate accessibility collapse matches every pixel of the original targeted native command",
+        "singleDate retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "repeated permits group activation through its disclosure child without editing",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "repeated disclosure-child activation confirms collapse without transferring focus",
+        "repeated ordinary command starts at the identical scroll position",
+        "repeated accessibility disclosure retains the native command's scroll adjustment",
+        "repeated accessibility collapse matches every pixel of the original targeted native command",
+        "repeated retains the native command's original event behavior",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "receipt confirms application state or reports the requested rejection",
+        "grouped listbox owns keyboard focus without a text editor",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "disclosure preserves nonediting grouped keyboard focus",
+        "ordinary Close focus ends the grouped-focus case",
+        "later repeated-caption target begins offscreen",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "offscreen disclosure leaves sampled unrelated roots expanded",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nested collapse retires disclosed leaf references",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nested reopening publishes fresh leaf references",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "nonrecursive root disclosure preserves opposite latent child states",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "native collapse retains its ordinary hidden-descendant deselection",
+        "unrelated editor accepts its ordinary AX focus",
+        "unrelated editor accepts pending Unicode text through its ordinary input path",
+        "unrelated pending editor accepts a nontrivial text selection",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "disclosure preserves pending native text, highlight, uncommitted value and handlers",
+        "ordinary Undo remains available in the preserved native editor",
+        "ordinary focus ends the unrelated editor case",
+        "active-editor disclosure reaches the application guard",
+        "native grid editing rejects disclosure without committing or invoking the controller",
+        "ordinary focus ends the native grid editor case",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "ignore rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "membership rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "caption rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "reparent rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "scope rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "loading changes the actual published provider generation",
+        "loading rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "replace changes the actual published provider generation",
+        "replace rejection never replays the controller",
+        "external AX accepts the scoped disclosure request",
+        "disclosure invokes the application controller exactly as required",
+        "controller receives only independently resolved native coordinates and intent",
+        "receipt confirms application state or reports the requested rejection",
+        "remove changes the actual published provider generation",
+        "controller removal actually withdraws current disclosure authority",
+        "remove rejection never replays the controller",
+        "loading and recovery retire old disclosure handles",
+        "VoiceOver reaches the actual grouped outline",
+        "VoiceOver Home reaches the first expanded root group",
+        "VoiceOver interacts with the standard disclosure control",
+        "VoiceOver activation target starts with the current expanded Boolean",
+        "VoiceOver activation collapses exactly one root through the application controller",
+        "the retained VoiceOver disclosure target has the confirmed collapsed Boolean",
+        "VoiceOver announces the collapsed group without cursor movement",
+        "VoiceOver reactivation expands exactly one root without replay",
+        "the retained VoiceOver disclosure target has the confirmed expanded Boolean",
+        "VoiceOver retains the group position and navigates into its disclosed child",
+        "VoiceOver returns to the first root row for ordinary row activation",
+        "VoiceOver row activation invokes one controller and confirms collapse",
+        "VoiceOver row activation invokes one controller and confirms expansion",
+        "VoiceOver row activation preserves the cursor at the same root group",
+        "canonical methods and all imported driver sources remain unchanged during the live gate",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "pixels": [
+        {
+          "case": "singleText",
+          "baseline": {
+            "path": "disclosure-compiled-singleTextnative-56e553f99a20487ea87348264377041f.png",
+            "sha256": "8c1e378b84294f155f1c668da9e2760739e5cd9de7e57e4fdae8080cd209e304",
+            "capturedWindow": {
+              "number": 77857,
+              "pid": 44947,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-compiled-singleText-integrated-bada9ee29795416290223eab7ea72bc2.png",
+            "sha256": "8c1e378b84294f155f1c668da9e2760739e5cd9de7e57e4fdae8080cd209e304",
+            "capturedWindow": {
+              "number": 77857,
+              "pid": 44947,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "case": "singleDate",
+          "baseline": {
+            "path": "disclosure-compiled-singleDatenative-aff8351552624f49afc2b2719d004d53.png",
+            "sha256": "3c8f466712f10fee3e6731c316a1b54646ebb24e17ddfd258878d52ae0ed5173",
+            "capturedWindow": {
+              "number": 77857,
+              "pid": 44947,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-compiled-singleDate-integrated-d0fc09a4b8cf4f1983a8a24a44b44d46.png",
+            "sha256": "3c8f466712f10fee3e6731c316a1b54646ebb24e17ddfd258878d52ae0ed5173",
+            "capturedWindow": {
+              "number": 77857,
+              "pid": 44947,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "case": "repeated",
+          "baseline": {
+            "path": "disclosure-compiled-repeatednative-faac63b2aa3f4876af98e161d599ac6e.png",
+            "sha256": "dd5b5e0de01b879279001a981fcd1164de456e19f1a911120b54e2e00e929cb7",
+            "capturedWindow": {
+              "number": 77857,
+              "pid": 44947,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-compiled-repeated-integrated-9f81bc67bced4919b5b68f0cca8ee3aa.png",
+            "sha256": "dd5b5e0de01b879279001a981fcd1164de456e19f1a911120b54e2e00e929cb7",
+            "capturedWindow": {
+              "number": 77857,
+              "pid": 44947,
+              "title": "AX native hierarchy probe",
+              "position": [
+                620.0,
+                285.0
+              ],
+              "size": [
+                680.0,
+                598.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "normalClose": true,
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Grouped items, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "\u00d7 In Grouped items, table, Group Leaf 1, level 2, level 2"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 A expanded disclosure triangle, expanded. 2 items enclosed., row 1 of 17"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "X In A expanded disclosure triangle, expanded, disclosure triangle cell A, expanded, disclosure triangle"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "X In A expanded disclosure triangle, expanded, disclosure triangle cell A, expanded, disclosure triangle"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 A: expanded"
+        },
+        {
+          "key": "up",
+          "shift": true,
+          "command": false,
+          "caption": "\u00d7 You are currently on a disclosure triangle cell, inside of a table. To navigate the cells within a table, press Control- Option and then Up Arrow, Down Arrow, Left Arrow, or"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 shared expanded disclosure triangle, expanded. 2 items enclosed., level 1"
+        },
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 A expanded disclosure triangle, expanded. 2 items enclosed., row 1 of 17"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 A expanded disclosure triangle, expanded. 2 items enclosed., row 1 of 17"
+        },
+        {
+          "key": "space",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 A: expanded"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 shared expanded disclosure triangle, expanded. 2 items enclosed., level 1"
+        }
+      ],
+      "disclosureFeedback": [
+        {
+          "rowKey": "g:7FE8F0CC11C84A81AAD184AA4DFCC925",
+          "expanded": false,
+          "calls": [
+            {
+              "objectName": "Grouped",
+              "backingRow": 1,
+              "breakLevel": 1,
+              "expanded": false,
+              "actionID": "54290DA9-EAED-4DA9-9190-DE8E6A9CB5AE"
+            }
+          ],
+          "receipt": "Group disclosure confirmed",
+          "caption": "\u00d7 A: collapsed"
+        },
+        {
+          "rowKey": "g:7FE8F0CC11C84A81AAD184AA4DFCC925",
+          "expanded": true,
+          "calls": [
+            {
+              "objectName": "Grouped",
+              "backingRow": 1,
+              "breakLevel": 1,
+              "expanded": true,
+              "actionID": "A5D84F47-FF20-4300-987D-362276CBD4E9"
+            }
+          ],
+          "receipt": "Group disclosure confirmed",
+          "caption": "\u00d7 A: expanded"
+        },
+        {
+          "rowKey": "g:7FE8F0CC11C84A81AAD184AA4DFCC925",
+          "expanded": false,
+          "calls": [
+            {
+              "objectName": "Grouped",
+              "backingRow": 1,
+              "breakLevel": 1,
+              "expanded": false,
+              "actionID": "C7C435FC-378F-427E-850B-6A5CDC31E746"
+            }
+          ],
+          "receipt": "Group disclosure confirmed",
+          "caption": "\u00d7 A: collapsed"
+        },
+        {
+          "rowKey": "g:7FE8F0CC11C84A81AAD184AA4DFCC925",
+          "expanded": true,
+          "calls": [
+            {
+              "objectName": "Grouped",
+              "backingRow": 1,
+              "breakLevel": 1,
+              "expanded": true,
+              "actionID": "122ABACD-8BA1-4DD5-B02B-C425172A72C4"
+            }
+          ],
+          "receipt": "Group disclosure confirmed",
+          "caption": "\u00d7 A: expanded"
+        }
+      ]
+    },
+    {
+      "mode": "subforms-interpreted",
+      "reportSHA256": "73c30e8e6ef87a31148acd31bfeeef9e06c6d95963eb6ad547e861578bed3e7c",
+      "checks": [
+        "actual nested desktop mode matches the requested run",
+        "repeated controls share keys and captions while binding independent native arrays",
+        "nested public paths distinguish identical control names",
+        "only the parent lifecycle area owns both nested branches",
+        "both axes at both ancestor levels begin with independently measured nonzero scrolling",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "main disclosure preserves the sibling's nonediting grouped focus",
+        "ordinary parent focus resolves to the exact root Close owner",
+        "sibling editor accepts ordinary instance-scoped focus",
+        "sibling editor accepts pending Unicode text",
+        "sibling editor accepts its native text highlight",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "cross-instance disclosure rejects without changing the sibling's pending text or highlight",
+        "root Close regains actual ownership after the sibling editor",
+        "pending nested request reaches its current controller",
+        "childScope rejects confirmation after the one dispatched callback",
+        "childScope retains exactly one invocation in the root-owned ledger across replacement",
+        "childScope retires old main disclosure handles",
+        "childScope preserves sibling business and controller state",
+        "childScope retires exactly the affected form branches",
+        "childScope never replays a callback into the replacement or recovered child",
+        "childScope recovery retains the same single actionID without replay",
+        "pending nested request reaches its current controller",
+        "childReady rejects confirmation after the one dispatched callback",
+        "childReady retains exactly one invocation in the root-owned ledger across replacement",
+        "childReady retires old main disclosure handles",
+        "childReady preserves sibling business and controller state",
+        "childReady retires exactly the affected form branches",
+        "childReady never replays a callback into the replacement or recovered child",
+        "childReady recovery retains the same single actionID without replay",
+        "pending nested request reaches its current controller",
+        "replace rejects confirmation after the one dispatched callback",
+        "replace retains exactly one invocation in the root-owned ledger across replacement",
+        "replacement actually runs the new child form's native On Load",
+        "replace retires old main disclosure handles",
+        "replace preserves sibling business and controller state",
+        "replace retires exactly the affected form branches",
+        "replace never replays a callback into the replacement or recovered child",
+        "replace recovery retains the same single actionID without replay",
+        "pending nested request reaches its current controller",
+        "rootScope rejects confirmation after the one dispatched callback",
+        "rootScope retains exactly one invocation in the root-owned ledger across replacement",
+        "rootScope retires old main disclosure handles",
+        "rootScope preserves sibling business and controller state",
+        "rootScope retires exactly the affected form branches",
+        "rootScope never replays a callback into the replacement or recovered child",
+        "rootScope recovery retains the same single actionID without replay",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "fully clipped disclosure changes no pixel and reveals no ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "nested canonical methods and every imported driver source remain unchanged",
+        "Owned process exits zero with a matching close marker and no error",
+        "shutdown clears every tracked native tree including retired children"
+      ],
+      "pixels": [
+        {
+          "baseline": {
+            "path": "disclosure-subforms-interpreted-a28de4adb22d414c824a90c0e8f4ca73.png",
+            "sha256": "f9dcc7d994b030ac558fba038c64a3df9749efef80e72aca35942a134405e26c",
+            "capturedWindow": {
+              "number": 77900,
+              "pid": 54676,
+              "title": "AX native hierarchy probe",
+              "position": [
+                285.0,
+                270.0
+              ],
+              "size": [
+                1350.0,
+                628.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-subforms-interpreted-85990c15001b4fa9881b7365cf96d283.png",
+            "sha256": "f9dcc7d994b030ac558fba038c64a3df9749efef80e72aca35942a134405e26c",
+            "capturedWindow": {
+              "number": 77900,
+              "pid": 54676,
+              "title": "AX native hierarchy probe",
+              "position": [
+                285.0,
+                270.0
+              ],
+              "size": [
+                1350.0,
+                628.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "normalClose": true
+    },
+    {
+      "mode": "subforms-compiled",
+      "reportSHA256": "397d7ae503a873500789e80b9d3de6fb5530fdf753cefdc171b7fd3ba72ec973",
+      "checks": [
+        "actual nested desktop mode matches the requested run",
+        "repeated controls share keys and captions while binding independent native arrays",
+        "nested public paths distinguish identical control names",
+        "only the parent lifecycle area owns both nested branches",
+        "both axes at both ancestor levels begin with independently measured nonzero scrolling",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "main disclosure preserves the sibling's nonediting grouped focus",
+        "ordinary parent focus resolves to the exact root Close owner",
+        "sibling editor accepts ordinary instance-scoped focus",
+        "sibling editor accepts pending Unicode text",
+        "sibling editor accepts its native text highlight",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "cross-instance disclosure rejects without changing the sibling's pending text or highlight",
+        "root Close regains actual ownership after the sibling editor",
+        "pending nested request reaches its current controller",
+        "childScope rejects confirmation after the one dispatched callback",
+        "childScope retains exactly one invocation in the root-owned ledger across replacement",
+        "childScope retires old main disclosure handles",
+        "childScope preserves sibling business and controller state",
+        "childScope retires exactly the affected form branches",
+        "childScope never replays a callback into the replacement or recovered child",
+        "childScope recovery retains the same single actionID without replay",
+        "pending nested request reaches its current controller",
+        "childReady rejects confirmation after the one dispatched callback",
+        "childReady retains exactly one invocation in the root-owned ledger across replacement",
+        "childReady retires old main disclosure handles",
+        "childReady preserves sibling business and controller state",
+        "childReady retires exactly the affected form branches",
+        "childReady never replays a callback into the replacement or recovered child",
+        "childReady recovery retains the same single actionID without replay",
+        "pending nested request reaches its current controller",
+        "replace rejects confirmation after the one dispatched callback",
+        "replace retains exactly one invocation in the root-owned ledger across replacement",
+        "replacement actually runs the new child form's native On Load",
+        "replace retires old main disclosure handles",
+        "replace preserves sibling business and controller state",
+        "replace retires exactly the affected form branches",
+        "replace never replays a callback into the replacement or recovered child",
+        "replace recovery retains the same single actionID without replay",
+        "pending nested request reaches its current controller",
+        "rootScope rejects confirmation after the one dispatched callback",
+        "rootScope retains exactly one invocation in the root-owned ledger across replacement",
+        "rootScope retires old main disclosure handles",
+        "rootScope preserves sibling business and controller state",
+        "rootScope retires exactly the affected form branches",
+        "rootScope never replays a callback into the replacement or recovered child",
+        "rootScope recovery retains the same single actionID without replay",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "fully clipped disclosure changes no pixel and reveals no ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "external AX accepts the instance-scoped disclosure request",
+        "instance controller count and completion receipt match the requested result",
+        "nested controller receives resolved local native coordinates",
+        "disclosure preserves the independently bound sibling's data, topology, selection and handlers",
+        "successful, rejected or idempotent disclosure never scrolls an ancestor",
+        "nested canonical methods and every imported driver source remain unchanged",
+        "Owned process exits zero with a matching close marker and no error",
+        "shutdown clears every tracked native tree including retired children"
+      ],
+      "pixels": [
+        {
+          "baseline": {
+            "path": "disclosure-subforms-compiled-b662f147848c4a17af78f71fc1eeea83.png",
+            "sha256": "f9dcc7d994b030ac558fba038c64a3df9749efef80e72aca35942a134405e26c",
+            "capturedWindow": {
+              "number": 77917,
+              "pid": 57615,
+              "title": "AX native hierarchy probe",
+              "position": [
+                285.0,
+                270.0
+              ],
+              "size": [
+                1350.0,
+                628.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "integrated": {
+            "path": "disclosure-subforms-compiled-9a159b7fa01f4744866bc4ea4343f29e.png",
+            "sha256": "f9dcc7d994b030ac558fba038c64a3df9749efef80e72aca35942a134405e26c",
+            "capturedWindow": {
+              "number": 77917,
+              "pid": 57615,
+              "title": "AX native hierarchy probe",
+              "position": [
+                285.0,
+                270.0
+              ],
+              "size": [
+                1350.0,
+                628.0
+              ],
+              "pidVerified": true
+            }
+          },
+          "changedPixels": 0,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "normalClose": true
+    }
+  ],
+  "scope": "Explicit application-controlled text/date grouped disclosure in standalone and repeated nested synthetic 4D forms.",
+  "compileReportSHA256": "f8e27437f87680df3acaaf0e695cdffbc94a516b207286bef094f03e68da4c4a",
+  "nativeSHA256": "32d0da7bf8108451f28b0c373f9cd6106f264b1f3d2acd7f5616d24f153c0b39",
+  "canonicalSourceSHA256": {
+    "host/OptionalMethods/AXB_Area.4dm": "463fa223a3d570ad728ca6bfac758cfa5a1422408ffac6409a3278c31ddbd437",
+    "host/OptionalMethods/AXB_AreaError.4dm": "f3487e812fe4bda243d3bbce9eda3d3cdf57513dd95c16fbe757281dc47fc89f",
+    "host/OptionalMethods/AXB_AreaForm.4dm": "700b5bccff8b28206e40ac55be69f95d26212cff0ec35308b73dc2454a77cfa4",
+    "host/OptionalMethods/AXB_ControlAction.4dm": "03d5199ff5f52d7a228f90f21fc793e7369ef7c13d72e3596c0faa83d9d5eeba",
+    "host/OptionalMethods/AXB_ControlConfirm.4dm": "528dd3770b96ba1bafd4483ce6ba1b95fb09ce013bb95eb49009839a559deed5",
+    "host/OptionalMethods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+    "host/OptionalMethods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+    "host/OptionalMethods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+    "host/OptionalMethods/AXB_ControlLayers.4dm": "eed3228479120ad3c9f0b1f714ea343f0e316198807195a8a9c6e30b6f6c094b",
+    "host/OptionalMethods/AXB_ControlPoint.4dm": "867b648058daedaa0f5f966fbad410fc914cf5c93cce7c381e4db0191e15fc8a",
+    "host/OptionalMethods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+    "host/OptionalMethods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+    "host/OptionalMethods/AXB_Discover.4dm": "8406d2a93e72050cb98e76b633896106aaa0ddb7f050cc8b537f2332e40e62f5",
+    "host/OptionalMethods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+    "host/OptionalMethods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+    "host/OptionalMethods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+    "host/OptionalMethods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+    "host/OptionalMethods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+    "host/OptionalMethods/AXB_Focus.4dm": "1a28fcb839467912e2501f2bd61197866066d389bf0aab79ca4545679b703e7c",
+    "host/OptionalMethods/AXB_Form.4dm": "29e2ecb70eb61e43b82fa4ebc80ba7fc6d46c52a180ed4457963c5d7a16c5aa0",
+    "host/OptionalMethods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+    "host/OptionalMethods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+    "host/OptionalMethods/AXB_FormEvent.4dm": "4b2c91dbb9de6fcc313df47f3aa8f4382b035659eac27257c99018d98e54c92c",
+    "host/OptionalMethods/AXB_FormExchange.4dm": "4121b71e2572ef6df325edecbb144d7869c4b2221be7528aeb21cf7c8a502bb6",
+    "host/OptionalMethods/AXB_FormFailed.4dm": "c8de2ed6a7420382ac75a732eb3d07e8012c9dc448bff44e2d6e7e95844e48b4",
+    "host/OptionalMethods/AXB_FormObserver.4dm": "13d456a06f0af38aa4e6c288002fb077c4d8c82880c19acab2ab05f7e2164c90",
+    "host/OptionalMethods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+    "host/OptionalMethods/AXB_FormStop.4dm": "c15f6edbefb02527d7863c28b2f2daf0cdb4595643d3d49665039fc2ad286fd1",
+    "host/OptionalMethods/AXB_FormTree.4dm": "65aa96fe4bf82f7a255d665bf76f23f31462233efacb621944c329df42be2057",
+    "host/OptionalMethods/AXB_GridBinding.4dm": "19fa0d67e44b800ec63dcff5c26d409acf672608103a65f848892b0ebe3fce84",
+    "host/OptionalMethods/AXB_GridGeometry.4dm": "b4a917a95d9665a6d612a091a43cd9a33e778055404f2b000d1429adf5f2cf89",
+    "host/OptionalMethods/AXB_GridListbox.4dm": "655980dee9a0c47409af5d1a1c250991b7ef21c944add27fb3de03c1df603afd",
+    "host/OptionalMethods/AXB_GridListboxAction.4dm": "adf9ea6d23b1b0f54ec723479ba348a39d0eba4c917cf7647b9e9df161b42fa0",
+    "host/OptionalMethods/AXB_GridListboxConfirm.4dm": "f619e1128035ef6745f42f855b36c09fcf072471a90b2275a941e0ba16b9b92f",
+    "host/OptionalMethods/AXB_GridOptions.4dm": "3e44c9cadc2ebba1541a097e5172b717754faa54935395afbd7a7aad6488ff7b",
+    "host/OptionalMethods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+    "host/OptionalMethods/AXB_GridReadPages.4dm": "31773c369b8e36bcce458b1155ca5e35b7146c19b0811459b8366f6c1284aeab",
+    "host/OptionalMethods/AXB_GridValue.4dm": "071a07c15919c8f5c7e1986c981db507d0355b3fdf36ee384039ceba79da16cf",
+    "host/OptionalMethods/AXB_Grids.4dm": "29c54807e5b15f4c64082ba0724c49937b3c874e358674678f2bc6bb60413d5e",
+    "host/OptionalMethods/AXB_Host.4dm": "d4e0914d9607242c8cd9028242bc311aec170dfb02ab84d025dd64b48035e53f",
+    "host/OptionalMethods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+    "host/OptionalMethods/AXB_Invalidate.4dm": "69e647e50f0ba7c309ef78e16430ad6f578e74e8ae104e89689ea172ae4db9d7",
+    "host/OptionalMethods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+    "host/OptionalMethods/AXB_ListEditor.4dm": "c5029d0370d1eb29be23c6aa5fd55d5b0bbd9bc2db9cc46cf711470cbe20fd69",
+    "host/OptionalMethods/AXB_ListEditorFocus.4dm": "1b5874aa5b3ef40278b9f723b3076393b0d94ed9b6cd01456a96df3b5cbfcb64",
+    "host/OptionalMethods/AXB_ListEditorRead.4dm": "7fe4061be1d7131add50e241e895074753260922112fece7584622d651743ec0",
+    "host/OptionalMethods/AXB_ListSubform.4dm": "6b299837a0cb2429aeca16d022ccc168c6b35be491f0645bbf05de987488d9fd",
+    "host/OptionalMethods/AXB_ListSubformEdit.4dm": "eadabf86c86276a2b8de1ece43c7a8a591aac75b3cca93795ddf234952aee564",
+    "host/OptionalMethods/AXB_ListSubformFields.4dm": "d000a8b27017c544b2fb13fb9049388dd37fa3baf17d87074f301e5e1e182c07",
+    "host/OptionalMethods/AXB_ListSubformInfo.4dm": "f022eb3176eec04fcb19840822c44050410f30aebc0cb89d0b4de2972b0d1337",
+    "host/OptionalMethods/AXB_ListSubformReveal.4dm": "381b779484185608e8d2a0cefac176dcd418c644a11316f33f4fe3402dc31a18",
+    "host/OptionalMethods/AXB_ListSubformSelect.4dm": "4b0372101064e52f3078452f6420a72f9322cd18984369fe019ec4135e3e4a02",
+    "host/OptionalMethods/AXB_ListSubformWidget.4dm": "4ba7151640c631b8bacd84283cf4b535e22dd52c7929c1e8399b3b3eb5e79ad5",
+    "host/OptionalMethods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+    "host/OptionalMethods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+    "host/OptionalMethods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+    "host/OptionalMethods/AXB_OutlineAction.4dm": "d4e353164df5fddbc66562debcf1d90767850f64c4ec71f815b6a81ba433929a",
+    "host/OptionalMethods/AXB_OutlineCapture.4dm": "0ccfd3caf56edc15fced6a114acaf629c3dd8002cfc5c81f72a3a478175a4266",
+    "host/OptionalMethods/AXB_OutlineConfirm.4dm": "acac494476c9f4875e93476f9b0eab8643f644cdc07bc7a85eb40b5daf8c3ee4",
+    "host/OptionalMethods/AXB_OutlineRows.4dm": "b91c9993ef196769b16ca43f452bdf923ee3228c9ba6ae1ab751bcb67f5786a3",
+    "host/OptionalMethods/AXB_OutlineTarget.4dm": "70d476785a4fcf87ad78af49eb03d1a03254fbd8377759b12d7efe7288e4bf00",
+    "host/OptionalMethods/AXB_OutlineToken.4dm": "88ba3baad059061204cb44910d49c8c8ea0d05d68aad32083ef1bfb2f15d9188",
+    "host/OptionalMethods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+    "host/OptionalMethods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+    "host/OptionalMethods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+    "host/OptionalMethods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+    "host/OptionalMethods/AXB_SelectionError.4dm": "c94b1348090d485d9fe77c74c4a201d202708cb80bc98041455fd17adb24045b",
+    "host/OptionalMethods/AXB_SelectionRead.4dm": "76d1810f5b51493ffcb662b2a8a2dd0a352acf32dc8a6f957034f934b34d59f6",
+    "host/OptionalMethods/AXB_SelectionSource.4dm": "bfd7bee03bb6a00af4496784a3e41b24fb0b37391d97c0fe40d43e6d855c28b2",
+    "host/OptionalMethods/AXB_StyledText.4dm": "c194256e299ba5a001721e671751f7a5c350064acb745ae8ef8b870d7cf6f49e",
+    "host/OptionalMethods/AXB_Tabs.4dm": "1369938b7b535d93a74f191a8afb8aae040939b8fd8ecce2e6cbbf86d8edd9aa",
+    "host/OptionalMethods/AXB_TextAction.4dm": "1b851745ee1df092e333c31244cca528399caccfdfb2bb2187135d5d0f4cd97e",
+    "host/OptionalMethods/AXB_TextEditor.4dm": "0491e2a03b7ed4e1ee59dce7be49268c2cb3356fe857e52081a583798b4c434f",
+    "host/OptionalMethods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+    "host/OptionalMethods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+    "host/OptionalMethods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+    "host/OptionalMethods/AXB_TextSelect.4dm": "059c0f4c1e48f495265f586ca5daf0751966a4561ebc410cbb8797a7fcd0d367",
+    "host/OptionalMethods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+    "host/OptionalMethods/AXB_View.4dm": "c95f105c487d87605a430cd4f69f30cd5198a4c464e20116e8efad58bebba4e2",
+    "host/OptionalMethods/AXB_ViewCreate.4dm": "a0b4d95c23db0068923466a00549dbcc91e601e28db2af5b0938bbc7f4197e70",
+    "host/OptionalMethods/Compiler_AXBHost.4dm": "b92adda06b4a9af297df8c6cc432a58e2a23acdda42df510f3b65a33bee9f5a8",
+    "tests/4d/AXHP_CaptureFault.4dm": "1839cf7b0214f186d3b799d475be1a7e52ae03c61f0da940acdcff69bdab0e72",
+    "tests/4d/AXHP_Command.4dm": "4dfd7b9b8f071aabd1691c0babd30dd16bd47a4e4060656403c6381e079c0899",
+    "tests/4d/AXHP_Error.4dm": "57ce45748aea4dabb43e4cf1e7afbc05f5bb3bf30d6002df16d708368f6af77e",
+    "tests/4d/AXHP_Event.4dm": "b7c4e13b4c9d96b62ff3936234acde0112ea0b13affa0b5657720cd78e363044",
+    "tests/4d/AXHP_Form.4dm": "e1502275f326af54cf5e3edaaca5870b0b336f6df1a4fd6c56f235eb69360091",
+    "tests/4d/AXHP_GroupedCase.4dm": "344626fd19e8dd2516f12847703f63c67c0e6736fdcd667a59a3c3877877b033",
+    "tests/4d/AXHP_GroupedRead.4dm": "d28b6028e9a22d37fa450f7126219d8def12a3b470989db6564ffdb01bacf2b0",
+    "tests/4d/AXHP_GroupedSentinel.4dm": "83006368d0dae8728a85df2ccab516869f02f8aec7fcf96475b6e3cf196e6537",
+    "tests/4d/AXHP_ListState.4dm": "b17013a181f8f97690c1b81b1f567be47a4cb9eb9f9411e5a928efea55b1d24d",
+    "tests/4d/AXHP_SetExpanded.4dm": "5431873161d539cc378eff859c4633cbece79bab3e458833e8b8ac424383e1af",
+    "tests/4d/AXHP_SetExpandedAlternate.4dm": "7bb6da84c4e7dcc3bfebf4d3bcabbadecdd368c26b8ed49cc633ca20cfcac51b",
+    "tests/4d/AXHP_State.4dm": "d78f2d4d54aa2637642419c965004b90818a1d3ed01bc88763dccd026b0d1879",
+    "tests/4d/AXHP_Topology.4dm": "2ea8448d2e328f2974a88093e02afb8200f8d97fabe51aab869a8c9d893e6392",
+    "prepare_hierarchy_probe.py": "b64aab883f180293408dc8befc7835c29bf098ac36308c3f28ff4f280b9e1961",
+    "tests/hierarchy_subforms.py": "ac0f05911a13e68f2205a3a93e43bed1017c47e80e9475a21476432faf34f11e",
+    "install_host_methods.py": "ffe95ba22cdf347019bc3b2ccfa677f09aaa800c2955e0ed73b4a5552973aba8",
+    "VERSION": "dbf81d3754264f6dce22444d551ef30913c3959a2ecc784a786162df068d5435"
+  },
+  "nativeSourceSHA256": {
+    "src/Area.h": "93a474955f9b39e15ff2d6976ca79f3f8e3dd6f82ec1d452585871d4e9260ff9",
+    "src/Area.mm": "8e9c72e1f64d8cdff62fff069ef0127100e7636dd93f21e6712d67b4dfd0a08b",
+    "src/Bridge.h": "44aa5d23302d823876393a214468643f54dbb09e44aff3c8a1fa184851018868",
+    "src/Bridge.mm": "ce527d867b8c0645e68c790ca8518f747b776f3d76bfa7162484fb22b30ff286",
+    "src/BridgePrivate.h": "1da38a7d74f26e2bb9d2586cc1bade053ff49fe7516a685a67597439eabc533a",
+    "src/Grid.h": "33b57db90f506610bcb782f9348a9536d283af3a29488728868b7c1746ed7acc",
+    "src/Grid.mm": "23d01d10ce5a2d886b67a002c7ef1e586d3f4b4a523e29cca4ef6b7e74aaa4ab",
+    "src/GridNative.mm": "0b83421cd4be483468fd9ae901c5d3da759083e0fc9a82d6e65193557a9fb429",
+    "src/Identifiers.h": "a6de821ab5c6390ff33fe41b2d46d5cff62cb34328b69b23316860a2eb2beafa",
+    "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+    "src/NativeLayout.h": "bae2bd173f9721d274c06dad293818a5e33748769a049db223883fc0fc0b39fa",
+    "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+    "src/Plugin.mm": "e446db1479915f10860b90f8ef19006b2a2aa308d4602ed38172ed06fd1a4fe1",
+    "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+    "src/Session.mm": "b7d5aa1f15d8246e456e5c058c6502328733bd2a3825ba2d8c975c1edf02f2e9",
+    "host/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+    "host/Methods/AXB_ALPGrid.4dm": "7236c53f5c9cad4008eb53c1f04a88d16f6f1f6b45599e6e7e71b99638c8a198",
+    "host/Methods/AXB_ALPGridAction.4dm": "366142ef7a5161726832dc7971a772b5d92eda65f9daa8347ec6dbc9fbf3cdbf",
+    "host/Methods/AXB_ALPGridConfirm.4dm": "d7115b943ef2fb80be7a16fa5174985d861b2a7222dd8e9e9159f14d5fc39f8f",
+    "host/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+    "host/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+    "host/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+    "host/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+    "host/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+    "host/Methods/AXB_ALPTable.4dm": "22df5b137ebf4e3f2c1d20dc2afc6d520eb5a1995f28b8748b7843a4fdfb19f5",
+    "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+    "host/Methods/AXB_Dispatch.4dm": "acfb4c83af0f476cc8b1da1f9b9fe9b1184785d3603ef6d8559a4f260e7be6ba",
+    "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+    "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+    "host/Methods/AXB_Start.4dm": "1fead9fe034cecc7ca428e877bb87b520be1a11fce908aaafa525974eddbdb31",
+    "host/Methods/AXB_Stop.4dm": "b34800c436a62339e79ce1ab1f4864445387a10d807bc82b8c8ec02b0512e551",
+    "host/Methods/Compiler_AXB.4dm": "5591f39488001d13a8c8f8883e000b369b0ae2ae5680fb22d511f6ee731ab8e7",
+    "resources/en.lproj/AccessibilityBridge.strings": "17fb4952dab66329c2699dadf38432133fe0eb336da14b3988ca30b4b52626ac",
+    "manifest.json": "b884b738d8b15f7d9f1449c604c6f92dd96575b0dbfe93d1b29b8b9ad4acca0b",
+    "VERSION": "dbf81d3754264f6dce22444d551ef30913c3959a2ecc784a786162df068d5435"
+  },
+  "componentSourceSHA256": {
+    "host/Methods/AXB_Start.4dm": "1fead9fe034cecc7ca428e877bb87b520be1a11fce908aaafa525974eddbdb31",
+    "host/Methods/AXB_Stop.4dm": "b34800c436a62339e79ce1ab1f4864445387a10d807bc82b8c8ec02b0512e551",
+    "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+    "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+    "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+    "host/Methods/AXB_Dispatch.4dm": "acfb4c83af0f476cc8b1da1f9b9fe9b1184785d3603ef6d8559a4f260e7be6ba",
+    "host/Methods/Compiler_AXB.4dm": "5591f39488001d13a8c8f8883e000b369b0ae2ae5680fb22d511f6ee731ab8e7",
+    "VERSION": "dbf81d3754264f6dce22444d551ef30913c3959a2ecc784a786162df068d5435",
+    "build_component.py": "879cafb7488fe3e4a8fd2795c13065861aff897a5a4245ddfb76440ab62867c5"
+  },
+  "componentPackageSHA256": {
+    "AccessibilityBridge.4DZ": "87d76909fe0e70f2b8ce13f9ad9882ec0a31aae69a74baefb7b41336450a5e29",
+    "Libraries/lib4d-arm64.dylib": "8fadf44c0e595c845cc93a58690c1c9f1641b7be3b8f1ef1430884b900e77661"
+  },
+  "summarySHA256": "6de8e92620f14a198ecec4d63abe27c5916a818c701839270cac685ab3159fe2",
+  "hostCommandChecks": {
+    "checks": 37,
+    "reportSHA256": "8e0f351aaad1fb1b23419fadcdf49e9056fd76330a15e9f6e2a8b5f4979e06cf"
+  },
+  "readOnlyRegression": [
+    {
+      "mode": "interpreted",
+      "reportSHA256": "3fc55ebe43c9600ed83d420ac65283f2e7e3022f8711bb6df5c4090676592847",
+      "checks": [
+        "actual 4D execution mode matches the requested mode",
+        "loaded native package advertises the outline capability",
+        "parent lifecycle area starts the configured provider",
+        "singleText exposes exact native group and leaf levels",
+        "singleText repeated native labels have distinct group identities",
+        "singleText structural row parents remain the outline",
+        "singleText unavailable complete selection is omitted from every row and the outline",
+        "singleText pending selection and disclosure actions are not advertised",
+        "singleText headers omit unsupported reveal and activation actions",
+        "singleText group label is immediate and has one cell",
+        "singleText group geometry spans the native row",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText final disclosed offscreen leaf retains its logical index and value",
+        "singleText first leaf column preserves the native blank value",
+        "singleText collapse retains group identity and removes disclosed descendants",
+        "singleText collapse retires retained leaf handles",
+        "singleText reopening requires fresh descendant handles",
+        "singleDate exposes exact native group and leaf levels",
+        "singleDate repeated native labels have distinct group identities",
+        "singleDate structural row parents remain the outline",
+        "singleDate unavailable complete selection is omitted from every row and the outline",
+        "singleDate pending selection and disclosure actions are not advertised",
+        "singleDate headers omit unsupported reveal and activation actions",
+        "singleDate group label is immediate and has one cell",
+        "singleDate group geometry spans the native row",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate final disclosed offscreen leaf retains its logical index and value",
+        "singleDate first leaf column preserves the native blank value",
+        "singleDate changing hierarchy binding retires earlier row handles",
+        "singleDate collapse retains group identity and removes disclosed descendants",
+        "singleDate collapse retires retained leaf handles",
+        "singleDate reopening requires fresh descendant handles",
+        "repeated exposes exact native group and leaf levels",
+        "repeated repeated native labels have distinct group identities",
+        "repeated structural row parents remain the outline",
+        "repeated unavailable complete selection is omitted from every row and the outline",
+        "repeated pending selection and disclosure actions are not advertised",
+        "repeated headers omit unsupported reveal and activation actions",
+        "repeated group label is immediate and has one cell",
+        "repeated group geometry spans the native row",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated final disclosed offscreen leaf retains its logical index and value",
+        "repeated changing hierarchy binding retires earlier row handles",
+        "repeated collapse retains group identity and removes disclosed descendants",
+        "repeated collapse retires retained leaf handles",
+        "repeated reopening requires fresh descendant handles",
+        "absent native row-control array captures successfully with zero flags",
+        "hierarchy without row-control array retains native group labels",
+        "attaching the row-control array preserves accepted capture",
+        "stale or incomplete caller bindings reject while preserving sampled OK, focus, selection and scroll",
+        "groupFormatNested rejects unavailable native caption authority",
+        "groupFormatNested retires retained outline and cell handles",
+        "groupFormatNested recovers with fresh outline handles",
+        "groupProtectNested rejects unavailable native caption authority",
+        "groupProtectNested retires retained outline and cell handles",
+        "groupProtectNested recovers with fresh outline handles",
+        "groupHideFirst rejects unavailable native caption authority",
+        "groupHideFirst retires retained outline and cell handles",
+        "groupHideFirst recovers with fresh outline handles",
+        "case variants follow the native partition and retain exact distinct captions",
+        "changed group membership retires the previous group handle",
+        "canonical helpers and desktop driver sources stay unchanged during acceptance",
+        "Owned process exits zero with a matching close marker and no error"
+      ]
+    },
+    {
+      "mode": "compiled",
+      "reportSHA256": "ed420bcae31ed159db4920c65482d825dd78e155211a890e784553c1f2cfe3bc",
+      "checks": [
+        "actual 4D execution mode matches the requested mode",
+        "loaded native package advertises the outline capability",
+        "parent lifecycle area starts the configured provider",
+        "singleText exposes exact native group and leaf levels",
+        "singleText repeated native labels have distinct group identities",
+        "singleText structural row parents remain the outline",
+        "singleText unavailable complete selection is omitted from every row and the outline",
+        "singleText pending selection and disclosure actions are not advertised",
+        "singleText headers omit unsupported reveal and activation actions",
+        "singleText group label is immediate and has one cell",
+        "singleText group geometry spans the native row",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText final disclosed offscreen leaf retains its logical index and value",
+        "singleText first leaf column preserves the native blank value",
+        "singleText collapse retains group identity and removes disclosed descendants",
+        "singleText collapse retires retained leaf handles",
+        "singleText reopening requires fresh descendant handles",
+        "singleDate exposes exact native group and leaf levels",
+        "singleDate repeated native labels have distinct group identities",
+        "singleDate structural row parents remain the outline",
+        "singleDate unavailable complete selection is omitted from every row and the outline",
+        "singleDate pending selection and disclosure actions are not advertised",
+        "singleDate headers omit unsupported reveal and activation actions",
+        "singleDate group label is immediate and has one cell",
+        "singleDate group geometry spans the native row",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate final disclosed offscreen leaf retains its logical index and value",
+        "singleDate first leaf column preserves the native blank value",
+        "singleDate changing hierarchy binding retires earlier row handles",
+        "singleDate collapse retains group identity and removes disclosed descendants",
+        "singleDate collapse retires retained leaf handles",
+        "singleDate reopening requires fresh descendant handles",
+        "repeated exposes exact native group and leaf levels",
+        "repeated repeated native labels have distinct group identities",
+        "repeated structural row parents remain the outline",
+        "repeated unavailable complete selection is omitted from every row and the outline",
+        "repeated pending selection and disclosure actions are not advertised",
+        "repeated headers omit unsupported reveal and activation actions",
+        "repeated group label is immediate and has one cell",
+        "repeated group geometry spans the native row",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated final disclosed offscreen leaf retains its logical index and value",
+        "repeated changing hierarchy binding retires earlier row handles",
+        "repeated collapse retains group identity and removes disclosed descendants",
+        "repeated collapse retires retained leaf handles",
+        "repeated reopening requires fresh descendant handles",
+        "absent native row-control array captures successfully with zero flags",
+        "hierarchy without row-control array retains native group labels",
+        "attaching the row-control array preserves accepted capture",
+        "stale or incomplete caller bindings reject while preserving sampled OK, focus, selection and scroll",
+        "groupFormatNested rejects unavailable native caption authority",
+        "groupFormatNested retires retained outline and cell handles",
+        "groupFormatNested recovers with fresh outline handles",
+        "groupProtectNested rejects unavailable native caption authority",
+        "groupProtectNested retires retained outline and cell handles",
+        "groupProtectNested recovers with fresh outline handles",
+        "groupHideFirst rejects unavailable native caption authority",
+        "groupHideFirst retires retained outline and cell handles",
+        "groupHideFirst recovers with fresh outline handles",
+        "case variants follow the native partition and retain exact distinct captions",
+        "changed group membership retires the previous group handle",
+        "canonical helpers and desktop driver sources stay unchanged during acceptance",
+        "Owned process exits zero with a matching close marker and no error"
+      ]
+    },
+    {
+      "mode": "compiled-voiceover",
+      "reportSHA256": "2979d671253e2c07a4e4dc75dfafa1161380f26a84d4c7a611907f05757e8b5a",
+      "checks": [
+        "actual 4D execution mode matches the requested mode",
+        "loaded native package advertises the outline capability",
+        "parent lifecycle area starts the configured provider",
+        "singleText exposes exact native group and leaf levels",
+        "singleText repeated native labels have distinct group identities",
+        "singleText structural row parents remain the outline",
+        "singleText unavailable complete selection is omitted from every row and the outline",
+        "singleText pending selection and disclosure actions are not advertised",
+        "singleText headers omit unsupported reveal and activation actions",
+        "singleText group label is immediate and has one cell",
+        "singleText group geometry spans the native row",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText final disclosed offscreen leaf retains its logical index and value",
+        "singleText first leaf column preserves the native blank value",
+        "singleText collapse retains group identity and removes disclosed descendants",
+        "singleText collapse retires retained leaf handles",
+        "singleText reopening requires fresh descendant handles",
+        "singleDate exposes exact native group and leaf levels",
+        "singleDate repeated native labels have distinct group identities",
+        "singleDate structural row parents remain the outline",
+        "singleDate unavailable complete selection is omitted from every row and the outline",
+        "singleDate pending selection and disclosure actions are not advertised",
+        "singleDate headers omit unsupported reveal and activation actions",
+        "singleDate group label is immediate and has one cell",
+        "singleDate group geometry spans the native row",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate final disclosed offscreen leaf retains its logical index and value",
+        "singleDate first leaf column preserves the native blank value",
+        "singleDate changing hierarchy binding retires earlier row handles",
+        "singleDate collapse retains group identity and removes disclosed descendants",
+        "singleDate collapse retires retained leaf handles",
+        "singleDate reopening requires fresh descendant handles",
+        "repeated exposes exact native group and leaf levels",
+        "repeated repeated native labels have distinct group identities",
+        "repeated structural row parents remain the outline",
+        "repeated unavailable complete selection is omitted from every row and the outline",
+        "repeated pending selection and disclosure actions are not advertised",
+        "repeated headers omit unsupported reveal and activation actions",
+        "repeated group label is immediate and has one cell",
+        "repeated group geometry spans the native row",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated final disclosed offscreen leaf retains its logical index and value",
+        "repeated changing hierarchy binding retires earlier row handles",
+        "repeated collapse retains group identity and removes disclosed descendants",
+        "repeated collapse retires retained leaf handles",
+        "repeated reopening requires fresh descendant handles",
+        "absent native row-control array captures successfully with zero flags",
+        "hierarchy without row-control array retains native group labels",
+        "attaching the row-control array preserves accepted capture",
+        "stale or incomplete caller bindings reject while preserving sampled OK, focus, selection and scroll",
+        "groupFormatNested rejects unavailable native caption authority",
+        "groupFormatNested retires retained outline and cell handles",
+        "groupFormatNested recovers with fresh outline handles",
+        "groupProtectNested rejects unavailable native caption authority",
+        "groupProtectNested retires retained outline and cell handles",
+        "groupProtectNested recovers with fresh outline handles",
+        "groupHideFirst rejects unavailable native caption authority",
+        "groupHideFirst retires retained outline and cell handles",
+        "groupHideFirst recovers with fresh outline handles",
+        "case variants follow the native partition and retain exact distinct captions",
+        "changed group membership retires the previous group handle",
+        "VoiceOver reaches the actual 4D grouped provider",
+        "VoiceOver reads native nested labels, leaf values and levels",
+        "VoiceOver remains responsive without fabricated selection",
+        "VoiceOver End reaches the last disclosed leaf",
+        "canonical helpers and desktop driver sources stay unchanged during acceptance",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Grouped items, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "\u00d7 In Grouped items, table, Group Leaf 1, level 2, level 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Subgroup shared"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Label Leaf 1"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Group Leaf 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Subgroup shared"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Label Leaf 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Group other, level 1"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Leaf 3, level 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Subgroup other"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Label Leaf 3"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Group B"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X shared, level 1"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Leaf 4, level 2"
+        },
+        {
+          "key": "end",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Label Loading, row 17 of 17"
+        }
+      ],
+      "loadedEndCaption": "X Leaf 8, level 2, cell"
+    }
+  ],
+  "packageBaselinePixels": [
+    {
+      "mode": "interpreted",
+      "baselineReportSHA256": "f3b2c14617501ccba9bb4696c0c9c3d293e71b7a608db103567992daf7bc6f60",
+      "comparisons": [
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleText"
+          },
+          "baselineSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "integratedSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "integratedSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "integratedSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "62c4b29da0eed9e804a56ab50e64d46a28d0512f390807c90374eb6e5d9c9096",
+          "integratedSHA256": "62c4b29da0eed9e804a56ab50e64d46a28d0512f390807c90374eb6e5d9c9096",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleDate"
+          },
+          "baselineSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "integratedSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "integratedSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "84e9eab8ff6286b752d059745c88f0095c3b1d555bc84c605d27c5f5706a0da0",
+          "integratedSHA256": "84e9eab8ff6286b752d059745c88f0095c3b1d555bc84c605d27c5f5706a0da0",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "8c561321e7aa01ebbdb619ddc198330f68bbde17aa790080393c35d2a61f9400",
+          "integratedSHA256": "8c561321e7aa01ebbdb619ddc198330f68bbde17aa790080393c35d2a61f9400",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "repeated"
+          },
+          "baselineSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "integratedSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "integratedSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "integratedSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "integratedSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupControlRestore",
+          "payload": {},
+          "baselineSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "integratedSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ]
+    },
+    {
+      "mode": "compiled",
+      "baselineReportSHA256": "2c725bcccede8a43096d28faf8022b079c682473365c5d1fbf8b6311c37cdcaa",
+      "comparisons": [
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleText"
+          },
+          "baselineSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "integratedSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "integratedSHA256": "461d01f75b734835ed90cc8c5fc426a41cad0202f83d2839fcbdd8e2911ee0aa",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "integratedSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "62c4b29da0eed9e804a56ab50e64d46a28d0512f390807c90374eb6e5d9c9096",
+          "integratedSHA256": "62c4b29da0eed9e804a56ab50e64d46a28d0512f390807c90374eb6e5d9c9096",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleDate"
+          },
+          "baselineSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "integratedSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "integratedSHA256": "e9e7c38c35e5bcc019426b1ba360246378b7c884c5ada751ed3aeeaaf4ebf2cf",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "84e9eab8ff6286b752d059745c88f0095c3b1d555bc84c605d27c5f5706a0da0",
+          "integratedSHA256": "84e9eab8ff6286b752d059745c88f0095c3b1d555bc84c605d27c5f5706a0da0",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "8c561321e7aa01ebbdb619ddc198330f68bbde17aa790080393c35d2a61f9400",
+          "integratedSHA256": "8c561321e7aa01ebbdb619ddc198330f68bbde17aa790080393c35d2a61f9400",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "repeated"
+          },
+          "baselineSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "integratedSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "integratedSHA256": "72b50315e1e9d903f7398c3279ce20c70effcc1ec0070a636948eb10f81a5ee6",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "integratedSHA256": "ea019168a67030ac7acd8b0b3e36ba2a4581678bdcbce49a046c2da6490430cc",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "integratedSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupControlRestore",
+          "payload": {},
+          "baselineSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "integratedSHA256": "c6d7018b20c98060b21378928f922f18763a3205e41cf3842e84006c92c2136f",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ]
+    }
+  ],
+  "flatGridSpeechRegression": {
+    "reportSHA256": "b8dff3fa91da4df6e4d3b1093e100624c70d3c3436d7fbf9533d74dc532ad199",
+    "sourceSHA256": {
+      "src/Session.mm": "b7d5aa1f15d8246e456e5c058c6502328733bd2a3825ba2d8c975c1edf02f2e9",
+      "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+      "src/Grid.mm": "23d01d10ce5a2d886b67a002c7ef1e586d3f4b4a523e29cca4ef6b7e74aaa4ab",
+      "src/Grid.h": "33b57db90f506610bcb782f9348a9536d283af3a29488728868b7c1746ed7acc",
+      "src/Bridge.mm": "ce527d867b8c0645e68c790ca8518f747b776f3d76bfa7162484fb22b30ff286",
+      "src/Bridge.h": "44aa5d23302d823876393a214468643f54dbb09e44aff3c8a1fa184851018868",
+      "src/BridgePrivate.h": "1da38a7d74f26e2bb9d2586cc1bade053ff49fe7516a685a67597439eabc533a",
+      "src/GridNative.mm": "0b83421cd4be483468fd9ae901c5d3da759083e0fc9a82d6e65193557a9fb429",
+      "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+      "src/NativeLayout.h": "bae2bd173f9721d274c06dad293818a5e33748769a049db223883fc0fc0b39fa",
+      "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+      "src/Identifiers.h": "a6de821ab5c6390ff33fe41b2d46d5cff62cb34328b69b23316860a2eb2beafa",
+      "tests/NativeGridFixture.mm": "a1ffabd505bc6406cf96ad18276cff413280decd063a0309243ee62c86ab6282",
+      "tests/mac_ax.py": "22bbc7a2a5ef520197cc05724991daa2cc659f34f8811bb132eeaa459d8d1747",
+      "tests/voiceover.py": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+      "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62",
+      "test_grid_value_speech.py": "bb3b16f16660c9f143719180e1becfed6562ac3803e466a2af6f38bf51b738be"
+    },
+    "cases": [
+      {
+        "case": "single",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.87,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.638,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.416,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.257,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.126,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.933,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.74,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.605,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "forward",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 3 row-00000 / column-2 / value-0"
+          }
+        ],
+        "observations": [
+          {
+            "column": 1,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.847,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 2.66,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.531,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.367,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.148,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.921,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.693,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.502,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "back",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "VoiceOver returns to the first cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.845,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 2.631,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.431,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.235,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.997,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.765,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.58,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.363,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "leave",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "VoiceOver leaves both cold cells for native window controls",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "pending grid values do not interrupt reading outside the grid",
+          "VoiceOver remains at the window close button",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          }
+        ],
+        "observations": [
+          {
+            "column": 1,
+            "leftGrid": true,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.797,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 2.665,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 4.468,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 6.29,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 8.12,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 9.92,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 11.706,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 13.556,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "inspection",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "an unrelated AX client inspects another cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.773,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.587,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.387,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.226,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.071,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.913,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.794,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.691,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "reload",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "cache invalidation preserves cell identity",
+          "VoiceOver revisits the retained cell while its identical value reloads",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.848,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.655,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.462,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.335,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.156,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.976,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.834,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.668,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          },
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.791,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 2.615,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.412,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.222,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.089,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.886,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.735,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.546,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "checkbox",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.813,
+                "caption": "\u00d7 Approved dimmed checked checkbox, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.62,
+                "caption": "\u00d7 Approved dimmed checked checkbox, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.467,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 6.313,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 8.133,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 10.028,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 11.903,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 13.799,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "checkbox_leave",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver leaves both cold cells for native window controls",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "pending grid values do not interrupt reading outside the grid",
+          "VoiceOver remains at the window close button",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": true,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.865,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 2.751,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 4.564,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 6.408,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 8.202,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 10.015,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 11.879,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 13.718,
+                "caption": "\u00d7 Approved checked checkbox"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "popup",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.779,
+                "caption": "\u00d7 Allowed Decision dimmed pop up button, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.601,
+                "caption": "\u00d7 Allowed Decision dimmed pop up button, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.414,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 6.248,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 8.073,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 10.007,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 11.855,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 13.748,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      }
+    ]
+  },
+  "limitations": [
+    "Complete break selection, reveal and editing remain unavailable.",
+    "Actual Symphony workflows, classic trees, broader caption types and lazy loading remain pending.",
+    "VoiceOver speech is accepted in English. One bridge announcement does not establish absence of duplicate native speech.",
+    "Physical Intel, client/server and signed distribution are separate gates."
+  ]
+}

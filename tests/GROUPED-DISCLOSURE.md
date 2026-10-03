@@ -122,3 +122,9 @@ This gate covers synthetic array hierarchies. Actual Symphony Alerts/date
 workflows, classic trees, other caption types, lazy loading, complete selection,
 Voice Control, Switch Control, physical Intel, client/server operation and signed
 distribution remain separate requirements.
+
+[The local development acceptance record](../validation/grouped-disclosure-development.json)
+passes 904 live 4D checks, 37 pure host checks, all 37 complete-window pixel
+comparisons and 135 checks across nine matching-source flat-grid speech cases.
+It records local package hashes; acceptance of an exact public CI download is a
+separate delivery gate.
