@@ -14,6 +14,7 @@ The initial release covers the implemented families below on 4D 20.8 and the tes
 | Classic list subforms | Unavailable | Unavailable | Unavailable | Unavailable | Scoped acceptance |
 | Stable automation locators | Unavailable | Unavailable | Native and desktop acceptance pass | Included | Included |
 | Compound generated early focus, restart and replacement | Unavailable | Unavailable | Replacement gap | Scoped acceptance | Included |
+| Native system web area beside 4D controls | Untested | Untested | Untested | Untested | Scoped acceptance; reading-order gap |
 
 Local 0.21.0 acceptance passes. For signed distribution, use the published [GitHub release](https://github.com/KyleKincer/4d-accessibility/releases); its notes and attached report record the exact signed-download checks. CI artifacts are development builds. [Candidate evidence](../../../validation/stable-identifiers-0.21.0.json) retains each tested package and source hash.
 
@@ -94,6 +95,12 @@ Fable 5.1 found no blocking list integration defect and confirmed the minimal pa
 Real 4D command tests pass 241 private-read and date/time checks, including process date storage and database time units; they do not prove native date/time editor actions. These local reports will be linked with the final acceptance record before publication.
 
 Automatic relations, nonzero pages, page-nested lists, several lists in one parent and complete application workflows remain separate acceptance cases. This development gate does not establish every list layout or full UI coverage.
+
+## Native web areas
+
+The matching 0.22.0 CI kit preserves the macOS system web area's native HTML provider beside ordinary 4D controls. Seven live runs with one unchanged driver pass 123 checks: native baseline and integrated actions in interpreted/compiled execution, compiled VoiceOver reading/checkbox/disclosure activation, and both pixel captures. The complete compiled window has zero changed pixels. The browser rejects invalid email and submits the actual edited values to a local endpoint; the original 4D handler runs once after navigation. No production code or new host hook is needed. Read [integration and engine limits](WEB-AREAS.md) and [exact evidence](../../../validation/native-web-areas.json). Native web content remains a sibling of the 4D group, so visual interleaving in VoiceOver navigation is still open. This does not cover arbitrary web applications or the embedded Chromium engine, whose bridge-free post-load VoiceOver probe remains without an `AXWebArea`.
+
+[4D's startup-switch configuration](https://blog.4d.com/custom-parameters-for-initializing-embedded-web-area/) begins with 20 R6, a separate feature branch. Its availability in the tested 20.8 LTS installation is unproven; no configuration file or engine change was made. Prelaunch VoiceOver remains a separate probe.
 
 ## Implemented and exercised
 
