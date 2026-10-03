@@ -36,7 +36,7 @@ For each ($query; $requests)
     $position:=$state.positions[$key]
     $column:=$state.columns[$columnID]
     $value:=AXB_GridValue($state; $column; $position)
-    $cell:=New object("column"; $columnID; "value"; $value.value; "enabled"; $value.ok & $definition.enabled & $value.enabled & (AXB_KeyIndex($descriptor.disabled; $key)<0); "editable"; $value.editable & $definition.editable & (AXB_KeyIndex($descriptor.uneditable; $key)<0))
+    $cell:=New object("column"; $columnID; "value"; $value.value; "enabled"; $value.ok & $definition.enabled & $value.enabled & (AXB_KeyIndex($descriptor.disabled; $key)<0); "editable"; $value.editable && $definition.editable && (AXB_KeyIndex($descriptor.uneditable; $key)<0))
     If ($value.role#Null)
      $cell.role:=$value.role
      If ($value.checked#Null)

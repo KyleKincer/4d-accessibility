@@ -67,6 +67,7 @@ jobs:
           python3 test_outline_rows.py --tool4d build/toolchain/tool4d.app
           python3 test_outline_host_helpers.py --tool4d build/toolchain/tool4d.app
           python3 test_outline_action_helpers.py --tool4d build/toolchain/tool4d.app
+          python3 test_grid_page_helpers.py --tool4d build/toolchain/tool4d.app
       - name: Package development artifacts
         run: |
           python3 package_release.py
