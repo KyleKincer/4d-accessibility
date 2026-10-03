@@ -4,9 +4,9 @@
 #DECLARE() -> $result : Object
 var $registry; $native; $node; $definition : Object
 var $name; $row; $column : Text
-var $matches; $bindings; $names; $frame : Collection
+var $matches; $bindings; $names; $frame; $exact : Collection
 var $x; $y : Real
-var $inside; $editing; $gridMatch : Boolean
+var $inside; $editing; $gridMatch; $uncertain; $exactPointer : Boolean
 var $pointer; $candidate : Pointer
 $result:=New object
 $registry:=AXB_FormRoots[String(Current form window)]
@@ -18,11 +18,13 @@ If (Not($native.ok=True))
  return
 End if
 $name:=OBJECT Get name(Object with focus)
+$uncertain:=($registry.observedFocus#Null) && ($registry.observedFocus.uncertain=True) && (Compare strings($registry.observedFocus.name; $name; sk char codes)=0)
 $editing:=Is editing text
 $pointer:=OBJECT Get pointer(Object with focus)
 $matches:=New collection
 $bindings:=New collection
 $names:=New collection
+$exact:=New collection
 $gridMatch:=False
 For each ($node; $registry.controls)
  If (New collection("tab"; "tabgroup").indexOf($node.role)>=0)
@@ -48,6 +50,7 @@ For each ($node; $registry.controls)
    $candidate:=$registry.controlPointers[$node.id]
    If ($candidate=$pointer)
     $matches.push(New object("node"; $node; "cell"; OB Copy($node.editor)))
+    $exact.push($matches[$matches.length-1])
    End if
   End if
   continue
@@ -68,11 +71,13 @@ For each ($node; $registry.controls)
   continue
  End if
  If ((Compare strings($name; $node.objectName; sk char codes)=0) & $node.visible & $node.enabled)
+  $exactPointer:=False
   If ($editing & ($node.role="textfield") & Not(Is nil pointer($pointer)))
    If (Value type($registry.controlPointers[$node.id])=Is pointer)
     $candidate:=$registry.controlPointers[$node.id]
     If ($candidate=$pointer)
      $bindings.push(New object("node"; $node))
+     $exact.push(New object("node"; $node))
     End if
    End if
   End if
@@ -94,12 +99,14 @@ For each ($node; $registry.controls)
     If (Value type($registry.controlPointers[$node.id])=Is pointer)
      $candidate:=$registry.controlPointers[$node.id]
      $inside:=$candidate=$pointer
+     $exactPointer:=$inside
     End if
     // Checkbox/popup cells keep the listbox's object name but 4D reports
     // their column's binding. Compare the exact live column in this instance.
     If (($node.cellFocus#Null) && (Value type($registry.cellPointers[$node.id])=Is pointer))
      $candidate:=$registry.cellPointers[$node.id]
      $inside:=$inside | ($candidate=$pointer)
+     $exactPointer:=$exactPointer | ($candidate=$pointer)
     End if
    Else
     // Collection/entity checkbox columns have no binding pointer. On 20.8
@@ -115,9 +122,25 @@ For each ($node; $registry.controls)
   End if
   If ($inside)
    $matches.push(New object("node"; $node))
+   If ($exactPointer)
+    $exact.push($matches[$matches.length-1])
+   End if
   End if
  End if
 End for each
+If ($uncertain)
+ // Exact native identity can still resolve an unobserved form. Count all
+ // native owners, including unsupported controls, before accepting it.
+ If (($exact.length=1) && ($registry.focusPointerOwners.length=1) && (Compare strings($registry.focusPointerName; $name; sk char codes)=0))
+  If ($registry.controlContexts[$exact[0].node.id].bindingKey=$registry.focusPointerOwners[0])
+   $matches:=$exact
+  Else
+   return New object("error"; "ambiguousFocus"; "object"; $name)
+  End if
+ Else
+  return New object("error"; "ambiguousFocus"; "object"; $name)
+ End if
+End if
 // A long multiline editor can report an unscrolled offscreen caret through
 // the public native API. An exact, unique live binding still identifies it.
 // Shared bindings remain ambiguous and must use the geometry path above.

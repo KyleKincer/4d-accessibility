@@ -5,6 +5,8 @@ $failure:=New object("ok"; False; "error"; "areaCallbackError"; "code"; Error; "
 ON ERR CALL($guard.previousHandler; ek local)
 AXB_AreaGuard:=$guard.previousGuard
 $guard.record.state:="failed"
+OB REMOVE($guard.record; "focusObservation")
+OB REMOVE($guard.record; "focusObservers")
 $guard.record.failure:=$failure
 If (($guard.record.starting=True) && (AXB_FormRoots#Null))
  $guard.record.context:=AXB_FormRoots[String($guard.record.window)].context

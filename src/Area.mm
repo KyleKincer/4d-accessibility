@@ -75,6 +75,9 @@ void AXBArea(PA_PluginParameters parameters) {
         uintptr_t key = ++nextArea;
         areas[@(key)] = area;
         PA_SetAreaReference(parameters, reinterpret_cast<void *>(key));
+        // Reserve the lifetime before form load can emit its initial focus.
+        // Registration still waits for the first ordinary idle callback.
+        NotifyHost(area, @"reserve");
         return;
     }
     uintptr_t key = reinterpret_cast<uintptr_t>(PA_GetAreaReference(parameters));
@@ -85,7 +88,7 @@ void AXBArea(PA_PluginParameters parameters) {
         // cannot acquire this lifetime again.
         [areas removeObjectForKey:@(key)];
         PA_SetAreaReference(parameters, nullptr);
-        if (area.attached) NotifyHost(area, @"stop");
+        NotifyHost(area, @"stop");
     } else if (event == eAE_Idle && !area.attached) {
         area.attached = YES;
         NotifyHost(area, @"attach");

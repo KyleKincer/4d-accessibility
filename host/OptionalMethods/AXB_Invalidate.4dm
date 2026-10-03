@@ -6,6 +6,7 @@ var $pending : Collection
 var $key : Text
 var $x; $y; $count : Integer
 $result:=New object("ok"; False; "error"; "unregisteredWindow")
+AXB_FormObserver("forget"; Null)
 If (AXB_FormRoots=Null)
  return
 End if
@@ -40,5 +41,7 @@ If ($count=0)
  // than allow an old request to reach a replacement with identical values.
  $context.view.instance:=Generate UUID
  $context.view.children:=New object
+ $registry.focusObservers:=AXB_FormObserver("snapshot"; New object("excludeSubform"; $subform))
 End if
+$registry.formContexts:=New object
 $result:=New object("ok"; True; "matchedParents"; $count)
