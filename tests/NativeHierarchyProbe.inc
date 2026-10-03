@@ -1,7 +1,16 @@
 // Disposable public-AppKit drawing diagnostic, not production support.
 @interface AXHPCellPaint : NSObject
 @property(nonatomic, weak) NSView *view;
+@property(nonatomic, weak) NSWindow *drawWindow;
+@property(nonatomic, weak) NSView *controlView;
+@property(nonatomic, weak) NSView *focusView;
 @property(nonatomic) NSRect frame;
+@property(nonatomic) NSRect windowFrame;
+@property(nonatomic) NSRect clipFrame;
+@property(nonatomic) NSInteger windowNumber;
+@property(nonatomic) NSInteger bezelStyle;
+@property(nonatomic) NSInteger state;
+@property(nonatomic) BOOL drawingToScreen;
 @property(nonatomic, copy) NSString *kind;
 @property(nonatomic, copy) NSString *text;
 @property(nonatomic, copy) NSString *phase;
@@ -14,9 +23,22 @@ static NSMutableArray<AXHPCellPaint *> *cellPaints;
 static NSUInteger paintCalls;
 static void ProbeCellDraw(NSCell *cell, NSRect frame, NSView *view, NSString *phase) {
     @synchronized(cellPaintLock) { ++paintCalls; }
-    if (!view || cell.stringValue.length > 1024) return;
+    if (cell.stringValue.length > 1024) return;
     AXHPCellPaint *paint=[AXHPCellPaint new];
     paint.view=view; paint.frame=frame; paint.text=cell.stringValue ?: @"";
+    paint.drawWindow=view.window;
+    paint.controlView=cell.controlView;
+    paint.focusView=NSView.focusView;
+    paint.windowNumber=view.window ? view.window.windowNumber : 0;
+    if (view.window) {
+        paint.windowFrame=[view convertRect:frame toView:view.window.contentView];
+        paint.clipFrame=[view convertRect:view.visibleRect toView:view.window.contentView];
+    }
+    paint.drawingToScreen=NSGraphicsContext.currentContext.isDrawingToScreen;
+    if ([cell isKindOfClass:NSButtonCell.class]) {
+        paint.bezelStyle=((NSButtonCell *)cell).bezelStyle;
+        paint.state=((NSButtonCell *)cell).state;
+    }
     paint.phase=phase;
     CGContextRef context=NSGraphicsContext.currentContext.CGContext;
     CGAffineTransform transform=context ? CGContextGetCTM(context) : CGAffineTransformIdentity;
@@ -42,6 +64,9 @@ CELL_PROBE(BrowserDraw)
 CELL_PROBE(BrowserInterior)
 CELL_PROBE(TextDraw)
 CELL_PROBE(TextInterior)
+CELL_PROBE(ButtonDraw)
+CELL_PROBE(ButtonInterior)
+CELL_PROBE(ButtonBezel)
 static void CellProbeHook(Class cls, SEL selector, IMP replacement, IMP *original) {
     Method method=class_getInstanceMethod(cls,selector);
     if(!method) return;
@@ -59,6 +84,9 @@ static void InitializeCellProbe(void) {
         CellProbeHook(NSBrowserCell.class,@selector(drawInteriorWithFrame:inView:),(IMP)BrowserInterior,&BrowserInteriorOriginal);
         CellProbeHook(NSTextFieldCell.class,@selector(drawWithFrame:inView:),(IMP)TextDraw,&TextDrawOriginal);
         CellProbeHook(NSTextFieldCell.class,@selector(drawInteriorWithFrame:inView:),(IMP)TextInterior,&TextInteriorOriginal);
+        CellProbeHook(NSButtonCell.class,@selector(drawWithFrame:inView:),(IMP)ButtonDraw,&ButtonDrawOriginal);
+        CellProbeHook(NSButtonCell.class,@selector(drawInteriorWithFrame:inView:),(IMP)ButtonInterior,&ButtonInteriorOriginal);
+        CellProbeHook(NSButtonCell.class,@selector(drawBezelWithFrame:inView:),(IMP)ButtonBezel,&ButtonBezelOriginal);
     });
 }
 static NSArray *ReadCellProbe(NSWindow *window) {
@@ -69,7 +97,17 @@ static NSArray *ReadCellProbe(NSWindow *window) {
         NSView *view=paint.view;
         NSRect r=NSZeroRect;
         if(view && view.window==window) r=[view convertRect:paint.frame toView:window.contentView];
-        [result addObject:@{@"viewAlive":@(view!=nil),@"hasWindow":@(view.window!=nil),@"windowMatches":@(view.window==window),@"kind":paint.kind,@"text":paint.text,@"phase":paint.phase,@"ctm":paint.transform,@"rawFrame":@[@(paint.frame.origin.x),@(paint.frame.origin.y),@(paint.frame.size.width),@(paint.frame.size.height)],@"frame":@[@(r.origin.x),@(r.origin.y),@(r.size.width),@(r.size.height)]}];
+        NSRect drawn=paint.windowFrame, clip=paint.clipFrame;
+        [result addObject:@{@"viewAlive":@(view!=nil),@"hasWindow":@(view.window!=nil),@"windowMatches":@(view.window==window),
+            @"drawWindowMatches":@(paint.drawWindow==window),@"drawWindowNumber":@(paint.windowNumber),@"drawingToScreen":@(paint.drawingToScreen),
+            @"controlViewAlive":@(paint.controlView!=nil),@"controlViewWindowMatches":@(paint.controlView.window==window),
+            @"focusViewAlive":@(paint.focusView!=nil),@"focusViewWindowMatches":@(paint.focusView.window==window),
+            @"bezelStyle":@(paint.bezelStyle),@"disclosureStyle":@(paint.bezelStyle==NSBezelStyleDisclosure && [paint.kind isEqual:@"NSButtonCell"]),@"state":@(paint.state),
+            @"kind":paint.kind,@"text":paint.text,@"phase":paint.phase,@"ctm":paint.transform,
+            @"rawFrame":@[@(paint.frame.origin.x),@(paint.frame.origin.y),@(paint.frame.size.width),@(paint.frame.size.height)],
+            @"drawFrame":@[@(drawn.origin.x),@(drawn.origin.y),@(drawn.size.width),@(drawn.size.height)],
+            @"drawClip":@[@(clip.origin.x),@(clip.origin.y),@(clip.size.width),@(clip.size.height)],
+            @"frame":@[@(r.origin.x),@(r.origin.y),@(r.size.width),@(r.size.height)]}];
     }
     return result;
 }

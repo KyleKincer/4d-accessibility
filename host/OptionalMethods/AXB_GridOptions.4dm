@@ -20,10 +20,10 @@ For each ($name; $grids)
    return
   End if
  End if
- If (New collection("array"; "areaList"; "collection"; "entity"; "selection"; "listSubform").indexOf($options.kind)<0)
+ If (New collection("array"; "outline"; "areaList"; "collection"; "entity"; "selection"; "listSubform").indexOf($options.kind)<0)
   return
  End if
- If ($options.kind="array")
+ If (New collection("array"; "outline").indexOf($options.kind)>=0)
   If ((Value type($options.keyColumn)#Is text) || ($options.keyColumn=""))
    return
   End if
@@ -90,6 +90,11 @@ For each ($name; $grids)
  // A list subform owns its native current selection and selection events.
  // Do not silently accept listbox callbacks which this provider cannot use.
  If (($options.kind="listSubform") & (OB Is defined($options; "selection") | OB Is defined($options; "onSelection")))
+  return
+ End if
+ If (($options.kind="outline") & (OB Is defined($options; "selection") | OB Is defined($options; "onSelection")))
+  // Complete native break selection is unavailable. Do not imply that a
+  // leaf callback supplies it or allow the flat selection mutation path.
   return
  End if
  For each ($property; New collection("ready"; "onSelection"; "selection"; "meta"))

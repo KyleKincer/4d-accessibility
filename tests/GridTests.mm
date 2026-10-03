@@ -201,6 +201,17 @@ int main(void) {
         hiddenHeaderGrid[@"columns"][0][@"header"][@"visible"] = @NO;
         Check([[headerSession exchange:@{@"snapshot": Snapshot(hiddenHeaderGrid, 2)} now:0][@"ok"] boolValue] && ![headerSession controlInputNode:headerInput], "hidden header cancels native input before delivery");
         [headerSession invalidate];
+        headerSession = [[AXBSession alloc] initWithIdentifier:@"header-reveal-disabled" windowID:21];
+        headerGrid[@"actions"] = @{@"select": @NO, @"edit": @NO, @"reveal": @NO};
+        [headerSession exchange:@{@"snapshot": Snapshot(headerGrid, 1)} now:0];
+        Check(![headerSession enqueueNode:@"grid" revision:@1 operation:@"gridHeaderReveal" value:@{@"column": @"column-0"} now:0], "header reveal rejects a grid without reveal capability");
+        Check([headerSession enqueueNode:@"grid" revision:@1 operation:@"gridHeaderPress" value:@{@"column": @"column-0"} now:0], "disabling reveal preserves independent header activation");
+        [headerSession invalidate];
+        headerSession = [[AXBSession alloc] initWithIdentifier:@"header-reveal-enabled" windowID:22];
+        headerGrid[@"actions"] = @{@"select": @NO, @"edit": @NO, @"reveal": @YES};
+        [headerSession exchange:@{@"snapshot": Snapshot(headerGrid, 1)} now:0];
+        Check([headerSession enqueueNode:@"grid" revision:@1 operation:@"gridHeaderReveal" value:@{@"column": @"column-0"} now:0], "header reveal accepts an explicit reveal capability");
+        [headerSession invalidate];
         NSMutableDictionary *geometry = Copy(Descriptor(2));
         NSMutableArray *columnExtents = [NSMutableArray new];
         for (NSUInteger column = 0; column < 24; column++) [columnExtents addObject:@[@(column * 120), @120]];
@@ -221,6 +232,7 @@ int main(void) {
         AXBGrid *grid = [session gridForNode:@"grid"];
         Check(grid.active && [grid.descriptor[@"rows"] count] == 50000 && grid.cachedPageCount == 0, "complete order needs no cell-value allocation");
         Check([grid indexOfRow:@"row-49999"] == 49999 && [grid indexOfColumn:@"column-23"] == 23, "last offscreen row and column remain addressable");
+        Check(![grid cachedCellForRow:@"row-49999" column:@"column-23"] && ![grid takeRequestsAtTime:1].count, "cache-only inspection never requests a missing page");
         Check([grid cellForRow:@"row-49999" column:@"column-23" now:1] == nil, "unloaded cell is unknown rather than an empty value");
         (void)[grid cellForRow:@"row-49998" column:@"column-22" now:1];
         (void)[grid cellForRow:@"row-25000" column:@"column-8" now:1];
@@ -235,6 +247,7 @@ int main(void) {
         Check([[session exchange:@{@"snapshot": snapshot, @"gridPages": pages, @"receipt": receipt} now:1.1][@"ok"] boolValue], "page values publish without fabricating a new form revision");
         Check([[grid cellForRow:@"row-49999" column:@"column-23" now:1.2][@"value"] isEqual:@"row-49999 / column-23"], "far cell reads its own stable key and column");
         Check(grid.cachedPageCount == 3 && [grid takeRequestsAtTime:1.2].count == 0, "current pages do not cause redundant requests");
+        Check([[grid cachedCellForRow:@"row-49999" column:@"column-23"][@"value"] isEqual:@"row-49999 / column-23"] && ![grid takeRequestsAtTime:2].count, "cache-only inspection reads a loaded value without scheduling refresh");
         (void)[grid cellForRow:@"row-49999" column:@"column-23" now:2];
         Check([grid takeRequestsAtTime:2].count == 1, "stale cached values request refresh while remaining readable");
 

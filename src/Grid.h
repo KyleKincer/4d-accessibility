@@ -23,6 +23,7 @@ BOOL AXBGridRowIsGroup(NSDictionary *descriptor, NSString *row);
 - (NSUInteger)indexOfRow:(NSString *)key;
 - (NSUInteger)indexOfColumn:(NSString *)key;
 - (NSArray<NSString *> *)disclosedChildrenOfRow:(NSString *)key;
+- (NSDictionary *)cachedCellForRow:(NSString *)row column:(NSString *)column;
 - (NSDictionary *)cellForRow:(NSString *)row column:(NSString *)column now:(NSTimeInterval)now;
 // Requests are read-only and separate from the single-flight action queue.
 - (NSArray *)takeRequestsAtTime:(NSTimeInterval)now;

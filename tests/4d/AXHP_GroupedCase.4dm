@@ -3,7 +3,7 @@
 var $i; $count : Integer
 ARRAY POINTER($hierarchy; 3)
 Case of
- : ($name="repeated")
+ : (New collection("repeated"; "singleText"; "singleDate").indexOf($name)>=0)
   $count:=8
  : ($name="placeholder")
   $count:=1
@@ -16,6 +16,7 @@ Form.groupedCase:=$name
 ARRAY TEXT(AXHP_Group; $count)
 ARRAY TEXT(AXHP_Subgroup; $count)
 ARRAY TEXT(AXHP_Label; $count)
+ARRAY DATE(AXHP_Date; $count)
 ARRAY LONGINT(AXHP_Key; $count)
 ARRAY BOOLEAN(AXHP_Selection; $count)
 ARRAY LONGINT(AXHP_Control; $count)
@@ -25,6 +26,7 @@ For ($i; 1; $count)
  AXHP_Subgroup{$i}:=Choose($i=3; "other"; "shared")
  AXHP_Label{$i}:="Leaf "+String($i)
  AXHP_Key{$i}:=$i
+ AXHP_Date{$i}:=!2026-10-01!+Choose($i<=3; 0; Choose($i<=5; 1; Choose($i<=7; 0; 2)))
  AXHP_Selection{$i}:=False
  AXHP_Control{$i}:=0
 End for
@@ -35,6 +37,10 @@ End if
 $hierarchy{1}:=->AXHP_Group
 $hierarchy{2}:=->AXHP_Subgroup
 $hierarchy{3}:=->AXHP_Label
+If (New collection("singleText"; "singleDate").indexOf($name)>=0)
+ ARRAY POINTER($hierarchy; 1)
+ $hierarchy{1}:=Choose($name="singleDate"; ->AXHP_Date; ->AXHP_Group)
+End if
 LISTBOX SET HIERARCHY(*; "Grouped"; True; $hierarchy)
 If ($count>0)
  // Reset break and leaf selections explicitly.

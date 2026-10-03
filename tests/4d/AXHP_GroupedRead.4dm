@@ -6,7 +6,7 @@ var $pointer; $control; $hitPointer : Pointer
 var $variable : Text
 var $values : Collection
 var $item : Object
-var $x; $y; $screenLeft; $screenTop; $screenRight; $screenBottom : Real
+var $x; $y; $sampleY; $screenLeft; $screenTop; $screenRight; $screenBottom : Real
 ARRAY POINTER($hierarchy; 0)
 $savedOK:=OK
 LISTBOX GET HIERARCHY(*; $name; $hierarchical; $hierarchy)
@@ -19,6 +19,11 @@ OBJECT GET SCROLL POSITION(*; $name; $vertical; $horizontal)
 $result.scroll:=New collection($vertical; $horizontal)
 $result.focus:=OBJECT Get name(Object with focus)
 $result.selectionMode:=LISTBOX Get property(*; $name; lk selection mode)
+$result.baseRowHeight:=LISTBOX Get rows height(*; $name; lk pixels)
+$result.rowHeights:=New collection
+For ($row; 1; $count)
+ $result.rowHeights.push(LISTBOX Get row height(*; $name; $row))
+End for
 $result.selectionSlotZero:=AXHP_Selection{0}
 ARRAY TO COLLECTION($result.selection; AXHP_Selection)
 For ($level; 1; Size of array($hierarchy))
@@ -38,7 +43,7 @@ End if
 // Include candidate break addresses as well as ordinary column addresses.
 // Nonpositive rectangles cannot justify any hit test or native input.
 For ($row; 1; $count)
- For ($column; 1; $columns+Size of array($hierarchy)-1)
+ For ($column; 0; $columns+New collection(1; Size of array($hierarchy)-1).max())
   $left:=0
   $top:=0
   $right:=0
@@ -68,4 +73,24 @@ For ($row; 1; $count)
   $result.coordinates.push($item)
  End for
 End for
+$result.singleSamples:=New collection
+If (Size of array($hierarchy)=1)
+ OBJECT GET COORDINATES(*; $name; $left; $top; $right; $bottom)
+ $y:=$top+LISTBOX Get headers height(*; $name; lk pixels)
+ While ($y<$bottom)
+  $x:=$left+80
+  $hitColumn:=0
+  $hitRow:=0
+  CLEAR VARIABLE($hitPointer)
+  $sampleY:=$y+5
+  LISTBOX GET CELL POSITION(*; $name; $x; $sampleY; $hitColumn; $hitRow; $hitPointer)
+  $item:=New object("point"; New collection($x; $sampleY); "hit"; New collection($hitColumn; $hitRow))
+  If (Not(Is nil pointer($hitPointer)))
+   RESOLVE POINTER($hitPointer; $variable; $table; $field)
+   $item.variable:=$variable
+  End if
+  $result.singleSamples.push($item)
+  $y:=$y+10
+ End while
+End if
 OK:=$savedOK

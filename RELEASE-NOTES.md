@@ -1,3 +1,13 @@
+# 0.23.0 development, read-only grouped arrays
+
+Array listbox hierarchies can expose their text/date groups and disclosed leaves through the parent lifecycle area. Configure `kind: outline` and an existing hidden column of stable row keys. The adapter preserves native arrays, visible layout, handlers and selection. Group identity includes the exact typed caption value, parent and member keys. Changed membership retires old handles.
+
+Selection state is unknown and omitted. Disclosure, selection, reveal, editing and header actions remain unavailable. Caption formats, protected captions and hidden rows fail closed. Classic trees and actual Symphony hierarchy workflows remain separate work.
+
+Cold text values update AX immediately and coalesce a layout notification for one second so stationary VoiceOver can read fast arrivals. Weak references and identity checks discard stale notifications. Checkbox and popup arrivals retain their previous behavior.
+
+The [development gate](validation/grouped-outlines-development.json) records both 4D modes, compiled VoiceOver, 26 zero-difference full-window comparisons and supporting outline/flat speech regressions. See [configuration, reproduction and limits](tests/GROUPED-OUTLINES.md). Upgrade plugin, component and helpers together; signed distribution remains pending.
+
 # 0.22.0 classic list subforms, source and CI kit
 
 A parent lifecycle area can now discover classic list subforms and expose every logical record as an accessible table. Named project and table input parents use the same installer. The repeated row form needs no new accessibility area, row method or field hook. Native layout, editors, key filters, selection and save handlers retain control of application behavior.

@@ -13,9 +13,6 @@ import time
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "tests"))
-import mac_ax as ax
-from voiceover import VoiceOver
-import doctor
 
 CASES = ("single", "forward", "back", "leave", "inspection", "reload", "checkbox", "checkbox_leave", "popup")
 SOURCES = (
@@ -28,6 +25,8 @@ TITLE = "AXB complete logical grid fixture"
 
 
 def run_case(case, binary, ocr, output):
+    import mac_ax as ax
+    from voiceover import VoiceOver
     report = {"case": case, "passed": False, "checks": [], "voiceover": [], "observations": []}
 
     def check(condition, description):
@@ -187,6 +186,9 @@ def run_case(case, binary, ocr, output):
 
 
 def main():
+    import mac_ax as ax
+    from voiceover import VoiceOver
+    import doctor
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", action="store_true", help="Run the owned VoiceOver session on an unlocked desktop")
     parser.add_argument("--case", choices=CASES, action="append", help="Run selected cases; default is all nine")

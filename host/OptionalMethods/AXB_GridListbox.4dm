@@ -1,15 +1,17 @@
 // Full logical listbox provider. Host pointers never enter JSON or the
 // compiled component. Expensive values are read only for requested pages.
 #DECLARE($operation : Text; $options : Object; $state : Object; $request : Object) -> $result : Object
-var $node; $reply; $column; $columnsByID; $positions; $known; $frames; $headers; $rowFrames; $descriptor; $header; $page; $rowData; $cell; $item; $action; $binding; $attribute; $metadata : Object
-var $rows; $columns; $selected; $disabled; $unselectable; $uneditable; $visible; $allKeys; $clip; $frame; $pageRows; $cells; $actual; $rowLayout; $columnLayout : Collection
+var $node; $reply; $column; $columnsByID; $positions; $known; $frames; $headers; $rowFrames; $descriptor; $header; $page; $rowData; $cell; $item; $action; $binding; $attribute; $metadata; $capture; $outline : Object
+var $rows; $columns; $selected; $disabled; $unselectable; $uneditable; $visible; $allKeys; $clip; $frame; $pageRows; $cells; $actual; $rowLayout; $columnLayout; $topology; $visibleKeys : Collection
 var $keys; $selection; $control; $pointer; $previous; $headerPointer : Pointer
 var $name; $key; $columnID; $columnName; $orderState; $text; $expression; $property; $variableName : Text
-var $count; $row; $i; $c; $first; $scrollColumn; $flags; $left; $top; $right; $bottom; $bodyTop; $lockedRight; $locked; $headerHeight; $sortValue; $tableNumber; $fieldNumber : Integer
-var $hierarchical; $enabled; $rebound; $singleClick; $sortable; $headerClick : Boolean
+var $count; $row; $i; $c; $first; $scrollColumn; $flags; $left; $top; $right; $bottom; $bodyTop; $lockedRight; $locked; $headerHeight; $sortValue; $tableNumber; $fieldNumber; $position; $frameCount; $coordinateOffset : Integer
+var $hierarchical; $enabled; $rebound; $singleClick; $sortable; $headerClick; $array; $grouped : Boolean
 var $selectionMode : Integer
 $result:=New object("ok"; False; "error"; "unsupportedLogicalListbox"; "status"; "rejected"; "message"; "Grid is unavailable"; "nodes"; New collection; "pages"; New collection)
 $name:=$options.objectName
+$grouped:=$options.kind="outline"
+$array:=New collection("array"; "outline").indexOf($options.kind)>=0
 If ($operation#"describe")
  return AXB_GridListboxAction($operation; $options; $state; $request)
 End if
@@ -45,12 +47,26 @@ $count:=$binding.count
 $keys:=Null
 $selection:=Null
 $control:=Null
-If ($options.kind="array")
+If ($array)
  $keys:=$binding.keyPointer
  $selection:=$binding.selectionPointer
  $control:=$binding.controlPointer
 End if
+$coordinateOffset:=Choose($grouped; $binding.coordinateOffset; 0)
 LISTBOX GET OBJECTS(*; $name; $parts)
+If ($grouped)
+ If ((Size of array($parts)<3) || Not(OBJECT Get visible(*; $parts{1})))
+  $node.label:=$options.label+": first hierarchy column must remain visible"
+  return
+ End if
+ If (($options.columns#Null) && ($options.columns[$parts{1}]#Null))
+  $metadata:=$options.columns[$parts{1}]
+  If (($metadata.decorative=True) | ($metadata.value#Null))
+   $node.label:=$options.label+": first hierarchy column must retain its native labels"
+   return
+  End if
+ End if
+End if
 $sortable:=LISTBOX Get property(*; $name; lk sortable)=lk yes
 OBJECT GET EVENTS(*; $name; $headerEvents)
 $headerClick:=Find in array($headerEvents; On Header Click)>0
@@ -69,7 +85,7 @@ If ($options.columns#Null)
   End if
  End for each
 End if
-If (($options.kind="array") && (Find in array($parts; $options.keyColumn)<1))
+If ($array && (Find in array($parts; $options.keyColumn)<1))
  return
 End if
 $columns:=New collection
@@ -93,8 +109,12 @@ For ($i; 1; Size of array($parts); 3)
   $property:=""
   $expression:=""
   $enabled:=OBJECT Get enterable(*; $columnName) & (OBJECT Get font(*; $columnName)#"%password")
-  If ($options.kind="array")
+  If ($array)
    $pointer:=OBJECT Get pointer(Object named; $columnName)
+   If ($grouped & ($i=1))
+    // The last hierarchy pointer binds ordinary first-column leaves.
+    $pointer:=$binding.hierarchy[$binding.hierarchy.length-1]
+   End if
    If (Is nil pointer($pointer))
     $node.label:=$options.label+": "+$columnName+" has no array binding"
     return
@@ -150,7 +170,7 @@ For ($i; 1; Size of array($parts); 3)
    $node.label:=$options.label+": "+$columnName+" needs a styled-value description"
    return
   End if
-  $enabled:=$enabled & ($metadata.value=Null)
+  $enabled:=$enabled & ($metadata.value=Null) & Not($grouped)
   $columnID:=$columnName
   $text:=OBJECT Get title(*; $parts{$i+1})
   If ($text="")
@@ -168,6 +188,9 @@ For ($i; 1; Size of array($parts); 3)
    End if
   End if
   $header:=New object("visible"; LISTBOX Get property(*; $name; lk display header)=lk yes; "enabled"; OBJECT Get enabled(*; $parts{$i+1}); "press"; $sortable | $headerClick | (Find in array($columnEvents; On Header Click)>0); "sortable"; $sortable | ($sortValue>0); "sort"; "none")
+  If ($grouped)
+   $header.press:=False
+  End if
   Case of
    : ($sortValue=1)
     $header.sort:="ascending"
@@ -177,18 +200,20 @@ For ($i; 1; Size of array($parts); 3)
   $columns.push(New object("id"; $columnID; "label"; $text; "enabled"; OBJECT Get enabled(*; $columnName); "editable"; $enabled; "header"; $header))
   $columns[$columns.length-1].automationKey:=Choose($metadata.automationKey=Null; $columnName; $metadata.automationKey)
   $column:=New object("name"; $columnName; "number"; Int(($i-1)/3)+1; "property"; $property; "format"; OBJECT Get format(*; $columnName); "protected"; OBJECT Get font(*; $columnName)="%password")
+  $column.coordinateNumber:=$column.number+$coordinateOffset
+  $column.blank:=$grouped && ($i=1) && ($binding.hierarchy.length=1)
   $column.headerName:=$parts{$i+1}
   $column.header:=$header
   $column.display:=LISTBOX Get property(*; $columnName; lk display type)
   $column.value:=$metadata.value
   $column.expression:=$expression
   $column.editable:=$enabled
-  If ($options.kind="array")
+  If ($array)
    $column.pointer:=$pointer
   End if
   $columnsByID[$columnID]:=$column
   If ($count>0)
-   LISTBOX GET CELL COORDINATES(*; $name; $column.number; 1; $left; $top; $right; $bottom)
+   LISTBOX GET CELL COORDINATES(*; $name; $column.coordinateNumber; 1; $left; $top; $right; $bottom)
   Else
    OBJECT GET COORDINATES(*; $columnName; $left; $top; $right; $bottom)
   End if
@@ -206,6 +231,7 @@ $singleClick:=LISTBOX Get property(*; $name; lk single click edit)=lk yes
 $positions:=New object
 $known:=New object
 $allKeys:=$binding.keys
+If (Not($grouped))
 For ($row; 1; $count)
  $key:=$allKeys[$row-1]
  If (($key="") | (Length($key)>256) | OB Is defined($known; $key))
@@ -252,16 +278,22 @@ For ($row; 1; $count)
   End if
  End if
 End for
-$orderState:=JSON Stringify(New collection($rows; $columns))
-If (Compare strings($orderState; $state.orderState; sk char codes)#0)
- $state.order:=$state.order+1
- $state.orderState:=$orderState
- $state.valueIssues:=New object
 End if
 $rebound:=False
 If ($state.binding#Null)
  $rebound:=Compare strings($binding.identity; $state.binding.identity; sk char codes)#0
- If ($options.kind="array")
+ If ($array)
+  If ($grouped)
+   If (($state.binding.hierarchy=Null) || ($state.binding.hierarchy.length#$binding.hierarchy.length))
+    $rebound:=True
+   Else
+    For ($i; 0; $binding.hierarchy.length-1)
+     $previous:=$state.binding.hierarchy[$i]
+     $pointer:=$binding.hierarchy[$i]
+     $rebound:=$rebound | ($previous#$pointer)
+    End for
+   End if
+  End if
   If (Value type($state.keyPointer)=Is pointer)
    $previous:=$state.keyPointer
    $rebound:=$rebound | ($previous#$keys)
@@ -306,6 +338,49 @@ End if
 If ($rebound)
  $state.generation:=Generate UUID
  $state.valueIssues:=New object
+ $state.outlinePrevious:=Null
+End if
+If ($grouped)
+ $capture:=AXB_OutlineCapture($name; $binding)
+ If ($capture.ok)
+  $outline:=AXB_OutlineRows($capture.snapshot; $state.outlinePrevious)
+ Else
+  $outline:=$capture
+ End if
+ If (Not($outline.ok))
+  $state.generation:=Generate UUID
+  $state.outlinePrevious:=Null
+  $node.label:=$options.label+": "+$outline.message
+  return
+ End if
+ If ($outline.requiresGeneration)
+  $state.generation:=Generate UUID
+  $state.valueIssues:=New object
+ End if
+ $state.outlinePrevious:=$outline
+ $rows:=$outline.rows
+ $positions:=$outline.positions
+ $rowLayout:=$outline.layout
+ $topology:=New collection
+ For each ($key; $rows)
+  $item:=$outline.outline[$key]
+  $topology.push(New collection($item.parent; $item.level; $item.kind; $item.label; $item.expanded))
+  $uneditable.push($key)
+  If ($item.kind="leaf")
+   $flags:=$capture.snapshot.flags[$positions[$key]-1]
+   If (New collection(2; 6).indexOf($flags)>=0)
+    $disabled.push($key)
+   End if
+  End if
+ End for each
+ $orderState:=JSON Stringify(New collection($rows; $columns; $topology))
+Else
+ $orderState:=JSON Stringify(New collection($rows; $columns))
+End if
+If (Compare strings($orderState; $state.orderState; sk char codes)#0)
+ $state.order:=$state.order+1
+ $state.orderState:=$orderState
+ $state.valueIssues:=New object
 End if
 $state.binding:=$binding
 $state.keyPointer:=$keys
@@ -331,7 +406,7 @@ $locked:=LISTBOX Get locked columns(*; $name)
 $lockedRight:=$left
 If ($count>0)
  For ($i; 1; $locked)
-  LISTBOX GET CELL COORDINATES(*; $name; $i; 1; $left; $top; $right; $bottom)
+  LISTBOX GET CELL COORDINATES(*; $name; $i+$coordinateOffset; 1; $left; $top; $right; $bottom)
   $lockedRight:=New collection($lockedRight; $right).max()
  End for
 End if
@@ -353,14 +428,33 @@ If ($headerHeight>0)
 End if
 OBJECT GET SCROLL POSITION(*; $name; $first; $scrollColumn)
 $first:=New collection(1; $first).max()
-For ($row; $first; $count)
- $key:=$allKeys[$row-1]
+$visibleKeys:=$allKeys
+$frameCount:=$count
+If ($grouped)
+ $first:=1
+ $visibleKeys:=$rows
+ $frameCount:=$rows.length
+End if
+For ($row; $first; $frameCount)
+ $key:=$visibleKeys[$row-1]
  If (OB Is defined($positions; $key))
+  $position:=$positions[$key]
   $rowFrames:=New object
   For each ($item; $columns)
    $column:=$columnsByID[$item.id]
-   LISTBOX GET CELL COORDINATES(*; $name; $column.number; $row; $left; $top; $right; $bottom)
-   If ($column.number>$locked)
+   If ($grouped && ($outline.outline[$key].kind="group"))
+    If ($item.id#$columns[0].id)
+     continue
+    End if
+    $frame:=$outline.outline[$key].frame
+    $left:=$frame[0]
+    $top:=$frame[1]
+    $right:=$left+$frame[2]
+    $bottom:=$top+$frame[3]
+   Else
+    LISTBOX GET CELL COORDINATES(*; $name; $column.coordinateNumber; $position; $left; $top; $right; $bottom)
+   End if
+   If (($column.number>$locked) & Not($grouped && ($outline.outline[$key].kind="group")))
     $left:=New collection($left; $lockedRight).max()
    End if
    $left:=New collection($left; $clip[0]).max()
@@ -388,9 +482,15 @@ If ($columns.length>0)
  $descriptor.layout:=New object("rows"; $rowLayout; "columns"; $columnLayout)
 End if
 $descriptor.actions:=New object("select"; (LISTBOX Get property(*; $name; lk selection mode)>0) & Not($binding.noSelection=True); "reveal"; True; "edit"; True)
+If ($grouped)
+ $descriptor.outline:=$outline.outline
+ $descriptor.selectionKnown:=False
+ OB REMOVE($descriptor; "selected")
+ $descriptor.actions:=New object("select"; False; "reveal"; False; "edit"; False)
+End if
 // Cell position alone survives loss of focus. The root resolves this table's
 // exact live instance before adopting its non-text cell position.
-If (Not(Is editing text) & (OBJECT Get name(Object with focus)=$name))
+If (Not($grouped) & Not(Is editing text) & (OBJECT Get name(Object with focus)=$name))
  LISTBOX GET CELL POSITION(*; $name; $c; $row)
  If (($row>0) & ($row<=$count))
   $key:=$allKeys[$row-1]
