@@ -1,6 +1,6 @@
 # Native hierarchy investigation
 
-These synthetic probes establish native command and input behavior before adding a hierarchy adapter. They do not establish bridge navigation, VoiceOver, editing or a Symphony hierarchy workflow. The bridge still reports hierarchical controls as unsupported.
+These synthetic probes establish native command and input behavior before adding hierarchy actions. They do not establish bridge navigation, VoiceOver, editing or a Symphony hierarchy workflow. The separate [0.23.0 grouped adapter](GROUPED-OUTLINES.md) has read-only text/date acceptance; interactive hierarchy and classic trees remain incomplete.
 
 Run compiler and desktop cases sequentially on an unlocked Mac with a licensed 4D Server and desktop installation. The desktop launcher currently uses `/Applications/4D/4D.app`. Read each script's `--help` before running it.
 
@@ -67,6 +67,8 @@ python3 test_hierarchy_probe.py --run --commands --compiled
 The observer inventories the content view's highest ancestor in the same verified window, then its descendants. It classifies public AppKit types without recognizing private 4D classes. Public `NSCell`, `NSBrowserCell` and `NSTextFieldCell` drawing wrappers call the original implementations unchanged. Samples retain weak views, raw frames, graphics transforms, phase and text, with bounded storage and explicit counters. Main-thread reads record whether a view survives and belongs to the queried window. A raw drawing frame without verified ownership is not a control rectangle.
 
 The earlier [October 3 record](../validation/native-hierarchy-probes-0.22.1.json) covers eight checks in each desktop mode and uniquely mapped diagnostic binaries. The wider inventory contains no usable `NSOutlineView`. The captured cell samples have blank text and no matching window, so they do not supply tree-row geometry. Earlier inventory reports lacked the current sample fields and cannot prove that these hooks captured zero paints.
+
+The [follow-up drawing observation](../validation/hierarchy-public-drawing-observation.json) adds `NSButtonCell` draw, interior and bezel hooks. It records the supplied view's window and converted bounds during each call, plus separate control-view and focus-view associations, drawing destination, bezel style and state. Both modes pass the twelve native-input checks and clean shutdown. Each final snapshot contains 468 disclosure-style samples, but none has a matching draw-time window, current owning window, control view or focus view. Other button paints do retain the owned window. This bounded experiment found no public drawing authority for disclosure targets in the tested runtime. It does not turn raw paint frames into input coordinates.
 
 ## Adapter prerequisites
 

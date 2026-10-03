@@ -6,7 +6,7 @@ var $value : Variant
 var $issue : Text
 var $type; $checked : Integer
 $result:=New object("ok"; True; "value"; ""; "editable"; False; "enabled"; True)
-If ($column.protected)
+If ($column.protected | ($column.blank=True))
  return
 End if
 $issue:=String($row)+":"+$column.name

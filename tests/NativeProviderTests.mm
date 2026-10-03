@@ -9,6 +9,11 @@
 #include <cstdlib>
 #include <thread>
 
+@interface AXBGridNode (ValueNotificationTests)
+- (void)scheduleValueNotifications;
+- (void)drainValueNotificationsAtTime:(NSTimeInterval)now;
+@end
+
 static void Check(BOOL condition, const char *message) {
     if (!condition) { fprintf(stderr, "FAIL: %s\n", message); exit(1); }
     printf("PASS: %s\n", message);
@@ -731,11 +736,67 @@ static void GridHeaderTest(void) {
         action = Exchange(window, 9021, 1, session, snapshot)[@"action"];
         Check([action[@"operation"] isEqual:@"gridHeaderReveal"] && !action[@"value"][@"row"], "header reveal does not require or select a row");
         Exchange(window, 9021, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"not visible"}); Pump();
+        grid[@"actions"] = @{@"select": @NO, @"edit": @NO, @"reveal": @NO};
+        grid[@"order"] = @5; snapshot[@"revision"] = @5;
+        Exchange(window, 9021, 1, session, snapshot); Pump();
+        Check(![[header accessibilityActionNames] containsObject:NSAccessibilityScrollToVisibleAction], "headers omit reveal when the grid cannot reveal");
+        [header accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+        Check(!Exchange(window, 9021, 1, session, snapshot)[@"action"], "unsupported header reveal never enters the action queue");
     }
 #pragma clang diagnostic pop
-    headerData[@"visible"] = @NO; grid[@"headerHeight"] = @0; grid[@"order"] = @5; snapshot[@"revision"] = @5;
+    headerData[@"visible"] = @NO; grid[@"headerHeight"] = @0; grid[@"order"] = @6; snapshot[@"revision"] = @6;
     Exchange(window, 9021, 1, session, snapshot); Pump();
     Check([[table accessibilityColumnHeaderUIElements] count] == 0 && ![header isAccessibilityElement] && ![header accessibilityPerformPress], "hidden headers retire their actions and relationships");
+    [window close]; Pump();
+}
+
+static void GridValueNotificationTest(void) {
+    NSWindow *window = Window(@"AXB settled grid values");
+    NSString *session = Open(window, 9030);
+    NSDictionary *grid = @{@"generation": @"settled", @"order": @1, @"rows": @[@"one"],
+        @"columns": @[@{@"id": @"label", @"label": @"Label", @"enabled": @YES, @"editable": @NO}],
+        @"visible": @[], @"selected": @[], @"frames": @{}, @"layout": @{@"rows": @[@[@20, @28]], @"columns": @[@[@10, @200]]},
+        @"actions": @{@"select": @NO, @"reveal": @NO, @"edit": @NO}};
+    NSDictionary *snapshot = @{@"version": @1, @"revision": @1, @"label": @"Settled values", @"enabled": @YES,
+        @"nodes": @[@{@"id": @"items", @"role": @"table", @"label": @"Items", @"value": @"", @"visible": @YES,
+            @"enabled": @YES, @"frame": @[@10, @20, @300, @140], @"grid": grid}]};
+    Check([Exchange(window, 9030, 1, session, snapshot)[@"ok"] boolValue], "settled-value fixture publishes"); Pump();
+    AXBGridNode *table = Provider(window).accessibilityChildren.firstObject;
+    id cell = [table accessibilityCellForColumn:0 row:0];
+    Check([[cell accessibilityValue] isEqual:@"Loading"], "settled-value fixture starts with an actual cold cell");
+    NSMutableDictionary *value = [@{@"column": @"label", @"value": @"A", @"enabled": @YES, @"editable": @NO} mutableCopy];
+    NSDictionary *page = @{@"node": @"items", @"generation": @"settled", @"order": @1, @"row": @0, @"column": @0,
+        @"rows": @[@{@"id": @"one", @"cells": @[value]}]};
+    Exchange(window, 9030, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
+    NSMapTable *pending = [table valueForKey:@"pendingValueNotifications"];
+    Check(pending.count == 1 && [[cell accessibilityValue] isEqual:@"A"], "arrival keeps one pending notification while exposing its value immediately");
+    value[@"value"] = @"B";
+    Exchange(window, 9030, 1, session, snapshot, nil, nil, nil, @[page]);
+    [table drainValueNotificationsAtTime:NSProcessInfo.processInfo.systemUptime + 2];
+    Check([pending objectForKey:cell] && ![pending objectForKey:cell][@"deadline"], "model arrival ahead of native publication retains a dormant notification");
+    Pump(); pending = [table valueForKey:@"pendingValueNotifications"];
+    Check([pending objectForKey:cell][@"deadline"] && [[cell accessibilityValue] isEqual:@"B"], "native publication reactivates the latest pending value");
+    value[@"value"] = @"A";
+    Exchange(window, 9030, 1, session, snapshot, nil, nil, nil, @[page]);
+    [table drainValueNotificationsAtTime:NSProcessInfo.processInfo.systemUptime + 2];
+    Check([pending objectForKey:cell] && ![pending objectForKey:cell][@"deadline"], "a second model change makes the pending notification dormant");
+    value[@"value"] = @"B";
+    Exchange(window, 9030, 1, session, snapshot, nil, nil, nil, @[page]);
+    Pump(); pending = [table valueForKey:@"pendingValueNotifications"];
+    Check([pending objectForKey:cell][@"deadline"] && [[cell accessibilityValue] isEqual:@"B"], "returning to the published value reactivates a dormant notification");
+    [table drainValueNotificationsAtTime:NSProcessInfo.processInfo.systemUptime + 2];
+    Check(pending.count == 0, "the latest settled value consumes its notification once");
+    NSMapTable *dead = [NSMapTable weakToStrongObjectsMapTable];
+    __weak NSObject *gone;
+    @autoreleasepool {
+        NSObject *key = [NSObject new]; gone = key;
+        [dead setObject:@{@"deadline": @0} forKey:key];
+    }
+    Check(!gone, "notification scheduler fixture has a genuinely deallocated weak key");
+    [table setValue:dead forKey:@"pendingValueNotifications"];
+    [table setValue:@NO forKey:@"valueNotificationScheduled"];
+    [table scheduleValueNotifications];
+    Check(dead.count == 0 && ![[table valueForKey:@"valueNotificationScheduled"] boolValue], "dead weak keys cannot retain a notification drain or schedule a loop");
     [window close]; Pump();
 }
 
@@ -942,6 +1003,7 @@ int main(void) {
         GridRefreshDelayTest();
         GridControlsTest();
         GridHeaderTest();
+        GridValueNotificationTest();
         CheckboxFeedbackTest();
         AdjustableTest();
         ButtonInputTest();

@@ -1,6 +1,6 @@
 # Native outline provider
 
-The production logical-grid model accepts application-owned outline metadata. It publishes an `AXOutline`, structural rows, logical disclosure relationships and group labels. The 4D host adapters still reject hierarchical controls. This provider is a foundation for those adapters, not a supported 4D hierarchy integration.
+The production logical-grid model accepts application-owned outline metadata. It publishes an `AXOutline`, structural rows, logical disclosure relationships and group labels. Stable 0.22.1 host adapters reject hierarchical controls. The separate [0.23.0 development grouped gate](GROUPED-OUTLINES.md) adds read-only text/date array capture. Full 4D hierarchy interaction remains unimplemented.
 
 ## Descriptor
 
@@ -39,4 +39,4 @@ python3 summarize_native_outlines.py --output validation/native-outlines-develop
 
 Omit `--run` to compile only. The owned AppKit fixture uses production Session, Grid, Bridge, GridNative and NativeLayout sources. It has repeated group labels, a nested group, 25 disclosed rows and a ten-row viewport. Plain AX passes 47 checks; the separate VoiceOver run passes 52. [Recorded evidence](../validation/native-outlines-development.json) includes all production source hashes, fixture/driver hashes, normal close and individual speech captions. Missing inputs invalidate old success before compilation or launch.
 
-VoiceOver reads the nested group at level 1 and its leaf at level 2, then reaches the final offscreen row with End. It says `table` on entry despite the exposed `AXOutline` and `outline` role description. External fixture commands change disclosure after VoiceOver stops, so spoken disclosure transitions remain untested. No 4D adapter, native disclosure action, hierarchy editing, lazy loading, Symphony workflow, unchanged-pixel or signed-distribution acceptance is claimed.
+VoiceOver reads the nested group at level 1 and its leaf at level 2, then reaches the final offscreen row with End. It says `table` on entry despite the exposed `AXOutline` and `outline` role description. External fixture commands change disclosure after VoiceOver stops, so spoken disclosure transitions remain untested. This foundation record claims no 4D adapter, native disclosure action, hierarchy editing, lazy loading, Symphony workflow, unchanged-pixel or signed-distribution acceptance. Its final offscreen value was loaded before VoiceOver End; the separate grouped/cold-value gate checks actual Loading-to-value speech.

@@ -1,0 +1,3566 @@
+{
+  "passed": true,
+  "date": "2026-10-03T19:34:16.971666+00:00",
+  "version": "0.23.0",
+  "scope": "Read-only text/date array grouped listboxes in a disposable 4D form. No disclosure action or Symphony workflow acceptance.",
+  "compileReportSHA256": "94ee85e871058f1b80cb12b3bb99e6657c8b878cc5c5ee2500a688cb3e949df8",
+  "canonicalSourceSHA256": {
+    "host/OptionalMethods/AXB_Area.4dm": "463fa223a3d570ad728ca6bfac758cfa5a1422408ffac6409a3278c31ddbd437",
+    "host/OptionalMethods/AXB_AreaError.4dm": "f3487e812fe4bda243d3bbce9eda3d3cdf57513dd95c16fbe757281dc47fc89f",
+    "host/OptionalMethods/AXB_AreaForm.4dm": "700b5bccff8b28206e40ac55be69f95d26212cff0ec35308b73dc2454a77cfa4",
+    "host/OptionalMethods/AXB_ControlAction.4dm": "03d5199ff5f52d7a228f90f21fc793e7369ef7c13d72e3596c0faa83d9d5eeba",
+    "host/OptionalMethods/AXB_ControlConfirm.4dm": "528dd3770b96ba1bafd4483ce6ba1b95fb09ce013bb95eb49009839a559deed5",
+    "host/OptionalMethods/AXB_ControlFocus.4dm": "39532923df38e7900fda96f8ed8f95642f20a38554c1222a5c65a7a0ebc11978",
+    "host/OptionalMethods/AXB_ControlGroups.4dm": "6510648fcdc5a73ee8b9678e4ac0f025bf1c3d98bbd98b6cdc18dbba181b2351",
+    "host/OptionalMethods/AXB_ControlKey.4dm": "8b0d504d69acf5f0d1a19e692de44e98eaf1db113fc3da31c2905fe2c9a875b5",
+    "host/OptionalMethods/AXB_ControlLayers.4dm": "eed3228479120ad3c9f0b1f714ea343f0e316198807195a8a9c6e30b6f6c094b",
+    "host/OptionalMethods/AXB_ControlPoint.4dm": "867b648058daedaa0f5f966fbad410fc914cf5c93cce7c381e4db0191e15fc8a",
+    "host/OptionalMethods/AXB_ControlValue.4dm": "d6d203c7bae282765bcc799f21206f45bbfd995392339bfeb210b13fc062b6bc",
+    "host/OptionalMethods/AXB_Controls.4dm": "3d613339dc0d6de53f794a706a6b0faedf5b9ad73d8f4479b9fe2b66b3bd5ce6",
+    "host/OptionalMethods/AXB_Discover.4dm": "8406d2a93e72050cb98e76b633896106aaa0ddb7f050cc8b537f2332e40e62f5",
+    "host/OptionalMethods/AXB_Dynamic.4dm": "3f3c618bf8c412d5a26a76786a081a8920bb176f0b6541af2811d3d3d71def09",
+    "host/OptionalMethods/AXB_DynamicClose.4dm": "2317da9ed9f5351c89c60edfb97298ea6f27b09a5f4ebb0ec451a46fdcbdeb75",
+    "host/OptionalMethods/AXB_DynamicEvent.4dm": "63da4337231840dd746f3a13a440c3db5a8f0be164610a58582f0603d0282328",
+    "host/OptionalMethods/AXB_DynamicFailure.4dm": "3c6b78e74624d220ca97849cea07cd23217edf1f0e0aaa9567e174e2ff6ebd63",
+    "host/OptionalMethods/AXB_DynamicStop.4dm": "99e619eca41cdaf4d157bbaa0419bcea8b9366446f40da4741ef1fc4242c1dad",
+    "host/OptionalMethods/AXB_Focus.4dm": "1a28fcb839467912e2501f2bd61197866066d389bf0aab79ca4545679b703e7c",
+    "host/OptionalMethods/AXB_Form.4dm": "29e2ecb70eb61e43b82fa4ebc80ba7fc6d46c52a180ed4457963c5d7a16c5aa0",
+    "host/OptionalMethods/AXB_FormContext.4dm": "6c7d548c0f38cd266c89e69bced12c779af461a2b3ec9ce2e8e711c17d4974fe",
+    "host/OptionalMethods/AXB_FormError.4dm": "8445e0473f15c3eb2159b2b520bf5230eaf5aeeb245e1d15de62ce4caaa4ff60",
+    "host/OptionalMethods/AXB_FormEvent.4dm": "4b2c91dbb9de6fcc313df47f3aa8f4382b035659eac27257c99018d98e54c92c",
+    "host/OptionalMethods/AXB_FormExchange.4dm": "557b0d06ec9216a71c4d6d9d654449baf56f1f8d49e9b7adebe29bf4ffcd83bb",
+    "host/OptionalMethods/AXB_FormFailed.4dm": "c8de2ed6a7420382ac75a732eb3d07e8012c9dc448bff44e2d6e7e95844e48b4",
+    "host/OptionalMethods/AXB_FormObserver.4dm": "13d456a06f0af38aa4e6c288002fb077c4d8c82880c19acab2ab05f7e2164c90",
+    "host/OptionalMethods/AXB_FormPoll.4dm": "a85f465ab0aa71b701f1dd48b612a4a9f484120b190ffc52edb41f0b9b41a9c7",
+    "host/OptionalMethods/AXB_FormStop.4dm": "c15f6edbefb02527d7863c28b2f2daf0cdb4595643d3d49665039fc2ad286fd1",
+    "host/OptionalMethods/AXB_FormTree.4dm": "65aa96fe4bf82f7a255d665bf76f23f31462233efacb621944c329df42be2057",
+    "host/OptionalMethods/AXB_GridBinding.4dm": "19fa0d67e44b800ec63dcff5c26d409acf672608103a65f848892b0ebe3fce84",
+    "host/OptionalMethods/AXB_GridGeometry.4dm": "b4a917a95d9665a6d612a091a43cd9a33e778055404f2b000d1429adf5f2cf89",
+    "host/OptionalMethods/AXB_GridListbox.4dm": "2db9a5e0b03b771b0d9e8e9615cf5e031968558f9128e4d4bc6ef34e1838113f",
+    "host/OptionalMethods/AXB_GridListboxAction.4dm": "335cfe9eefa2af1fe2e17fc267bafb217c990be21de7baa1657cfebb072b6fa8",
+    "host/OptionalMethods/AXB_GridListboxConfirm.4dm": "f619e1128035ef6745f42f855b36c09fcf072471a90b2275a941e0ba16b9b92f",
+    "host/OptionalMethods/AXB_GridOptions.4dm": "d7db2f355567e3facb534ffac33456ff689c0ccb309445957e32a592da81ddb4",
+    "host/OptionalMethods/AXB_GridPoll.4dm": "06617546d9786841c9f4ca54bf77986d17ba08541e942e4b4352e3147789026a",
+    "host/OptionalMethods/AXB_GridReadPages.4dm": "31773c369b8e36bcce458b1155ca5e35b7146c19b0811459b8366f6c1284aeab",
+    "host/OptionalMethods/AXB_GridValue.4dm": "071a07c15919c8f5c7e1986c981db507d0355b3fdf36ee384039ceba79da16cf",
+    "host/OptionalMethods/AXB_Grids.4dm": "fdce799c1d85dce1470437dda95131d66ff3f1ddddb877904a427b9d603ad86c",
+    "host/OptionalMethods/AXB_Host.4dm": "d4e0914d9607242c8cd9028242bc311aec170dfb02ab84d025dd64b48035e53f",
+    "host/OptionalMethods/AXB_Intersects.4dm": "4597a4b2e7f3ff9b1ab354517c3960b824e6a7c3a8ab69c2fbd87cf981c1de2c",
+    "host/OptionalMethods/AXB_Invalidate.4dm": "69e647e50f0ba7c309ef78e16430ad6f578e74e8ae104e89689ea172ae4db9d7",
+    "host/OptionalMethods/AXB_KeyIndex.4dm": "c4ae12db1d18aae9e9a8d9d260ae91e5c668e87687ac292f7de38fcf99c148e5",
+    "host/OptionalMethods/AXB_ListEditor.4dm": "c5029d0370d1eb29be23c6aa5fd55d5b0bbd9bc2db9cc46cf711470cbe20fd69",
+    "host/OptionalMethods/AXB_ListEditorFocus.4dm": "1b5874aa5b3ef40278b9f723b3076393b0d94ed9b6cd01456a96df3b5cbfcb64",
+    "host/OptionalMethods/AXB_ListEditorRead.4dm": "7fe4061be1d7131add50e241e895074753260922112fece7584622d651743ec0",
+    "host/OptionalMethods/AXB_ListSubform.4dm": "6b299837a0cb2429aeca16d022ccc168c6b35be491f0645bbf05de987488d9fd",
+    "host/OptionalMethods/AXB_ListSubformEdit.4dm": "eadabf86c86276a2b8de1ece43c7a8a591aac75b3cca93795ddf234952aee564",
+    "host/OptionalMethods/AXB_ListSubformFields.4dm": "d000a8b27017c544b2fb13fb9049388dd37fa3baf17d87074f301e5e1e182c07",
+    "host/OptionalMethods/AXB_ListSubformInfo.4dm": "f022eb3176eec04fcb19840822c44050410f30aebc0cb89d0b4de2972b0d1337",
+    "host/OptionalMethods/AXB_ListSubformReveal.4dm": "381b779484185608e8d2a0cefac176dcd418c644a11316f33f4fe3402dc31a18",
+    "host/OptionalMethods/AXB_ListSubformSelect.4dm": "4b0372101064e52f3078452f6420a72f9322cd18984369fe019ec4135e3e4a02",
+    "host/OptionalMethods/AXB_ListSubformWidget.4dm": "4ba7151640c631b8bacd84283cf4b535e22dd52c7929c1e8399b3b3eb5e79ad5",
+    "host/OptionalMethods/AXB_Listbox.4dm": "8bfd89ff78ebeff15ce3565b9d4fc9e0fbd916e43592773855177576751f8e1d",
+    "host/OptionalMethods/AXB_ListboxConfirm.4dm": "e3e499443a30152923f8ba45f2ae1ac0a9d6250642d7b6ba2884c846df340dd2",
+    "host/OptionalMethods/AXB_ListboxSelect.4dm": "41d25f860edeb89f033ebd5be91e23571e17421230f3c3ec173b68ec37b74ec3",
+    "host/OptionalMethods/AXB_OutlineCapture.4dm": "0ccfd3caf56edc15fced6a114acaf629c3dd8002cfc5c81f72a3a478175a4266",
+    "host/OptionalMethods/AXB_OutlineRows.4dm": "b91c9993ef196769b16ca43f452bdf923ee3228c9ba6ae1ab751bcb67f5786a3",
+    "host/OptionalMethods/AXB_OutlineToken.4dm": "88ba3baad059061204cb44910d49c8c8ea0d05d68aad32083ef1bfb2f15d9188",
+    "host/OptionalMethods/AXB_PictureEquals.4dm": "32b137e406d909da0a838108b141b4381962e97a04178a04eda5285397d7adde",
+    "host/OptionalMethods/AXB_PopupValue.4dm": "7fb4522826d58ced8fc29e90c2b5b33903bfd12c33b98485ab7153ea5ab714e5",
+    "host/OptionalMethods/AXB_Result.4dm": "c21f9850ba6e37cf9606646b85ae77703bfea1eb1d863ed1e4301fcfff61ae01",
+    "host/OptionalMethods/AXB_ScrollChild.4dm": "470d5ff2dc708ffe86bd2a7a24d80914625991f1d66d709b7004d627a669dbe5",
+    "host/OptionalMethods/AXB_SelectionError.4dm": "c94b1348090d485d9fe77c74c4a201d202708cb80bc98041455fd17adb24045b",
+    "host/OptionalMethods/AXB_SelectionRead.4dm": "76d1810f5b51493ffcb662b2a8a2dd0a352acf32dc8a6f957034f934b34d59f6",
+    "host/OptionalMethods/AXB_SelectionSource.4dm": "bfd7bee03bb6a00af4496784a3e41b24fb0b37391d97c0fe40d43e6d855c28b2",
+    "host/OptionalMethods/AXB_StyledText.4dm": "c194256e299ba5a001721e671751f7a5c350064acb745ae8ef8b870d7cf6f49e",
+    "host/OptionalMethods/AXB_Tabs.4dm": "1369938b7b535d93a74f191a8afb8aae040939b8fd8ecce2e6cbbf86d8edd9aa",
+    "host/OptionalMethods/AXB_TextAction.4dm": "1b851745ee1df092e333c31244cca528399caccfdfb2bb2187135d5d0f4cd97e",
+    "host/OptionalMethods/AXB_TextEditor.4dm": "0491e2a03b7ed4e1ee59dce7be49268c2cb3356fe857e52081a583798b4c434f",
+    "host/OptionalMethods/AXB_TextFocus.4dm": "8315fc270358a3319bf0abdefbbd9ac28583ae937d6fb6d79d95059ae8242b0d",
+    "host/OptionalMethods/AXB_TextIndex.4dm": "7b4acc44f62def8ef482e67e306586474114574c515ff965112d6a3a3cc019ce",
+    "host/OptionalMethods/AXB_TextReady.4dm": "076856af56b230df45f2d8cf9937bf35f43c2fde57c0fc366e5b84464216c0f1",
+    "host/OptionalMethods/AXB_TextSelect.4dm": "059c0f4c1e48f495265f586ca5daf0751966a4561ebc410cbb8797a7fcd0d367",
+    "host/OptionalMethods/AXB_TextStep.4dm": "ac60e42fbb0722ec4bede7b0398d80c9ff01e7a8dfa6f5afaf0431c58fbb92d1",
+    "host/OptionalMethods/AXB_View.4dm": "c95f105c487d87605a430cd4f69f30cd5198a4c464e20116e8efad58bebba4e2",
+    "host/OptionalMethods/AXB_ViewCreate.4dm": "a0b4d95c23db0068923466a00549dbcc91e601e28db2af5b0938bbc7f4197e70",
+    "host/OptionalMethods/Compiler_AXBHost.4dm": "21dad7356ce97921c8a942dc6b7788bbe8bfb2b4f2f619dd126387b9b342c41a",
+    "tests/4d/AXHP_CaptureFault.4dm": "1839cf7b0214f186d3b799d475be1a7e52ae03c61f0da940acdcff69bdab0e72",
+    "tests/4d/AXHP_Command.4dm": "aa19894b7f8ed328e71182c936d98c188f9cbcc555833dab40791c953a48f67f",
+    "tests/4d/AXHP_Error.4dm": "57ce45748aea4dabb43e4cf1e7afbc05f5bb3bf30d6002df16d708368f6af77e",
+    "tests/4d/AXHP_Event.4dm": "b7c4e13b4c9d96b62ff3936234acde0112ea0b13affa0b5657720cd78e363044",
+    "tests/4d/AXHP_Form.4dm": "fb5fb5f7507bb25f82fd499fc9a86e3d423e863ba18472e3ee0d6130c40a8a4d",
+    "tests/4d/AXHP_GroupedCase.4dm": "55d24585e414f614aa878a3a8caeeb4850a6250d86fba5d28494d5b567438f23",
+    "tests/4d/AXHP_GroupedRead.4dm": "d28b6028e9a22d37fa450f7126219d8def12a3b470989db6564ffdb01bacf2b0",
+    "tests/4d/AXHP_GroupedSentinel.4dm": "83006368d0dae8728a85df2ccab516869f02f8aec7fcf96475b6e3cf196e6537",
+    "tests/4d/AXHP_ListState.4dm": "b17013a181f8f97690c1b81b1f567be47a4cb9eb9f9411e5a928efea55b1d24d",
+    "tests/4d/AXHP_State.4dm": "c869daf205cc5f637b5a387f4cfd5d287a203ced7dc73b7f74440d0c16d56a45",
+    "tests/4d/AXHP_Topology.4dm": "2ea8448d2e328f2974a88093e02afb8200f8d97fabe51aab869a8c9d893e6392",
+    "prepare_hierarchy_probe.py": "85bc1abf42d99cde225ec6474aefead6f739566509fe73d7cc8b1f9580f7465c",
+    "install_host_methods.py": "ffe95ba22cdf347019bc3b2ccfa677f09aaa800c2955e0ed73b4a5552973aba8",
+    "VERSION": "d1994e4942b06ec398ed7d9fa91ecce4079cd3f85ffe9e04588866291263149c"
+  },
+  "nativeSourceSHA256": {
+    "src/Area.h": "93a474955f9b39e15ff2d6976ca79f3f8e3dd6f82ec1d452585871d4e9260ff9",
+    "src/Area.mm": "8e9c72e1f64d8cdff62fff069ef0127100e7636dd93f21e6712d67b4dfd0a08b",
+    "src/Bridge.h": "44aa5d23302d823876393a214468643f54dbb09e44aff3c8a1fa184851018868",
+    "src/Bridge.mm": "6511be73ad0ae3f78f7a851023fbd9a2b096fa3c744a2c2286cf7d8a126f2329",
+    "src/BridgePrivate.h": "1511261a5ca197bd76c2dfe171bad0ca7cd560a8cfc8baeefd14b470f0e20ea4",
+    "src/Grid.h": "b3ad64ce38d1b88594107164a0e3c651e105813d8eb191e1999439223e878f15",
+    "src/Grid.mm": "ccd34d36dc2e594298575f20017bdbdb0360716b91422dd576fd061c8f6e767a",
+    "src/GridNative.mm": "ce6e3187ab33c44aa0ba8b4080292141f154991c8f6d6b917243e45c49181eaa",
+    "src/Identifiers.h": "a6de821ab5c6390ff33fe41b2d46d5cff62cb34328b69b23316860a2eb2beafa",
+    "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+    "src/NativeLayout.h": "bae2bd173f9721d274c06dad293818a5e33748769a049db223883fc0fc0b39fa",
+    "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+    "src/Plugin.mm": "6d985973af7e2336e3ff28a85ccfde5c7b6c1f41a8a67371985c9f56b9277ee3",
+    "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+    "src/Session.mm": "478b91f75af64dca26b501cbcba998da1d7ed35d27a5409c2b955c69e86f06cb",
+    "host/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+    "host/Methods/AXB_ALPGrid.4dm": "7236c53f5c9cad4008eb53c1f04a88d16f6f1f6b45599e6e7e71b99638c8a198",
+    "host/Methods/AXB_ALPGridAction.4dm": "366142ef7a5161726832dc7971a772b5d92eda65f9daa8347ec6dbc9fbf3cdbf",
+    "host/Methods/AXB_ALPGridConfirm.4dm": "d7115b943ef2fb80be7a16fa5174985d861b2a7222dd8e9e9159f14d5fc39f8f",
+    "host/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+    "host/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+    "host/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+    "host/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+    "host/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+    "host/Methods/AXB_ALPTable.4dm": "22df5b137ebf4e3f2c1d20dc2afc6d520eb5a1995f28b8748b7843a4fdfb19f5",
+    "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+    "host/Methods/AXB_Dispatch.4dm": "acfb4c83af0f476cc8b1da1f9b9fe9b1184785d3603ef6d8559a4f260e7be6ba",
+    "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+    "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+    "host/Methods/AXB_Start.4dm": "1fead9fe034cecc7ca428e877bb87b520be1a11fce908aaafa525974eddbdb31",
+    "host/Methods/AXB_Stop.4dm": "b34800c436a62339e79ce1ab1f4864445387a10d807bc82b8c8ec02b0512e551",
+    "host/Methods/Compiler_AXB.4dm": "5591f39488001d13a8c8f8883e000b369b0ae2ae5680fb22d511f6ee731ab8e7",
+    "resources/en.lproj/AccessibilityBridge.strings": "eede755b7f18e3b925931f4cd56ae311688da90b0a72c3ee33f22ee3dd7f3742",
+    "manifest.json": "b884b738d8b15f7d9f1449c604c6f92dd96575b0dbfe93d1b29b8b9ad4acca0b",
+    "VERSION": "d1994e4942b06ec398ed7d9fa91ecce4079cd3f85ffe9e04588866291263149c"
+  },
+  "componentSourceSHA256": {
+    "host/Methods/AXB_Start.4dm": "1fead9fe034cecc7ca428e877bb87b520be1a11fce908aaafa525974eddbdb31",
+    "host/Methods/AXB_Stop.4dm": "b34800c436a62339e79ce1ab1f4864445387a10d807bc82b8c8ec02b0512e551",
+    "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+    "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+    "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+    "host/Methods/AXB_Dispatch.4dm": "acfb4c83af0f476cc8b1da1f9b9fe9b1184785d3603ef6d8559a4f260e7be6ba",
+    "host/Methods/Compiler_AXB.4dm": "5591f39488001d13a8c8f8883e000b369b0ae2ae5680fb22d511f6ee731ab8e7",
+    "VERSION": "d1994e4942b06ec398ed7d9fa91ecce4079cd3f85ffe9e04588866291263149c",
+    "build_component.py": "879cafb7488fe3e4a8fd2795c13065861aff897a5a4245ddfb76440ab62867c5"
+  },
+  "componentPackageSHA256": {
+    "AccessibilityBridge.4DZ": "fadb34b7f764c1413dfb94fb821ac96f09b6ab401b21623320cbff910f6f1a91",
+    "Libraries/lib4d-arm64.dylib": "e251da24aa244b82a8ad568842bd9e0a4b59be0cc18a4ac1a1ed939a8e6fea78"
+  },
+  "compiledHostSHA256": {
+    "Libraries/lib4d-arm64.dylib": "0e52ffa2322ba6d559a16d31c955d73e38d34fd245e7098b2f54b11908667e6b",
+    "Project/DerivedData/CompiledCode/MX64 2147483630": "3945b7453ebb22a84633a5c7b024c8aa3e7051029eec07a70690b683e1b578e9",
+    "Project/DerivedData/CompiledCode/MX64 2147483608": "896b3dd4cb1a27e119e7ea9467056c183f65e3723c6152e551af2b8bb9927eca",
+    "Project/DerivedData/CompiledCode/MX64 2147483637": "220a5ed7cd5874a170fa271d1232a3e0391db75384047a63f2c3f3d0cad27e66",
+    "Project/DerivedData/CompiledCode/MX64 2147483601": "cf5c5832d20d6b6bb0ff124b592c26450815c125d4c70af0ac23682ff4fabd6f",
+    "Project/DerivedData/CompiledCode/MX64 2147483639": "69c23ec9420f9763ba5f94fecb6a4d16c382e41131003da0550f80ea773208a4",
+    "Project/DerivedData/CompiledCode/MX64 2147483606": "4e1fbc8cdb1930050dd8a97760f26cfef1c2754796783dbe6775d7088fcb39ca",
+    "Project/DerivedData/CompiledCode/MX64 2147483638": "87b9ba7f04ae6c87df97111169d3394b5f91a16af315debdaf9494532a16be04",
+    "Project/DerivedData/CompiledCode/MX64 2147483607": "88a9217a052481e6199f0992b5067a2b9014e70c4e483777dce98a324283fde3",
+    "Project/DerivedData/CompiledCode/MX64 2147483600": "a78542463544d061c7016b73831ea7c67896716d91ab747eaaf01a86ec04a19b",
+    "Project/DerivedData/CompiledCode/MX64 2147483609": "017ace6b1fde2675cbf4faaeceff1b144c5f7a6cc7dcfc2d0930c91abccad2d5",
+    "Project/DerivedData/CompiledCode/MX64 2147483636": "9d043a398652752d5feff8986d37f209ea8c50b1f404daabe18f331ddd7aab81",
+    "Project/DerivedData/CompiledCode/MX64 2147483631": "528fa20a5bcf7bb861e1d461e49b73976c7cfe5fc7f4cc59fa1233c5b709bc5b",
+    "Project/DerivedData/CompiledCode/MX64 2147483585": "a05cedac36d2491bde89c0da0869b41a31161df9e38bd8176ee6f90fa0092d32",
+    "Project/DerivedData/CompiledCode/MX64 2147483571": "050477d09166bb74fe1a9dea89418919ac7a5d6653daa10905bbe0c7a70c5533",
+    "Project/DerivedData/CompiledCode/MX64 2147483576": "f4d642272df93f05ba8ab6ca25887933747c0afbb15cee6be225beb6178ff094",
+    "Project/DerivedData/CompiledCode/MX64 2147483582": "f5cc8dd5a56306998679629e25d53d769d0085681b0ea013dfe4c4b321303220",
+    "Project/DerivedData/CompiledCode/IX64 -2": "67fef270d5fe0fa619db775844064fc4c9ad3279c82c12b96142a430ec23b85f",
+    "Project/DerivedData/CompiledCode/IX64 -5": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b",
+    "Project/DerivedData/CompiledCode/MX64 2147483578": "393801545c5141942c3dc7e374dfaec6f1475b5d5396fa8fe670f5baf04a44b8",
+    "Project/DerivedData/CompiledCode/MX64 2147483579": "9d952b5862faff2054b60ea0541641f29eed4258a306fb1b28cc32cba15629ff",
+    "Project/DerivedData/CompiledCode/IX64 -4": "e4cee5f03dca941b5e3dc5f2f9ef9ba94554dde03b72bfddfa0796d1ed81a4a3",
+    "Project/DerivedData/CompiledCode/IX64 -3": "aa564c255a14b8b99488167faae8e38c452de643adf97c99044a7726c1de4654",
+    "Project/DerivedData/CompiledCode/MX64 2147483583": "3f09cb49aebdb4129186f6769f4606f337f705c3ad9999c2f36f3ee0dfdbea1a",
+    "Project/DerivedData/CompiledCode/MX64 2147483577": "cde270a2a26d0a8fd29ae28494bae182cfbe0167814434297ae8202d1b8ed297",
+    "Project/DerivedData/CompiledCode/MX64 2147483570": "3bf082242d900c828cec02f683b47e280e1e2561511128f6c46aa2ee8d5d078b",
+    "Project/DerivedData/CompiledCode/MX64 2147483584": "1b304a2550379e217a82a19db347bbe8a96be69b839f573067d9f84b0ad64f2f",
+    "Project/DerivedData/CompiledCode/MX64 2147483599": "958c6518bd9db922b2e956cb3644f4bc84eb043279aaf71e3ef7fe47a2588a3b",
+    "Project/DerivedData/CompiledCode/MX64 2147483555": "a79630dff8b72d0b296926baea56db54e6bbca7dad5e44ac400294941d031a8d",
+    "Project/DerivedData/CompiledCode/MX64 2147483597": "0e5985d949dd8fe687a0235fb2828aeb7b394241876dee6e5f30b050144a1675",
+    "Project/DerivedData/CompiledCode/MX64 2147483563": "2d5545e66fb31500f9146a0841cab082056ac2d7a0bfbc9de36c271011489e2e",
+    "Project/DerivedData/CompiledCode/IX64 -10": "a1226cb075eacf92555273b7f87f4cccb02fe3157535addcaafad234483a66f3",
+    "Project/DerivedData/CompiledCode/MX64 2147483564": "99d3aaf3e01237526f76e78c91d313053898b7ad9198d3d4835468280c555d86",
+    "Project/DerivedData/CompiledCode/MX64 2147483590": "318708336ea2825b1940d2f0760bc437f2d691114da816c412fd75ca67a31eca",
+    "Project/DerivedData/CompiledCode/IX64 -11": "9b0045dfb58ddcbb153497eb702114d17b1da6c508d34017d8c23aa0cb736f90",
+    "Project/DerivedData/CompiledCode/MX64 2147483591": "2d584ca4a220988b2562ddbb25097ca3c2ddf1c92f9ffd1d04f367f80f22a0b9",
+    "Project/DerivedData/CompiledCode/MX64 2147483565": "046d506d19fe616110605fc56f78d1c958da2312b368701efdfd0b7ba47fac23",
+    "Project/DerivedData/CompiledCode/MX64 2147483562": "dba5670ccb26b4bebe8e0fe6f73a0c72aa58941a32c306df214d14014d5f915e",
+    "Project/DerivedData/CompiledCode/MX64 2147483596": "79d8531d59c826f33e03bdf31fc0beda6a865c31ba5a80c6e25d05ec724a3b0d",
+    "Project/DerivedData/CompiledCode/MX64 2147483554": "9cb1a85023489bc160ca12d92025b01c694eb33302271625b7c0d42ddf85a3bc",
+    "Project/DerivedData/CompiledCode/MX64 2147483598": "f75f6a45762c2d7e990eb082fe3549e6ebd32d8b4ce40f1ae91e7971496bd57d",
+    "Project/DerivedData/CompiledCode/MX64 2147483553": "47c8390b8d1e7a3710f0389465c4111d4b67b13c60ecbbdff70659b79b9fe7e9",
+    "Project/DerivedData/CompiledCode/MX64 2147483613": "16561a97b784d780426aaf36fc33edeb5807fdbaccb64c1d7328f825516333fa",
+    "Project/DerivedData/CompiledCode/MX64 2147483614": "cafc6e3214637220bcb92bf834a4f7af1588c2140adeae993f94cad9293d2031",
+    "Project/DerivedData/CompiledCode/MX64 2147483622": "90dff0dfb0df7d3f809125e703ffb7d3d2cd377a9a90d58d1711d08f29c88cac",
+    "Project/DerivedData/CompiledCode/MX64 2147483625": "83f93ad08ede6e97af353629dfde34ecd9b389f543a1cc59bdc6cfaf89154872",
+    "Project/DerivedData/CompiledCode/MX64 2147483640": "c74cd46f22b78e0481d79287be5da5101927baacd2f8924a0257870a910e191d",
+    "Project/DerivedData/CompiledCode/MX64 2147483647": "8f9b3c6d439a5621ed5b149015f0484420c5d41975e08f7aac757167c4cc6290",
+    "Project/DerivedData/CompiledCode/MX64 2147483624": "34f5b5d973683a8414cee57166fb7fa7d87f84e11ca3fee6d3916b9da7ec89ce",
+    "Project/DerivedData/CompiledCode/MX64 2147483623": "81b576f58996deb21e92b04900255eb5ee634d9bc8aba963821de73982943896",
+    "Project/DerivedData/CompiledCode/MX64 2147483615": "b2a3cf720d4e283bc1464e8035499ae62a8cf59f2ca1abb51fc3451474f6bf58",
+    "Project/DerivedData/CompiledCode/MX64 2147483612": "15a29aafac57a78f051fb4522d8c1fe5c32a66da7e8040b29312cc07c3cdf6b1",
+    "Project/DerivedData/CompiledCode/MX64 2147483646": "7018d45447c1470810fdc71499e640ab1e29172ca6830cbfecb292c0871755dd",
+    "Project/DerivedData/CompiledCode/MX64 2147483641": "a99321c058afa44f9680dd39f75b8af9d0ae3dde1b76b3330308fe2056e8e92c",
+    "Project/DerivedData/CompiledCode/MX64 2147483634": "9cab4d071daca31ed6215a3f0fecad8d6d7077345db22e428b911a013dd11262",
+    "Project/DerivedData/CompiledCode/MX64 2147483633": "5d18dba7cd9e800a51a14ccf52e8dd02c990db582adea26b823ea95a51139eec",
+    "Project/DerivedData/CompiledCode/MX64 2147483605": "5ab064b893aba71a7217f5876e68ef358921e5d39ff767e0c4753161d2607371",
+    "Project/DerivedData/CompiledCode/MX64 2147483602": "3e85ef72468dc685afd6fe2348d4a0f1c0cdffb8f4f2297268fd24e800701287",
+    "Project/DerivedData/CompiledCode/MX64 2147483603": "3e479932663b1f5c9bb48840d2d1d038683c94b4c7246553b873ab990f76d58e",
+    "Project/DerivedData/CompiledCode/MX64 2147483604": "5a74baa3bdfc9b98a8a02e1572a6d59431872a8986356505e849cee50978e375",
+    "Project/DerivedData/CompiledCode/MX64 2147483632": "452c53c001eb13934308a87269b337312e1e3e714e2584e6133514d18f4564d2",
+    "Project/DerivedData/CompiledCode/MX64 2147483635": "b9aa7b4da1dbc2c7b5120a1f8339e9c3cab62258bc4c28f94995e0aea4a6735f",
+    "Project/DerivedData/CompiledCode/MX64 2147483575": "a243fd859b4d9220b44c895b83175f82a1d61b149431ecbed93876d191eb00f5",
+    "Project/DerivedData/CompiledCode/IX64 -8": "74775a8b5200fd56d6cdfd8dc56f34b5e0a4e57d2d5f1507d6a15e56602ec210",
+    "Project/DerivedData/CompiledCode/MX64 2147483581": "f5fae8798940ae7d0ffc7c5b786f28c94f7c1dbb36b1c01b9d6d513b8ec3fb2e",
+    "Project/DerivedData/CompiledCode/MX64 2147483586": "d34007bdbf1c2ef4bcc06f15d3c918cf17bf173be2e7038aebf460d8b4f56ab2",
+    "Project/DerivedData/CompiledCode/MX64 2147483572": "e13894a2695d8dd77ecad9b1ce58281a364ab2f8ff878d524e91ad1df3fa524a",
+    "Project/DerivedData/CompiledCode/IX64 -6": "15ec7bf0b50732b49f8228e07d24365338f9e3ab994b00af08e5a3bffe55fd8b",
+    "Project/DerivedData/CompiledCode/MX64 2147483588": "7bcc7e215acbfd9691080b176a4c14564608fe4f0d9d45ae6d8ac6a4d0f10822",
+    "Project/DerivedData/CompiledCode/IX64 0": "9457b0cdcb9e7a5c21fc7d8547185b40259a3be2a7334700616366a65e7b8d84",
+    "Project/DerivedData/CompiledCode/MX64 2147483589": "8c43ec234bc822caf59216f0addfc4d0c934603a6a3346f84b7a29a95e151c94",
+    "Project/DerivedData/CompiledCode/IX64 -7": "af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc",
+    "Project/DerivedData/CompiledCode/MX64 2147483573": "351f5b871ee6ce8e690e56171dd3a52d6289c0e15ffee1cb6705d571a0959898",
+    "Project/DerivedData/CompiledCode/MX64 2147483587": "25326654c3e2457dd9f9bafbe590586c12537e37b69230f166670b5ed251156b",
+    "Project/DerivedData/CompiledCode/MX64 2147483580": "df4f7ba0343669d18ab488db85e077d22386c5378d86231cc059849c66546095",
+    "Project/DerivedData/CompiledCode/IX64 -9": "642ec10c9a3b3dd96c59757741ef76f835c080b6ad61b39aca8fe1c1a22fe60e",
+    "Project/DerivedData/CompiledCode/MX64 2147483574": "2081d68addf5364e3f68ae4b5a528a3fd88da6f322a6e9c116d8228f9d6a8742",
+    "Project/DerivedData/CompiledCode/MX64 2147483569": "a08c1d6fb7e30962155f83f95cc1ef57611cd0d8b37b5679aed8f310f6f31532",
+    "Project/DerivedData/CompiledCode/MX64 2147483556": "367d444943da6aa4aab8c14c75db5b755f8e43381431bd40f1c34c32b0e81008",
+    "Project/DerivedData/CompiledCode/MX64 2147483558": "6dd3737af51ddba5a6daa1ca1a6455287f70394b558a5dfb44746856db084709",
+    "Project/DerivedData/CompiledCode/MX64 2147483567": "8696eb1a0b35b6a391b25c19cef38062c6b483ac669d5705356b8ff844412ddd",
+    "Project/DerivedData/CompiledCode/MX64 2147483593": "add14c72d67ca09d5ea41fab1008b680c1523d413ee3316bda419991d35bcc66",
+    "Project/DerivedData/CompiledCode/MX64 2147483594": "5896c45c6803997baf22ba91e77e82aacacff6c7bfe3fd2dbbfd15a89bf47fc2",
+    "Project/DerivedData/CompiledCode/MX64 2147483560": "ac63fc163ca377f22dcbdb712553aab5b32689c963b289bed72237ac2e24d209",
+    "Project/DerivedData/CompiledCode/MX64 2147483561": "16a8fa7a099fbf762efe3aeb736734225185f544686dda105bac922157297329",
+    "Project/DerivedData/CompiledCode/MX64 2147483595": "c06d6f1db78e18274ca2ed5e565bdafc0e79baa17c0f90a3a5a75a80928e0385",
+    "Project/DerivedData/CompiledCode/IX64 -12": "af5a1dadd9de4cfd602717bfb3977e707dd25d6e555a0696e621b6b347b9c862",
+    "Project/DerivedData/CompiledCode/MX64 2147483559": "ff7c03e3d910beaf798948dd73ed3f5ac35fb42d5071e3aa8fd58484dcbf3da9",
+    "Project/DerivedData/CompiledCode/MX64 2147483592": "5a85fd0f7ae0a85ecd65f028d8b425753228c4d312ecfb6cb6c160ebe3c2df63",
+    "Project/DerivedData/CompiledCode/MX64 2147483566": "091bddfeea8d0191b0921709ad30cdcbc8fb655776d19839050911a81be8483d",
+    "Project/DerivedData/CompiledCode/MX64 2147483568": "7409b8733f3fab6075f27cd709cfa6b8ae790e0451754073075fa4f161ade521",
+    "Project/DerivedData/CompiledCode/MX64 2147483557": "3cb8e633b7f24e9e5f9ad03aca10e79d51e83aacdb0374b9a083088a87c564f1",
+    "Project/DerivedData/CompiledCode/MX64 2147483644": "6e97136ac6ff6b02a15fc811707c9e44fb870db568f669467f7bad3d6df2764e",
+    "Project/DerivedData/CompiledCode/MX64 2147483643": "c9a243e22102d1ca2b4b4b04c0d782ee9452f76901abf8afd1f85da099d00914",
+    "Project/DerivedData/CompiledCode/map.json": "be949e13495e207c0b6dfc5bc5dd80bdf66d2e4e4be72e18f5dc0bcb0ed4680c",
+    "Project/DerivedData/CompiledCode/MX64 2147483617": "eb56328804eb5b879965e37a4fa589d398cc414704814d4d77a603cef17fcf78",
+    "Project/DerivedData/CompiledCode/MX64 2147483628": "e517b4cffd04b04a5bc8c383ad66df58e1ed9a2e7c4a66552efb94de7bf28c10",
+    "Project/DerivedData/CompiledCode/MX64 2147483610": "6bc9c8f2bacc8acc69e09885ff21e4f820c2fdd8248d84cd51ff19b25d2e5ac3",
+    "Project/DerivedData/CompiledCode/MX64 2147483626": "95d5686e5763522f45ff042d1500a5e2a2bc935b78c7199de65d515aeab626bd",
+    "Project/DerivedData/CompiledCode/MX64 2147483619": "1b6a1d2e7809637b5d73e20f5dbb7e750c355278758f5c64af27927fdf4df05a",
+    "Project/DerivedData/CompiledCode/MX64 2147483621": "fdb9deff956b98c26f6d3af43050c789900683212996bb1a9acb5b57fc39abd4",
+    "Project/DerivedData/CompiledCode/MX64 2147483642": "d13a0ea1204371ee75c7a77f27f7c5e738521a00c19438c1f442805d7489b5eb",
+    "Project/DerivedData/CompiledCode/MX64 2147483645": "aa2d4be5bb2f0ba21d230ab5235c3ea687e17e66a8c8d97b8de215d019b94241",
+    "Project/DerivedData/CompiledCode/MX64 2147483620": "5451d5c4187a05032081ce215837806fb5196044e1c1c574b5ec1a857d433639",
+    "Project/DerivedData/CompiledCode/MX64 2147483627": "f3c7bdcc5a6dd0851597e5d01f937a0911913c6b4425427b5bbd71ff63afce1d",
+    "Project/DerivedData/CompiledCode/MX64 2147483618": "c5093fe52728aeccc1d82399497275ad48f5a118cba5056465e9d643e8083ada",
+    "Project/DerivedData/CompiledCode/MX64 2147483611": "294e1b39d3343252a328452c45d916ba7685aaae6b84918dd2acb7ea6890b1be",
+    "Project/DerivedData/CompiledCode/MX64 2147483616": "f8a8064c1116cd68c3dcf05cb159767119707dd6689e88be3ace622e6a9088a4",
+    "Project/DerivedData/CompiledCode/MX64 2147483629": "dbaaaf8adeef19137f796c9052cfd3dc83cd7200562442201b5a9d100659698d"
+  },
+  "driverSourceSHA256": {
+    "test_grouped_outline.py": "d4fa6954769c72c6fbc77f1fb82098953fab85275a9cd256cc3e6f112eec9ce2",
+    "test_hierarchy_probe.py": "764353109118fd7f99f27b79d5eb7fc6baaa6b5ba13d54dc87e4903af34d4a5b",
+    "build_component.py": "879cafb7488fe3e4a8fd2795c13065861aff897a5a4245ddfb76440ab62867c5",
+    "tests/mac_ax.py": "22bbc7a2a5ef520197cc05724991daa2cc659f34f8811bb132eeaa459d8d1747",
+    "tests/fixture_desktop.py": "a6f2fcfe8a5b374faee530c4ccab56b227d130b94f0a0f08e2b7d516f0f8522d",
+    "tests/voiceover.py": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+    "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62"
+  },
+  "summarySHA256": "ce0042a2b67dc8f94c14aa60142c16ee3dca008e6e7c4e2b75758b2e8421158e",
+  "runs": [
+    {
+      "mode": "interpreted",
+      "reportSHA256": "4a5c1598a800101465440ee9a4f874810715dbf17cc9fdd69b565afabd89a8ac",
+      "checks": [
+        "actual 4D execution mode matches the requested mode",
+        "loaded native package advertises the outline capability",
+        "parent lifecycle area starts the configured provider",
+        "singleText exposes exact native group and leaf levels",
+        "singleText repeated native labels have distinct group identities",
+        "singleText structural row parents remain the outline",
+        "singleText unavailable complete selection is omitted from every row and the outline",
+        "singleText pending selection and disclosure actions are not advertised",
+        "singleText headers omit unsupported reveal and activation actions",
+        "singleText group label is immediate and has one cell",
+        "singleText group geometry spans the native row",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText final disclosed offscreen leaf retains its logical index and value",
+        "singleText first leaf column preserves the native blank value",
+        "singleText collapse retains group identity and removes disclosed descendants",
+        "singleText collapse retires retained leaf handles",
+        "singleText reopening requires fresh descendant handles",
+        "singleDate exposes exact native group and leaf levels",
+        "singleDate repeated native labels have distinct group identities",
+        "singleDate structural row parents remain the outline",
+        "singleDate unavailable complete selection is omitted from every row and the outline",
+        "singleDate pending selection and disclosure actions are not advertised",
+        "singleDate headers omit unsupported reveal and activation actions",
+        "singleDate group label is immediate and has one cell",
+        "singleDate group geometry spans the native row",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate final disclosed offscreen leaf retains its logical index and value",
+        "singleDate first leaf column preserves the native blank value",
+        "singleDate changing hierarchy binding retires earlier row handles",
+        "singleDate collapse retains group identity and removes disclosed descendants",
+        "singleDate collapse retires retained leaf handles",
+        "singleDate reopening requires fresh descendant handles",
+        "repeated exposes exact native group and leaf levels",
+        "repeated repeated native labels have distinct group identities",
+        "repeated structural row parents remain the outline",
+        "repeated unavailable complete selection is omitted from every row and the outline",
+        "repeated pending selection and disclosure actions are not advertised",
+        "repeated headers omit unsupported reveal and activation actions",
+        "repeated group label is immediate and has one cell",
+        "repeated group geometry spans the native row",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated final disclosed offscreen leaf retains its logical index and value",
+        "repeated changing hierarchy binding retires earlier row handles",
+        "repeated collapse retains group identity and removes disclosed descendants",
+        "repeated collapse retires retained leaf handles",
+        "repeated reopening requires fresh descendant handles",
+        "absent native row-control array captures successfully with zero flags",
+        "hierarchy without row-control array retains native group labels",
+        "attaching the row-control array preserves accepted capture",
+        "stale or incomplete caller bindings reject while preserving sampled OK, focus, selection and scroll",
+        "groupFormatNested rejects unavailable native caption authority",
+        "groupFormatNested retires retained outline and cell handles",
+        "groupFormatNested recovers with fresh outline handles",
+        "groupProtectNested rejects unavailable native caption authority",
+        "groupProtectNested retires retained outline and cell handles",
+        "groupProtectNested recovers with fresh outline handles",
+        "groupHideFirst rejects unavailable native caption authority",
+        "groupHideFirst retires retained outline and cell handles",
+        "groupHideFirst recovers with fresh outline handles",
+        "case variants follow the native partition and retain exact distinct captions",
+        "changed group membership retires the previous group handle",
+        "canonical helpers and desktop driver sources stay unchanged during acceptance",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "nativeSHA256": "dda8c417b424915e4d461eaa372aa83561af2829efcff69be27350deb0f80e0e",
+      "componentPackageSHA256": {
+        "AccessibilityBridge.4DZ": "fadb34b7f764c1413dfb94fb821ac96f09b6ab401b21623320cbff910f6f1a91",
+        "Libraries/lib4d-arm64.dylib": "e251da24aa244b82a8ad568842bd9e0a4b59be0cc18a4ac1a1ed939a8e6fea78"
+      },
+      "normalClose": true
+    },
+    {
+      "mode": "compiled",
+      "reportSHA256": "3a1e6fff8e2411bf8fb0acc9787fc79b16c4b1f3e3654617772fe1b22b7b6920",
+      "checks": [
+        "actual 4D execution mode matches the requested mode",
+        "loaded native package advertises the outline capability",
+        "parent lifecycle area starts the configured provider",
+        "singleText exposes exact native group and leaf levels",
+        "singleText repeated native labels have distinct group identities",
+        "singleText structural row parents remain the outline",
+        "singleText unavailable complete selection is omitted from every row and the outline",
+        "singleText pending selection and disclosure actions are not advertised",
+        "singleText headers omit unsupported reveal and activation actions",
+        "singleText group label is immediate and has one cell",
+        "singleText group geometry spans the native row",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText final disclosed offscreen leaf retains its logical index and value",
+        "singleText first leaf column preserves the native blank value",
+        "singleText collapse retains group identity and removes disclosed descendants",
+        "singleText collapse retires retained leaf handles",
+        "singleText reopening requires fresh descendant handles",
+        "singleDate exposes exact native group and leaf levels",
+        "singleDate repeated native labels have distinct group identities",
+        "singleDate structural row parents remain the outline",
+        "singleDate unavailable complete selection is omitted from every row and the outline",
+        "singleDate pending selection and disclosure actions are not advertised",
+        "singleDate headers omit unsupported reveal and activation actions",
+        "singleDate group label is immediate and has one cell",
+        "singleDate group geometry spans the native row",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate final disclosed offscreen leaf retains its logical index and value",
+        "singleDate first leaf column preserves the native blank value",
+        "singleDate changing hierarchy binding retires earlier row handles",
+        "singleDate collapse retains group identity and removes disclosed descendants",
+        "singleDate collapse retires retained leaf handles",
+        "singleDate reopening requires fresh descendant handles",
+        "repeated exposes exact native group and leaf levels",
+        "repeated repeated native labels have distinct group identities",
+        "repeated structural row parents remain the outline",
+        "repeated unavailable complete selection is omitted from every row and the outline",
+        "repeated pending selection and disclosure actions are not advertised",
+        "repeated headers omit unsupported reveal and activation actions",
+        "repeated group label is immediate and has one cell",
+        "repeated group geometry spans the native row",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated final disclosed offscreen leaf retains its logical index and value",
+        "repeated changing hierarchy binding retires earlier row handles",
+        "repeated collapse retains group identity and removes disclosed descendants",
+        "repeated collapse retires retained leaf handles",
+        "repeated reopening requires fresh descendant handles",
+        "absent native row-control array captures successfully with zero flags",
+        "hierarchy without row-control array retains native group labels",
+        "attaching the row-control array preserves accepted capture",
+        "stale or incomplete caller bindings reject while preserving sampled OK, focus, selection and scroll",
+        "groupFormatNested rejects unavailable native caption authority",
+        "groupFormatNested retires retained outline and cell handles",
+        "groupFormatNested recovers with fresh outline handles",
+        "groupProtectNested rejects unavailable native caption authority",
+        "groupProtectNested retires retained outline and cell handles",
+        "groupProtectNested recovers with fresh outline handles",
+        "groupHideFirst rejects unavailable native caption authority",
+        "groupHideFirst retires retained outline and cell handles",
+        "groupHideFirst recovers with fresh outline handles",
+        "case variants follow the native partition and retain exact distinct captions",
+        "changed group membership retires the previous group handle",
+        "canonical helpers and desktop driver sources stay unchanged during acceptance",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "environment": {
+        "macOS": "26.7.1",
+        "hostArchitecture": "arm64"
+      },
+      "nativeSHA256": "dda8c417b424915e4d461eaa372aa83561af2829efcff69be27350deb0f80e0e",
+      "componentPackageSHA256": {
+        "AccessibilityBridge.4DZ": "fadb34b7f764c1413dfb94fb821ac96f09b6ab401b21623320cbff910f6f1a91",
+        "Libraries/lib4d-arm64.dylib": "e251da24aa244b82a8ad568842bd9e0a4b59be0cc18a4ac1a1ed939a8e6fea78"
+      },
+      "normalClose": true
+    },
+    {
+      "mode": "compiled-voiceover",
+      "reportSHA256": "5ec7c8b25c0d3498365f13b0b650a9dfa3f606e6936150ddd575d4f91ad0e7d3",
+      "checks": [
+        "actual 4D execution mode matches the requested mode",
+        "loaded native package advertises the outline capability",
+        "parent lifecycle area starts the configured provider",
+        "singleText exposes exact native group and leaf levels",
+        "singleText repeated native labels have distinct group identities",
+        "singleText structural row parents remain the outline",
+        "singleText unavailable complete selection is omitted from every row and the outline",
+        "singleText pending selection and disclosure actions are not advertised",
+        "singleText headers omit unsupported reveal and activation actions",
+        "singleText group label is immediate and has one cell",
+        "singleText group geometry spans the native row",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText disclosure relation identifies the exact immediate parent",
+        "singleText final disclosed offscreen leaf retains its logical index and value",
+        "singleText first leaf column preserves the native blank value",
+        "singleText collapse retains group identity and removes disclosed descendants",
+        "singleText collapse retires retained leaf handles",
+        "singleText reopening requires fresh descendant handles",
+        "singleDate exposes exact native group and leaf levels",
+        "singleDate repeated native labels have distinct group identities",
+        "singleDate structural row parents remain the outline",
+        "singleDate unavailable complete selection is omitted from every row and the outline",
+        "singleDate pending selection and disclosure actions are not advertised",
+        "singleDate headers omit unsupported reveal and activation actions",
+        "singleDate group label is immediate and has one cell",
+        "singleDate group geometry spans the native row",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate disclosure relation identifies the exact immediate parent",
+        "singleDate final disclosed offscreen leaf retains its logical index and value",
+        "singleDate first leaf column preserves the native blank value",
+        "singleDate changing hierarchy binding retires earlier row handles",
+        "singleDate collapse retains group identity and removes disclosed descendants",
+        "singleDate collapse retires retained leaf handles",
+        "singleDate reopening requires fresh descendant handles",
+        "repeated exposes exact native group and leaf levels",
+        "repeated repeated native labels have distinct group identities",
+        "repeated structural row parents remain the outline",
+        "repeated unavailable complete selection is omitted from every row and the outline",
+        "repeated pending selection and disclosure actions are not advertised",
+        "repeated headers omit unsupported reveal and activation actions",
+        "repeated group label is immediate and has one cell",
+        "repeated group geometry spans the native row",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated disclosure relation identifies the exact immediate parent",
+        "repeated final disclosed offscreen leaf retains its logical index and value",
+        "repeated changing hierarchy binding retires earlier row handles",
+        "repeated collapse retains group identity and removes disclosed descendants",
+        "repeated collapse retires retained leaf handles",
+        "repeated reopening requires fresh descendant handles",
+        "absent native row-control array captures successfully with zero flags",
+        "hierarchy without row-control array retains native group labels",
+        "attaching the row-control array preserves accepted capture",
+        "stale or incomplete caller bindings reject while preserving sampled OK, focus, selection and scroll",
+        "groupFormatNested rejects unavailable native caption authority",
+        "groupFormatNested retires retained outline and cell handles",
+        "groupFormatNested recovers with fresh outline handles",
+        "groupProtectNested rejects unavailable native caption authority",
+        "groupProtectNested retires retained outline and cell handles",
+        "groupProtectNested recovers with fresh outline handles",
+        "groupHideFirst rejects unavailable native caption authority",
+        "groupHideFirst retires retained outline and cell handles",
+        "groupHideFirst recovers with fresh outline handles",
+        "case variants follow the native partition and retain exact distinct captions",
+        "changed group membership retires the previous group handle",
+        "VoiceOver reaches the actual 4D grouped provider",
+        "VoiceOver reads native nested labels, leaf values and levels",
+        "VoiceOver remains responsive without fabricated selection",
+        "VoiceOver End reaches the last disclosed leaf",
+        "canonical helpers and desktop driver sources stay unchanged during acceptance",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "voiceover": [
+        {
+          "key": "home",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Grouped items, table"
+        },
+        {
+          "key": "down",
+          "shift": true,
+          "command": false,
+          "caption": "\u00d7 In Grouped items, table, Group Leaf 1, level 2, level 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Subgroup shared"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Label Leaf 1"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Group Leaf 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Subgroup shared"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Label Leaf 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Group other, level 1"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Leaf 3, level 2"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Subgroup other"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Label Leaf 3"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Group B"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X shared, level 1"
+        },
+        {
+          "key": "right",
+          "shift": false,
+          "command": false,
+          "caption": "X Leaf 4, level 2"
+        },
+        {
+          "key": "end",
+          "shift": false,
+          "command": false,
+          "caption": "\u00d7 Label Loading, row 17 of 17"
+        }
+      ],
+      "entryCaption": "\u00d7 Grouped items, table",
+      "loadedEndCaption": "X Leaf 8, level 2, cell",
+      "normalClose": true
+    }
+  ],
+  "pixels": [
+    {
+      "mode": "interpreted",
+      "baselineReportSHA256": "d16f91fd7a07238995bbf12ccf979d568cb2eecc90151b35ce6f0316b714ba51",
+      "comparisons": [
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleText"
+          },
+          "baselineSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "integratedSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "integratedSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "integratedSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "578a2487f6c83c8bde0bf3f4d185a36f6bf89408c09582549b96a8cf2664a908",
+          "integratedSHA256": "578a2487f6c83c8bde0bf3f4d185a36f6bf89408c09582549b96a8cf2664a908",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleDate"
+          },
+          "baselineSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "integratedSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "integratedSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "ef1dd24a8078f79bcf93a01fabc0c2a925fd3b2b293c449d7f40caa680143558",
+          "integratedSHA256": "ef1dd24a8078f79bcf93a01fabc0c2a925fd3b2b293c449d7f40caa680143558",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "1bb72446128c5280d06a26c48917ff14622d70ef1f23ce783527fa87e17aeab3",
+          "integratedSHA256": "1bb72446128c5280d06a26c48917ff14622d70ef1f23ce783527fa87e17aeab3",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "repeated"
+          },
+          "baselineSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "integratedSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "integratedSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "integratedSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "integratedSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupControlRestore",
+          "payload": {},
+          "baselineSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "integratedSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ]
+    },
+    {
+      "mode": "compiled",
+      "baselineReportSHA256": "33be86bed2e296cf915b2c3013fc8df072adaf817839b13a24b74e0a930574b8",
+      "comparisons": [
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleText"
+          },
+          "baselineSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "integratedSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "integratedSHA256": "4c6168bbfb2ce3b07b8870ed817adaed8838e91568b642158cc05ccffb472312",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "integratedSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "578a2487f6c83c8bde0bf3f4d185a36f6bf89408c09582549b96a8cf2664a908",
+          "integratedSHA256": "578a2487f6c83c8bde0bf3f4d185a36f6bf89408c09582549b96a8cf2664a908",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "singleDate"
+          },
+          "baselineSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "integratedSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "integratedSHA256": "3a96962ebab674ab1b69e791fa2bed4316da593ed34873dce5aab9ae85cb60a7",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "ef1dd24a8078f79bcf93a01fabc0c2a925fd3b2b293c449d7f40caa680143558",
+          "integratedSHA256": "ef1dd24a8078f79bcf93a01fabc0c2a925fd3b2b293c449d7f40caa680143558",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "1bb72446128c5280d06a26c48917ff14622d70ef1f23ce783527fa87e17aeab3",
+          "integratedSHA256": "1bb72446128c5280d06a26c48917ff14622d70ef1f23ce783527fa87e17aeab3",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCase",
+          "payload": {
+            "name": "repeated"
+          },
+          "baselineSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "integratedSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "integratedSHA256": "ef4e68b3bd55eb739420d933262a4a5cfa0c14f45c9e07190c7f54f9e46fd26c",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupCollapseAll",
+          "payload": {},
+          "baselineSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "integratedSHA256": "fbdd074bee3c603da00445b5d8180f635a7e855193a48cd66f1cea6c4fe7d99e",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupExpandAll",
+          "payload": {},
+          "baselineSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "integratedSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        },
+        {
+          "operation": "groupControlRestore",
+          "payload": {},
+          "baselineSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "integratedSHA256": "007d5f2fdb369471e8715c05a4fc540f67bdbf12b64f2afd70d87c1a81842864",
+          "size": [
+            792,
+            710
+          ],
+          "changedPixels": 0,
+          "differenceBounds": null,
+          "wholeWindow": true,
+          "mask": false,
+          "tolerance": 0
+        }
+      ]
+    }
+  ],
+  "coldOutlineSpeech": {
+    "reportSHA256": "25f6453b33835b0418e6c0a3970bf9a7d861ca39b5d5d93ebc90638c5be637dd",
+    "sourceSHA256": {
+      "src/Area.h": "93a474955f9b39e15ff2d6976ca79f3f8e3dd6f82ec1d452585871d4e9260ff9",
+      "src/Area.mm": "8e9c72e1f64d8cdff62fff069ef0127100e7636dd93f21e6712d67b4dfd0a08b",
+      "src/Bridge.h": "44aa5d23302d823876393a214468643f54dbb09e44aff3c8a1fa184851018868",
+      "src/Bridge.mm": "6511be73ad0ae3f78f7a851023fbd9a2b096fa3c744a2c2286cf7d8a126f2329",
+      "src/BridgePrivate.h": "1511261a5ca197bd76c2dfe171bad0ca7cd560a8cfc8baeefd14b470f0e20ea4",
+      "src/Grid.h": "b3ad64ce38d1b88594107164a0e3c651e105813d8eb191e1999439223e878f15",
+      "src/Grid.mm": "ccd34d36dc2e594298575f20017bdbdb0360716b91422dd576fd061c8f6e767a",
+      "src/GridNative.mm": "ce6e3187ab33c44aa0ba8b4080292141f154991c8f6d6b917243e45c49181eaa",
+      "src/Identifiers.h": "a6de821ab5c6390ff33fe41b2d46d5cff62cb34328b69b23316860a2eb2beafa",
+      "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+      "src/NativeLayout.h": "bae2bd173f9721d274c06dad293818a5e33748769a049db223883fc0fc0b39fa",
+      "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+      "src/Plugin.mm": "6d985973af7e2336e3ff28a85ccfde5c7b6c1f41a8a67371985c9f56b9277ee3",
+      "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+      "src/Session.mm": "478b91f75af64dca26b501cbcba998da1d7ed35d27a5409c2b955c69e86f06cb",
+      "tests/NativeOutlineFixture.mm": "aec0ad811fcc9fe0d03e67e1d9638970add7bd802ba28374565c556f10679e1a",
+      "tests/mac_ax.py": "22bbc7a2a5ef520197cc05724991daa2cc659f34f8811bb132eeaa459d8d1747",
+      "tests/voiceover.py": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+      "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62",
+      "test_outline_value_speech.py": "4a31887bd41fcfeda7d7cd1dac0d27b6aa8ffd3401c8f5fa66387656cc99991a"
+    },
+    "cases": [
+      {
+        "case": "offscreen-delayed",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "VoiceOver speaks the loaded final value without cursor movement",
+          "VoiceOver does not speak an unrelated value",
+          "next navigation starts from the same final-row cell",
+          "return navigation retains the exact loaded target",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Item Distant leaf"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Value Value root/19"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.765,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "afterLoadedSeconds": 2.519,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 4.372,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 6.229,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 8.053,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 9.961,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 12.559,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 14.411,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          }
+        ],
+        "runID": "d3f2334c29094adeb15cdfe7f5ef7b4b",
+        "pid": 86224,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 10,
+          "pages": 31,
+          "pendingPages": 1,
+          "generation": "outline-a",
+          "targetPages": 0,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "d3f2334c29094adeb15cdfe7f5ef7b4b",
+          "pid": 86224,
+          "deferredPages": true
+        },
+        "afterRelease": {
+          "viewportRows": 10,
+          "pages": 32,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 1,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 1,
+          "selectionKnown": false,
+          "runID": "d3f2334c29094adeb15cdfe7f5ef7b4b",
+          "pid": 86224,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      },
+      {
+        "case": "onscreen-delayed",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "VoiceOver speaks the loaded final value without cursor movement",
+          "VoiceOver does not speak an unrelated value",
+          "next navigation starts from the same final-row cell",
+          "return navigation retains the exact loaded target",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Item Distant leaf"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Value Value root/19"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.765,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "afterLoadedSeconds": 2.552,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 4.415,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 6.336,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 8.228,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 10.054,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 11.932,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 13.817,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          }
+        ],
+        "runID": "939f1a748df047ab9bcc1e867e160150",
+        "pid": 87748,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 25,
+          "pages": 30,
+          "pendingPages": 7,
+          "generation": "outline-a",
+          "targetPages": 0,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "939f1a748df047ab9bcc1e867e160150",
+          "pid": 87748,
+          "deferredPages": true
+        },
+        "afterRelease": {
+          "viewportRows": 25,
+          "pages": 32,
+          "pendingPages": 5,
+          "generation": "outline-a",
+          "targetPages": 2,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 1,
+          "selectionKnown": false,
+          "runID": "939f1a748df047ab9bcc1e867e160150",
+          "pid": 87748,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      },
+      {
+        "case": "offscreen-immediate",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "VoiceOver speaks the loaded final value without cursor movement",
+          "VoiceOver does not speak an unrelated value",
+          "next navigation starts from the same final-row cell",
+          "return navigation retains the exact loaded target",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Item Distant leaf"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Value Value root/19"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.831,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 2.626,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 4.462,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 6.362,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 8.247,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 10.071,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 11.909,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 13.725,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          }
+        ],
+        "runID": "205d7691fda74429accb97c7fea17fc2",
+        "pid": 88753,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 10,
+          "pages": 32,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 2,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "205d7691fda74429accb97c7fea17fc2",
+          "pid": 88753,
+          "deferredPages": false
+        },
+        "afterRelease": {
+          "viewportRows": 10,
+          "pages": 32,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 2,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "205d7691fda74429accb97c7fea17fc2",
+          "pid": 88753,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      },
+      {
+        "case": "fast-update",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "a second value arrives before the settled layout notification",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "VoiceOver speaks the loaded final value without cursor movement",
+          "VoiceOver does not speak an unrelated value",
+          "next navigation starts from the same final-row cell",
+          "return navigation retains the exact loaded target",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Item Distant leaf"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Updated final value"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.758,
+            "caption": "\u00d7 Updated final value, cell"
+          },
+          {
+            "afterLoadedSeconds": 2.612,
+            "caption": "\u00d7 Updated final value, cell"
+          },
+          {
+            "afterLoadedSeconds": 4.446,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 6.346,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 8.154,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 9.982,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 11.933,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 13.791,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          }
+        ],
+        "runID": "d4e4674387af478e9e6a011798a359b3",
+        "pid": 89851,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 10,
+          "pages": 33,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 3,
+          "revision": 1,
+          "finalValueUpdated": true,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "d4e4674387af478e9e6a011798a359b3",
+          "pid": 89851,
+          "deferredPages": false
+        },
+        "afterRelease": {
+          "viewportRows": 10,
+          "pages": 33,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 3,
+          "revision": 1,
+          "finalValueUpdated": true,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "d4e4674387af478e9e6a011798a359b3",
+          "pid": 89851,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      },
+      {
+        "case": "leave",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "VoiceOver leaves the outline for its native close button",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "arriving values do not interrupt reading outside the outline",
+          "next navigation retains the native window-control cursor",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, button"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.798,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 2.635,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 4.435,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 6.237,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 8.085,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 9.88,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 11.702,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 13.576,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          }
+        ],
+        "runID": "9e05624cc598451aa3dff7c8ba9adbbd",
+        "pid": 91078,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 10,
+          "pages": 31,
+          "pendingPages": 1,
+          "generation": "outline-a",
+          "targetPages": 0,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "9e05624cc598451aa3dff7c8ba9adbbd",
+          "pid": 91078,
+          "deferredPages": true
+        },
+        "afterRelease": {
+          "viewportRows": 10,
+          "pages": 35,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 1,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 1,
+          "selectionKnown": false,
+          "runID": "9e05624cc598451aa3dff7c8ba9adbbd",
+          "pid": 91078,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      },
+      {
+        "case": "leave-after-load",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "VoiceOver leaves immediately after page arrival",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "arriving values do not interrupt reading outside the outline",
+          "next navigation retains the native window-control cursor",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, button"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.814,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 2.658,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 4.535,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 6.371,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 8.208,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 10.09,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 11.932,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          },
+          {
+            "afterLoadedSeconds": 13.76,
+            "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+          }
+        ],
+        "runID": "defb6209f722427b9f5034971b2fa0bb",
+        "pid": 92001,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 10,
+          "pages": 31,
+          "pendingPages": 1,
+          "generation": "outline-a",
+          "targetPages": 0,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "defb6209f722427b9f5034971b2fa0bb",
+          "pid": 92001,
+          "deferredPages": true
+        },
+        "afterRelease": {
+          "viewportRows": 10,
+          "pages": 32,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 1,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 1,
+          "selectionKnown": false,
+          "runID": "defb6209f722427b9f5034971b2fa0bb",
+          "pid": 92001,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      },
+      {
+        "case": "inspection",
+        "passed": true,
+        "checks": [
+          "exact owned outline window is frontmost",
+          "production outline exposes the exact target row",
+          "target geometry matches the chosen viewport",
+          "final value page starts cold",
+          "VoiceOver reaches the owned outline",
+          "VoiceOver actually reads the cold final row",
+          "an unrelated AX client inspects a different cold row",
+          "page release preserves topology and target identity",
+          "the same retained target has its exact loaded value",
+          "provider stays responsive during stationary observation",
+          "VoiceOver speaks the loaded final value without cursor movement",
+          "VoiceOver does not speak an unrelated value",
+          "next navigation starts from the same final-row cell",
+          "return navigation retains the exact loaded target",
+          "owned fixture closes normally with matching evidence"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Grouped items, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In Grouped items, table, Item Repeated group"
+          },
+          {
+            "key": "end",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Item Distant leaf"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Value Value root/19"
+          }
+        ],
+        "observations": [
+          {
+            "afterLoadedSeconds": 0.818,
+            "caption": "\u00d7 Value Loading, row 25 of 25"
+          },
+          {
+            "afterLoadedSeconds": 2.596,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 4.362,
+            "caption": "\u00d7 Value root/19, cell"
+          },
+          {
+            "afterLoadedSeconds": 6.235,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 8.084,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 9.911,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 11.736,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          },
+          {
+            "afterLoadedSeconds": 13.565,
+            "caption": "X You are currently on a cell, inside of a table. To navigate the cells within a table, press Control-Option and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this"
+          }
+        ],
+        "runID": "ce047e2098774024bbf5f848d72debcd",
+        "pid": 92864,
+        "coldCaption": "\u00d7 Value Loading, row 25 of 25",
+        "beforeRelease": {
+          "viewportRows": 10,
+          "pages": 30,
+          "pendingPages": 2,
+          "generation": "outline-a",
+          "targetPages": 0,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 0,
+          "selectionKnown": false,
+          "runID": "ce047e2098774024bbf5f848d72debcd",
+          "pid": 92864,
+          "deferredPages": true
+        },
+        "afterRelease": {
+          "viewportRows": 10,
+          "pages": 32,
+          "pendingPages": 0,
+          "generation": "outline-a",
+          "targetPages": 1,
+          "revision": 1,
+          "finalValueUpdated": false,
+          "order": 1,
+          "expanded": true,
+          "rows": [
+            "first",
+            "nested",
+            "leaf/1",
+            "leaf/2",
+            "later",
+            "root/0",
+            "root/1",
+            "root/2",
+            "root/3",
+            "root/4",
+            "root/5",
+            "root/6",
+            "root/7",
+            "root/8",
+            "root/9",
+            "root/10",
+            "root/11",
+            "root/12",
+            "root/13",
+            "root/14",
+            "root/15",
+            "root/16",
+            "root/17",
+            "root/18",
+            "root/19"
+          ],
+          "command": 1,
+          "selectionKnown": false,
+          "runID": "ce047e2098774024bbf5f848d72debcd",
+          "pid": 92864,
+          "deferredPages": false
+        },
+        "exitCode": 0
+      }
+    ]
+  },
+  "flatGridSpeechRegression": {
+    "reportSHA256": "f0b759e2921b9faa64d99ad8c8da01e4dfaf2ad6b3523e4fe18ad9083a394534",
+    "sourceSHA256": {
+      "src/Session.mm": "478b91f75af64dca26b501cbcba998da1d7ed35d27a5409c2b955c69e86f06cb",
+      "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+      "src/Grid.mm": "ccd34d36dc2e594298575f20017bdbdb0360716b91422dd576fd061c8f6e767a",
+      "src/Grid.h": "b3ad64ce38d1b88594107164a0e3c651e105813d8eb191e1999439223e878f15",
+      "src/Bridge.mm": "6511be73ad0ae3f78f7a851023fbd9a2b096fa3c744a2c2286cf7d8a126f2329",
+      "src/Bridge.h": "44aa5d23302d823876393a214468643f54dbb09e44aff3c8a1fa184851018868",
+      "src/BridgePrivate.h": "1511261a5ca197bd76c2dfe171bad0ca7cd560a8cfc8baeefd14b470f0e20ea4",
+      "src/GridNative.mm": "ce6e3187ab33c44aa0ba8b4080292141f154991c8f6d6b917243e45c49181eaa",
+      "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+      "src/NativeLayout.h": "bae2bd173f9721d274c06dad293818a5e33748769a049db223883fc0fc0b39fa",
+      "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+      "src/Identifiers.h": "a6de821ab5c6390ff33fe41b2d46d5cff62cb34328b69b23316860a2eb2beafa",
+      "tests/NativeGridFixture.mm": "a1ffabd505bc6406cf96ad18276cff413280decd063a0309243ee62c86ab6282",
+      "tests/mac_ax.py": "22bbc7a2a5ef520197cc05724991daa2cc659f34f8811bb132eeaa459d8d1747",
+      "tests/voiceover.py": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+      "tests/ReadScreen.swift": "10399fe72efb1481b610720735e646e812658906dd9e983c0470201d2711ae62",
+      "test_grid_value_speech.py": "bb3b16f16660c9f143719180e1becfed6562ac3803e466a2af6f38bf51b738be"
+    },
+    "cases": [
+      {
+        "case": "single",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.777,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.497,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.307,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.161,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.932,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.817,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.681,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.502,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "forward",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 3 row-00000 / column-2 / value-0"
+          }
+        ],
+        "observations": [
+          {
+            "column": 1,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.818,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 2.58,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.393,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.162,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.952,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.772,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.532,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.299,
+                "caption": "X row-00000 / column-1 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "back",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "VoiceOver returns to the first cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.849,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 2.655,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.443,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.247,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.069,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.883,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.743,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.535,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "leave",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver visits a second cold cell",
+          "VoiceOver leaves both cold cells for native window controls",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "pending grid values do not interrupt reading outside the grid",
+          "VoiceOver remains at the window close button",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 2 Loading"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          }
+        ],
+        "observations": [
+          {
+            "column": 1,
+            "leftGrid": true,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.866,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 2.672,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 4.49,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 6.342,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 8.233,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 10.043,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 11.858,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 13.757,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "inspection",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "an unrelated AX client inspects another cold cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.794,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.513,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.226,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 5.942,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 7.698,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.511,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.326,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.082,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "reload",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "cache invalidation preserves cell identity",
+          "VoiceOver revisits the retained cell while its identical value reloads",
+          "external AX reads the provider's actual value",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          },
+          {
+            "key": "left",
+            "shift": false,
+            "command": false,
+            "caption": "X Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.861,
+                "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+              },
+              {
+                "afterLoadedSeconds": 2.676,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.512,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.296,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.054,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 9.924,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 11.807,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 13.636,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              }
+            ]
+          },
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.851,
+                "caption": "X You are currently on a cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit"
+              },
+              {
+                "afterLoadedSeconds": 2.689,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.482,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 6.276,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 8.102,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 9.821,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 11.629,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              },
+              {
+                "afterLoadedSeconds": 13.404,
+                "caption": "X row-00000 / column-0 / value-0, cell"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "checkbox",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.785,
+                "caption": "\u00d7 Approved dimmed checked checkbox, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.599,
+                "caption": "\u00d7 Approved dimmed checked checkbox, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.36,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 6.214,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 8.046,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 9.877,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 11.782,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              },
+              {
+                "afterLoadedSeconds": 13.609,
+                "caption": "X You are currently on a checkbox cell, inside of a table. To navigate the cells within this table press Control-Option, and then Up Arrow, Down Arrow, Left Arrow, or Right"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "checkbox_leave",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "VoiceOver leaves both cold cells for native window controls",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "pending grid values do not interrupt reading outside the grid",
+          "VoiceOver remains at the window close button",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": true,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.767,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 2.635,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 4.44,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 6.297,
+                "caption": "\u00d7 You are currently on a button. To click this button, which closes the current window, press Control-Option-Space."
+              },
+              {
+                "afterLoadedSeconds": 8.104,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 9.936,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 11.769,
+                "caption": "\u00d7 Approved checked checkbox"
+              },
+              {
+                "afterLoadedSeconds": 13.53,
+                "caption": "\u00d7 Approved checked checkbox"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      },
+      {
+        "case": "popup",
+        "passed": true,
+        "checks": [
+          "exact owned native window is frontmost",
+          "complete synthetic logical table is discoverable",
+          "fixture withholds values while exposing the real grid",
+          "VoiceOver begins at the owned window",
+          "VoiceOver reaches the bridge group",
+          "VoiceOver reaches the logical table",
+          "VoiceOver actually reads the cold first cell",
+          "external AX reads the provider's actual value",
+          "loaded content exposes its actual control role and state",
+          "read-only control does not acquire a mutation action",
+          "provider remains responsive during delayed speech",
+          "VoiceOver speaks the arriving value without cursor movement",
+          "VoiceOver does not speak a different cell's value",
+          "next navigation starts from the same cell",
+          "reading does not select a row"
+        ],
+        "voiceover": [
+          {
+            "key": "home",
+            "shift": false,
+            "command": true,
+            "caption": "\u00d7 close, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X minimize, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 zoom, dimmed, button"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 AXB complete logical grid fixture"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "X Complete grid fixture, group"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "\u00d7 In Complete grid fixture, group, All 60 rows and 24 columns, table"
+          },
+          {
+            "key": "down",
+            "shift": true,
+            "command": false,
+            "caption": "X In All 60 rows and 24 columns, table, Column 1 Loading"
+          },
+          {
+            "key": "right",
+            "shift": false,
+            "command": false,
+            "caption": "\u00d7 Column 2 row-00000 / column-1 / value-o"
+          }
+        ],
+        "observations": [
+          {
+            "column": 0,
+            "leftGrid": false,
+            "captions": [
+              {
+                "afterLoadedSeconds": 0.787,
+                "caption": "\u00d7 Allowed Decision dimmed pop up button, cell"
+              },
+              {
+                "afterLoadedSeconds": 2.651,
+                "caption": "\u00d7 Allowed Decision dimmed pop up button, cell"
+              },
+              {
+                "afterLoadedSeconds": 4.465,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 6.35,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 8.167,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 9.92,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 11.812,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              },
+              {
+                "afterLoadedSeconds": 13.686,
+                "caption": "X You are currently on a pop up button cell, inside of a table. To navigate the cells within this table press Control- Option, and then Up Arrow, Down Arrow, Left Arrow, or"
+              }
+            ]
+          }
+        ],
+        "initialCaption": "\u00d7 close, button",
+        "exitCode": 0
+      }
+    ]
+  },
+  "singlePointerGeometry": [
+    {
+      "mode": "interpreted",
+      "reportSHA256": "380bdb65812a07b37231ec6b342a8318c4e6ec346fed0dea2065a95991acc05c",
+      "checks": [
+        "actual desktop execution mode matches the requested mode",
+        "singleText returns one hierarchy pointer and eight backing rows",
+        "singleText all backing leaves have positive ordinary first-column geometry",
+        "singleText host capture publishes four distinct native groups and eight leaves",
+        "singleText collapse removes ordinary leaf geometry",
+        "singleText host capture retains root identities and omits collapsed leaves",
+        "singleText reopening restores every leaf and preserves binding values",
+        "singleText native reopen changes only a uniform vertical origin",
+        "singleText explicit global height controls the leaf heights",
+        "singleText each break gap follows the public global height",
+        "singleText individual configured height is ignored by native hierarchy geometry",
+        "singleText ignored individual height preserves the native window pixels",
+        "singleText collapsed group markers differ by the public break height",
+        "singleDate returns one hierarchy pointer and eight backing rows",
+        "singleDate all backing leaves have positive ordinary first-column geometry",
+        "singleDate host capture publishes four distinct native groups and eight leaves",
+        "singleDate collapse removes ordinary leaf geometry",
+        "singleDate host capture retains root identities and omits collapsed leaves",
+        "singleDate reopening restores every leaf and preserves binding values",
+        "singleDate native reopen changes only a uniform vertical origin",
+        "singleDate explicit global height controls the leaf heights",
+        "singleDate each break gap follows the public global height",
+        "singleDate individual configured height is ignored by native hierarchy geometry",
+        "singleDate ignored individual height preserves the native window pixels",
+        "singleDate collapsed group markers differ by the public break height",
+        "Owned process exits zero with a matching close marker and no error"
+      ]
+    },
+    {
+      "mode": "compiled",
+      "reportSHA256": "39010ceff120612a42a78aaf965a16747a0b42d6ebbb5d8cfa9d4d6d5cf02968",
+      "checks": [
+        "actual desktop execution mode matches the requested mode",
+        "singleText returns one hierarchy pointer and eight backing rows",
+        "singleText all backing leaves have positive ordinary first-column geometry",
+        "singleText host capture publishes four distinct native groups and eight leaves",
+        "singleText collapse removes ordinary leaf geometry",
+        "singleText host capture retains root identities and omits collapsed leaves",
+        "singleText reopening restores every leaf and preserves binding values",
+        "singleText native reopen changes only a uniform vertical origin",
+        "singleText explicit global height controls the leaf heights",
+        "singleText each break gap follows the public global height",
+        "singleText individual configured height is ignored by native hierarchy geometry",
+        "singleText ignored individual height preserves the native window pixels",
+        "singleText collapsed group markers differ by the public break height",
+        "singleDate returns one hierarchy pointer and eight backing rows",
+        "singleDate all backing leaves have positive ordinary first-column geometry",
+        "singleDate host capture publishes four distinct native groups and eight leaves",
+        "singleDate collapse removes ordinary leaf geometry",
+        "singleDate host capture retains root identities and omits collapsed leaves",
+        "singleDate reopening restores every leaf and preserves binding values",
+        "singleDate native reopen changes only a uniform vertical origin",
+        "singleDate explicit global height controls the leaf heights",
+        "singleDate each break gap follows the public global height",
+        "singleDate individual configured height is ignored by native hierarchy geometry",
+        "singleDate ignored individual height preserves the native window pixels",
+        "singleDate collapsed group markers differ by the public break height",
+        "Owned process exits zero with a matching close marker and no error"
+      ]
+    }
+  ],
+  "hostCommandChecks": {
+    "rows": {
+      "checks": 28,
+      "reportSHA256": "4df03980460640e011e84d776bd21ae7ff73478b6d2055f2270d3c51dcdb24bb"
+    },
+    "geometryAndPages": {
+      "checks": 11,
+      "reportSHA256": "09210eb35c34e5e08dc83ef1b1d1a8a813b001d40777c27a6d8d6304b7ab4e8b"
+    }
+  },
+  "limitations": [
+    "Disclosure, complete selection, reveal and editing remain unavailable through accessibility. Original fixture commands change expansion.",
+    "Only text/date break captions are accepted. Hidden backing rows, formatted text and protected captions fail closed.",
+    "One-pointer and nested array hierarchies are synthetic acceptance. Actual Symphony Alerts/date workflows are pending.",
+    "Lazy loading, ancestor clipping, broader styled/numeric captions, classic trees and other hierarchy families remain pending.",
+    "VoiceOver says table on entry despite AXOutline. The one-second settled layout notification is an observed workaround.",
+    "Host architecture is recorded. Physical Intel, client/server, background-window speech and signed distribution are not established."
+  ]
+}

@@ -51,6 +51,8 @@ The optional `--grouped-states` cases and `summarize_grouped_probe.py` require P
 
 The production native outline provider has a separate [AppKit acceptance fixture](tests/NATIVE-OUTLINES.md). It tests supplied topology, disclosure relationships, unknown selection, group labels, retained-handle retirement and VoiceOver levels/offscreen navigation. It does not supply a 4D hierarchy adapter or disclosure action.
 
+The development [read-only grouped adapter gate](tests/GROUPED-OUTLINES.md) adds owning-form capture for text/date array breaks. It tests both 4D modes, compiled VoiceOver, caption/binding rejection and recovery, exact packages, cold-value speech and complete-window baseline pixels. It leaves disclosure, selection, reveal, editing and actual Symphony hierarchy workflows pending.
+
 The separate `--grouped-inputs` cases and `summarize_grouped_inputs.py` check center clicks followed by native keyboard disclosure on visible later/nested breaks. They need no Pillow dependency and cannot combine with `--grouped-states`. Selection-preserving disclosure, arbitrary/offscreen targets and action races remain unvalidated. Both evidence publishers reject stale prepared method sets; CI runs four deletion/rename fault regressions.
 
 `python3 test_form_focus.py --server /path/to/4D\ Server.app` exercises production focus resolution with real 4D object identities and child paths. It covers forwarded ancestor events, shared bindings, unobserved descendants, retired/disabled controls and conflicting contexts. Run it sequentially with every other 4D compiler or graphical fixture. It complements the live event and VoiceOver checks.
@@ -67,7 +69,7 @@ For delayed grid values, without a 4D installation:
 python3 test_grid_value_speech.py --run
 ```
 
-This builds the production native provider in an owned synthetic window and starts its own VoiceOver session. Eight cases verify speech when a cold cell loads, navigation between pending cells, leaving the grid, unrelated AX inspection, reloading the same value and delayed checkbox/popup roles. Each case observes speech without moving the reading cursor, then checks its position. Existing user VoiceOver sessions are left alone. Reports and synthetic caption images stay under ignored `build/grid-value-speech/`. Use `--case single` for the shortest reproduction or omit `--run` to compile only. `test_native_grids.py --run --voiceover` separately tests all 50,000 logical rows and 24 columns.
+This builds the production native provider in an owned synthetic window and starts its own VoiceOver session. Nine cases verify speech when a cold cell loads, navigation between pending cells, leaving the grid, unrelated AX inspection, reloading the same value and delayed checkbox/popup roles. Each case observes speech without moving the reading cursor, then checks its position. Existing user VoiceOver sessions are left alone. Reports and synthetic caption images stay under ignored `build/grid-value-speech/`. Use `--case single` for the shortest reproduction or omit `--run` to compile only. `test_native_grids.py --run --voiceover` separately tests all 50,000 logical rows and 24 columns.
 
 For example, after building the two packages:
 

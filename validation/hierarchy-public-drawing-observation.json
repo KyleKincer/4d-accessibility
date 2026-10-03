@@ -1,0 +1,74 @@
+{
+  "scope": "Bounded public AppKit drawing diagnostic. No adapter or disclosure action acceptance.",
+  "runs": [
+    {
+      "mode": "interpreted",
+      "reportSHA256": "3ada14c0dfe82430afe20bfc1b494e88c9cb895e950f29111c2b8087fbb3a7ed",
+      "diagnosticNativeSHA256": "3d8bf89697e5d7e3149a58b56c0075c044b61a67c3e3291b33e8cc63293dc2b8",
+      "uniqueMappedDiagnostic": true,
+      "checks": [
+        "Both representations, selection, focus and OK preserved",
+        "All root and latent descendants read without expanding",
+        "Negative references and blank leaf preserved",
+        "Empty branch retained",
+        "Three hierarchy pointers returned",
+        "Process-targeted POST KEY matches native tree arrows and original handler sequences",
+        "Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry",
+        "laterRootRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedLeft changes its intended branch and runs one native disclosure handler",
+        "laterRootLeft changes its intended branch and runs one native disclosure handler",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "states": 37,
+      "finalPaintCalls": 637,
+      "finalStoredPaints": 637,
+      "finalKinds": {
+        "NSButtonCell": 482,
+        "NSTextFieldCell": 155
+      },
+      "finalDisclosurePaints": 468,
+      "ownedDisclosurePaints": 0,
+      "nativeClose": {
+        "runId": "86b5a99f30d1463ead75331c24985818"
+      },
+      "exitCode": 0
+    },
+    {
+      "mode": "compiled",
+      "reportSHA256": "6f1f390daf22a6ca946584a31673e04bcdd795cb7ad43763918115ccd887fa4c",
+      "diagnosticNativeSHA256": "3d8bf89697e5d7e3149a58b56c0075c044b61a67c3e3291b33e8cc63293dc2b8",
+      "uniqueMappedDiagnostic": true,
+      "checks": [
+        "Both representations, selection, focus and OK preserved",
+        "All root and latent descendants read without expanding",
+        "Negative references and blank leaf preserved",
+        "Empty branch retained",
+        "Three hierarchy pointers returned",
+        "Process-targeted POST KEY matches native tree arrows and original handler sequences",
+        "Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry",
+        "laterRootRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedRight changes its intended branch and runs one native disclosure handler",
+        "laterNestedLeft changes its intended branch and runs one native disclosure handler",
+        "laterRootLeft changes its intended branch and runs one native disclosure handler",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "states": 37,
+      "finalPaintCalls": 637,
+      "finalStoredPaints": 637,
+      "finalKinds": {
+        "NSButtonCell": 482,
+        "NSTextFieldCell": 155
+      },
+      "finalDisclosurePaints": 468,
+      "ownedDisclosurePaints": 0,
+      "nativeClose": {
+        "runId": "86b5a99f30d1463ead75331c24985818"
+      },
+      "exitCode": 0
+    }
+  ],
+  "observerSourceSHA256": "242c34f5c44c707d8fab85cd227ba734484fb4a4fd1ef9de06f120aa73dd4d9a",
+  "compileReportSHA256": "2f844719f8bc587abef07da2fd927fccef6de24be1b00d2ecf0ec161a090a89b",
+  "conclusion": "No public drawing authority found in the tested runtime. Disclosure cells draw with supplied views lacking an owning window, control-view association and focus-view association. Painted rectangles do not establish native input targets."
+}
