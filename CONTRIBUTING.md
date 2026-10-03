@@ -45,6 +45,8 @@ For native web areas beside ordinary controls, use [web-area acceptance](tests/W
 
 For Appium Mac2/XCTest discovery and original-handler activation, use [Appium acceptance](tests/APPIUM.md). It operates the disposable classic list parent through stable identifiers and independently verifies fixture state. This is separate from real application or SQUASH runner acceptance.
 
+For the remaining hierarchy adapter, use [native hierarchy probes](tests/HIERARCHY-PROBES.md). These compare read-only state, native tree arrows, process-targeted `POST KEY` and grouped mouse disclosure. The optional observer records public native views and drawing with distinct test binaries. Neither these probes nor their compilation establishes hierarchy accessibility.
+
 `python3 test_form_focus.py --server /path/to/4D\ Server.app` exercises production focus resolution with real 4D object identities and child paths. It covers forwarded ancestor events, shared bindings, unobserved descendants, retired/disabled controls and conflicting contexts. Run it sequentially with every other 4D compiler or graphical fixture. It complements the live event and VoiceOver checks.
 
 `test_area_pixels.py --server /path/to/4D\ Server.app --run` compares the complete rendered synthetic window with and without the area. It requires Pillow and accepts no changed pixels, masks or tolerance.
