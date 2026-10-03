@@ -1,0 +1,914 @@
+{
+  "date": "2026-10-03T15:31:43.017698+00:00",
+  "scope": "Synthetic native hierarchy investigation only. No bridge adapter, VoiceOver or Symphony hierarchy workflow acceptance.",
+  "productionSourceCommit": "b699e632c863f360ad0ec9658c114fe3563a515b",
+  "productionRuntimeUnchanged": true,
+  "environment": {
+    "macOS": "26.7.1",
+    "hostArchitecture": "arm64",
+    "4DDesktopVersion": "20.8 build 20.102009"
+  },
+  "fixtureCompile": {
+    "passed": true,
+    "compiler": {
+      "success": true,
+      "errors": []
+    },
+    "targets": [
+      "arm64_macOS_lib",
+      "x86_64_generic"
+    ],
+    "sourceFiles": 15,
+    "changedDuringCompile": [],
+    "reportSHA256": "e447d8c136ef62b8c331467c82981515b7418832f13b0a2762b8eb3625ab4333",
+    "preparerSHA256": "79467f2dd93973b0edc570b9b9c32da377540481694de8cbe1f4696f8f84240e",
+    "sourcesSHA256": {
+      "Project/Sources/catalog.4DCatalog": "525d6e445523eb5cc5493241e35fec6c363737da37697f333d0e89a6b8310b46",
+      "Project/Sources/Methods/Compiler_Hierarchy.4dm": "d927cadd577c46cd8852aebcf1dfabb24af12876a673f0f996a2af1bd4d22d73",
+      "Project/Sources/Methods/AXHP_Error.4dm": "57ce45748aea4dabb43e4cf1e7afbc05f5bb3bf30d6002df16d708368f6af77e",
+      "Project/Sources/Methods/AXHP_State.4dm": "0be83dd553bbf17cfc62c950e467d50ebb83829de761467c5780e384fb871fd1",
+      "Project/Sources/Methods/AXHP_ListState.4dm": "b17013a181f8f97690c1b81b1f567be47a4cb9eb9f9411e5a928efea55b1d24d",
+      "Project/Sources/Methods/AXHP_Event.4dm": "8f922e0f62a356517f526a85c010e28539c9caf25a5a6055404d4d8a8f146c4c",
+      "Project/Sources/Methods/AXHP_Command.4dm": "31b82bcb70593f2d298929d6d62682ae66d4dd3ee3c12d5ee272a1095ceff3b3",
+      "Project/Sources/Methods/AXHP_Form.4dm": "598b4310f3f43a61f7c5c81d140f081c6ad71c619f45f60d581b82c02054d654",
+      "Project/Sources/Methods/AXHP_Topology.4dm": "2ea8448d2e328f2974a88093e02afb8200f8d97fabe51aab869a8c9d893e6392",
+      "Project/Sources/DatabaseMethods/onStartup.4dm": "876264f691233df1ba3262b02f5c06700b5651e25496eedf7a4660f752b091ce",
+      "Project/Sources/Forms/Probe/method.4dm": "5de75239acede2c67bffdaea308f9b3ed3e34bf9519f828968aebbdd1c752df6",
+      "Project/Sources/Forms/Probe/form.4DForm": "89f17f182510f6fe20a9c06f91b7927a56f0bd2de3723ccb0769ed02980801fa",
+      "Project/Sources/Forms/Probe/ObjectMethods/Grouped.4dm": "a35901e6d9067fd82f6416cdcee57f23127f8d755523b3cd368b8f5b2e5caab3",
+      "Project/Sources/Forms/Probe/ObjectMethods/TreeB.4dm": "a35901e6d9067fd82f6416cdcee57f23127f8d755523b3cd368b8f5b2e5caab3",
+      "Project/Sources/Forms/Probe/ObjectMethods/TreeA.4dm": "a35901e6d9067fd82f6416cdcee57f23127f8d755523b3cd368b8f5b2e5caab3"
+    }
+  },
+  "diagnosticObserver": {
+    "productionSourceCommit": "b699e632c863f360ad0ec9658c114fe3563a515b",
+    "observerTemplateSHA256": "d971c2ff849a743b2089a64b18e1efa6b56d2112a8d18a9128bb040ef61e42f9",
+    "observerPluginSourceSHA256": "f4ec27dacdb8635cb07705d7aa7cf2e4716e0a0f8424f3bebc2d2f037e4f55fc",
+    "preparerSHA256": "69a405990ac224c16875684517e9ae86cae26be38ffb2a5da3a1671c4f52aacb",
+    "scope": "Disposable native view and public NSCell drawing observation, no adapter acceptance",
+    "diagnosticNativeSHA256": "cd893e93467ea5d654191403c95dcbfaa628e1129ba107f9bb111589466934d1",
+    "publicationRecipePreparedOnly": true,
+    "preparedPluginMatchesExecutedPlugin": true,
+    "productionKit": false,
+    "installation": "Disposable fixture only; not installed in Symphony"
+  },
+  "reports": {
+    "interpreted": {
+      "passed": true,
+      "checks": [
+        "Both representations, selection, focus and OK preserved",
+        "All root and latent descendants read without expanding",
+        "Negative references and blank leaf preserved",
+        "Empty branch retained",
+        "Three hierarchy pointers returned",
+        "Process-targeted POST KEY matches native tree arrows and original handler sequences",
+        "Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "exitCode": 0,
+      "matchingCloseRunId": true,
+      "shutdownErrors": [],
+      "finalErrorFileAbsent": true,
+      "reportSHA256": "408d247b440cd7c22423638cb6c938fc3af882f4856f7ac14146b993ff708fc4",
+      "driverSHA256": "6f8de2ec5633bf8b6c2760661a15493b9b937bfd8ed686cff00149094b456626",
+      "compileReportSHA256": "e447d8c136ef62b8c331467c82981515b7418832f13b0a2762b8eb3625ab4333",
+      "diagnosticNativeSHA256": "cd893e93467ea5d654191403c95dcbfaa628e1129ba107f9bb111589466934d1",
+      "uniqueMappedDiagnostic": true,
+      "native": {
+        "mainThread": true,
+        "viewTypes": {
+          "NSView": 14,
+          "NSControl": 4
+        },
+        "inventoryErrors": [],
+        "paintCalls": 15,
+        "storedPaints": 15,
+        "windowMatchingPaints": 0,
+        "paintKinds": {
+          "NSTextFieldCell": 15
+        },
+        "allPaintSamplesBlank": true
+      },
+      "probes": [
+        {
+          "operation": "treeExpand",
+          "newEvents": [],
+          "treeASelected": [
+            201
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            201
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeSelect",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupExpand",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupSelect",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeSelectRoot",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "focusTree",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "nativeRight",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 43
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "nativeLeft",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 44
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "nativeDown",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 31
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeSelectRoot",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "focusTree",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treePostRight",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 43
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treePostLeft",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 44
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treePostDown",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 31
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupSelectRoot",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "focusGrouped",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupNativeRight",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 4,
+              "column": 0,
+              "frame": [
+                20,
+                280,
+                20,
+                280
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupNativeLeft",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 4,
+              "column": 0,
+              "frame": [
+                20,
+                280,
+                20,
+                280
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupNativeDown",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupMouseExpand",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false,
+          "ownerVerified": true,
+          "disclosurePointHitBefore": [
+            1,
+            1
+          ],
+          "firstLeafBefore": [
+            20,
+            317,
+            180,
+            317
+          ],
+          "firstLeafAfter": [
+            20,
+            337,
+            180,
+            357
+          ]
+        },
+        {
+          "operation": "groupMouseCollapse",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false,
+          "ownerVerified": true,
+          "disclosurePointHitBefore": [
+            1,
+            1
+          ],
+          "firstLeafBefore": [
+            20,
+            337,
+            180,
+            357
+          ],
+          "firstLeafAfter": [
+            20,
+            317,
+            180,
+            317
+          ]
+        }
+      ]
+    },
+    "compiled": {
+      "passed": true,
+      "checks": [
+        "Both representations, selection, focus and OK preserved",
+        "All root and latent descendants read without expanding",
+        "Negative references and blank leaf preserved",
+        "Empty branch retained",
+        "Three hierarchy pointers returned",
+        "Process-targeted POST KEY matches native tree arrows and original handler sequences",
+        "Native grouped mouse disclosure targets the verified break, runs its handler once and changes descendant geometry",
+        "Owned process exits zero with a matching close marker and no error"
+      ],
+      "exitCode": 0,
+      "matchingCloseRunId": true,
+      "shutdownErrors": [],
+      "finalErrorFileAbsent": true,
+      "reportSHA256": "e893b7ebb9878aa427176da83ee3001f85d146cd4f03a0eedfdfcc43bbfba894",
+      "driverSHA256": "6f8de2ec5633bf8b6c2760661a15493b9b937bfd8ed686cff00149094b456626",
+      "compileReportSHA256": "e447d8c136ef62b8c331467c82981515b7418832f13b0a2762b8eb3625ab4333",
+      "diagnosticNativeSHA256": "cd893e93467ea5d654191403c95dcbfaa628e1129ba107f9bb111589466934d1",
+      "uniqueMappedDiagnostic": true,
+      "native": {
+        "mainThread": true,
+        "viewTypes": {
+          "NSView": 14,
+          "NSControl": 4
+        },
+        "inventoryErrors": [],
+        "paintCalls": 15,
+        "storedPaints": 15,
+        "windowMatchingPaints": 0,
+        "paintKinds": {
+          "NSTextFieldCell": 15
+        },
+        "allPaintSamplesBlank": true
+      },
+      "probes": [
+        {
+          "operation": "treeExpand",
+          "newEvents": [],
+          "treeASelected": [
+            201
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            201
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeSelect",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupExpand",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupSelect",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            -301
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeSelectRoot",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "focusTree",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "nativeRight",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 43
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "nativeLeft",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 44
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "nativeDown",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 31
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treeSelectRoot",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "focusTree",
+          "newEvents": [],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treePostRight",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 43
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": true,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treePostLeft",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 44
+            }
+          ],
+          "treeASelected": [
+            101
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "treePostDown",
+          "newEvents": [
+            {
+              "name": "TreeA",
+              "event": 4
+            },
+            {
+              "name": "TreeA",
+              "event": 31
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupSelectRoot",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "focusGrouped",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupNativeRight",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 4,
+              "column": 0,
+              "frame": [
+                20,
+                280,
+                20,
+                280
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupNativeLeft",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 4,
+              "column": 0,
+              "frame": [
+                20,
+                280,
+                20,
+                280
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupNativeDown",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupCollapse",
+          "newEvents": [],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false
+        },
+        {
+          "operation": "groupMouseExpand",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 43,
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false,
+          "ownerVerified": true,
+          "disclosurePointHitBefore": [
+            1,
+            1
+          ],
+          "firstLeafBefore": [
+            20,
+            317,
+            180,
+            317
+          ],
+          "firstLeafAfter": [
+            20,
+            337,
+            180,
+            357
+          ]
+        },
+        {
+          "operation": "groupMouseCollapse",
+          "newEvents": [
+            {
+              "name": "Grouped",
+              "event": 44,
+              "row": 1,
+              "column": 1,
+              "frame": [
+                20,
+                297,
+                635,
+                317
+              ]
+            }
+          ],
+          "treeASelected": [
+            102
+          ],
+          "treeARootExpanded": false,
+          "treeBRootExpanded": false,
+          "ownerVerified": true,
+          "disclosurePointHitBefore": [
+            1,
+            1
+          ],
+          "firstLeafBefore": [
+            20,
+            337,
+            180,
+            357
+          ],
+          "firstLeafAfter": [
+            20,
+            317,
+            180,
+            317
+          ]
+        }
+      ]
+    }
+  },
+  "review": {
+    "model": "gpt-6-astra",
+    "scope": "Read-only design and harness review. Shutdown and grouped-target false-pass findings fixed before these final runs.",
+    "cleanupRegressionCases": 7
+  },
+  "limitations": [
+    "Hierarchy remains unsupported by the production bridge.",
+    "No usable NSOutlineView or window-owned public NSCell paint was observed for classic-tree geometry.",
+    "GET LIST PROPERTIES line height is a minimum, not exact row geometry.",
+    "Grouped disclosure uses a synthetic fixture inset and proves no general disclosure geometry.",
+    "POST KEY was tested only on an already focused synthetic tree; targeting another row, editing, lazy loading and action races remain unproved.",
+    "No real Symphony hierarchy workflow, VoiceOver, physical Intel, client/server or remote delivery acceptance."
+  ]
+}
