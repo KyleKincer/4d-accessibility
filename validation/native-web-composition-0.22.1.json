@@ -1,0 +1,1559 @@
+{
+  "schema": 1,
+  "date": "2026-10-03",
+  "version": "0.22.1",
+  "scope": "Whole-content inherited native containers combining ordinary 4D bridge controls with browser-owned system-engine HTML. No host hooks or physical view moves.",
+  "acceptance": "Local candidate passes; publication and exact main-CI kit acceptance remain pending.",
+  "runtime": {
+    "4D": "20.8",
+    "macOS": "26.7.1",
+    "architecture": "Apple Silicon host; individual web-run process architecture was not recorded",
+    "compilerTargets": [
+      "arm64_macOS_lib",
+      "x86_64_generic"
+    ]
+  },
+  "localKit": {
+    "baseCommit": "588ef60f7241247e692cd74c172b96dff70fd043",
+    "sourceState": "Uncommitted candidate, identified by build and test source hashes",
+    "signing": "ad hoc; not notarized",
+    "native_sha256": "0fba59a42013ea76c3bdfdc0889456d5a84203778b419a835cc2d997fc867937",
+    "component_sha256": "af990d243e13b2d10f27e33b58276461aa1db2f798795cd393f6f8e2dce125cd",
+    "nativeBuildReportSHA256": "316b1e72c1d5604634559e2b17fadd52931dfaa80c95ac110cb60a888f443f2f",
+    "componentBuildReportSHA256": "aa48f484430a966d33c8d021817ec643e34e081fbab382ec43118008272b63b3",
+    "productionSources": {
+      "src/Area.h": "93a474955f9b39e15ff2d6976ca79f3f8e3dd6f82ec1d452585871d4e9260ff9",
+      "src/Area.mm": "8e9c72e1f64d8cdff62fff069ef0127100e7636dd93f21e6712d67b4dfd0a08b",
+      "src/Bridge.h": "44aa5d23302d823876393a214468643f54dbb09e44aff3c8a1fa184851018868",
+      "src/Bridge.mm": "e7dd46661b73d65ed001c4d41cb9dfadc38ebc7662f46b547ca521abf30b4df9",
+      "src/BridgePrivate.h": "1511261a5ca197bd76c2dfe171bad0ca7cd560a8cfc8baeefd14b470f0e20ea4",
+      "src/Grid.h": "77215c0bcbd54a0b745d228e196cc2de74499e3a039b8baf3a354d4f3e450cff",
+      "src/Grid.mm": "713a2c4cc5a35acd67a731516f7b39735eae57c29dd5f95ec86de37c62c9104f",
+      "src/GridNative.mm": "568cf85800d158b41f0ab0c99067ffb6b778dc372ca295dfbf5b7089eac3bd40",
+      "src/Identifiers.h": "a6de821ab5c6390ff33fe41b2d46d5cff62cb34328b69b23316860a2eb2beafa",
+      "src/Limits.h": "be6adfbd7223e5938e015a96fe3702603daf036a889a2c09bc9d99ebb68c4b91",
+      "src/NativeLayout.h": "bae2bd173f9721d274c06dad293818a5e33748769a049db223883fc0fc0b39fa",
+      "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+      "src/Plugin.mm": "27df45bfd722a02dbfd9be77eb609d0dd4e78bccdf27c863abaf962cfd5a267d",
+      "src/Session.h": "60e610694bc9d774ce77aa364fbbd507dbbc0557c0fa14590b1acc8d4eef3341",
+      "src/Session.mm": "9f6626647a04517feffcfa1f28059dbe8508db14be64f06102f530e34ed2ca40",
+      "host/Methods/AXB_ALPEditor.4dm": "599d0f6141fb97cd7b69d5cee53aff178beb599364fbda4dfa4718dd5da5c26a",
+      "host/Methods/AXB_ALPGrid.4dm": "7236c53f5c9cad4008eb53c1f04a88d16f6f1f6b45599e6e7e71b99638c8a198",
+      "host/Methods/AXB_ALPGridAction.4dm": "366142ef7a5161726832dc7971a772b5d92eda65f9daa8347ec6dbc9fbf3cdbf",
+      "host/Methods/AXB_ALPGridConfirm.4dm": "d7115b943ef2fb80be7a16fa5174985d861b2a7222dd8e9e9159f14d5fc39f8f",
+      "host/Methods/AXB_ALPGridValue.4dm": "29f7a76896d77bed35d0a4dace68636dd29bef74628d84b3b17828c0ddd66813",
+      "host/Methods/AXB_ALPNode.4dm": "347f6ed4ee6bca9cfff75c34d72a74b86c2ae2c68fc7c27dcd6c4ad9044dae47",
+      "host/Methods/AXB_ALPRows.4dm": "cebf2b17865e283f498691d3b52114fa51c567df45ed5fa59ef431892be83cc3",
+      "host/Methods/AXB_ALPRowsSelect.4dm": "c41bb08081eacaf49a694199cb40ba46eae0e7c9dd6d3d262f730313175b44e3",
+      "host/Methods/AXB_ALPSelect.4dm": "bdd9746ab5e2316877a5994b08838400d29bf5ba440bcb13d41786b769370802",
+      "host/Methods/AXB_ALPTable.4dm": "22df5b137ebf4e3f2c1d20dc2afc6d520eb5a1995f28b8748b7843a4fdfb19f5",
+      "host/Methods/AXB_ControlNode.4dm": "3abfeb44b3d01770033c6aba5ad6f98e4c586d612e266ac2cf7797ff480f132f",
+      "host/Methods/AXB_Dispatch.4dm": "acfb4c83af0f476cc8b1da1f9b9fe9b1184785d3603ef6d8559a4f260e7be6ba",
+      "host/Methods/AXB_Poll.4dm": "a68f4e77d0c97cd6413d665eb0539a9db2a83865c445c37209372ef6186418e8",
+      "host/Methods/AXB_Pulse.4dm": "dac349b76f7f9c14336396711d748c609d88d3f1569d97f0f0745cb7fa7bf458",
+      "host/Methods/AXB_Start.4dm": "1fead9fe034cecc7ca428e877bb87b520be1a11fce908aaafa525974eddbdb31",
+      "host/Methods/AXB_Stop.4dm": "b34800c436a62339e79ce1ab1f4864445387a10d807bc82b8c8ec02b0512e551",
+      "host/Methods/Compiler_AXB.4dm": "5591f39488001d13a8c8f8883e000b369b0ae2ae5680fb22d511f6ee731ab8e7",
+      "resources/en.lproj/AccessibilityBridge.strings": "eede755b7f18e3b925931f4cd56ae311688da90b0a72c3ee33f22ee3dd7f3742",
+      "manifest.json": "b884b738d8b15f7d9f1449c604c6f92dd96575b0dbfe93d1b29b8b9ad4acca0b",
+      "VERSION": "cc001c7b0f7e3ddacdc145fb6e4101e66a11e1bc82399f59d9ed020c0cc30273"
+    }
+  },
+  "nativeInterop": {
+    "passed": true,
+    "exitCode": 0,
+    "checks": [
+      "owned local WebKit fixture is ready",
+      "the bridge-free plain container has the expected native default role",
+      "baseline: external hit preserves native button",
+      "baseline: external hit preserves native editor",
+      "baseline: external hit preserves native web button",
+      "baseline: native action works",
+      "baseline: web action works",
+      "the web-free form uses its separate virtual root",
+      "attach: external hit preserves native button",
+      "attach: external hit preserves native editor",
+      "attach: external hit preserves native web button",
+      "attach: native action works",
+      "attach: web action works",
+      "attach: non-focusable bridge button does not advertise a focus setter",
+      "attach: external hit finds bridge control",
+      "attach: bridge status and controls share the native parent",
+      "attach: native and virtual root children agree on parentage",
+      "attach: mixed root children are not duplicated",
+      "attach: the complete navigation order leaves the empty status group last",
+      "attach: legacy table selection advertises its setter without recursion",
+      "attach: legacy row selection advertises its setter without recursion",
+      "attach: external hit finds deepest bridge cell",
+      "refresh: external hit preserves native button",
+      "refresh: external hit preserves native editor",
+      "refresh: external hit preserves native web button",
+      "refresh: native action works",
+      "refresh: web action works",
+      "refresh: non-focusable bridge button does not advertise a focus setter",
+      "refresh: external hit finds bridge control",
+      "refresh: bridge status and controls share the native parent",
+      "refresh: native and virtual root children agree on parentage",
+      "refresh: mixed root children are not duplicated",
+      "refresh: the complete navigation order leaves the empty status group last",
+      "refresh: legacy table selection advertises its setter without recursion",
+      "refresh: legacy row selection advertises its setter without recursion",
+      "refresh: external hit finds deepest bridge cell",
+      "move: external hit preserves native button",
+      "move: external hit preserves native editor",
+      "move: external hit preserves native web button",
+      "move: native action works",
+      "move: web action works",
+      "move: non-focusable bridge button does not advertise a focus setter",
+      "move: external hit finds bridge control",
+      "move: bridge status and controls share the native parent",
+      "move: native and virtual root children agree on parentage",
+      "move: mixed root children are not duplicated",
+      "move: the complete navigation order leaves the empty status group last",
+      "move: legacy table selection advertises its setter without recursion",
+      "move: legacy row selection advertises its setter without recursion",
+      "move: external hit finds deepest bridge cell",
+      "native children added after attachment remain hittable",
+      "the next publication includes the newly added native control in navigation order",
+      "bridge action accepts one request",
+      "root receipt changes immediately when an action queues",
+      "root distinguishes delivery from completion",
+      "root exposes the exact host completion message",
+      "native editor accepts focus",
+      "bridge focus is exposed",
+      "value observer reads committed text and current focus",
+      "selection changes notify the external client",
+      "ordinary text changes do not announce layout changes",
+      "another native editor accepts focus",
+      "leaving bridge restores current native editor focus",
+      "hiding the only web area restores the native container metadata",
+      "showing the web area restores mixed containment",
+      "two native web areas retain their own providers and complete mixed navigation order",
+      "removing a web area removes its native tree and navigation stop",
+      "resizing preserves native web and editor hit testing",
+      "replacing the native container restores the retired container",
+      "container replacement preserves virtual and native hits",
+      "host container replacement preserves the native editor values",
+      "a newer host metadata assignment wins over the bridge",
+      "detach restores native metadata getter values and computed navigation",
+      "retained bridge status is empty after detach",
+      "retained bridge action is unusable after detach",
+      "detach: external hit preserves native button",
+      "detach: external hit preserves native editor",
+      "detach: external hit preserves native web button",
+      "detach: external hit preserves native late button",
+      "restart allocates a new session and virtual element",
+      "restart keeps retained old actions unusable",
+      "repeated detach restores the host's newer metadata",
+      "a distinct custom host navigation order keeps the original integration path",
+      "custom navigation fallback preserves native controls and web hit testing",
+      "custom host navigation remains unchanged after detach",
+      "legacyContainer: native controls remain hittable",
+      "a custom children provider omitting the drawing anchor cannot enumerate bridge controls",
+      "customChildrenContainer: native controls remain hittable",
+      "bridge-free help follows the native tooltip",
+      "bridge-free help follows a tooltip change",
+      "a newer host role assignment yields composition without overwriting the role",
+      "the newer host role survives detach",
+      "an existing host group role keeps the original integration path",
+      "the existing host group role survives detach"
+    ],
+    "regressions": [
+      {
+        "name": "a retained separate root stops exposing children after native composition",
+        "passed": true
+      },
+      {
+        "name": "overlapping text: external hit follows form control arbitration and clipping",
+        "passed": true
+      },
+      {
+        "name": "overlapping group: external hit follows form control arbitration and clipping",
+        "passed": true
+      },
+      {
+        "name": "overlapping button: external hit follows form control arbitration and clipping",
+        "passed": true
+      },
+      {
+        "name": "overlapping revealable: external hit follows form control arbitration and clipping",
+        "passed": true
+      },
+      {
+        "name": "a clipped revealable control remains hittable inside its viewport",
+        "passed": true
+      },
+      {
+        "name": "legacyContainer: incompatible native provider keeps the separate virtual root",
+        "passed": true
+      },
+      {
+        "name": "legacy ignored container: the separate bridge root remains discoverable and hittable",
+        "passed": true
+      },
+      {
+        "name": "legacyContainer: rejected composition preserves computed native help",
+        "passed": true
+      },
+      {
+        "name": "customChildrenContainer: incompatible native provider keeps the separate virtual root",
+        "passed": true
+      },
+      {
+        "name": "customChildrenContainer: rejected composition preserves computed native help",
+        "passed": true
+      },
+      {
+        "name": "detach leaves no application focus override on the restored ignored native container",
+        "passed": true
+      },
+      {
+        "name": "detach preserves computed native help after its source changes",
+        "passed": true
+      }
+    ],
+    "sources": {
+      "src/Bridge.mm": "e7dd46661b73d65ed001c4d41cb9dfadc38ebc7662f46b547ca521abf30b4df9",
+      "src/BridgePrivate.h": "1511261a5ca197bd76c2dfe171bad0ca7cd560a8cfc8baeefd14b470f0e20ea4",
+      "src/Session.mm": "9f6626647a04517feffcfa1f28059dbe8508db14be64f06102f530e34ed2ca40",
+      "src/Grid.mm": "713a2c4cc5a35acd67a731516f7b39735eae57c29dd5f95ec86de37c62c9104f",
+      "src/GridNative.mm": "568cf85800d158b41f0ab0c99067ffb6b778dc372ca295dfbf5b7089eac3bd40",
+      "src/NativeLayout.mm": "8dc735cfe3b079b4fffcd330b476bef286ec02c0858d5efea52969a6b4c957cf",
+      "tests/NativeInteropFixture.mm": "b1e274601b6fba0143203d31f7a031c62c6194542cc249e6ae1527b0f53a7b9b",
+      "test_native_interop.py": "1092adc231e81904ec12b00e84558a65b599d84b26c02d7f726fe09c67620c7a",
+      "tests/mac_ax.py": "22bbc7a2a5ef520197cc05724991daa2cc659f34f8811bb132eeaa459d8d1747"
+    },
+    "reportSHA256": "d87841c5c1543a4f874922006a3df02299ef6a77db45dd3db0ffabcb084d53c3",
+    "scope": "AppKit/WebKit fixture compiled with current production provider sources"
+  },
+  "nativeBaseline": {
+    "passed": true,
+    "exitCode": 0,
+    "logSHA256": "baa23d3c0f809a909ac9dd0438b08fa9792cc127b801e98c3910e30f4a6d1f9b"
+  },
+  "localWebMatrix": {
+    "passed": true,
+    "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+    "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+    "runs": [
+      {
+        "case": "web-system-baseline-actions-interpreted",
+        "passed": true,
+        "report_sha256": "6459eb038e355865ed72bf27d50828619d8fa02e931c92d5f07b3d3418deb745",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "aec54c8246e934e7e5d5890c2b5671aa0ee1e3307b29a90ce9ca161307a9dc0e",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "HTML text accepts its native AX value replacement",
+            "passed": true
+          },
+          {
+            "name": "HTML checkbox accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Native pointer disclosure exposes the expanded content",
+            "passed": true
+          },
+          {
+            "name": "Native keyboard disclosure removes collapsed content",
+            "passed": true
+          },
+          {
+            "name": "HTML reset accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Browser-owned reset restores the original HTML values",
+            "passed": true
+          },
+          {
+            "name": "Invalid HTML email is submitted through native accessibility",
+            "passed": true
+          },
+          {
+            "name": "Native browser validation prevents the invalid submission",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML name accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML email accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Valid HTML submission accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "The local endpoint receives the browser's actual submitted values",
+            "passed": true
+          },
+          {
+            "name": "Native browser link returns to the form",
+            "passed": true
+          },
+          {
+            "name": "Original web load and navigation handlers complete without a reported error",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "57b09b7043824a2aab30308cab0d44b7",
+          "clicks": 0,
+          "name": "Native field"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          },
+          {
+            "path": "/submit",
+            "query": {
+              "name": [
+                "After"
+              ],
+              "email": [
+                "after@example.test"
+              ],
+              "enabled": [
+                "on"
+              ]
+            }
+          },
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 0,
+        "browserEvents": [
+          {
+            "kind": "web",
+            "code": 1
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 15
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          }
+        ],
+        "bridgeInfo": null,
+        "readingOrder": null
+      },
+      {
+        "case": "web-system-baseline-actions-compiled",
+        "passed": true,
+        "report_sha256": "72723da8f3ef2ceec79f50849acbd7a16d864b556fb2c461d24681eed9718fc0",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "aec54c8246e934e7e5d5890c2b5671aa0ee1e3307b29a90ce9ca161307a9dc0e",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "HTML text accepts its native AX value replacement",
+            "passed": true
+          },
+          {
+            "name": "HTML checkbox accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Native pointer disclosure exposes the expanded content",
+            "passed": true
+          },
+          {
+            "name": "Native keyboard disclosure removes collapsed content",
+            "passed": true
+          },
+          {
+            "name": "HTML reset accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Browser-owned reset restores the original HTML values",
+            "passed": true
+          },
+          {
+            "name": "Invalid HTML email is submitted through native accessibility",
+            "passed": true
+          },
+          {
+            "name": "Native browser validation prevents the invalid submission",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML name accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML email accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Valid HTML submission accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "The local endpoint receives the browser's actual submitted values",
+            "passed": true
+          },
+          {
+            "name": "Native browser link returns to the form",
+            "passed": true
+          },
+          {
+            "name": "Original web load and navigation handlers complete without a reported error",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "57b09b7043824a2aab30308cab0d44b7",
+          "clicks": 0,
+          "name": "Native field"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          },
+          {
+            "path": "/submit",
+            "query": {
+              "name": [
+                "After"
+              ],
+              "email": [
+                "after@example.test"
+              ],
+              "enabled": [
+                "on"
+              ]
+            }
+          },
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 0,
+        "browserEvents": [
+          {
+            "kind": "web",
+            "code": 1
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 15
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          }
+        ],
+        "bridgeInfo": null,
+        "readingOrder": null
+      },
+      {
+        "case": "web-system-bridge-actions-interpreted",
+        "passed": true,
+        "report_sha256": "2d30cc9f6ce8d72bb841def3a4a7c8934eff659195414b7445159fd8dd1a3ee5",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "a8c51b71de4ce9d57a446ee14aeb95f99a76026430bec90c898ea3d8ac8f6ac4",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "The lifecycle area has one active registration",
+            "passed": true
+          },
+          {
+            "name": "Discovery leaves only the browser-owned web area pending",
+            "passed": true
+          },
+          {
+            "name": "The loaded native plugin and compiled component match the kit and lifecycle contract",
+            "passed": true
+          },
+          {
+            "name": "No virtual 4D descendant duplicates the native web role or frame",
+            "passed": true
+          },
+          {
+            "name": "The bridge status and native web tree share the native form container",
+            "passed": true
+          },
+          {
+            "name": "The mixed form root has one stable identifier occurrence",
+            "passed": true
+          },
+          {
+            "name": "Mixed navigation orders every child once and leaves the empty status group last",
+            "passed": true
+          },
+          {
+            "name": "Native and virtual children report the same form parent",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "HTML text accepts its native AX value replacement",
+            "passed": true
+          },
+          {
+            "name": "HTML checkbox accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Native pointer disclosure exposes the expanded content",
+            "passed": true
+          },
+          {
+            "name": "Native keyboard disclosure removes collapsed content",
+            "passed": true
+          },
+          {
+            "name": "HTML reset accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Browser-owned reset restores the original HTML values",
+            "passed": true
+          },
+          {
+            "name": "Invalid HTML email is submitted through native accessibility",
+            "passed": true
+          },
+          {
+            "name": "Native browser validation prevents the invalid submission",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML name accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML email accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Valid HTML submission accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "The local endpoint receives the browser's actual submitted values",
+            "passed": true
+          },
+          {
+            "name": "Native browser link returns to the form",
+            "passed": true
+          },
+          {
+            "name": "Original web load and navigation handlers complete without a reported error",
+            "passed": true
+          },
+          {
+            "name": "After browser submission and navigation: native web and ordinary controls retain complete mixed navigation",
+            "passed": true
+          },
+          {
+            "name": "Ordinary 4D text accepts an AX edit after web navigation",
+            "passed": true
+          },
+          {
+            "name": "Ordinary 4D editing exposes the editor as the focused element",
+            "passed": true
+          },
+          {
+            "name": "Ordinary 4D button accepts AX activation after web navigation",
+            "passed": true
+          },
+          {
+            "name": "The original 4D button handler runs exactly once",
+            "passed": true
+          },
+          {
+            "name": "Native web focus preserves 4D data and handler count",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "dca5c99b972f411da44445d37cf6ad45",
+          "clicks": 1,
+          "name": "Host edit"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          },
+          {
+            "path": "/submit",
+            "query": {
+              "name": [
+                "After"
+              ],
+              "email": [
+                "after@example.test"
+              ],
+              "enabled": [
+                "on"
+              ]
+            }
+          },
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 0,
+        "browserEvents": [
+          {
+            "kind": "web",
+            "code": 1
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 15
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          }
+        ],
+        "bridgeInfo": {
+          "ok": true,
+          "hostAPI": 1,
+          "nativeStatus": "Accessibility Bridge 0.22.1; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; macOS",
+          "componentInfo": {
+            "version": "0.22.1",
+            "protocol": 1,
+            "hostAPI": 1,
+            "automaticControls": 1,
+            "nativeFocus": 1,
+            "formOwnership": 1,
+            "rootDataOwnership": 1,
+            "sessionAllocation": 1,
+            "capturedStop": 1,
+            "compiled": true,
+            "hostCompiled": false
+          }
+        },
+        "readingOrder": null
+      },
+      {
+        "case": "web-system-bridge-actions-compiled",
+        "passed": true,
+        "report_sha256": "2cc0fb322552ecfb18e64132478ab5ed96ee07f2b511afafc52b7592fae53f70",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "a8c51b71de4ce9d57a446ee14aeb95f99a76026430bec90c898ea3d8ac8f6ac4",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "The lifecycle area has one active registration",
+            "passed": true
+          },
+          {
+            "name": "Discovery leaves only the browser-owned web area pending",
+            "passed": true
+          },
+          {
+            "name": "The loaded native plugin and compiled component match the kit and lifecycle contract",
+            "passed": true
+          },
+          {
+            "name": "No virtual 4D descendant duplicates the native web role or frame",
+            "passed": true
+          },
+          {
+            "name": "The bridge status and native web tree share the native form container",
+            "passed": true
+          },
+          {
+            "name": "The mixed form root has one stable identifier occurrence",
+            "passed": true
+          },
+          {
+            "name": "Mixed navigation orders every child once and leaves the empty status group last",
+            "passed": true
+          },
+          {
+            "name": "Native and virtual children report the same form parent",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "HTML text accepts its native AX value replacement",
+            "passed": true
+          },
+          {
+            "name": "HTML checkbox accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Native pointer disclosure exposes the expanded content",
+            "passed": true
+          },
+          {
+            "name": "Native keyboard disclosure removes collapsed content",
+            "passed": true
+          },
+          {
+            "name": "HTML reset accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "Browser-owned reset restores the original HTML values",
+            "passed": true
+          },
+          {
+            "name": "Invalid HTML email is submitted through native accessibility",
+            "passed": true
+          },
+          {
+            "name": "Native browser validation prevents the invalid submission",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML name accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Focused HTML email accepts the submission value",
+            "passed": true
+          },
+          {
+            "name": "Valid HTML submission accepts its native AX press",
+            "passed": true
+          },
+          {
+            "name": "The local endpoint receives the browser's actual submitted values",
+            "passed": true
+          },
+          {
+            "name": "Native browser link returns to the form",
+            "passed": true
+          },
+          {
+            "name": "Original web load and navigation handlers complete without a reported error",
+            "passed": true
+          },
+          {
+            "name": "After browser submission and navigation: native web and ordinary controls retain complete mixed navigation",
+            "passed": true
+          },
+          {
+            "name": "Ordinary 4D text accepts an AX edit after web navigation",
+            "passed": true
+          },
+          {
+            "name": "Ordinary 4D editing exposes the editor as the focused element",
+            "passed": true
+          },
+          {
+            "name": "Ordinary 4D button accepts AX activation after web navigation",
+            "passed": true
+          },
+          {
+            "name": "The original 4D button handler runs exactly once",
+            "passed": true
+          },
+          {
+            "name": "Native web focus preserves 4D data and handler count",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "dca5c99b972f411da44445d37cf6ad45",
+          "clicks": 1,
+          "name": "Host edit"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          },
+          {
+            "path": "/submit",
+            "query": {
+              "name": [
+                "After"
+              ],
+              "email": [
+                "after@example.test"
+              ],
+              "enabled": [
+                "on"
+              ]
+            }
+          },
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 0,
+        "browserEvents": [
+          {
+            "kind": "web",
+            "code": 1
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 15
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          }
+        ],
+        "bridgeInfo": {
+          "ok": true,
+          "hostAPI": 1,
+          "nativeStatus": "Accessibility Bridge 0.22.1; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; macOS",
+          "componentInfo": {
+            "version": "0.22.1",
+            "protocol": 1,
+            "hostAPI": 1,
+            "automaticControls": 1,
+            "nativeFocus": 1,
+            "formOwnership": 1,
+            "rootDataOwnership": 1,
+            "sessionAllocation": 1,
+            "capturedStop": 1,
+            "compiled": true,
+            "hostCompiled": true
+          }
+        },
+        "readingOrder": null
+      },
+      {
+        "case": "web-system-bridge-voiceover-compiled",
+        "passed": true,
+        "report_sha256": "a2a29e3b5f20eb2c4dc6a6c5c9a5e9fb754abd4ffdd3b49310ca593448817422",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "a8c51b71de4ce9d57a446ee14aeb95f99a76026430bec90c898ea3d8ac8f6ac4",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "The lifecycle area has one active registration",
+            "passed": true
+          },
+          {
+            "name": "Discovery leaves only the browser-owned web area pending",
+            "passed": true
+          },
+          {
+            "name": "The loaded native plugin and compiled component match the kit and lifecycle contract",
+            "passed": true
+          },
+          {
+            "name": "No virtual 4D descendant duplicates the native web role or frame",
+            "passed": true
+          },
+          {
+            "name": "The bridge status and native web tree share the native form container",
+            "passed": true
+          },
+          {
+            "name": "The mixed form root has one stable identifier occurrence",
+            "passed": true
+          },
+          {
+            "name": "Mixed navigation orders every child once and leaves the empty status group last",
+            "passed": true
+          },
+          {
+            "name": "Native and virtual children report the same form parent",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver Count action starts with no earlier activation",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver activates the original ordinary 4D Count handler exactly once",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver reaches the HTML heading as an individual reading stop",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver activates the native HTML checkbox",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver expands the native HTML disclosure",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver reads the newly disclosed HTML content",
+            "passed": true
+          },
+          {
+            "name": "After Close, reverse navigation verifies the group boundary or the empty status group",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver reaches individual HTML heading, editor, checkbox and submit reading stops",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver reaches individual ordinary 4D and native web reading stops",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver interleaves native HTML between its neighboring 4D controls",
+            "passed": true
+          },
+          {
+            "name": "VoiceOver verifies the heading and original Count action and restores HTML checkbox/disclosure states",
+            "passed": true
+          },
+          {
+            "name": "After VoiceOver browser actions: native web and ordinary controls retain complete mixed navigation",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "dca5c99b972f411da44445d37cf6ad45",
+          "clicks": 1,
+          "name": "Native field"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 37,
+        "browserEvents": null,
+        "bridgeInfo": {
+          "ok": true,
+          "hostAPI": 1,
+          "nativeStatus": "Accessibility Bridge 0.22.1; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; macOS",
+          "componentInfo": {
+            "version": "0.22.1",
+            "protocol": 1,
+            "hostAPI": 1,
+            "automaticControls": 1,
+            "nativeFocus": 1,
+            "formOwnership": 1,
+            "rootDataOwnership": 1,
+            "sessionAllocation": 1,
+            "capturedStop": 1,
+            "compiled": true,
+            "hostCompiled": true
+          }
+        },
+        "readingOrder": {
+          "fieldIndex": 5,
+          "countIndex": 6,
+          "webGroupIndex": 8,
+          "headingIndex": 11,
+          "closeIndex": 33
+        }
+      },
+      {
+        "case": "web-system-baseline-pixels-compiled",
+        "passed": true,
+        "report_sha256": "83b8cb8976276123c9885a06ab76ed4a7b02c497ab09b5e53e3102f6ad6c8cfd",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "109cd5c27de9b1ec3c45401f51f739a36074250ad0d280f8568d7d3f8d1a9253",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "Pixel capture preserves the original 4D value",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "dac0ac37147348b9a85915ca3f57b73b",
+          "clicks": 1,
+          "name": "Native field"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 0,
+        "browserEvents": null,
+        "bridgeInfo": null,
+        "readingOrder": null
+      },
+      {
+        "case": "web-system-bridge-pixels-compiled",
+        "passed": true,
+        "report_sha256": "3dd0650888f7ed1b4218190a70525b902d80866acf5d9a221b39b24c2859a66c",
+        "driver_sha256": "99c2b02e2d38d9f28c7b0ca5e97cec93c64b175e3248243f13f6dafb435adf38",
+        "voiceover_helper_sha256": "83c1f942a925a2fdeb55b3ca930342c9bbb66c9359feef77a010ba8238f84b0b",
+        "compile_sha256": "f271629f4faed905dc711a54c0d598d2c7c9772ca929969b12be6519026547cd",
+        "checks": [
+          {
+            "name": "Actual 4D execution mode matches the requested mode",
+            "passed": true
+          },
+          {
+            "name": "The actual window contains one native web accessibility tree",
+            "passed": true
+          },
+          {
+            "name": "The bridge does not publish duplicate HTML controls",
+            "passed": true
+          },
+          {
+            "name": "Only the integrated fixture has a bridge accessibility root",
+            "passed": true
+          },
+          {
+            "name": "The lifecycle area has one active registration",
+            "passed": true
+          },
+          {
+            "name": "Discovery leaves only the browser-owned web area pending",
+            "passed": true
+          },
+          {
+            "name": "The loaded native plugin and compiled component match the kit and lifecycle contract",
+            "passed": true
+          },
+          {
+            "name": "No virtual 4D descendant duplicates the native web role or frame",
+            "passed": true
+          },
+          {
+            "name": "The bridge status and native web tree share the native form container",
+            "passed": true
+          },
+          {
+            "name": "The mixed form root has one stable identifier occurrence",
+            "passed": true
+          },
+          {
+            "name": "Mixed navigation orders every child once and leaves the empty status group last",
+            "passed": true
+          },
+          {
+            "name": "Native and virtual children report the same form parent",
+            "passed": true
+          },
+          {
+            "name": "Native HTML labels, roles and initial values are exposed",
+            "passed": true
+          },
+          {
+            "name": "Pixel capture preserves the original 4D value",
+            "passed": true
+          }
+        ],
+        "closed": {
+          "runId": "d84bfa840004480e88d1e493da12d28d",
+          "clicks": 1,
+          "name": "Native field"
+        },
+        "requests": [
+          {
+            "path": "/",
+            "query": {}
+          }
+        ],
+        "voiceoverSteps": 0,
+        "browserEvents": null,
+        "bridgeInfo": {
+          "ok": true,
+          "hostAPI": 1,
+          "nativeStatus": "Accessibility Bridge 0.22.1; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; macOS",
+          "componentInfo": {
+            "version": "0.22.1",
+            "protocol": 1,
+            "hostAPI": 1,
+            "automaticControls": 1,
+            "nativeFocus": 1,
+            "formOwnership": 1,
+            "rootDataOwnership": 1,
+            "sessionAllocation": 1,
+            "capturedStop": 1,
+            "compiled": true,
+            "hostCompiled": true
+          }
+        },
+        "readingOrder": null
+      }
+    ],
+    "liveChecks": 149,
+    "browserEventChecks": [
+      {
+        "mode": "interpreted",
+        "passed": true,
+        "events": [
+          {
+            "kind": "web",
+            "code": 1
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 15
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          }
+        ]
+      },
+      {
+        "mode": "compiled",
+        "passed": true,
+        "events": [
+          {
+            "kind": "web",
+            "code": 1
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 15
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 47
+          },
+          {
+            "kind": "web",
+            "code": 49
+          }
+        ]
+      }
+    ],
+    "voiceoverReadingOrder": {
+      "passed": true,
+      "closeIndex": 33,
+      "webGroupIndex": 8,
+      "headingIndex": 11,
+      "captions": [
+        "\u00d7 close, button",
+        "X minimize, button",
+        "X full screen, button",
+        "X AX native web fixture",
+        "X Native field",
+        "\u00d7 Native field, Insertion at beginning of text., Native field, edit text",
+        "\u00d7 Count, button",
+        "\u00d7 You are currently on a button. To click this button, press Control-Option-Space.",
+        "X Native web fixture, web content",
+        "X In Native web fixture, web content, heading level 1, Native web fixture",
+        "X Name",
+        "X heading level 1, Native web fixture",
+        "X You are currently on a selectable text, inside of web content. To exit this web area, press Control-Option- Shift-Up Arrow.",
+        "\u00d7 Before, contents selected, Name, required, edit text",
+        "X Email",
+        "x before@example.test, contents selected, Email, required, email field",
+        "\u00d7 Enabled, checked, checkbox",
+        "X unchecked",
+        "X checked",
+        "X Enabled",
+        "\u00d7 Reset fixture, button",
+        "\u00d7 Submit fixture, button",
+        "\u00d7 More information, collapsed, summary",
+        "X expanded",
+        "\u00d7 Expanded content.",
+        "\u00d7 More information, expanded, summary",
+        "X collapsed",
+        "X link, Next page",
+        "X Out of Native web fixture, web content",
+        "X Native field Native field, Insertion at beginning of text., Native field, edit text, Count, button, Native web fixture, web content, Close fixture, button, group",
+        "\u00d7 Native field, Insertion at beginning of text., Native field, edit text",
+        "\u00d7 Count, button",
+        "X Native web fixture, web content",
+        "\u00d7 Close fixture, button",
+        "\u00d7 Close fixture, button",
+        "X Native web fixture, web content",
+        "\u00d7 You are currently on web content. To enter the web area, press Control-Option-Shift-Down Arrow."
+      ],
+      "fieldIndex": 5,
+      "countIndex": 6,
+      "afterLastControl": {
+        "branch": "boundary",
+        "rightIndex": 34,
+        "leftIndex": 35
+      },
+      "scope": "Native HTML follows the controls above it and precedes Close below it"
+    },
+    "pixels": {
+      "passed": true,
+      "compiled": true,
+      "engine": "system",
+      "images": {
+        "baseline": {
+          "sha256": "372e6d19c92d6601c36befe29e2d7908c5ef9a44820288b8ac9dfcc3822df745",
+          "size": [
+            680,
+            648
+          ]
+        },
+        "bridge": {
+          "sha256": "372e6d19c92d6601c36befe29e2d7908c5ef9a44820288b8ac9dfcc3822df745",
+          "size": [
+            680,
+            648
+          ]
+        }
+      },
+      "reports": {
+        "baseline": "83b8cb8976276123c9885a06ab76ed4a7b02c497ab09b5e53e3102f6ad6c8cfd",
+        "bridge": "3dd0650888f7ed1b4218190a70525b902d80866acf5d9a221b39b24c2859a66c"
+      },
+      "driver_sha256": "bf4da9fa85b9c7a32e6d421e5e16c81d246e208b11f1f11f0ed59a12a5a91af6",
+      "differenceBounds": null,
+      "changedPixels": 0
+    },
+    "pixels_report_sha256": "c0ebd9d3964e28a535ab8c267ef49f485afdea28d46c188ac12208389cc0f733",
+    "reportSHA256": "dcc27eb1951e587d9f1699fc8dc14938ae5a27ef752947c04f88552f8a251df2",
+    "matrixDriverSHA256": "3d7bb6926f5e48adc74ca5ee2f1474c78c9d697614673d2b36efbc056c2103ff",
+    "prepareDriverSHA256": "5c12c203c9a4ee44cb6ffd27b73b27c3982bd889a0a03de3a5ec7032b5f9f17f"
+  },
+  "oracleRegressions": {
+    "passed": true,
+    "checks": 7,
+    "sourceSHA256": "fb62243efb4552c0e51cd2ee7adaec60a9903b538673a57edb65d229d08ccb56",
+    "scope": "Individual stops exclude interaction summaries, multiple-role captions and plain arrows"
+  },
+  "review": {
+    "model": "Claude Opus 5.5",
+    "scope": "Read-only production and regression-oracle review",
+    "corrections": [
+      "Retained roots, layered/clipped hit testing and native editor focus",
+      "Never write host Help, labels or identifiers; restore owned role explicitly",
+      "Respect inherited, legacy and custom accessibility providers",
+      "Include every child in navigation, with the status group last",
+      "Require individual VoiceOver stops and reverse navigation after Close"
+    ]
+  },
+  "rejectedApproaches": [
+    "Nullable metadata restoration froze tooltip-derived Help; removed",
+    "Getter overlays and runtime class replacement; removed",
+    "An AXUnknown composed container cycled in VoiceOver; replaced by guarded AXGroup ownership",
+    "Aggregate Close captions falsely passed an earlier oracle; those runs are superseded"
+  ],
+  "knownLimits": [
+    "Only whole-content containers whose managed accessibility methods inherit NSView implementations are composed",
+    "Detach leaves an explicit AXUnknown role equal to the probed current default",
+    "Same-value host assignments are indistinguishable; an initial explicit order equal to computed order restores as computed",
+    "A custom children provider omitting the anchor can prevent bridge enumeration; preserved custom navigation does not prove VoiceOver order",
+    "A transient reciprocity failure disables composition for the registration",
+    "Nested, scrolled, multiple-web, large-form, physical Intel and remote reading-order gates are unvalidated",
+    "Embedded Chromium, arbitrary web apps, browser dialogs, frames and third-party editors remain outside this gate",
+    "Signed/notarized distribution and actual Symphony web workflows remain separate acceptance gates"
+  ]
+}

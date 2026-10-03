@@ -31,6 +31,7 @@ jobs:
           python3 test_install_host_methods.py
           python3 test_signing_keychain.py
           python3 tests/test_desktop_session.py
+          python3 tests/test_voiceover_stops.py
           python3 test_appium_list_fixture.py --help
           python3 prepare_alp_subforms.py --help
       - name: Test session and grid models
@@ -41,6 +42,7 @@ jobs:
         run: |
           python3 build.py
           python3 test_native.py
+          python3 test_native_interop.py
           python3 test_grid_value_speech.py
       - name: Build compiled component with pinned tool4d
         run: |
