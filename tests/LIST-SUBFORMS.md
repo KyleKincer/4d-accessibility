@@ -31,7 +31,7 @@ python3 test_list_subform_matrix.py --server /path/to/4D\ Server.app --run --voi
 
 Pixel comparisons can also run independently with `test_list_subform_pixels.py --server /path/to/4D\ Server.app --run`, optionally adding `--header --multiline`.
 
-The desktop driver reads first and distant rows, checks stored primary-key locators, reveals a distant record, inspects a modified buffer, edits through the original native field and checkbox, and verifies fresh stored values. It checks original callbacks and native selection including clearing. AX transport success alone never passes an action; each case checks application completion and the actual result. The VoiceOver case also records receipt transitions because a later automatic reveal can replace the latest status message.
+The desktop driver reads first and distant rows, checks stored primary-key locators, reveals a distant record, inspects a modified buffer, edits through the original native field and checkbox, and verifies fresh stored values. It checks original callbacks and native selection including clearing. AX transport success alone never passes an action; each case checks application completion and the actual result. The VoiceOver case also records receipt transitions because a later automatic reveal can replace the latest status message. It navigates to the ordinary inspection button and activates it through VoiceOver, then verifies one original handler call, a completion receipt and independently read saved data. VoiceOver remains the sole input actor during that phase; read-only AX observations can run concurrently.
 
 For a standalone spoken check, prepare its required header/multiline layout:
 

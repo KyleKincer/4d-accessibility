@@ -203,11 +203,23 @@ def main():
             completed("Activation dispatched through the control's normal event path")
 
         def leave_editor():
+            receipt_start = len(report.get("voiceover_help_history", []))
             check(
                 control("Note").set_boolean("AXFocused", True) == 0,
                 "ordinary field accepts focus request",
             )
-            completed("Keyboard focus confirmed")
+            if args.voiceover:
+                # VoiceOver follows keyboard focus with an automatic reveal,
+                # which can replace the latest receipt before this read.
+                ax.wait_for(
+                    lambda: "Keyboard focus confirmed"
+                    in report["voiceover_help_history"][receipt_start:]
+                    and control("Note").read("AXFocused") is True,
+                    "Keyboard focus confirmed",
+                    timeout=20,
+                )
+            else:
+                completed("Keyboard focus confirmed")
 
         def stored():
             before = state().get("inspections", 0)
@@ -414,8 +426,6 @@ def main():
                 "VoiceOver checkbox did not change",
                 timeout=20,
             )
-            receipt_stop.set()
-            receipt_thread.join(timeout=2)
             check(
                 "List subform checkbox state confirmed"
                 in report["voiceover_help_history"],
@@ -454,8 +464,36 @@ def main():
             )
             check(True, "VoiceOver announces the confirmed checkbox state")
             leave_editor()
+            # Keep one input actor while VoiceOver follows keyboard focus and
+            # sends automatic reveals. AX transport can report success for a
+            # competing press that the single-flight provider cannot accept.
+            for _ in range(8):
+                caption = vo.key("right")
+                if "Inspect" in caption and "button" in caption.lower():
+                    break
+            else:
+                raise AssertionError("VoiceOver did not reach the original inspection button")
+            check(True, "VoiceOver reaches the ordinary inspection button")
+            before = state().get("inspections", 0)
+            vo.key("space")
+            saved = ax.wait_for(
+                lambda: (
+                    state().get("privateRead")
+                    if state().get("inspections", 0) == before+1
+                    and state().get("privateRead", {}).get("done")
+                    else None
+                ),
+                "VoiceOver did not activate the original inspection handler",
+                timeout=20,
+            )
+            check(True, "VoiceOver runs the original inspection handler once")
             check(
-                stored()["approved"] is True,
+                "Activation dispatched through the control's normal event path"
+                in report["voiceover_help_history"],
+                "VoiceOver inspection receives an application completion receipt",
+            )
+            check(
+                saved["approved"] is True,
                 "VoiceOver checkbox result persists through the native editor",
             )
             report["speech"] = vo.steps
