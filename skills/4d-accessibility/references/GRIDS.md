@@ -38,7 +38,7 @@ The validated fixture covers flat array list boxes with scalar text, number, dat
 
 ## Read a grouped array listbox
 
-Matching 0.23.0 development packages add read-only text/date array groups through the parent lifecycle area. The stable 0.22.1 packages do not include this adapter. Configure the existing hierarchical listbox with `kind: "outline"`, its hidden row-key column and a label:
+Matching 0.23.0 development packages add read-only text/date array groups through the parent lifecycle area. Version 0.24.0 adds optional application-controlled disclosure. The stable 0.22.1 packages do not include this adapter. Configure the existing hierarchical listbox with `kind: "outline"`, its hidden row-key column and a label:
 
 ```4d
 $options.grids:=New object("Grouped"; New object(\
@@ -47,9 +47,13 @@ $options.grids:=New object("Grouped"; New object(\
 
 Use one unique, nonempty text or integer key per backing row. Text keys allow at most 254 UTF-16 units because logical leaves add an internal prefix. Keep the ordinary Boolean selection array and all backing arrays aligned. Group identity follows native geometry, parent/level, the exact typed caption value and the exact member-key set. It does not use the displayed caption as a unique key.
 
-The adapter reads one-pointer text/date and nested text groups, including disclosed leaves outside the viewport. It preserves the native blank first leaf column in a one-pointer hierarchy. Group captions are immediate read-only text. Hidden backing rows, formatted text captions and protected captions disable the grouped provider until their unsupported state is removed. Other caption types, lazy branches and ancestor clipping need further acceptance.
+The adapter reads one-pointer text/date and nested text groups, including disclosed leaves outside the viewport. It preserves the native blank first leaf column in a one-pointer hierarchy. Group captions are immediate read-only text. Hidden backing rows, formatted text captions and protected captions disable the grouped provider until their unsupported state is removed. Other caption types and lazy branches need further acceptance.
 
-Complete break selection is unavailable through the ordinary leaf-selection array. Omit `selection` and `onSelection`; those options are rejected for this read-only kind. The provider omits selected attributes and all selection, disclosure, reveal and editing actions, and reports `groupedActionsPending`. This does not make an interactive grouped form accessible. See [the development gate](../../../tests/GROUPED-OUTLINES.md) for source/package checks, both-mode reading, VoiceOver and unchanged appearance.
+Complete break selection is unavailable through the ordinary leaf-selection array. Omit `selection` and `onSelection`; those options are rejected for this kind. The provider omits selected attributes and selection, reveal, editing and header actions, and reports `groupedActionsPending`. Without a controller it also omits disclosure. See [the read-only development gate](../../../tests/GROUPED-OUTLINES.md) for source/package checks, both-mode reading, VoiceOver and unchanged appearance.
+
+For disclosure with matching 0.24.0 packages, add `"setExpanded"; Formula(My_SetExpanded($1))` to the grid options and keep that Formula instance stable. The callback receives exactly `objectName`, one-based `backingRow`, one-based `breakLevel`, Boolean `expanded` and opaque `actionID`. Whitelist the expected owning form and native listbox, require complete arrays and the expected hierarchy, then call nonrecursive `LISTBOX EXPAND` or `LISTBOX COLLAPSE` with `lk break row` and those coordinates. Do not select a row or move focus. The bridge guards semantic identity and calls once; it confirms state and editor preservation after the callback returns. Keep a `ready` Formula false during partial loads or replacement.
+
+Live group rows expose `AXDisclosing`; rows, first cells and virtual disclosure triangles expose `AXPress`. Wait for the completion receipt, then verify application state. Disclosure bypasses ancestor scrolling, including offscreen and fully clipped targets. The native command retains its ordinary effects inside the listbox, including deselection of newly hidden leaves. [The disclosure guide](../../../tests/GROUPED-DISCLOSURE.md) specifies failure behavior, VoiceOver feedback and the repeated/nested acceptance gate. This adds targeted disclosure only; whole-workflow accessibility still requires the remaining interactive controls.
 
 ## Use a collection or entity-selection list box
 

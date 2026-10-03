@@ -1,3 +1,11 @@
+# 0.24.0 development, application-controlled grouped disclosure
+
+Text/date array hierarchies can use a stable `setExpanded` Formula to collapse or expand a semantic group through the application's targeted native command. The bridge supplies fresh backing-row and break-level coordinates, calls the controller once, and confirms the resulting group and native editor state before reporting completion. Idempotent requests do not call the controller. Scope, membership, readiness, generation and controller changes reject stale authority.
+
+Rows and their disclosure triangles support VoiceOver activation. A receipt-backed English announcement reports the confirmed caption and expanded/collapsed state when stationary value notifications do not speak it. Capability removal permanently retires old triangle handles. Disclosure skips ancestor reveal, preserving scrolling in repeated nested forms and pending text in an unrelated resolved editor.
+
+Read [configuration and gate reproduction](tests/GROUPED-DISCLOSURE.md). Complete break selection, reveal, editing, classic trees and actual Symphony hierarchy workflows remain pending. Upgrade the plugin, component and helpers together; this is a development build, with signed distribution separate.
+
 # 0.23.0 development, read-only grouped arrays
 
 Array listbox hierarchies can expose their text/date groups and disclosed leaves through the parent lifecycle area. Configure `kind: outline` and an existing hidden column of stable row keys. The adapter preserves native arrays, visible layout, handlers and selection. Group identity includes the exact typed caption value, parent and member keys. Changed membership retires old handles.

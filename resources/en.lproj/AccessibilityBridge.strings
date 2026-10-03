@@ -2,3 +2,5 @@
 "checked" = "checked";
 "mixed" = "mixed";
 "selected" = "selected";
+"expanded" = "expanded";
+"collapsed" = "collapsed";

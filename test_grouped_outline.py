@@ -69,6 +69,10 @@ def main():
                    "nativeSHA256": sha(native), "componentSHA256": sha(component), "driverSHA256": sha(Path(__file__))})
     report.update({name: prepared[name] for name in ("canonicalSourceSHA256", "nativeSourceSHA256", "componentSourceSHA256", "componentPackageSHA256")})
     report["compiledHostSHA256"] = prepared["compiledHostSHA256"]
+    if prepared.get("subforms"):
+        (resources / "launch-variant.txt").write_text("standalone")
+    if prepared.get("disclosure"):
+        (resources / "read-only.txt").write_text("The owning fixture has no disclosure controller for this run.\n")
     for name in ("state.json", "close.json", "closed.json", "error.json", "request.json"):
         (resources / name).unlink(missing_ok=True)
     run_id = (resources / "run-id.txt").read_text()

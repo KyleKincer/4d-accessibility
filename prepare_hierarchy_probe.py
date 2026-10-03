@@ -16,7 +16,7 @@ from install_host_methods import main as install_host
 
 def canonical_sources(root=ROOT):
     paths = sorted((root / "host/OptionalMethods").glob("*.4dm")) + sorted((root / "tests/4d").glob("AXHP_*.4dm"))
-    paths += [root / "prepare_hierarchy_probe.py", root / "install_host_methods.py", root / "VERSION"]
+    paths += [root / "prepare_hierarchy_probe.py", root / "tests/hierarchy_subforms.py", root / "install_host_methods.py", root / "VERSION"]
     return {str(path.relative_to(root)): sha(path) for path in paths}
 
 
@@ -25,9 +25,15 @@ def main():
     parser.add_argument("--server", type=Path, required=True)
     parser.add_argument("--diagnostic-plugin", type=Path)
     parser.add_argument("--bridge", action="store_true", help="Install the development grouped outline provider")
+    parser.add_argument("--disclosure", action="store_true", help="Opt the owned bridge fixture into an explicit disclosure controller")
+    parser.add_argument("--subforms", action="store_true", help="Exercise independently bound, repeated nested disclosure children")
     args = parser.parse_args()
     if args.bridge and args.diagnostic_plugin:
         parser.error("Choose the production development bridge or the diagnostic plugin")
+    if args.disclosure and not args.bridge:
+        parser.error("Disclosure requires the matching development bridge")
+    if args.subforms and not args.disclosure:
+        parser.error("Nested disclosure children require --bridge --disclosure")
     for name in ("4D", "4D Server"):
         if subprocess.run(["pgrep", "-x", name], capture_output=True).returncode == 0:
             parser.error("Close 4D before this sequential probe")
@@ -65,6 +71,9 @@ ARRAY DATE(AXHP_Date; 0)
 ARRAY LONGINT(AXHP_Key; 0)
 ARRAY BOOLEAN(AXHP_Selection; 0)
 ARRAY LONGINT(AXHP_Control; 0)
+C_OBJECT(AXHP_Options)
+C_OBJECT(AXHP_SetExpanded; $1)
+C_OBJECT(AXHP_SetExpandedAlternate; $1)
 C_OBJECT(AXHP_Command; $0)
 C_OBJECT(AXHP_Command; $1)
 C_OBJECT(AXHP_CaptureFault; $0; $1)
@@ -122,6 +131,9 @@ C_LONGINT(AXB_OutlineToken; $2)
                         "header": {"name": "RowKeyHeader", "text": "Row key"}})
     objects["Close"] = {"type": "button", "text": "Close probe", "action": "cancel",
         "left": 520, "top": 520, "width": 130, "height": 28}
+    if args.disclosure:
+        objects["Note"] = {"type": "input", "dataSource": "Form.note", "left": 20, "top": 520, "width": 470, "height": 28,
+            "enterable": True, "events": ["onAfterEdit"], "method": "ObjectMethods/Note.4dm"}
     form = {"windowTitle": "AX native hierarchy probe", "width": 680, "height": 570,
         "method": "method.4dm", "events": ["onLoad", "onTimer"],
         "pages": [None, {"objects": objects}]}
@@ -130,6 +142,8 @@ C_LONGINT(AXB_OutlineToken; $2)
     (form_path / "method.4dm").write_text("AXHP_Form\n")
     for name in ("TreeA", "TreeB", "Grouped"):
         (form_path / "ObjectMethods" / (name + ".4dm")).write_text("AXHP_Event\n")
+    if args.disclosure:
+        (form_path / "ObjectMethods/Note.4dm").write_text("AXHP_Event\n")
     (form_path / "form.4DForm").write_text(json.dumps(form, indent=2) + "\n")
     if args.bridge:
         compiler = methods / "Compiler_Hierarchy.4dm"
@@ -139,11 +153,29 @@ C_LONGINT(AXB_OutlineToken; $2)
         (methods / "AXB_Configure.4dm").write_text('''#DECLARE($name : Text) -> $options : Object
 $options:=New object("label"; "Hierarchy probe"; "grids"; New object("Grouped"; New object("kind"; "outline"; "keyColumn"; "RowKey"; "label"; "Grouped items")))
 ''')
+        if args.disclosure:
+            with (methods / "AXB_Configure.4dm").open("a") as configure:
+                configure.write('$options.scope:=Formula(Form.scope)\n$options.grids.Grouped.ready:=Formula(Form.ready)\nIf (Not(File("/RESOURCES/read-only.txt").exists))\n $options.grids.Grouped.setExpanded:=Formula(AXHP_SetExpanded($1))\nEnd if\nAXHP_Options:=$options\n')
         compiler = methods / "Compiler_Hierarchy.4dm"
         compiler.write_text(compiler.read_text() + "C_OBJECT(AXB_Configure; $0)\nC_TEXT(AXB_Configure; $1)\n")
         state = methods / "AXHP_State.4dm"
         state.write_text(state.read_text().replace("// Native probe result, when installed.",
             '$state.bridge:=AXB_Area("diagnostics"; ""; "")\n$state.info:=AXB_Host("info"; New object)'))
+        if args.disclosure:
+            # Fault injection changes the actual current provider options,
+            # not the configuration object copied by area startup.
+            state.write_text(state.read_text().replace('$state.bridge:=AXB_Area("diagnostics"; ""; "")', '''var $context : Object
+$context:=AXB_FormContext
+If ($context#Null)
+ AXHP_Options:=$context.view.options
+ $state.runtimeGeneration:=$context.view.grids.Grouped.generation
+ $state.runtimeDisclosure:=AXHP_Options.grids.Grouped.setExpanded#Null
+End if
+$state.bridge:=AXB_Area("diagnostics"; ""; "")'''))
+    if args.subforms:
+        from tests.hierarchy_subforms import prepare
+        prepare(sources)
+        install_host(["--project-dir", str(project.parent), "--compiler-method", "Compiler_Hierarchy", "--form", "Root"])
     (fixture / "Resources/run-id.txt").write_text(uuid.uuid4().hex)
     before = {str(p.relative_to(fixture)): sha(p) for p in sources.rglob("*") if p.is_file()}
     server = args.server.expanduser().resolve()
@@ -175,6 +207,8 @@ $options:=New object("label"; "Hierarchy probe"; "grids"; New object("Grouped"; 
         report["diagnosticNativeSHA256"] = sha(
             fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")
     report["bridge"] = args.bridge
+    report["disclosure"] = args.disclosure
+    report["subforms"] = args.subforms
     if args.bridge:
         report["nativeSHA256"] = sha(fixture / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")
         report["componentSHA256"] = sha(fixture / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ")

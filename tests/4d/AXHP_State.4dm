@@ -1,5 +1,5 @@
 var $state; $beforeA; $beforeB; $afterA; $afterB; $beforeGroup; $afterGroup; $groupSentinelBefore; $groupSentinelAfter : Object
-var $savedOK; $rows; $cols; $column; $row; $left; $top; $right; $bottom; $scroll; $lastRow : Integer
+var $savedOK; $rows; $cols; $column; $row; $left; $top; $right; $bottom; $scroll; $lastRow; $start; $end : Integer
 var $hierarchical : Boolean
 var $hitX; $hitY : Real
 var $item; $address : Object
@@ -7,6 +7,19 @@ var $fault : Text
 ARRAY POINTER($hierarchy; 0)
 ARRAY BOOLEAN($selection; 0)
 $state:=New object("command"; Form.command; "runId"; Form.runId; "compiled"; Is compiled mode; "events"; Form.events; "focus"; OBJECT Get name(Object with focus))
+Form.stateSerial:=Form.stateSerial+1
+$state.sampleSerial:=Form.stateSerial
+$state.disclosureCalls:=Form.disclosureCalls
+$state.disclosureMode:=Form.disclosureMode
+$state.scope:=Form.scope
+$state.ready:=Form.ready
+$state.note:=Form.note
+$state.editing:=Is editing text
+If ($state.editing)
+ $state.editedText:=Get edited text
+ GET HIGHLIGHT(*; $state.focus; $start; $end)
+ $state.highlight:=New collection($start; $end)
+End if
 $beforeA:=AXHP_ListState("TreeA")
 $beforeB:=AXHP_ListState("TreeB")
 $savedOK:=OK

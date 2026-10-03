@@ -12,6 +12,7 @@ root = Path(__file__).resolve().parent
 binary = root / "build/NativeProviderTests"
 subprocess.run([
     "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror",
+    "-include", str(root / "tests/NotificationProbe.h"),
     "-I", str(root / "src"), str(root / "tests/NativeProviderTests.mm"),
     str(root / "src/Session.mm"), str(root / "src/Grid.mm"), str(root / "src/Bridge.mm"), str(root / "src/GridNative.mm"), str(root / "src/NativeLayout.mm"),
     "-framework", "Cocoa", "-o", str(binary),

@@ -122,9 +122,60 @@ static void OutlineTests(void) {
     [session exchange:@{@"snapshot": Snapshot(valid, 1)} now:0];
     Check(![session enqueueNode:@"grid" revision:@1 operation:@"gridSelect" value:@[@"first"] now:0], "session rejects unknown outline selection independently of AX setters");
 }
+static void OutlineDisclosureTests(void) {
+    NSMutableDictionary *grid = Outline();
+    Check(!AXBGridRowAllowsDisclosure(grid, @"first"), "omitted disclosure capability remains read-only");
+    grid[@"actions"] = @{@"disclose": @YES};
+    Check(AXBValidateGrid(grid) == nil && AXBGridRowAllowsDisclosure(grid, @"first") &&
+        !AXBGridRowAllowsDisclosure(grid, @"leaf"), "disclosure capability permits only groups independently of editing and selection");
+    NSDictionary *guard = AXBGridGroupActionState(grid, @"first");
+    Check(guard.count == 5 && !guard[@"frame"] && [guard[@"label"] isEqual:@"Repeated"] &&
+        !AXBGridGroupActionState(grid, @"leaf"), "group action identity contains exact semantics without translated geometry");
+    NSMutableDictionary *bad = Copy(grid); bad[@"actions"][@"disclose"] = @1;
+    Check(AXBValidateGrid(bad) != nil, "disclosure capability rejects a numeric truth value");
+    bad = Copy(Descriptor(1)); bad[@"actions"] = @{@"disclose": @YES};
+    Check(AXBValidateGrid(bad) != nil, "flat grids cannot advertise disclosure");
+    bad[@"actions"] = @{@"disclose": @NO};
+    Check(AXBValidateGrid(bad) != nil, "a flat grid cannot silently retain an outline-only capability");
+    AXBSession *session = [[AXBSession alloc] initWithIdentifier:@"outline-disclosure" windowID:89];
+    [session exchange:@{@"snapshot": Snapshot(grid, 1)} now:0];
+    for (id desired in @[@1, @"true", NSNull.null, @[]])
+        Check(![session enqueueNode:@"grid" revision:@1 operation:@"gridSetExpanded" value:@{@"row": @"first", @"expanded": desired} now:0],
+            "disclosure requests require an actual Boolean");
+    for (NSString *row in @[@"leaf", @"missing", @""])
+        Check(![session enqueueNode:@"grid" revision:@1 operation:@"gridSetExpanded" value:@{@"row": row, @"expanded": @NO} now:0],
+            "disclosure requests reject leaves and unavailable targets");
+    Check([session enqueueNode:@"grid" revision:@1 operation:@"gridSetExpanded" value:@{@"row": @"first", @"expanded": @NO,
+        @"generation": @"forged", @"expectedGroup": @{@"label": @"forged"}, @"backingRow": @999, @"callback": @"forged"} now:0],
+        "a permitted disclosure request queues without backing coordinates");
+    NSDictionary *action = [session exchange:@{@"snapshot": Snapshot(grid, 2)} now:0.1][@"action"];
+    Check([action[@"operation"] isEqual:@"gridSetExpanded"] && [action[@"value"][@"generation"] isEqual:grid[@"generation"]] &&
+        [action[@"value"][@"expectedGroup"] isEqual:guard] && [action[@"value"] count] == 4,
+        "session overwrites forged guards and strips callback and backing-coordinate input");
+    [session exchange:@{@"snapshot": Snapshot(grid, 3), @"receipt": @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}} now:0.2];
+    Check([session enqueueNode:@"grid" revision:@3 operation:@"gridSetExpanded" value:@{@"row": @"first", @"expanded": @YES} now:0.2],
+        "an already-expanded request can reach host idempotence without toggling");
+    NSMutableDictionary *moved = Copy(grid); moved[@"outline"][@"first"][@"frame"] = @[@20, @20, @400, @24];
+    NSDictionary *reply = [session exchange:@{@"snapshot": Snapshot(moved, 4)} now:0.3];
+    Check(!reply[@"action"] && [reply[@"result"][@"status"] isEqual:@"rejected"], "predispatch disclosure retains the strict complete table guard");
+    Check([session enqueueNode:@"grid" revision:@4 operation:@"gridSetExpanded" value:@{@"row": @"first", @"expanded": @NO} now:0.3],
+        "current geometry admits a new disclosure request");
+    moved[@"generation"] = @"controller-replaced";
+    reply = [session exchange:@{@"snapshot": Snapshot(moved, 5)} now:0.4];
+    Check(!reply[@"action"] && [reply[@"result"][@"status"] isEqual:@"rejected"], "controller generation replacement rejects queued disclosure");
+    moved[@"disabled"] = @[@"first"];
+    [session exchange:@{@"snapshot": Snapshot(moved, 6)} now:0.5];
+    Check(![session enqueueNode:@"grid" revision:@6 operation:@"gridSetExpanded" value:@{@"row": @"first", @"expanded": @NO} now:0.5],
+        "disabled groups cannot receive disclosure");
+    moved[@"disabled"] = @[]; moved[@"actions"] = @{@"disclose": @NO};
+    [session exchange:@{@"snapshot": Snapshot(moved, 7)} now:0.6];
+    Check(![session enqueueNode:@"grid" revision:@7 operation:@"gridSetExpanded" value:@{@"row": @"first", @"expanded": @NO} now:0.6],
+        "removed disclosure capability cannot receive an action");
+}
 int main(void) {
     @autoreleasepool {
         OutlineTests();
+        OutlineDisclosureTests();
         NSMutableDictionary *clickGrid = Copy(Descriptor(2));
         NSString *row0 = clickGrid[@"rows"][0], *row1 = clickGrid[@"rows"][1];
         clickGrid[@"selectionMode"] = @"multiple";

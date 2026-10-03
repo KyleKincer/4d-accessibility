@@ -38,7 +38,10 @@ jobs:
           python3 tests/test_native_outline_driver.py
           python3 tests/test_native_outline_summary.py
           python3 tests/test_grouped_outline_summary.py
+          python3 tests/test_grouped_disclosure_summary.py
           python3 test_grouped_outline.py --help
+          python3 test_grouped_disclosure.py --help
+          python3 test_grouped_disclosure_subforms.py --help
           python3 test_native_outlines.py --help
           python3 test_appium_list_fixture.py --help
           python3 prepare_alp_subforms.py --help
@@ -62,6 +65,7 @@ jobs:
           python3 test_form_focus.py --tool4d build/toolchain/tool4d.app
           python3 test_outline_rows.py --tool4d build/toolchain/tool4d.app
           python3 test_outline_host_helpers.py --tool4d build/toolchain/tool4d.app
+          python3 test_outline_action_helpers.py --tool4d build/toolchain/tool4d.app
       - name: Package development artifacts
         run: |
           python3 package_release.py

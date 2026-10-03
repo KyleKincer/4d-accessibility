@@ -97,7 +97,10 @@ For each ($name; $grids)
   // leaf callback supplies it or allow the flat selection mutation path.
   return
  End if
- For each ($property; New collection("ready"; "onSelection"; "selection"; "meta"))
+ If (OB Is defined($options; "setExpanded") & ($options.kind#"outline"))
+  return
+ End if
+ For each ($property; New collection("ready"; "onSelection"; "selection"; "meta"; "setExpanded"))
   If (OB Is defined($options; $property))
    If (($property="ready") & (Value type($options[$property])=Is Boolean))
     continue
