@@ -3,27 +3,42 @@
 #DECLARE($view : Object; $request : Object) -> $result : Object
 var $name; $id; $property; $issueKey; $column : Text
 var $columns : Collection
-var $options; $state; $reply; $action : Object
+var $options; $state; $reply; $action; $configured : Object
+var $table : Pointer
+var $detail; $list : Text
+var $position : Integer
 var $ready : Boolean
 ARRAY TEXT($objects; 0)
 ARRAY TEXT($methods; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; True; "nodes"; New collection; "unsupported"; New collection; "pages"; New collection; "status"; "rejected"; "message"; "Grid is unavailable")
-If ($view.options.grids=Null)
- return
+$configured:=New object
+If ($view.options.grids#Null)
+ For each ($name; $view.options.grids)
+  $configured[$name]:=$view.options.grids[$name]
+ End for each
 End if
 If ($view.grids=Null)
  $view.grids:=New object
 End if
 FORM GET OBJECTS($objects; $variables; $pages; Form current page+Form inherited)
-For each ($name; $view.options.grids)
+For ($position; 1; Size of array($objects))
+ $name:=$objects{$position}
+ If ((OBJECT Get type(*; $name)=Object type subform) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
+  OBJECT GET SUBFORM(*; $name; $table; $detail; $list)
+  If (Not(Is nil pointer($table)) & ($list#""))
+   $configured[$name]:=New object("kind"; "listSubform"; "label"; $name)
+  End if
+ End if
+End for
+For each ($name; $configured)
  If ((Find in array($objects; $name)>0) && OBJECT Get visible(*; $name))
   // Normalize only the outer object. Providers read nested configuration;
   // keeping its identity avoids deep-copying Formula objects on every poll.
   $options:=New object
-  For each ($property; $view.options.grids[$name])
-   $options[$property]:=$view.options.grids[$name][$property]
+  For each ($property; $configured[$name])
+   $options[$property]:=$configured[$name][$property]
   End for each
   If (Not(AXB_GridOptions(New object($name; $options))))
    return New object("ok"; False; "error"; "invalidGrids")
@@ -69,6 +84,20 @@ For each ($name; $view.options.grids)
    continue
   End if
   $state.suspended:=False
+  If ($options.kind="listSubform")
+   If (($request.operation="describe") | ($request.node=$id))
+    $reply:=AXB_ListSubform($request.operation; $options; $state; $request)
+    If ($request.operation#"describe")
+     return $reply
+    End if
+    If (Not($reply.ok=True))
+     return $reply
+    End if
+    $result.nodes:=$result.nodes.concat($reply.nodes)
+    $result.unsupported:=$result.unsupported.concat($reply.unsupported)
+   End if
+   continue
+  End if
   If ($options.kind="areaList")
    If ($view.areaListProvider=Null)
     METHOD GET NAMES($methods; "AXB_ALPGrid")

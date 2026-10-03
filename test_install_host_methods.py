@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from install_host_methods import AREA, AREA_NAME, BEGIN, END, ROOT, area_form, main
+from install_host_methods import AREA, AREA_NAME, BEGIN, END, ROOT, METADATA_NAME, area_form, main
 
 
 class InstallTests(unittest.TestCase):
@@ -253,6 +253,210 @@ class InstallTests(unittest.TestCase):
                 result = self.run_installer(success=False)
                 self.assertIn("ApplicationDeclarations", result.stderr)
                 self.assertEqual(before, self.snapshot())
+
+    def test_list_metadata_is_packaged_without_changing_row_forms(self):
+        self.form()
+        row, value = self.form("Rows", table=True)
+        value.update(destination="listScreen", markerHeader=28, markerBody=52)
+        row.write_text(json.dumps(value))
+        original = row.read_bytes()
+        preview = self.run_installer("--form", "Customer", "--dry-run")
+        resource = self.project.parent / "Resources" / METADATA_NAME
+        self.assertIn("../Resources/" + METADATA_NAME, preview.stdout)
+        self.assertFalse(resource.exists())
+        self.run_installer("--form", "Customer")
+        self.assertEqual(
+            json.loads(resource.read_text())["forms"],
+            {"1": {"Rows": {"header": 28, "body": 52}}},
+        )
+        self.assertEqual(row.read_bytes(), original)
+        first = resource.read_bytes()
+        self.run_installer()
+        self.assertEqual(resource.read_bytes(), first)
+        value["markerBody"] = 56
+        row.write_text(json.dumps(value))
+        self.run_installer()
+        self.assertEqual(
+            json.loads(resource.read_text())["forms"]["1"]["Rows"]["body"], 56
+        )
+
+    def test_current_project_directory_places_metadata_beside_project(self):
+        self.form()
+        row, value = self.form("Rows", table=True)
+        value.update(markerHeader=0, markerBody=24)
+        row.write_text(json.dumps(value))
+        command = [sys.executable, str(ROOT / "install_host_methods.py"),
+                   "--project-dir", ".", "--compiler-method", "Compiler_Application",
+                   "--form", "Customer"]
+        preview = subprocess.run([*command, "--dry-run"], cwd=self.project,
+                                 capture_output=True, text=True)
+        self.assertEqual(preview.returncode, 0, preview.stderr)
+        self.assertIn("../Resources/" + METADATA_NAME, preview.stdout)
+        result = subprocess.run(command, cwd=self.project, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.project.parent / "Resources" / METADATA_NAME).is_file())
+        self.assertFalse((self.project / "Resources" / METADATA_NAME).exists())
+
+    def test_bulk_preserves_referenced_rows_with_unspecified_destination(self):
+        parent, value = self.form()
+        row, _ = self.form("Rows", table=True)
+        value["pages"][1]["objects"]["Items"] = {
+            "type": "subform", "table": 1, "listForm": "Rows"}
+        parent.write_text(json.dumps(value))
+        before = row.read_bytes()
+        preview = self.run_installer("--all-forms", "--dry-run")
+        self.assertIn("Skipped list-row form: Sources/TableForms/1/Rows", preview.stdout)
+        self.run_installer("--all-forms")
+        self.assertEqual(row.read_bytes(), before)
+        self.assertEqual(json.loads(parent.read_text())["pages"][0]["objects"][AREA_NAME], AREA)
+        snapshot = self.snapshot()
+        self.run_installer("--form", "TableForms/1/Rows", success=False)
+        self.assertEqual(snapshot, self.snapshot())
+
+    def test_shared_list_row_base_keeps_area_in_detail_branch(self):
+        base, _ = self.form("Base")
+        parent, value = self.form()
+        value["inheritedForm"] = "Base"
+        value["pages"][1]["objects"]["Items"] = {
+            "type": "subform", "table": "Customers", "listForm": "Rows"}
+        parent.write_text(json.dumps(value))
+        row, value = self.form("Rows", table=True)
+        value["inheritedForm"] = "Base"
+        row.write_text(json.dumps(value))
+        (self.project / "Sources/catalog.4DCatalog").write_text(
+            '<base><table id="1" name="Customers"/></base>')
+        before = {p: p.read_bytes() for p in (base, row)}
+        self.run_installer("--all-forms")
+        self.assertEqual(before, {p: p.read_bytes() for p in before})
+        self.assertEqual(json.loads(parent.read_text())["pages"][0]["objects"][AREA_NAME], AREA)
+        snapshot = self.snapshot()
+        self.run_installer("--all-forms")
+        self.run_installer("--form", "Customer")
+        self.assertEqual(snapshot, self.snapshot())
+
+    def legacy_row_base(self):
+        base, value = self.form("Base", page_zero={"objects": {AREA_NAME: AREA.copy()}})
+        parent, value = self.form()
+        value["inheritedForm"] = "Base"
+        value["pages"][1]["objects"]["Items"] = {
+            "type": "subform", "table": 1, "listForm": "Rows"}
+        parent.write_text(json.dumps(value))
+        row, value = self.form("Rows", table=True,
+                               page_zero={"objects": {AREA_NAME: AREA.copy()}})
+        value["inheritedForm"] = "Base"
+        row.write_text(json.dumps(value))
+        return base, parent, row
+
+    def test_bulk_migrates_old_row_and_shared_base_areas(self):
+        base, parent, row = self.legacy_row_base()
+        original = {p: json.loads(p.read_text()) for p in (base, row)}
+        preview = self.run_installer("--all-forms", "--dry-run")
+        self.assertIn("Removed legacy list-row lifecycle", preview.stdout)
+        for path in (base, row):
+            self.assertEqual(json.loads(path.read_text()), original[path])
+        self.run_installer("--all-forms")
+        for path in (base, row):
+            expected = original[path]
+            del expected["pages"][0]["objects"][AREA_NAME]
+            self.assertEqual(json.loads(path.read_text()), expected)
+        self.assertEqual(json.loads(parent.read_text())["pages"][0]["objects"][AREA_NAME], AREA)
+        snapshot = self.snapshot()
+        self.run_installer("--all-forms")
+        self.assertEqual(snapshot, self.snapshot())
+
+    def test_named_install_requires_bulk_migration_of_old_row_areas(self):
+        self.legacy_row_base()
+        before = self.snapshot()
+        result = self.run_installer("--form", "Customer", success=False)
+        self.assertIn("--all-forms", result.stderr)
+        self.assertEqual(before, self.snapshot())
+
+    def test_edited_legacy_row_area_blocks_bulk_before_any_writes(self):
+        _, _, row = self.legacy_row_base()
+        value = json.loads(row.read_text())
+        value["pages"][0]["objects"][AREA_NAME]["left"] = 5
+        row.write_text(json.dumps(value))
+        before = self.snapshot()
+        result = self.run_installer("--all-forms", success=False)
+        self.assertIn("differs", result.stderr)
+        self.assertEqual(before, self.snapshot())
+
+    def test_metadata_only_update_preserves_every_form(self):
+        parent, value = self.form()
+        row, value = self.form("Rows", table=True)
+        value.update(destination="listScreen", markerHeader=0, markerBody=24)
+        row.write_text(json.dumps(value))
+        before = {p: p.read_bytes() for p in (parent, row)}
+        self.run_installer("--form-metadata")
+        resource = self.project.parent / "Resources" / METADATA_NAME
+        self.assertTrue(resource.is_file())
+        self.assertEqual(before, {p: p.read_bytes() for p in before})
+
+    def test_list_parent_settings_follow_native_defaults_and_inheritance(self):
+        parent, value = self.form()
+        value["pages"][1]["objects"]["Items"] = {
+            "type": "subform",
+            "table": 1,
+            "listForm": "Rows",
+        }
+        parent.write_text(json.dumps(value))
+        inherited, child = self.form("Child")
+        child["inheritedForm"] = "Customer"
+        inherited.write_text(json.dumps(child))
+        self.run_installer("--form", "Customer")
+        resource = self.project.parent / "Resources" / METADATA_NAME
+        forms = json.loads(resource.read_text())["forms"]["0"]
+        expected = {"selection": "none", "enterable": False}
+        self.assertEqual(forms["Customer"]["lists"]["Items"], expected)
+        self.assertEqual(forms["Child"]["lists"]["Items"], expected)
+        value["pages"][1]["objects"]["Items"].update(
+            selectionMode="single", enterableInList=True
+        )
+        parent.write_text(json.dumps(value))
+        self.run_installer()
+        forms = json.loads(resource.read_text())["forms"]["0"]
+        expected = {"selection": "single", "enterable": True}
+        self.assertEqual(forms["Customer"]["lists"]["Items"], expected)
+        self.assertEqual(forms["Child"]["lists"]["Items"], expected)
+
+    def test_list_metadata_inherits_markers_and_omits_unknown_layouts(self):
+        self.form()
+        base, value = self.form("Base")
+        value.update(markerHeader=30, markerBody=54)
+        base.write_text(json.dumps(value))
+        row, value = self.form("Rows", table=True)
+        value.update(inheritedForm="Base", markerBody=58)
+        row.write_text(json.dumps(value))
+        for name, body in (("Unknown", None), ("Invalid", -1), ("Boolean", True)):
+            path, value = self.form(name, table=True)
+            value["markerBody"] = body
+            path.write_text(json.dumps(value))
+        self.run_installer("--form", "Customer")
+        resource = self.project.parent / "Resources" / METADATA_NAME
+        self.assertEqual(
+            json.loads(resource.read_text())["forms"],
+            {
+                "0": {"Base": {"header": 30, "body": 54}},
+                "1": {"Rows": {"header": 30, "body": 58}},
+            },
+        )
+
+    def test_edited_list_metadata_blocks_all_writes(self):
+        self.form()
+        row, value = self.form("Rows", table=True)
+        value.update(markerHeader=0, markerBody=24)
+        row.write_text(json.dumps(value))
+        self.run_installer("--form", "Customer")
+        resource = self.project.parent / "Resources" / METADATA_NAME
+        edited = json.loads(resource.read_text())
+        edited["forms"]["1"]["Rows"]["body"] = 32
+        resource.write_text(json.dumps(edited))
+        before = self.snapshot()
+        text = resource.read_bytes()
+        self.run_installer(success=False)
+        self.assertEqual(before, self.snapshot())
+        self.assertEqual(text, resource.read_bytes())
+
 
 
 if __name__ == "__main__":

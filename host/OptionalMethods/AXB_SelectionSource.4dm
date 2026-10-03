@@ -1,48 +1,98 @@
 // Resolve classic list-box data in a private process. The form's loaded record,
 // current selection and unsaved values never become a temporary export buffer.
-#DECLARE($options : Object; $state : Object) -> $result : Object
+#DECLARE($options : Object; $state : Object; $list : Object) -> $result : Object
 var $table : Pointer
-var $tableNumber; $row; $process : Integer
+var $tableNumber; $row; $process; $field; $fieldType : Integer
 var $selectionName; $highlight; $signature; $keyProperty; $key : Text
-var $dataClass; $attribute; $pending; $latest : Object
-var $records; $rawKeys : Collection
-var $source : 4D.EntitySelection
-var $value : Variant
+var $dataClass; $attribute; $pending; $latest; $column; $fieldInfo : Object
+var $records; $rawKeys; $readFields : Collection
+var $source; $value : Variant
+var $needed : Boolean
 ARRAY LONGINT($recordNumbers; 0)
 $result:=New object("ok"; False; "message"; "Classic selection is loading"; "keys"; New collection; "selected"; New collection)
-LISTBOX GET TABLE SOURCE(*; $options.objectName; $tableNumber; $selectionName; $highlight)
+If ($list=Null)
+ LISTBOX GET TABLE SOURCE(*; $options.objectName; $tableNumber; $selectionName; $highlight)
+Else
+ $tableNumber:=$list.table
+ $selectionName:=$list.form
+ $highlight:=$list.highlight
+End if
 If ($tableNumber<1)
  $result.message:="List box has no classic table source"
  return
 End if
 $table:=Table($tableNumber)
-$dataClass:=ds[Table name($tableNumber)]
-If ($dataClass=Null)
- $result.message:="Classic table needs a datastore mapping"
- return
+$dataClass:=Null
+If (OB Keys(ds).indexOf(Table name($tableNumber))>=0)
+ $dataClass:=ds[Table name($tableNumber)]
 End if
-$keyProperty:=$dataClass.getInfo().primaryKey
+$keyProperty:=""
+If ($dataClass#Null)
+ $keyProperty:=$dataClass.getInfo().primaryKey
+End if
 If (OB Is defined($options; "keyProperty"))
  $keyProperty:=$options.keyProperty
 End if
-$attribute:=$dataClass[$keyProperty]
-If (($attribute=Null) || ($attribute.kind#"storage") || (New collection("string"; "number").indexOf($attribute.type)<0))
- $result.message:="Classic identity must be a stored text or integer attribute"
- return
-End if
-If ($selectionName="")
- LONGINT ARRAY FROM SELECTION($table->; $recordNumbers)
+$readFields:=Null
+$attribute:=Null
+If ($dataClass=Null)
+ If ($list=Null)
+  $result.error:="classicDatastoreRequired"
+  $result.message:="Classic list box needs a datastore mapping"
+  return
+ End if
+ $readFields:=New shared collection
+ For ($field; 1; Get last field number($tableNumber))
+  If (Not(Is field number valid($tableNumber; $field)))
+   continue
+  End if
+  GET FIELD PROPERTIES($tableNumber; $field; $fieldType)
+  $fieldInfo:=New shared object("name"; Field name($tableNumber; $field); "field"; $field; "type"; $fieldType)
+  $needed:=False
+  If (Compare strings($fieldInfo.name; $keyProperty; sk char codes)=0)
+   $attribute:=$fieldInfo
+   $needed:=True
+  End if
+  For each ($column; $list.columns)
+   $needed:=$needed | (($column.fieldNumber=$field) & Not($column.protected))
+  End for each
+  If ($needed && (New collection(Is alpha field; Is text; Is real; Is integer; Is longint; Is integer 64 bits; Is date; Is time; Is Boolean).indexOf($fieldType)>=0))
+   Use ($readFields)
+    $readFields.push($fieldInfo)
+   End use
+  End if
+ End for
+ If (($attribute=Null) || (New collection(Is alpha field; Is text; Is integer; Is longint).indexOf($attribute.type)<0))
+  $result.error:="classicIdentityRequired"
+  $result.message:="Classic table without a primary key needs an existing unique text or integer keyProperty"
+  return
+ End if
 Else
- LONGINT ARRAY FROM SELECTION($table->; $recordNumbers; $selectionName)
+ $attribute:=$dataClass[$keyProperty]
+ If (($attribute=Null) || ($attribute.kind#"storage") || (New collection("string"; "number").indexOf($attribute.type)<0))
+  $result.error:="classicIdentityRequired"
+  $result.message:="Classic identity must be a stored text or integer attribute"
+  return
+ End if
 End if
-$records:=New collection
-ARRAY TO COLLECTION($records; $recordNumbers)
-$result.count:=LISTBOX Get number of rows(*; $options.objectName)
+If ($list#Null)
+ $records:=$list.records
+ $result.count:=$records.length
+Else
+ If ($selectionName="")
+  LONGINT ARRAY FROM SELECTION($table->; $recordNumbers)
+ Else
+  LONGINT ARRAY FROM SELECTION($table->; $recordNumbers; $selectionName)
+ End if
+ $records:=New collection
+ ARRAY TO COLLECTION($records; $recordNumbers)
+ $result.count:=LISTBOX Get number of rows(*; $options.objectName)
+End if
 If ($result.count#$records.length)
  $result.message:="Classic selection changed during inspection"
  return
 End if
-$signature:=Generate digest(JSON Stringify(New collection($tableNumber; $selectionName; $highlight; $records)); SHA256 digest)
+$signature:=Generate digest(JSON Stringify(New collection($tableNumber; $selectionName; $highlight; $records; $readFields)); SHA256 digest)
 $pending:=$state.selectionRead
 If (($pending#Null) && ($pending.done=True))
  If ($pending.signature=$signature)
@@ -57,6 +107,11 @@ If (($pending#Null) && ($pending.done=True))
 End if
 If ($state.selectionRead=Null)
  $pending:=New shared object("done"; False; "signature"; $signature; "table"; $tableNumber; "records"; $records.copy(ck shared); "highlight"; "")
+ If ($readFields#Null)
+  Use ($pending)
+   $pending.readFields:=$readFields.copy(ck shared; $pending)
+  End use
+ End if
  If ($highlight#"")
   Use ($pending)
    $pending.highlight:="<>AXB_"+Generate UUID

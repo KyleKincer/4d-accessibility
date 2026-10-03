@@ -61,3 +61,4 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 - (id)headerForColumn:(NSString *)column;
 @end
 BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view);
+BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity);

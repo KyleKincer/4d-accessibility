@@ -11,6 +11,7 @@ The initial release covers the implemented families below on 4D 20.8 and the tes
 | Ordinary styled text | Unavailable | Unavailable | 116 checks pass in four live runs | Included |
 | Tabs | Unavailable | Unavailable | 628 checks pass across eight live runs | Included |
 | Classic current/named-selection grids | Unavailable | Unavailable | 164 checks pass in six live runs | Included |
+| Classic list subforms | Unavailable | Unavailable | Unavailable | Unavailable; 0.22.0 development gate below |
 | Stable automation locators | Unavailable | Unavailable | Native and desktop acceptance pass | Included |
 | Compound generated early focus, restart and replacement | Unavailable | Unavailable | Replacement gap | Scoped acceptance |
 
@@ -73,6 +74,24 @@ Version 0.21.1 fixes initial focus, intentional restart and child replacement in
 The [candidate evidence](../../../validation/compound-form-focus-0.21.1.json) distinguishes earlier replacement and unsafe-focus failures from acceptance of the matching 0.21.1 kit. It covers interpreted ARM, compiled ARM and compiled Rosetta compound forms, compiled VoiceOver reading/activation, restart, replacement, manual-registration coexistence, inherited/yielding startup, dependency/configuration failure and close before first idle. Real 4D command checks, repeated/shared scrolling, data ownership, pixels and a Form Editor save have separate records.
 
 This is a scoped compound-form gate. Physical Intel hardware, remote client/server delivery, list subforms and hierarchy remain separate work. CI kits are development packages; signed distribution still needs its exact-download acceptance.
+
+## Classic list subforms in development
+
+The 0.22.0 development source adds automatic parent discovery and generated row metadata. It preserves the row form and original editors and handlers, with no new row or field hooks. No published kit contains this adapter. Read [integration and limits](LIST-SUBFORMS.md) and [acceptance commands](../../../tests/LIST-SUBFORMS.md).
+
+The fixed-source list matrix passes 894 checks across 22 archived run reports: interpreted and compiled ARM desktop cases, compiled Rosetta, compiled VoiceOver and two complete-window comparisons with zero changed pixels. It covers project/table parents, selection modes including the native default, static headers, multiline input, no-primary-key tables, exact text keys, visible horizontal/vertical scrollbars and stale elements after rebinding/hiding/readiness changes. These are local results from the recorded list candidate, not acceptance of the next combined release package.
+
+VoiceOver exposed a receipt-observation race and then a spoken-feedback failure during checkbox activation. The driver now captures receipt transitions. The provider retains confirmed checkbox feedback only across a same-cell reveal, and the list adapter clicks the real checkbox instead of entering an unrelated text field. Compiled VoiceOver passes 20 checks, including the final record, original handler once, spoken checked state and independently read saved value. Exact case/accent/@ key comparisons pass 25 live checks in each desktop mode. The first scrollbar fixture used an invalid enum; the corrected fixtures require native scrollbar proof before testing their geometry.
+
+Shared-grid regressions remain an open publication gate. The existing AppKit dispatcher passes the complete 180-check widget suite with corrected reveal helpers in a reordered alignment run. A subsequent native baseline identifies an outdated right-aligned Boolean hit region after horizontal scrolling: resetting the origin and minimally revealing the column restores the original click. The canonical-order extension passes short/empty captions and explicit padding; its next focus request exposed a fixture synchronization gap during caption restoration. The corrected full test and matching-package matrix remain pending. No SDK event-delivery prototype is part of canonical source.
+
+The distant-row popup baseline opens the original menu, selects its native item, checks the saved value and original callbacks, then returns to an ordinary editor with selection preserved. Keyboard activation probes are not replacements: they move distant-row selection on blur. Both accepted corrections use the existing native mouse dispatcher without assigning bindings, saving records or invoking business handlers manually.
+
+Fable 5.1 found no blocking list integration defect and confirmed the minimal parent-area/metadata design. Its diagnostic finding is corrected: unsupported row and parent settings remain reported while binding resolution loads or fails. Opus 5.5 rated the skill and linked integration documents 8/10; the remaining wording corrections are applied. Final compiler, runtime, pixel and shared-grid acceptance still need the exact reviewed source and packages.
+
+Real 4D command tests pass 241 private-read and date/time checks, including process date storage and database time units; they do not prove native date/time editor actions. These local reports will be linked with the final acceptance record before publication.
+
+Automatic relations, nonzero pages, page-nested lists, several lists in one parent and complete application workflows remain separate acceptance cases. This development gate does not establish every list layout or full UI coverage.
 
 ## Implemented and exercised
 

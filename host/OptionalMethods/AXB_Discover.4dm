@@ -2,6 +2,8 @@
 // expressions, read masked values, or copy application object/collection data.
 #DECLARE($options : Object; $tabState : Object; $paintOffset : Collection) -> $result : Object
 var $name; $role; $label; $font : Text
+var $detailForm; $listForm : Text
+var $subformTable : Pointer
 var $indicator : Integer
 var $minimum; $maximum : Real
 var $minimumDate; $maximumDate : Date
@@ -153,7 +155,13 @@ For ($i; 1; Size of array($names))
      End if
     End if
    : ($type=Object type subform)
-    $result.subforms.push($name)
+    OBJECT GET SUBFORM(*; $name; $subformTable; $detailForm; $listForm)
+    If ($listForm="")
+     $result.subforms.push($name)
+    Else
+     // A list form repeats records. Its current field buffer is not a row.
+     $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "listSubformPending"))
+    End if
    Else
     If (New collection(Object type line; Object type rectangle; Object type rounded rectangle; Object type oval).indexOf($type)<0)
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "providerPending"))
