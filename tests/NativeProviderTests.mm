@@ -230,6 +230,8 @@ static void OutlineDisclosureTest(void) {
     Check(Announcements.count == 1 && Announcements[0][@"element"] == window &&
         [Announcements[0][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: expanded"],
         "confirmed expansion posts the exact caption and state to its owning window once");
+    Check([Announcements[0][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityHigh,
+        "confirmed disclosure feedback takes priority over ongoing row reading and hints");
     Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
     Check(outline.owner.actionFeedback == nil, "disclosure receipt replay cannot recreate feedback");
     Check(Announcements.count == 1, "receipt replay produces no additional disclosure announcement");
@@ -241,6 +243,8 @@ static void OutlineDisclosureTest(void) {
     Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
     Check(Announcements.count == 2 && [Announcements[1][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: collapsed"],
         "confirmed row-setter collapse announces the authoritative collapsed state");
+    Check([Announcements[1][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityHigh,
+        "row-setter disclosure uses the same immediate feedback priority");
     [group setAccessibilityDisclosed:NO];
     action = Exchange(window, 9041, 1, session, snapshot)[@"action"];
     Check(action && outline.owner.actionFeedback == nil, "idempotent disclosure retains host validation without creating speech feedback");
@@ -468,6 +472,7 @@ static void ButtonInputTest(void) {
     [window close]; Pump();
 }
 static void GridControlsTest(void) {
+    Announcements = [NSMutableArray new];
     NSWindow *window = Window(@"AXB typed grid controls");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
     [window.contentView addSubview:canvas];
@@ -516,6 +521,8 @@ static void GridControlsTest(void) {
     value[@"checked"] = @1; value[@"value"] = @"1";
     Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
     Check([[checkbox accessibilityValue] isEqual:@1] && table.owner.actionFeedback == nil, "published checkbox state consumes confirmed feedback once");
+    Check(Announcements.count == 1 && [Announcements[0][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityMedium,
+        "grid checkbox feedback retains its existing medium priority");
     Exchange(window, 9012, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"}, nil, nil, @[page]); Pump();
     Check(table.owner.actionFeedback == nil, "grid checkbox receipt replay cannot repeat feedback");
     Check([checkbox accessibilityPerformPress], "grid checkbox accepts activation before an unrelated selection");
@@ -602,6 +609,7 @@ static void GridControlsTest(void) {
     Check(menu.accessibilityParent == window, "retiring a popup during menu tracking restores native ownership");
     [NSNotificationCenter.defaultCenter postNotificationName:NSMenuDidEndTrackingNotification object:menu];
     Check([text isKindOfClass:AXBTextNode.class] && ![popup isAccessibilityElement] && ![popup accessibilityPerformShowMenu], "native text behavior resumes only through a new child when the cell changes type");
+    Announcements = nil;
     [window close]; Pump();
 }
 static void AdjustableTest(void) {

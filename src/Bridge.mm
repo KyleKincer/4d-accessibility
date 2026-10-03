@@ -1041,9 +1041,11 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
                         NSString *key = disclosure ? (value.boolValue ? @"expanded" : @"collapsed") :
                             value.integerValue == 2 ? @"mixed" : value.boolValue ? @"checked" : @"unchecked";
                         NSString *state = [[NSBundle bundleForClass:AXBNode.class] localizedStringForKey:key value:key table:@"AccessibilityBridge"];
+                        // A confirmed group action must be heard over the row
+                        // context or interaction hints VoiceOver is still reading.
                         NSAccessibilityPostNotificationWithUserInfo(self.window, NSAccessibilityAnnouncementRequestedNotification,
                             @{NSAccessibilityAnnouncementKey: [NSString stringWithFormat:@"%@: %@", [control accessibilityLabel] ?: @"", state],
-                              NSAccessibilityPriorityKey: @(NSAccessibilityPriorityMedium)});
+                              NSAccessibilityPriorityKey: @(disclosure ? NSAccessibilityPriorityHigh : NSAccessibilityPriorityMedium)});
                     }
                 }
             } else for (AXBNode *node in self.nodes) {
