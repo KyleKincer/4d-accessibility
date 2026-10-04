@@ -30,8 +30,9 @@ static NSTimeInterval Now(void) { return NSProcessInfo.processInfo.systemUptime;
 
 static NSDictionary *ConfirmedControlFeedback(NSDictionary *feedback, NSDictionary *activity, NSTimeInterval now) {
     NSDictionary *result = activity[@"result"];
-    if (!feedback[@"control"] || feedback[@"result"] || ![feedback[@"id"] isEqual:result[@"id"]] ||
-        ![result[@"status"] isEqual:@"completed"]) return feedback;
+    if (!feedback[@"control"] || feedback[@"result"] || ![feedback[@"id"] isEqual:result[@"id"]]) return feedback;
+    if ([result[@"status"] isEqual:@"rejected"]) return nil;
+    if (![result[@"status"] isEqual:@"completed"]) return feedback;
     NSMutableDictionary *confirmed = [feedback mutableCopy];
     confirmed[@"result"] = result;
     confirmed[@"deadline"] = feedback[@"deadline"] ?: @(now+2);

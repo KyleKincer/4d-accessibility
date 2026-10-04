@@ -423,6 +423,24 @@ static void OutlineDisclosureRevealTest(void) {
         Check(outline.owner.actionFeedback == nil && Announcements.count == 2 &&
             [Announcements[1][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: collapsed"],
             "coalesced receipts announce only the authoritative disclosure state once");
+        Check([content accessibilityPerformPress], "disclosure queues before coalesced rejection updates");
+        action = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"validation rejected"})[@"ok"] boolValue],
+            "coalesced disclosure rejection is accepted before pumping native refresh");
+        [cell accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+        Check(outline.owner.actionFeedback == nil, "coalesced rejection clears disclosure feedback before reveal dispatch");
+        reveal = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+        Check([reveal[@"operation"] isEqual:@"gridReveal"] && [reveal[@"node"] isEqual:@"grid"] &&
+            [reveal[@"value"][@"row"] isEqual:@"group"] && [reveal[@"value"][@"column"] isEqual:@"item"],
+            "reveal after rejection still follows its genuine exact cell route");
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue],
+            "reveal after rejection has its own accepted completion receipt"); Pump();
+        Check(outline.owner.actionFeedback == nil && Announcements.count == 2, "reveal completion cannot revive rejected disclosure feedback");
+        groupData[@"expanded"] = @YES; grid[@"order"] = @4; snapshot[@"revision"] = @4;
+        Check([Exchange(window, 9141, 1, session, snapshot)[@"ok"] boolValue], "independent disclosure state after rejection is accepted"); Pump();
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue],
+            "latest reveal receipt replay after rejected disclosure is accepted"); Pump();
+        Check(outline.owner.actionFeedback == nil && Announcements.count == 2, "state changes and receipt replay cannot resurrect rejected disclosure speech");
         for (NSDictionary *route in @[@{@"cell": otherRowCell, @"node": @"grid", @"row": @"other"},
                                      @{@"cell": otherNodeCell, @"node": @"other-grid", @"row": @"group"}]) {
             Check([content accessibilityPerformPress], "disclosure queues before an unrelated real reveal");
@@ -443,7 +461,7 @@ static void OutlineDisclosureRevealTest(void) {
         action = Exchange(window, 9141, 1, session, snapshot)[@"action"];
         Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
         id originalRow = [outline accessibilityRows][0];
-        grid[@"generation"] = @"reveal-replacement"; snapshot[@"revision"] = @4;
+        grid[@"generation"] = @"reveal-replacement"; snapshot[@"revision"] = @5;
         Check([Exchange(window, 9141, 1, session, snapshot)[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
         AXBGridNode *replacement = Provider(window).accessibilityChildren[0];
         id replacementCell = [replacement accessibilityCellForColumn:0 row:0];
