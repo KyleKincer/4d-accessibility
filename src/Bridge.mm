@@ -28,6 +28,16 @@ static NSString *JSON(id object) {
 }
 static NSTimeInterval Now(void) { return NSProcessInfo.processInfo.systemUptime; }
 
+static NSDictionary *ConfirmedControlFeedback(NSDictionary *feedback, NSDictionary *activity, NSTimeInterval now) {
+    NSDictionary *result = activity[@"result"];
+    if (!feedback[@"control"] || feedback[@"result"] || ![feedback[@"id"] isEqual:result[@"id"]] ||
+        ![result[@"status"] isEqual:@"completed"]) return feedback;
+    NSMutableDictionary *confirmed = [feedback mutableCopy];
+    confirmed[@"result"] = result;
+    confirmed[@"deadline"] = feedback[@"deadline"] ?: @(now+2);
+    return confirmed;
+}
+
 // Form-local coordinates stay fixed while a scroll container reveals a child.
 // Keep that reading order instead of letting screen geometry reorder siblings.
 static NSArray *NavigationChildren(NSArray *children) {
@@ -238,13 +248,24 @@ static NSArray *TopLevelNodes(AXBWindowView *view);
 - (BOOL)queue:(NSString *)operation value:(id)value {
     BOOL readable = [operation isEqual:@"reveal"] && [self.owner canAct];
     if (!NSThread.isMainThread || (!self.isAccessibilityEnabled && !readable) || ![self isAccessibilityElement]) return NO;
-    BOOL accepted = [self.owner.session enqueueNode:self.data[@"id"] revision:self.revision operation:operation value:value observedSnapshot:self.owner.publishedSnapshot now:Now()];
+    AXBSession *session = self.owner.session;
+    BOOL accepted;
+    NSDictionary *activity;
+    // Capture the accepted request and preceding result under the session's
+    // monitor. A host exchange can complete the new request before AppKit's
+    // queued refresh runs, replacing that result. No AppKit calls hold the lock.
+    @synchronized(session) {
+        accepted = [session enqueueNode:self.data[@"id"] revision:self.revision operation:operation value:value observedSnapshot:self.owner.publishedSnapshot now:Now()];
+        activity = accepted ? session.activity : nil;
+    }
     if (accepted) {
-        if (!AXBGridRevealMatchesElement(self.owner.actionFeedback[@"control"], self.owner.session.activity))
+        if (AXBGridRevealMatchesElement(self.owner.actionFeedback[@"control"], activity))
+            self.owner.actionFeedback = ConfirmedControlFeedback(self.owner.actionFeedback, activity, Now());
+        else
             self.owner.actionFeedback = nil;
         // VoiceOver can read the old value before 4D applies an action. These
         // controls need feedback after the exact host completion receipt.
-        NSString *action = self.owner.session.activity[@"id"];
+        NSString *action = activity[@"id"];
         BOOL checkbox = [operation isEqual:@"press"] && [self.data[@"role"] isEqual:@"checkbox"] && ![self.data[@"focusable"] boolValue];
         BOOL tab = [operation isEqual:@"press"] && [self.data[@"role"] isEqual:@"tab"];
         BOOL slider = [@[@"increment", @"decrement"] containsObject:operation] && [self.data[@"role"] isEqual:@"slider"];
@@ -1006,16 +1027,10 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         ![feedback[@"id"] isEqual:activity[@"id"]] && !sameCellReveal) {
         self.actionFeedback = nil; feedback = nil;
     }
-    if (feedback[@"control"] && [feedback[@"id"] isEqual:result[@"id"]] &&
-        [result[@"status"] isEqual:@"completed"] && !feedback[@"result"]) {
-        // VoiceOver can reveal the same cell again while its changed value page
-        // arrives. Retain the exact completed receipt across that harmless
-        // request, but cancel for any other action and keep the bounded wait.
-        NSMutableDictionary *confirmed = [feedback mutableCopy];
-        confirmed[@"result"] = result;
-        confirmed[@"deadline"] = @(Now()+2);
-        self.actionFeedback = confirmed; feedback = confirmed;
-    }
+    // VoiceOver can reveal the same cell while its changed value page arrives.
+    // Keep the original completed receipt and deadline across that request.
+    self.actionFeedback = ConfirmedControlFeedback(feedback, activity, Now());
+    feedback = self.actionFeedback;
     if (feedback[@"result"]) result = feedback[@"result"];
     if (feedback && [feedback[@"id"] isEqual:result[@"id"]]) {
         self.actionFeedback = nil; // A receipt replay must never repeat speech.

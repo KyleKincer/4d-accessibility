@@ -129,8 +129,14 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @end
 
 BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
-    if (![element isKindOfClass:AXBGridWidget.class] || ![activity[@"operation"] isEqual:@"gridReveal"]) return NO;
-    AXBGridCell *cell = ((AXBGridWidget *)element).cell;
+    if (![activity[@"operation"] isEqual:@"gridReveal"]) return NO;
+    AXBGridCell *cell = nil;
+    if ([element isKindOfClass:AXBGridWidget.class])
+        cell = ((AXBGridWidget *)element).cell;
+    else if ([element isKindOfClass:AXBGridDisclosure.class] && [element isAccessibilityElement])
+        cell = ((AXBGridDisclosure *)element).cell;
+    else
+        return NO;
     return [activity[@"node"] isEqual:cell.table.data[@"id"]] &&
         [activity[@"row"] isEqual:cell.row.key] && [activity[@"column"] isEqual:cell.columnKey];
 }

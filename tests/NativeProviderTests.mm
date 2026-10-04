@@ -344,6 +344,125 @@ static void RefreshDelayTest(void) {
     Check(![element accessibilityPerformPress], "changed control rejects an action before its native refresh");
     [window close]; Pump();
 }
+static void OutlineDisclosureRevealTest(void) {
+    if (@available(macOS 26.0, *)) {
+        Announcements = [NSMutableArray new];
+        NSWindow *window = Window(@"AXB outline reveal feedback");
+        [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+        NSString *session = Open(window, 9141);
+        NSMutableDictionary *groupData = [@{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Group", @"expanded": @NO,
+            @"frame": @[@10, @20, @300, @24]} mutableCopy];
+        NSMutableDictionary *grid = [@{@"generation": @"reveal-first", @"order": @1, @"rows": @[@"group", @"other"],
+            @"columns": @[@{@"id": @"item", @"label": @"Item", @"enabled": @YES, @"editable": @NO}],
+            @"visible": @[@"group", @"other"], @"selectionKnown": @NO, @"actions": @{@"disclose": @YES, @"reveal": @YES},
+            @"outline": @{@"group": groupData, @"other": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Other", @"expanded": @NO,
+                @"frame": @[@10, @44, @300, @24]}},
+            @"frames": @{@"group": @{@"item": @[@10, @20, @300, @24]}, @"other": @{@"item": @[@10, @44, @300, @24]}}} mutableCopy];
+        NSMutableDictionary *data = [@{@"id": @"grid", @"role": @"table", @"label": @"Groups", @"value": @"", @"visible": @YES,
+            @"enabled": @YES, @"frame": @[@10, @20, @300, @60], @"grid": grid} mutableCopy];
+        NSDictionary *otherGrid = @{@"generation": @"reveal-other", @"order": @1, @"rows": @[@"group"],
+            @"columns": grid[@"columns"], @"visible": @[@"group"], @"selectionKnown": @NO, @"actions": grid[@"actions"],
+            @"outline": @{@"group": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Group", @"expanded": @NO,
+                @"frame": @[@10, @100, @300, @24]}}, @"frames": @{@"group": @{@"item": @[@10, @100, @300, @24]}}};
+        NSDictionary *otherData = @{@"id": @"other-grid", @"role": @"table", @"label": @"Other groups", @"value": @"", @"visible": @YES,
+            @"enabled": @YES, @"frame": @[@10, @100, @300, @60], @"grid": otherGrid};
+        NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Reveal feedback", @"enabled": @YES,
+            @"nodes": @[data, otherData]} mutableCopy];
+        Check([Exchange(window, 9141, 1, session, snapshot)[@"ok"] boolValue], "disclosure reveal fixture accepts two independent outline routes"); Pump();
+        AXBGridNode *outline = Provider(window).accessibilityChildren[0], *other = Provider(window).accessibilityChildren[1];
+        id cell = [outline accessibilityCellForColumn:0 row:0], otherRowCell = [outline accessibilityCellForColumn:0 row:1];
+        id otherNodeCell = [other accessibilityCellForColumn:0 row:0], content = [cell accessibilityChildren][0];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        Check([[cell accessibilityActionNames] containsObject:NSAccessibilityScrollToVisibleAction], "live group cell advertises ordinary reveal");
+#pragma clang diagnostic pop
+        Check([content accessibilityPerformPress], "disclosure queues before the same-cell reveal regression");
+        NSDictionary *action = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        NSDictionary *feedback = [outline.owner.actionFeedback copy];
+        NSNumber *deadline = [feedback[@"deadline"] copy];
+        Check(feedback && [feedback[@"result"][@"id"] isEqual:action[@"id"]] && Announcements.count == 0,
+            "completed disclosure receipt waits for authoritative state without optimistic speech");
+        Check([feedback[@"deadline"] isKindOfClass:NSNumber.class] && [feedback[@"deadline"] doubleValue] > NSProcessInfo.processInfo.systemUptime,
+            "receipt-backed disclosure has a real future bounded-wait deadline");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+        [cell accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+        NSDictionary *reveal = Exchange(window, 9141, 1, session, snapshot)[@"action"]; Pump();
+        Check([reveal[@"operation"] isEqual:@"gridReveal"] && [reveal[@"node"] isEqual:@"grid"] &&
+            [reveal[@"value"][@"row"] isEqual:@"group"] && [reveal[@"value"][@"column"] isEqual:@"item"],
+            "same-cell reveal follows the real node-row-column provider route");
+        Check(AXBGridRevealMatchesElement(content, outline.owner.session.activity) && [outline.owner.actionFeedback isEqual:feedback] && [outline.owner.actionFeedback[@"deadline"] isEqual:deadline],
+            "same-cell reveal retains the exact disclosure receipt and unchanged deadline");
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        Check([outline.owner.actionFeedback isEqual:feedback] && [outline.owner.actionFeedback[@"deadline"] isEqual:deadline], "reveal completion cannot erase or extend receipt-backed disclosure feedback");
+        groupData[@"expanded"] = @YES; grid[@"order"] = @2; snapshot[@"revision"] = @2;
+        Check([Exchange(window, 9141, 1, session, snapshot)[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        Check(outline.owner.actionFeedback == nil && Announcements.count == 1 && Announcements[0][@"element"] == NSApp &&
+            [Announcements[0][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: expanded"],
+            "changed application state after same-cell reveal announces exactly once");
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        Check(outline.owner.actionFeedback == nil && Announcements.count == 1, "latest reveal receipt replay cannot recreate consumed disclosure feedback");
+        Check([content accessibilityPerformPress], "disclosure queues before coalesced receipt updates");
+        action = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"})[@"ok"] boolValue],
+            "coalesced disclosure completion is accepted before pumping native refresh");
+        // Both receipts arrive without running the queued AppKit refresh.
+        [cell accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+        reveal = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+        Check([reveal[@"operation"] isEqual:@"gridReveal"] && [reveal[@"node"] isEqual:@"grid"] &&
+            [reveal[@"value"][@"row"] isEqual:@"group"] && [reveal[@"value"][@"column"] isEqual:@"item"],
+            "coalesced reveal uses the exact live disclosure cell");
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue],
+            "coalesced reveal completion is accepted before pumping native refresh"); Pump();
+        feedback = [outline.owner.actionFeedback copy]; deadline = [feedback[@"deadline"] copy];
+        Check([feedback[@"result"][@"id"] isEqual:action[@"id"]] && deadline.doubleValue > NSProcessInfo.processInfo.systemUptime && Announcements.count == 1,
+            "coalesced same-cell reveal preserves the completed disclosure receipt and bounded deadline");
+        groupData[@"expanded"] = @NO; grid[@"order"] = @3; snapshot[@"revision"] = @3;
+        Check([Exchange(window, 9141, 1, session, snapshot)[@"ok"] boolValue], "coalesced disclosure state publication is accepted"); Pump();
+        Check(outline.owner.actionFeedback == nil && Announcements.count == 2 &&
+            [Announcements[1][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: collapsed"],
+            "coalesced receipts announce only the authoritative disclosure state once");
+        for (NSDictionary *route in @[@{@"cell": otherRowCell, @"node": @"grid", @"row": @"other"},
+                                     @{@"cell": otherNodeCell, @"node": @"other-grid", @"row": @"group"}]) {
+            Check([content accessibilityPerformPress], "disclosure queues before an unrelated real reveal");
+            action = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+            Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+            Check(outline.owner.actionFeedback != nil, "unrelated reveal test starts with receipt-backed pending state");
+            [route[@"cell"] accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+            reveal = Exchange(window, 9141, 1, session, snapshot)[@"action"]; Pump();
+            Check([reveal[@"operation"] isEqual:@"gridReveal"] && [reveal[@"node"] isEqual:route[@"node"]] &&
+                [reveal[@"value"][@"row"] isEqual:route[@"row"]] && [reveal[@"value"][@"column"] isEqual:@"item"],
+                "unrelated reveal independently identifies its expected node-row-column tuple");
+            Check(!AXBGridRevealMatchesElement(content, outline.owner.session.activity) && outline.owner.actionFeedback == nil,
+                "different row or node reveal cancels older disclosure feedback");
+            Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+            Check(Announcements.count == 2, "unrelated reveal completion cannot revive cancelled disclosure speech");
+        }
+        Check([content accessibilityPerformPress], "disclosure queues before its generation retires");
+        action = Exchange(window, 9141, 1, session, snapshot)[@"action"];
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        id originalRow = [outline accessibilityRows][0];
+        grid[@"generation"] = @"reveal-replacement"; snapshot[@"revision"] = @4;
+        Check([Exchange(window, 9141, 1, session, snapshot)[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        AXBGridNode *replacement = Provider(window).accessibilityChildren[0];
+        id replacementCell = [replacement accessibilityCellForColumn:0 row:0];
+        [replacementCell accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+        reveal = Exchange(window, 9141, 1, session, snapshot)[@"action"]; Pump();
+        BOOL retiredMatches = AXBGridRevealMatchesElement(content, replacement.owner.session.activity);
+        Check([reveal[@"operation"] isEqual:@"gridReveal"] && [reveal[@"node"] isEqual:@"grid"] &&
+            [reveal[@"value"][@"row"] isEqual:@"group"] && [reveal[@"value"][@"column"] isEqual:@"item"] &&
+            !retiredMatches && ![originalRow isAccessibilityElement] && ![content isAccessibilityElement] && replacement.owner.actionFeedback == nil,
+            "replacement reveal cannot match or resurrect the retired disclosure control");
+        Check([Exchange(window, 9141, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue], "native disclosure receipt or publication exchange is accepted"); Pump();
+        Check(Announcements.count == 2, "retirement and replacement reveal produce no stale disclosure speech");
+#pragma clang diagnostic pop
+        [window close]; Pump(); Announcements = nil;
+    } else {
+        puts("SKIP: disclosure reveal feedback requires macOS 26 ScrollToVisible support");
+    }
+}
+
 static void GridRefreshDelayTest(void) {
     NSWindow *window = Window(@"AXB delayed grid refresh");
     [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
@@ -480,9 +599,10 @@ static void GridControlsTest(void) {
     [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
     NSString *session = Open(window, 9012);
     NSDictionary *grid = @{@"generation": @"controls", @"order": @1, @"rows": @[@"one"],
-        @"columns": @[@{@"id": @"check", @"label": @"Approved", @"enabled": @YES, @"editable": @YES}],
+        @"columns": @[@{@"id": @"check", @"label": @"Approved", @"enabled": @YES, @"editable": @YES},
+                       @{@"id": @"other", @"label": @"Other", @"enabled": @YES, @"editable": @NO}],
         @"visible": @[@"one"], @"selected": @[], @"disabled": @[], @"uneditable": @[], @"unselectable": @[],
-        @"frames": @{@"one": @{@"check": @[@10, @30, @200, @28]}},
+        @"frames": @{@"one": @{@"check": @[@10, @30, @200, @28], @"other": @[@210, @30, @100, @28]}},
         @"actions": @{@"select": @YES, @"reveal": @YES, @"edit": @YES}};
     NSDictionary *snapshot = @{@"version": @1, @"revision": @1, @"label": @"Typed controls", @"enabled": @YES,
         @"nodes": @[@{@"id": @"items", @"role": @"table", @"label": @"Items", @"value": @"", @"visible": @YES,
@@ -490,7 +610,7 @@ static void GridControlsTest(void) {
     NSMutableDictionary *value = [@{@"column": @"check", @"value": @"2", @"role": @"checkbox", @"checked": @2,
         @"label": @"Approved", @"enabled": @YES, @"editable": @YES} mutableCopy];
     NSDictionary *page = @{@"node": @"items", @"generation": @"controls", @"order": @1, @"row": @0, @"column": @0,
-        @"rows": @[@{@"id": @"one", @"cells": @[value]}]};
+        @"rows": @[@{@"id": @"one", @"cells": @[value, @{@"column": @"other", @"value": @"Other", @"enabled": @YES, @"editable": @NO}]}]};
     Check([Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page])[@"ok"] boolValue], "typed grid snapshot and values accepted"); Pump();
     AXBGridNode *table = Provider(window).accessibilityChildren.firstObject;
     id cell = [table accessibilityCellForColumn:0 row:0];
@@ -527,6 +647,25 @@ static void GridControlsTest(void) {
         "grid checkbox feedback retains its existing medium priority");
     Exchange(window, 9012, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"}, nil, nil, @[page]); Pump();
     Check(table.owner.actionFeedback == nil, "grid checkbox receipt replay cannot repeat feedback");
+    Check([checkbox accessibilityPerformPress], "grid checkbox queues before another column is revealed");
+    action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
+    Check([Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"})[@"ok"] boolValue],
+        "column-mismatch regression accepts the real checkbox completion receipt"); Pump();
+    Check(table.owner.actionFeedback != nil, "column-mismatch test starts with receipt-backed checkbox feedback");
+    id otherColumnCell = [table accessibilityCellForColumn:1 row:0];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [otherColumnCell accessibilityPerformAction:NSAccessibilityScrollToVisibleAction];
+#pragma clang diagnostic pop
+    reveal = Exchange(window, 9012, 1, session, snapshot)[@"action"]; Pump();
+    Check([reveal[@"operation"] isEqual:@"gridReveal"] && [reveal[@"node"] isEqual:@"items"] &&
+        [reveal[@"value"][@"row"] isEqual:@"one"] && [reveal[@"value"][@"column"] isEqual:@"other"],
+        "second-column reveal uses the same node and row with a distinct real column");
+    Check(!AXBGridRevealMatchesElement(checkbox, table.owner.session.activity) && table.owner.actionFeedback == nil,
+        "revealing another column cancels older checkbox feedback");
+    Check([Exchange(window, 9012, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"})[@"ok"] boolValue],
+        "second-column reveal accepts its real completion receipt"); Pump();
+    Check(Announcements.count == 1, "another column reveal cannot revive cancelled checkbox speech");
     Check([checkbox accessibilityPerformPress], "grid checkbox accepts activation before an unrelated selection");
     action = Exchange(window, 9012, 1, session, snapshot)[@"action"];
     Exchange(window, 9012, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
@@ -1148,6 +1287,7 @@ int main(void) {
         StableIdentifierTest();
         OutlineSemanticsTest();
         OutlineDisclosureTest();
+        OutlineDisclosureRevealTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();
