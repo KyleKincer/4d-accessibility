@@ -227,9 +227,9 @@ static void OutlineDisclosureTest(void) {
     Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
     Check([cell accessibilityChildren][0] == content && [[content accessibilityValue] isEqual:@YES], "expansion retains the disclosure child and updates its Boolean from application state");
     Check(outline.owner.actionFeedback == nil, "confirmed disclosure consumes feedback exactly once");
-    Check(Announcements.count == 1 && Announcements[0][@"element"] == window &&
+    Check(Announcements.count == 1 && Announcements[0][@"element"] == NSApp &&
         [Announcements[0][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: expanded"],
-        "confirmed expansion posts the exact caption and state to its owning window once");
+        "confirmed expansion posts the exact caption and state to the application element once");
     Check([Announcements[0][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityHigh,
         "confirmed disclosure feedback takes priority over ongoing row reading and hints");
     Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
@@ -241,7 +241,8 @@ static void OutlineDisclosureTest(void) {
         "group setter requests the explicit Boolean instead of toggling");
     groupData[@"expanded"] = @NO; grid[@"order"] = @3; snapshot[@"revision"] = @3;
     Exchange(window, 9041, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"confirmed"}); Pump();
-    Check(Announcements.count == 2 && [Announcements[1][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: collapsed"],
+    Check(Announcements.count == 2 && Announcements[1][@"element"] == NSApp &&
+        [Announcements[1][@"info"][NSAccessibilityAnnouncementKey] isEqual:@"Group: collapsed"],
         "confirmed row-setter collapse announces the authoritative collapsed state");
     Check([Announcements[1][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityHigh,
         "row-setter disclosure uses the same immediate feedback priority");
@@ -521,7 +522,8 @@ static void GridControlsTest(void) {
     value[@"checked"] = @1; value[@"value"] = @"1";
     Exchange(window, 9012, 1, session, snapshot, nil, nil, nil, @[page]); Pump();
     Check([[checkbox accessibilityValue] isEqual:@1] && table.owner.actionFeedback == nil, "published checkbox state consumes confirmed feedback once");
-    Check(Announcements.count == 1 && [Announcements[0][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityMedium,
+    Check(Announcements.count == 1 && Announcements[0][@"element"] == window &&
+        [Announcements[0][@"info"][NSAccessibilityPriorityKey] integerValue] == NSAccessibilityPriorityMedium,
         "grid checkbox feedback retains its existing medium priority");
     Exchange(window, 9012, 1, session, snapshot, @{@"id": reveal[@"id"], @"status": @"completed", @"message": @"revealed"}, nil, nil, @[page]); Pump();
     Check(table.owner.actionFeedback == nil, "grid checkbox receipt replay cannot repeat feedback");
