@@ -59,6 +59,8 @@ The separate `--grouped-inputs` cases and `summarize_grouped_inputs.py` check ce
 
 `python3 test_form_focus.py --server /path/to/4D\ Server.app` exercises production focus resolution with real 4D object identities and child paths. It covers forwarded ancestor events, shared bindings, unobserved descendants, retired/disabled controls and conflicting contexts. Run it sequentially with every other 4D compiler or graphical fixture. It complements the live event and VoiceOver checks.
 
+`python3 test_grid_page_helpers.py --tool4d /path/to/tool4d.app` exercises the canonical page poller and page reader with real 4D commands. A licensed `--server` is also supported. It checks adjacent same-grid batching, FIFO and request-budget preservation, distinct route authority, stale order rejection, page bounds and exact editability restrictions. Its view seam records dispatches; live provider capture count, latency and native behavior remain separate checks. Run it sequentially with other 4D utilities and desktop fixtures.
+
 `test_area_pixels.py --server /path/to/4D\ Server.app --run` compares the complete rendered synthetic window with and without the area. It requires Pillow and accepts no changed pixels, masks or tolerance.
 
 For persisted entities, shared objects and class instances, run `test_root_data.py --server /path/to/4D\ Server.app --kind entity --area --generated --no-error-callback --run`, then add `--compiled`. Replace `entity` with `shared`, `instance` or `plain`. This checks unchanged data ownership, failure diagnostics without an application callback, deliberate recovery and cleanup of the replacement registration.

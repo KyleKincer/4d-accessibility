@@ -1,6 +1,7 @@
 // Serve at most two page requests per event cycle in their original form view.
 #DECLARE($context : Object; $tree : Object; $requests : Collection)
-var $query; $route; $packet; $reply; $token : Object
+var $query; $route; $packet; $reply; $token; $next : Object
+var $batch : Collection
 var $key : Text
 var $i : Integer
 If ($context.gridQueue=Null)
@@ -24,9 +25,21 @@ For ($i; 1; 2)
  $packet:=$context.gridQueue.shift()
  OB REMOVE($context.gridQueued; $packet.key)
  $query:=$packet.query
+ $batch:=New collection($query)
+ // Only adjacent requests for the same live route share one fresh read.
+ // Preserve the FIFO budget; never search past a different provider.
+ If (($i=1) && ($context.gridQueue.length>0))
+  $next:=$context.gridQueue[0]
+  If (Compare strings($next.query.node; $query.node; sk char codes)=0)
+   $next:=$context.gridQueue.shift()
+   OB REMOVE($context.gridQueued; $next.key)
+   $batch.push($next.query)
+   $i:=2
+  End if
+ End if
  $route:=$tree.routes[$query.node]
  If (($route#Null) && ($route.node.grid#Null) && $route.node.visible)
-  $packet:=New object("operation"; "readGrid"; "rootView"; $context.view; "path"; $route.path; "lineage"; $route.lineage; "instance"; $route.instance; "scope"; $route.scope; "action"; New object("node"; $route.localID); "requests"; New collection($query); "depth"; 0)
+  $packet:=New object("operation"; "readGrid"; "rootView"; $context.view; "path"; $route.path; "lineage"; $route.lineage; "instance"; $route.instance; "scope"; $route.scope; "action"; New object("node"; $route.localID); "requests"; $batch; "depth"; 0)
   $reply:=AXB_View($packet)
   If (($reply.ok=True) && ($reply.pages#Null))
    $context.gridPages:=$context.gridPages.concat($reply.pages)
