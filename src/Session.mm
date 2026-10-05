@@ -109,6 +109,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (!Number(s[@"revision"]) || revision < 1 || revision > 9007199254740991.0 || floor(revision) != revision) return @"invalid revision";
     if (!Text(s[@"label"], 512) || !Bool(s[@"enabled"])) return @"invalid window metadata";
     if (s[@"automationKey"] && (!Text(s[@"automationKey"], 128) || ![s[@"automationKey"] length])) return @"invalid automation key";
+    if (s[@"omitOutsideWindow"] && !Bool(s[@"omitOutsideWindow"])) return @"invalid window metadata";
     NSArray *nodes = s[@"nodes"];
     if (![nodes isKindOfClass:NSArray.class] || nodes.count > AXBLimits::nodes) return @"invalid node count";
     NSMutableSet *ids = [NSMutableSet new];

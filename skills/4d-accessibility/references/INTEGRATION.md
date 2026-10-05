@@ -122,6 +122,8 @@ Button activation uses an uncovered part of the visible button. Equal or higher 
 
 If one control on a declared higher layer completely covers a button, that button leaves the tree until the covering control moves or hides. This handles an application's default button moving over another button without publishing two indistinguishable actions. With equal layers, the bridge keeps the conservative overlap check because their actual order is unknown.
 
+Forms often park shortcut-only buttons, their legends and state fields outside the window. Users cannot see or click them, yet assistive technologies list them, often under object names. For a form whose window cannot scroll, set `$options.omitOutsideWindow:=True` in its configuration. Top-level controls that lie wholly outside the window then leave the tree; their keyboard shortcuts still work natively. A focused control stays, so an offscreen field that receives typing is still announced. Controls inside subforms, including list rows scrolled out of view, and partly visible controls are unaffected, and a control that moves into the window returns. The bridge cannot detect 4D's own form scrolling, so do not set this option for a scrolling form.
+
 Completion: activate foreground and background actions through AX and check which application handler ran. Confirm that a covered control cannot accidentally activate its neighbor. Invalid layer metadata returns `invalidControlLayer` during configuration.
 
 ### Child forms
