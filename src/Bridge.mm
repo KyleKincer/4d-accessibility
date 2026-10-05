@@ -990,8 +990,15 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         NSAccessibilityPostNotification(node, NSAccessibilityValueChangedNotification);
     }
     for (AXBNode *node in changedTextSelections) NSAccessibilityPostNotification(node, NSAccessibilitySelectedTextChangedNotification);
+    // When one refresh replaces the focused node (a field becoming editable on a host
+    // mode change), the destroyed element may be under the VoiceOver cursor. A bare
+    // layout change then sends VoiceOver to an ancestor, which ignores the focus change.
+    // Name the newly focused element in the layout change, and announce focus after it.
+    if (structureChanged) {
+        if (focusChanged) NSAccessibilityPostNotificationWithUserInfo(self.window, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[focused]});
+        else NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
+    }
     if (focusChanged) NSAccessibilityPostNotification(focused, NSAccessibilityFocusedUIElementChangedNotification);
-    if (structureChanged) NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
     NSDictionary *feedback = self.actionFeedback;
     if (([feedback[@"role"] isEqual:@"tab"] && focusChanged) ||
         (feedback[@"deadline"] && Now() >= [feedback[@"deadline"] doubleValue])) {

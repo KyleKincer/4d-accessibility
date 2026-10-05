@@ -5,3 +5,5 @@
 // while forwarding them unchanged to AppKit.
 void AXBTestPostNotificationWithUserInfo(id element, NSAccessibilityNotificationName notification, NSDictionary *userInfo);
 #define NSAccessibilityPostNotificationWithUserInfo AXBTestPostNotificationWithUserInfo
+void AXBTestPostNotification(id element, NSAccessibilityNotificationName notification);
+#define NSAccessibilityPostNotification AXBTestPostNotification

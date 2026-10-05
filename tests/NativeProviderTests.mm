@@ -10,8 +10,15 @@
 #include <thread>
 
 #undef NSAccessibilityPostNotificationWithUserInfo
+#undef NSAccessibilityPostNotification
 static NSMutableArray<NSDictionary *> *Announcements;
+static NSMutableArray<NSDictionary *> *Posts;
+void AXBTestPostNotification(id element, NSAccessibilityNotificationName notification) {
+    if (Posts) [Posts addObject:@{@"element": element ?: NSNull.null, @"notification": notification}];
+    NSAccessibilityPostNotification(element, notification);
+}
 void AXBTestPostNotificationWithUserInfo(id element, NSAccessibilityNotificationName notification, NSDictionary *userInfo) {
+    if (Posts) [Posts addObject:@{@"element": element ?: NSNull.null, @"notification": notification, @"info": userInfo ?: @{}}];
     if ([notification isEqual:NSAccessibilityAnnouncementRequestedNotification] && Announcements)
         [Announcements addObject:@{@"element": element, @"info": userInfo ?: @{}}];
     NSAccessibilityPostNotificationWithUserInfo(element, notification, userInfo);
@@ -465,6 +472,45 @@ static void ButtonInputTest(void) {
     button[@"enabled"] = @NO; snapshot[@"revision"] = @2;
     Exchange(window, 9025, 1, session, snapshot); Pump();
     Check(canvas.presses == 1 && ![Exchange(window, 9025, 1, session, snapshot)[@"controlInputResult"][@"accepted"] boolValue], "disabling a button before native dispatch prevents its handler");
+    [window close]; Pump();
+}
+static void FocusAfterLayoutTest(void) {
+    // A host mode change can make the focused field editable in the same refresh
+    // that replaces it. VoiceOver follows the new focus only when the layout change
+    // names it and the focus change follows the layout change.
+    NSWindow *window = Window(@"AXB focus after layout");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9031);
+    NSMutableDictionary *note = [@{@"id": @"note", @"role": @"textfield", @"label": @"Latest note", @"value": @"Note",
+        @"editable": @NO, @"focusable": @YES, @"focused": @YES, @"enabled": @YES, @"visible": @YES, @"frame": @[@20, @20, @200, @60]} mutableCopy];
+    NSDictionary *search = @{@"id": @"search", @"role": @"textfield", @"label": @"Quick search", @"value": @"",
+        @"editable": @YES, @"focusable": @YES, @"focused": @NO, @"enabled": @YES, @"visible": @YES, @"frame": @[@20, @100, @200, @24]};
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Notes", @"enabled": @YES, @"nodes": @[note, search]} mutableCopy];
+    Check([Exchange(window, 9031, 1, session, snapshot)[@"ok"] boolValue], "read-only focused note accepted"); Pump();
+    id readOnly = NSApp.accessibilityApplicationFocusedUIElement;
+    Check([[readOnly accessibilityIdentifier] hasSuffix:@"/note"] && ![readOnly isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)],
+          "the read-only note owns application focus before the mode change");
+    Posts = [NSMutableArray new];
+    note[@"editable"] = @YES; snapshot[@"revision"] = @2;
+    Check([Exchange(window, 9031, 1, session, snapshot)[@"ok"] boolValue], "editable note accepted"); Pump();
+    id editable = NSApp.accessibilityApplicationFocusedUIElement;
+    NSArray *posts = Posts; Posts = nil;
+    NSUInteger focus = [posts indexOfObjectPassingTest:^BOOL(NSDictionary *post, NSUInteger, BOOL *) {
+        return [post[@"notification"] isEqual:NSAccessibilityFocusedUIElementChangedNotification] && post[@"element"] == editable; }];
+    NSUInteger layout = [posts indexOfObjectPassingTest:^BOOL(NSDictionary *post, NSUInteger, BOOL *) {
+        return [post[@"notification"] isEqual:NSAccessibilityLayoutChangedNotification] && post[@"element"] == window; }];
+    Check(editable != readOnly && [[editable accessibilityIdentifier] hasSuffix:@"/note"] &&
+          [editable isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)], "the replacement editable note owns application focus");
+    Check(focus != NSNotFound && layout != NSNotFound, "replacing the focused note posts both focus and layout changes");
+    Check(layout < focus, "focus is announced after the layout change that replaced the focused note");
+    Check([posts[layout][@"info"][NSAccessibilityUIElementsKey] isEqual:@[editable]], "the layout change names the newly focused note");
+    Posts = [NSMutableArray new];
+    note[@"value"] = @"Edited"; snapshot[@"revision"] = @3;
+    Exchange(window, 9031, 1, session, snapshot); Pump();
+    posts = Posts; Posts = nil;
+    Check(![posts indexesOfObjectsPassingTest:^BOOL(NSDictionary *post, NSUInteger, BOOL *) {
+        return [post[@"notification"] isEqual:NSAccessibilityLayoutChangedNotification] || [post[@"notification"] isEqual:NSAccessibilityFocusedUIElementChangedNotification]; }].count,
+          "an ordinary value change moves neither layout nor focus");
     [window close]; Pump();
 }
 static void GridControlsTest(void) {
@@ -1152,6 +1198,7 @@ int main(void) {
         CheckboxFeedbackTest();
         AdjustableTest();
         ButtonInputTest();
+        FocusAfterLayoutTest();
         SelectionInputTest();
         ComboPopupTest();
         NSWindow *first = Window(@"AXB native test 1");
