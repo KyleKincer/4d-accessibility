@@ -73,6 +73,14 @@ python3 test_grid_value_speech.py --run
 
 This builds the production native provider in an owned synthetic window and starts its own VoiceOver session. Nine cases verify speech when a cold cell loads, navigation between pending cells, leaving the grid, unrelated AX inspection, reloading the same value and delayed checkbox/popup roles. Each case observes speech without moving the reading cursor, then checks its position. Existing user VoiceOver sessions are left alone. Reports and synthetic caption images stay under ignored `build/grid-value-speech/`. Use `--case single` for the shortest reproduction or omit `--run` to compile only. `test_native_grids.py --run --voiceover` separately tests all 50,000 logical rows and 24 columns.
 
+For focus after a host mode change, without a 4D installation:
+
+```sh
+python3 test_focus_replacement_speech.py --run
+```
+
+An owned synthetic window publishes a focused read-only note beside forty sibling fields, then makes every field editable in one refresh, as a 4D form does when it enters Modify. VoiceOver must announce the note as editable text in every trial rather than moving to the containing group. It starts its own VoiceOver session and reads speech with VoiceOver's AppleScript `last phrase`, so "Allow VoiceOver to be controlled with AppleScript" must be enabled. Omit `--run` to compile only.
+
 For VoiceOver test-session cleanup:
 
 ```sh
