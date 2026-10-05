@@ -1,3 +1,15 @@
+# 0.25.0 development, standard messages and VoiceOver corrections
+
+Standard 4D `ALERT`, `CONFIRM` and `Request` windows are accessible with only the native plugin installed. The plugin publishes the message, the Request field and named buttons from the text 4D draws, and presses with an ordinary click. `OK` and answers are unchanged, and VoiceOver echoes typing. No host method or component change is needed. Every window is pixel-identical to the plugin-free window. [The acceptance record](validation/native-messages-provider.json) passes 252 checks: interpreted and compiled, native ARM and Rosetta, with and without VoiceOver. Client/server, Request caret movement and other built-in windows remain open.
+
+A host mode change that makes the focused field editable now keeps VoiceOver on that field. The layout change that replaces the field names the newly focused element and precedes the focus change. An owned AppKit fixture announces the editable field in every trial. [Evidence](validation/focus-replacement-speech.json).
+
+Applications can declare `omitOutsideWindow` for a form in a fixed window. Top-level controls parked wholly outside the window then leave the tree; partly visible, focused and subform controls remain. [Evidence](validation/parked-controls.json). An input with 4D's default **Automatic** Multiline setting can be declared with `controls.<name>.multiline` when 4D treats it as multi-line. Accessibility text entry, including whole-value writes, then accepts line breaks.
+
+Polling a large form is about four times cheaper. The form tree is rebuilt after a pending step only when a receipt must be published, and each view copies its clip rectangle instead of sharing it. [Evidence](validation/description-performance.json).
+
+Upgrade the plugin, component and host helpers together. The new snapshot options need matching helpers; the standard message windows need only the plugin. This is a development build; signed distribution is separate.
+
 # 0.24.0 development, application-controlled grouped disclosure
 
 Text/date array hierarchies can use a stable `setExpanded` Formula to collapse or expand a semantic group through the application's targeted native command. The bridge supplies fresh backing-row and break-level coordinates, calls the controller once, and confirms the resulting group and native editor state before reporting completion. Idempotent requests do not call the controller. Scope, membership, readiness, generation and controller changes reject stale authority.
@@ -5,8 +17,6 @@ Text/date array hierarchies can use a stable `setExpanded` Formula to collapse o
 Rows and their disclosure triangles support VoiceOver activation. A receipt-backed English announcement reports the confirmed caption and expanded/collapsed state when stationary value notifications do not speak it. Capability removal permanently retires old triangle handles. Disclosure skips ancestor reveal, preserving scrolling in repeated nested forms and pending text in an unrelated resolved editor.
 
 [The acceptance record](validation/grouped-disclosure-development.json) passes 904 live 4D checks, 37 whole-window comparisons with zero changed RGBA pixels, 37 pure host checks and nine fresh flat-grid speech cases with 135 checks. Read [configuration and gate reproduction](tests/GROUPED-DISCLOSURE.md). Complete break selection, reveal, editing, classic trees and actual Symphony hierarchy workflows remain pending. Upgrade the plugin, component and helpers together; this is a development build, with signed distribution separate.
-
-Standard 4D `ALERT`, `CONFIRM` and `Request` windows are accessible with only the native plugin installed. The plugin publishes the message, the Request field and named buttons from the text 4D draws, and presses with an ordinary click. `OK` and answers are unchanged, and VoiceOver echoes typing. No host method or component change is needed. Every window is pixel-identical to the plugin-free window. [The acceptance record](validation/native-messages-provider.json) passes 252 checks: interpreted and compiled, native ARM and Rosetta, with and without VoiceOver. Client/server, Request caret movement and other built-in windows remain open.
 
 # 0.23.0 development, read-only grouped arrays
 
