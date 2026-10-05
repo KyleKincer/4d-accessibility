@@ -26,6 +26,8 @@ A host mode change that makes the focused field editable now keeps VoiceOver on 
 
 An application can set `omitOutsideWindow` for a form in a fixed window. Top-level controls parked wholly outside that window then leave the tree. Symphony's customer window exposed 106 such shortcut buttons, legends and state fields to VoiceOver and the Item Chooser. 4D draws its forms in its own view without a native scroll view, so the bridge cannot detect form scrolling; the option stays explicit. Native provider tests cover the omitted, partly visible, focused, revealable, subform-row and invalid-option cases. In the actual Symphony window the 100 root-level helpers leave the tree and the VoiceOver Notes workflow still passes; six helpers parked inside a subform remain. [Evidence](../../../validation/parked-controls.json). This is an unreleased development candidate.
 
+An application can declare an automatic-multiline input with `controls.<name>.multiline`, so accessibility text entry accepts line breaks there. 4D's automatic rule depends on height and font metrics; a 4D 20.8 probe recorded the thresholds documented in the integration guide. This is an unreleased development candidate.
+
 Local 0.21.0 acceptance passes. For signed distribution, use the published [GitHub release](https://github.com/KyleKincer/4d-accessibility/releases); its notes and attached report record the exact signed-download checks. CI artifacts are development builds. [Candidate evidence](../../../validation/stable-identifiers-0.21.0.json) retains each tested package and source hash.
 
 Build branch kits using [the build guide](../../../CONTRIBUTING.md). Install the plugin, component and helpers from the same kit. A newer helper with an older native plugin does not add a native capability.
