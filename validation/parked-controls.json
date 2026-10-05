@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "date": "2026-10-04",
+  "release": "0.24.0 development candidate",
+  "source_revision": "5f4d0c407802f53eb934908c92333c639d59696a",
+  "base_revision": "1235496",
+  "scope": "Opt-in omission of root-form controls parked wholly outside a fixed window",
+  "finding": "Symphony's customer window exposed 106 helpers parked beyond its right and bottom edges (47 shortcut-only buttons, 53 legend captions, 6 state fields) to VoiceOver navigation and the Item Chooser, mostly under object names. VO-Right from the quick-search field reached \"CmdCtrlF10Btn button\". 4D draws the form in its own view (XMacNSView_saisierec) with no native scroll view, so the bridge cannot distinguish a fixed window from a scrolling form; a default rule keyed on revealable or scroll views either never applied or would hide reachable rows.",
+  "correction": "omitOutsideWindow, set by the application for a form in a fixed window, is passed in the snapshot and validated as a Boolean. Root-form nodes wholly outside the window then are not accessibility elements. Focused nodes, subform children (longer navigation paths, including list rows scrolled out of view) and partly visible nodes are unaffected.",
+  "native_tests": {
+    "provider_checks": 356,
+    "cases": [
+      "default keeps every visible control",
+      "option omits wholly outside root controls",
+      "partly visible kept",
+      "focused offscreen field kept, then omitted on losing focus",
+      "revealable root control still omitted",
+      "subform row below the window kept",
+      "parked button not pressable",
+      "non-Boolean option rejected",
+      "removing the option restores controls"
+    ]
+  },
+  "application_workflow": {
+    "record": "Symphony Tools/AccessibilityBridge/validation/notes-voiceover-parked-helpers-2026-10-04.json",
+    "result": "Compiled Rosetta 4D 20.8 with this change and the focus-replacement change: the 100 root-level helpers leave the tree, the Item Chooser lists 553 items instead of 653, VO-Right from quick search no longer reaches a helper, and the complete VoiceOver Notes workflow still passes. Six helpers parked inside a subform remain exposed by design."
+  },
+  "sources_sha256": {
+    "src/Bridge.mm": "4d82644d9e0d179d15d4d20e476fb4e46bd6446e2f9bcd0703714f7b651be981",
+    "src/Session.mm": "09740abfa61e27bb0130c9414059792d5477993124c7615b33fbf08ba1c7532b",
+    "src/BridgePrivate.h": "32b3de402482910bf45919c0d3fff13dfee1d1300f38fe1f45389270db66b4cd",
+    "host/OptionalMethods/AXB_FormExchange.4dm": "3a13174b9be4c268be420060d343d337dc310160bb4bedc6a515438c611de668",
+    "tests/NativeProviderTests.mm": "4347df3f797999bed03900bb7d61acc2247165dabb39c98f6563f2fcf769c9ae"
+  }
+}
