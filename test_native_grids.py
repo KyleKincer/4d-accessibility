@@ -23,8 +23,8 @@ def main():
     binary = ROOT / "build/NativeGridFixture"
     subprocess.run([
         "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
-        *[str(ROOT / path) for path in ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "tests/NativeGridFixture.mm"]],
-        "-framework", "Cocoa", "-o", str(binary),
+        *[str(ROOT / path) for path in ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/MessageDialogs.mm", "tests/NativeGridFixture.mm"]],
+        "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary),
     ], check=True)
     if not args.run:
         print("Built native grid fixture; use --run on an unlocked desktop.")

@@ -73,6 +73,16 @@ python3 test_grid_value_speech.py --run
 
 This builds the production native provider in an owned synthetic window and starts its own VoiceOver session. Nine cases verify speech when a cold cell loads, navigation between pending cells, leaving the grid, unrelated AX inspection, reloading the same value and delayed checkbox/popup roles. Each case observes speech without moving the reading cursor, then checks its position. Existing user VoiceOver sessions are left alone. Reports and synthetic caption images stay under ignored `build/grid-value-speech/`. Use `--case single` for the shortest reproduction or omit `--run` to compile only. `test_native_grids.py --run --voiceover` separately tests all 50,000 logical rows and 24 columns.
 
+For standard `ALERT`, `CONFIRM` and `Request` windows, with 4D desktop at `/Applications/4D/4D.app`:
+
+```sh
+python3 test_native_messages.py --baseline
+python3 test_native_messages.py --run
+python3 test_native_messages.py --run --voiceover
+```
+
+`--baseline` records the plugin-free windows, advancing with Return only as setup. `--run` then requires identical pixels before acting through AX. `--voiceover` navigates, types and activates with VoiceOver and records only the fixture's speech. It reads speech through VoiceOver's AppleScript `last phrase`, so "Allow VoiceOver to be controlled with AppleScript" must be enabled. Add `--intel` for Rosetta, or `--compiled --server /path/to/4D\ Server.app` to compile the copy first. Reports stay under ignored `build/`.
+
 For focus after a host mode change, without a 4D installation:
 
 ```sh

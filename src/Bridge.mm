@@ -5,6 +5,7 @@
 #import "Identifiers.h"
 #include "Limits.h"
 #import "NativeLayout.h"
+#import "MessageDialogs.h"
 #import <objc/runtime.h>
 
 static NSMutableDictionary<NSString *, AXBSession *> *sessions;
@@ -1379,6 +1380,10 @@ void AXBDetach(NSString *sessionID, NSInteger processID) {
 void AXBInitialize(void) {
     Init();
     AXBLayoutInitialize();
+    // Standard 4D message windows have no application form method to integrate. Install
+    // now, on 4D's calling thread: a startup method's first message can be drawn inside a
+    // modal loop that never drains the main queue, so a deferred install would miss it.
+    AXBMessagesInitialize();
     // 4D can close and reopen a database while this bundle remains loaded.
     // Shutdown has retired old sessions and completed native-view cleanup.
     @synchronized(registryLock) { stopped = NO; }
@@ -1395,6 +1400,6 @@ void AXBShutdown(void) {
     }
     // Unload must wait until every AppKit object and queued refresh has gone.
     // No monitor is held, and cleanup never calls 4D or waits for the form.
-    dispatch_block_t cleanup = ^{ for (AXBWindowView *v in views.allValues) [v invalidate]; [views removeAllObjects]; AXBLayoutShutdown(); };
+    dispatch_block_t cleanup = ^{ for (AXBWindowView *v in views.allValues) [v invalidate]; [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); };
     if (NSThread.isMainThread) cleanup(); else dispatch_sync(dispatch_get_main_queue(), cleanup);
 }
