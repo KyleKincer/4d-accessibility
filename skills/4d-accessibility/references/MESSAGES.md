@@ -12,11 +12,11 @@ With the native plugin installed, it publishes them without any host change. It 
 - the Request answer as an editable text field, which starts focused, including when empty;
 - the buttons by their drawn titles, cancel before default. Without a Request field, focus starts on the default button.
 
-A press posts an ordinary click at the button's center, so 4D sets `OK` exactly as for the mouse. Writing the field's value selects the answer, then types each character into 4D's own editor. Line breaks are rejected because they would end entry. Typing, from the keyboard or through AX, is announced as text edits, so VoiceOver echoes characters and words.
+A press posts an ordinary click at the button's center, so 4D sets `OK` exactly as for the mouse. 4D discards input queued before its modal loop starts, just after the window is drawn, so a press or value write is held until the window has been published for half a second. An automation client may therefore press as soon as the elements appear. Writing the field's value selects the answer, then types each character into 4D's own editor. Line breaks are rejected because they would end entry. Typing, from the keyboard or through AX, is announced as text edits, so VoiceOver echoes characters and words.
 
 Recognition is strict. A window is published only if every object in its form is a known message object and both `main` and `ok` are present. Any other window is left untouched. A window that already has a bridge session is also left untouched.
 
-[Acceptance](../../../validation/native-messages-provider.json): `test_native_messages.py` covers two CONFIRMs, an ALERT and three Requests, one with no default answer. It passes interpreted and compiled, in native ARM and Rosetta, with and without VoiceOver. Every window is pixel-identical to the plugin-free window before any action. Each choice returns 4D's normal `OK` and answer.
+[Acceptance](../../../validation/native-messages-provider.json): `test_native_messages.py` covers three CONFIRMs, one pressed the moment it appears, an ALERT and three Requests, one with no default answer. It passes interpreted and compiled, in native ARM and Rosetta, with and without VoiceOver. Every window is pixel-identical to the plugin-free window before any action. Each choice returns 4D's normal `OK` and answer.
 
 Remaining scope:
 
