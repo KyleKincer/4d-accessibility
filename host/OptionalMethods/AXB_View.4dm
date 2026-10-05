@@ -421,7 +421,9 @@ For each ($node; $description.nodes)
   End if
  End if
  If ((Value type($clip)=Is collection) & ($clip#Null))
-  $copy.clip:=$clip
+  // Store a fresh rectangle per node. In 4D 20.8, assigning one shared clip collection to
+  // hundreds of node objects cost about 1.7 ms each, most of a large form's description.
+  $copy.clip:=New collection($clip[0]; $clip[1]; $clip[2]; $clip[3])
   If (Not($view.automatic=True))
    $copy.visible:=$node.visible & AXB_Intersects($copy.frame; $clip)
   End if

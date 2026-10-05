@@ -47,11 +47,15 @@ If ((Value type($context.pending)=Is object) & ($context.pending#Null))
   $context.receipt:=$result
  End if
  // A confirmed callback can update dependent controls. Publish their new state
- // with the receipt, after rechecking the whole clipped form tree.
- $tree:=AXB_FormTree
- If (Not($tree.ok=True))
-  AXB_FormFailed($context; New object("error"; $tree.error))
-  return
+ // with the receipt, after rechecking the whole clipped form tree. A step that
+ // is still pending has only posted input that 4D applies after this callback;
+ // the next poll describes the form again before confirming the next step.
+ If (Value type($context.receipt)=Is object)
+  $tree:=AXB_FormTree
+  If (Not($tree.ok=True))
+   AXB_FormFailed($context; New object("error"; $tree.error))
+   return
+  End if
  End if
 End if
 $token:=$context.token
