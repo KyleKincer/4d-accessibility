@@ -259,6 +259,16 @@ No application-written list of choices or separate selection callback is needed.
 
 With VoiceOver, open the choices, use ordinary Down/Up arrows to move through spoken selections, and confirm with Return. This matches the tested AppKit combo. VO-Right moves to the arrow button rather than through the choices.
 
+### Declare automatic multi-line inputs
+
+A text input whose Multiline property is **Yes** accepts line breaks in accessibility text entry, including whole-value writes. With the default **Automatic**, 4D decides from the field's height and font metrics. Measured with the system font in 4D 20.8, the first height that accepts Return as a line break was 18 points at 10-point text, 24 at 13-point, 32 at 18-point and 44 at 24-point. Shorter fields treat Return as the end of entry. The bridge therefore keeps an automatic field single-line, and rejects text with line breaks, unless the application declares it:
+
+```4d
+$options.controls.Remarks:=New object("label"; "Remarks"; "multiline"; True)
+```
+
+Declare only automatic fields that actually accept Return as a line break. A field explicitly set to **No** stays single-line regardless.
+
 ### Name groups, progress and image statuses
 
 The working semantic-control extension reads group-box captions, numeric progress values/ranges and busy indicators automatically. It groups each control under its unique innermost containing group box, preserving the control's identity and existing handlers. Overlapping boxes that do not establish a clear hierarchy produce an `ambiguousGroup` diagnostic. Set `group` to the exact containing object's name to resolve that case, or to an empty string to keep the control at the root.

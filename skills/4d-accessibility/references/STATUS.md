@@ -22,6 +22,8 @@ Version 0.23.0 development adds read-only text/date array hierarchies through `k
 
 Version 0.24.0 development adds application-controlled text/date group disclosure with one stable `setExpanded` Formula. Its [acceptance record](../../../validation/grouped-disclosure-development.json) covers standalone and repeated nested forms, compiled VoiceOver row/triangle activation, stale-authority rejection and same-binary read-only regressions. Selection, reveal, editing, classic trees and actual Symphony workflows remain pending. These packages are development builds, with signed distribution separate.
 
+An application can declare an automatic-multiline input with `controls.<name>.multiline`, so accessibility text entry accepts line breaks there. 4D's automatic rule depends on height and font metrics; a 4D 20.8 probe recorded the thresholds documented in the integration guide. This is an unreleased development candidate.
+
 Local 0.21.0 acceptance passes. For signed distribution, use the published [GitHub release](https://github.com/KyleKincer/4d-accessibility/releases); its notes and attached report record the exact signed-download checks. CI artifacts are development builds. [Candidate evidence](../../../validation/stable-identifiers-0.21.0.json) retains each tested package and source hash.
 
 Build branch kits using [the build guide](../../../CONTRIBUTING.md). Install the plugin, component and helpers from the same kit. A newer helper with an older native plugin does not add a native capability.
