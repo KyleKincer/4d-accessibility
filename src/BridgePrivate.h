@@ -46,6 +46,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic, strong) NSMenu *adoptedMenu;
 @property(nonatomic, strong) id menuNativeParent;
 @property(nonatomic) BOOL live;
+@property(nonatomic) BOOL omitOutsideWindow;
 - (void)refresh;
 - (void)refreshNativeRoot;
 - (void)refreshComboPopup;

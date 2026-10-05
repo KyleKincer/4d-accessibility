@@ -474,6 +474,59 @@ static void ButtonInputTest(void) {
     Check(canvas.presses == 1 && ![Exchange(window, 9025, 1, session, snapshot)[@"controlInputResult"][@"accepted"] boolValue], "disabling a button before native dispatch prevents its handler");
     [window close]; Pump();
 }
+static AXBWindowView *BridgeView(NSWindow *window) {
+    NSMutableArray<NSView *> *pending = [NSMutableArray arrayWithObject:window.contentView];
+    while (pending.count) {
+        NSView *view = pending.lastObject; [pending removeLastObject];
+        if ([view isKindOfClass:AXBWindowView.class]) return (AXBWindowView *)view;
+        [pending addObjectsFromArray:view.subviews];
+    }
+    return nil;
+}
+static NSSet<NSString *> *ExposedIDs(NSWindow *window) {
+    NSMutableSet *ids = [NSMutableSet new];
+    for (AXBNode *node in BridgeView(window).nodes) if (node.isAccessibilityElement) [ids addObject:node.data[@"id"]];
+    return ids;
+}
+static void ParkedControlsTest(void) {
+    // 4D forms park shortcut-only buttons, their legends and state fields beyond a fixed window.
+    NSWindow *window = Window(@"AXB parked controls");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9032);
+    NSDictionary *(^node)(NSString *, NSString *, NSArray *, BOOL) = ^NSDictionary *(NSString *identifier, NSString *role, NSArray *frame, BOOL focused) {
+        // Automatically discovered controls are revealable; that does not make a parked control reachable.
+        return @{@"id": identifier, @"role": role, @"label": identifier, @"value": @"", @"editable": @([role isEqual:@"textfield"]),
+                 @"focusable": @([role isEqual:@"textfield"]), @"focused": @(focused), @"enabled": @YES, @"visible": @YES, @"revealable": @YES, @"frame": frame};
+    };
+    NSMutableArray *nodes = [@[node(@"inside", @"button", @[@20, @20, @100, @24], NO), node(@"edge", @"button", @[@390, @20, @30, @20], NO),
+        node(@"parked", @"button", @[@600, @20, @22, @11], NO), node(@"legend", @"text", @[@630, @20, @150, @11], NO),
+        node(@"below", @"textfield", @[@20, @400, @150, @17], NO), node(@"search", @"textfield", @[@600, @60, @2, @12], YES)] mutableCopy];
+    // A subform row that scrolled below the window has a longer navigation path and stays readable.
+    NSMutableDictionary *row = [node(@"row", @"textfield", @[@20, @420, @150, @17], NO) mutableCopy];
+    row[@"navigation"] = @[@100, @20, @320, @0];
+    [nodes addObject:row];
+    NSSet *all = [NSSet setWithArray:@[@"inside", @"edge", @"parked", @"legend", @"below", @"search", @"row"]];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Customers", @"enabled": @YES, @"nodes": nodes} mutableCopy];
+    Check([Exchange(window, 9032, 1, session, snapshot)[@"ok"] boolValue], "parked-control snapshot accepted"); Pump();
+    Check([ExposedIDs(window) isEqual:all], "without the application option every visible control stays exposed");
+    snapshot[@"omitOutsideWindow"] = @YES; snapshot[@"revision"] = @2;
+    Check([Exchange(window, 9032, 1, session, snapshot)[@"ok"] boolValue], "fixed-window option accepted"); Pump();
+    Check([ExposedIDs(window) isEqual:[NSSet setWithArray:@[@"inside", @"edge", @"search", @"row"]]],
+          "with the option, root-form controls wholly outside the window are omitted; partly visible, focused and subform controls remain");
+    AXBNode *parked = nil;
+    for (AXBNode *candidate in BridgeView(window).nodes) if ([candidate.data[@"id"] isEqual:@"parked"]) parked = candidate;
+    Check(parked && ![parked accessibilityPerformPress] && ![Provider(window).accessibilityChildren containsObject:parked],
+          "a parked button is neither listed nor pressable through accessibility");
+    nodes[5] = node(@"search", @"textfield", @[@600, @60, @2, @12], NO); snapshot[@"revision"] = @3;
+    Exchange(window, 9032, 1, session, snapshot); Pump();
+    Check(![ExposedIDs(window) containsObject:@"search"], "a parked field leaves the tree when it loses focus");
+    snapshot[@"omitOutsideWindow"] = @"yes"; snapshot[@"revision"] = @4;
+    Check(![Exchange(window, 9032, 1, session, snapshot)[@"ok"] boolValue], "a non-Boolean fixed-window option is rejected");
+    [snapshot removeObjectForKey:@"omitOutsideWindow"]; snapshot[@"revision"] = @5;
+    Exchange(window, 9032, 1, session, snapshot); Pump();
+    Check([ExposedIDs(window) isEqual:all], "removing the option restores every visible control");
+    [window close]; Pump();
+}
 static void FocusAfterLayoutTest(void) {
     // A host mode change can make the focused field editable in the same refresh
     // that replaces it. VoiceOver follows the new focus only when the layout change
@@ -1199,6 +1252,7 @@ int main(void) {
         AdjustableTest();
         ButtonInputTest();
         FocusAfterLayoutTest();
+        ParkedControlsTest();
         SelectionInputTest();
         ComboPopupTest();
         NSWindow *first = Window(@"AXB native test 1");
