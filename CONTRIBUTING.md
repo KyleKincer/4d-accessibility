@@ -83,6 +83,14 @@ python3 test_native_messages.py --run --voiceover
 
 `--baseline` records the plugin-free windows, advancing with Return only as setup. `--run` then requires identical pixels before acting through AX. `--voiceover` navigates, types and activates with VoiceOver and records only the fixture's speech. It reads speech through VoiceOver's AppleScript `last phrase`, so "Allow VoiceOver to be controlled with AppleScript" must be enabled. Add `--intel` for Rosetta, or `--compiled --server /path/to/4D\ Server.app` to compile the copy first. Reports stay under ignored `build/`.
 
+For focus after a host mode change, without a 4D installation:
+
+```sh
+python3 test_focus_replacement_speech.py --run
+```
+
+An owned synthetic window publishes a focused read-only note beside forty sibling fields, then makes every field editable in one refresh, as a 4D form does when it enters Modify. VoiceOver must announce the note as editable text in every trial rather than moving to the containing group. It starts its own VoiceOver session and reads speech with VoiceOver's AppleScript `last phrase`, so "Allow VoiceOver to be controlled with AppleScript" must be enabled. Omit `--run` to compile only.
+
 For VoiceOver test-session cleanup:
 
 ```sh

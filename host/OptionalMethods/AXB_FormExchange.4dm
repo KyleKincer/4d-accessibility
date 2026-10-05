@@ -47,11 +47,15 @@ If ((Value type($context.pending)=Is object) & ($context.pending#Null))
   $context.receipt:=$result
  End if
  // A confirmed callback can update dependent controls. Publish their new state
- // with the receipt, after rechecking the whole clipped form tree.
- $tree:=AXB_FormTree
- If (Not($tree.ok=True))
-  AXB_FormFailed($context; New object("error"; $tree.error))
-  return
+ // with the receipt, after rechecking the whole clipped form tree. A step that
+ // is still pending has only posted input that 4D applies after this callback;
+ // the next poll describes the form again before confirming the next step.
+ If (Value type($context.receipt)=Is object)
+  $tree:=AXB_FormTree
+  If (Not($tree.ok=True))
+   AXB_FormFailed($context; New object("error"; $tree.error))
+   return
+  End if
  End if
 End if
 $token:=$context.token
@@ -61,6 +65,10 @@ End use
 $snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current form window=Frontmost window; "nodes"; $tree.nodes)
 If (Value type($context.view.options.automationKey)=Is text)
  $snapshot.automationKey:=$context.view.options.automationKey
+End if
+// The application asserts that this form's window does not scroll; controls parked outside it are omitted.
+If ($context.view.options.omitOutsideWindow=True)
+ $snapshot.omitOutsideWindow:=True
 End if
 $state:=JSON Stringify($snapshot)
 If (Compare strings($state; $context.state; sk char codes)#0)

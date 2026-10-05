@@ -59,6 +59,7 @@ jobs:
           python3 test_native_interop.py
           python3 test_grid_value_speech.py
           python3 test_outline_value_speech.py
+          python3 test_focus_replacement_speech.py
       - name: Build compiled component with pinned tool4d
         run: |
           python3 ci/download_tool4d.py

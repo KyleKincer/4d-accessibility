@@ -122,6 +122,8 @@ Button activation uses an uncovered part of the visible button. Equal or higher 
 
 If one control on a declared higher layer completely covers a button, that button leaves the tree until the covering control moves or hides. This handles an application's default button moving over another button without publishing two indistinguishable actions. With equal layers, the bridge keeps the conservative overlap check because their actual order is unknown.
 
+Forms often park shortcut-only buttons, their legends and state fields outside the window. Users cannot see or click them, yet assistive technologies list them, often under object names. For a form whose window cannot scroll, set `$options.omitOutsideWindow:=True` in its configuration. Top-level controls that lie wholly outside the window then leave the tree; their keyboard shortcuts still work natively. A focused control stays, so an offscreen field that receives typing is still announced. Controls inside subforms, including list rows scrolled out of view, and partly visible controls are unaffected, and a control that moves into the window returns. The bridge cannot detect 4D's own form scrolling, so do not set this option for a scrolling form.
+
 Completion: activate foreground and background actions through AX and check which application handler ran. Confirm that a covered control cannot accidentally activate its neighbor. Invalid layer metadata returns `invalidControlLayer` during configuration.
 
 ### Child forms
@@ -258,6 +260,16 @@ Typing, selecting text and replacing text use the real editor. Existing keystrok
 No application-written list of choices or separate selection callback is needed. If its label is unclear, set `controls.<object>.label` as for any input. The popup integration currently recognizes one native table directly above or below the focused combo. Unrelated or ambiguous windows are never adopted; unusual placement remains part of the multi-display validation work.
 
 With VoiceOver, open the choices, use ordinary Down/Up arrows to move through spoken selections, and confirm with Return. This matches the tested AppKit combo. VO-Right moves to the arrow button rather than through the choices.
+
+### Declare automatic multi-line inputs
+
+A text input whose Multiline property is **Yes** accepts line breaks in accessibility text entry, including whole-value writes. With the default **Automatic**, 4D decides from the field's height and font metrics. Measured with the system font in 4D 20.8, the first height that accepts Return as a line break was 18 points at 10-point text, 24 at 13-point, 32 at 18-point and 44 at 24-point. Shorter fields treat Return as the end of entry. The bridge therefore keeps an automatic field single-line, and rejects text with line breaks, unless the application declares it:
+
+```4d
+$options.controls.Remarks:=New object("label"; "Remarks"; "multiline"; True)
+```
+
+Declare only automatic fields that actually accept Return as a line break. A field explicitly set to **No** stays single-line regardless.
 
 ### Name groups, progress and image statuses
 

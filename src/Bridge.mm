@@ -126,6 +126,22 @@ static id DeepestHit(id element, NSPoint point);
 static id DeepestFormHit(AXBWindowView *view, NSPoint point);
 static NSArray *TopLevelNodes(AXBWindowView *view);
 
+// With the application's omitOutsideWindow option, a control of the root form placed wholly outside
+// the window is a parked helper: it cannot be seen or clicked. 4D forms often park shortcut-only
+// buttons, their legends and state fields there. 4D draws scrolling forms itself, so only the
+// application can say that a window does not scroll. Focused controls stay exposed. Subform
+// children, whose navigation path is longer than the root form's, can scroll within their subform.
+static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
+    if (!view || !view.omitOutsideWindow || data[@"parent"] || [data[@"focused"] boolValue]) return NO;
+    NSArray *navigation = data[@"navigation"];
+    if ([navigation isKindOfClass:NSArray.class] && navigation.count > 2) return NO;
+    NSArray *f = data[@"frame"];
+    if (![f isKindOfClass:NSArray.class] || f.count != 4) return NO;
+    NSRect frame = NSMakeRect([f[0] doubleValue], [f[1] doubleValue], [f[2] doubleValue], [f[3] doubleValue]);
+    NSRect content = NSMakeRect(0, 0, NSWidth(view.bounds), NSHeight(view.bounds));
+    return !NSIsEmptyRect(content) && !NSIntersectsRect(frame, content);
+}
+
 @implementation AXBNode
 - (id)accessibilityHitTest:(NSPoint)point {
     return self.owner.rootContainer && !self.data[@"parent"] ? DeepestFormHit(self.owner, point) : DeepestHit(self, point);
@@ -136,7 +152,7 @@ static NSArray *TopLevelNodes(AXBWindowView *view);
     self.live = NO;
     NSAccessibilityPostNotification(self, NSAccessibilityUIElementDestroyedNotification);
 }
-- (BOOL)isAccessibilityElement { return self.live && [self.data[@"visible"] boolValue]; }
+- (BOOL)isAccessibilityElement { return self.live && [self.data[@"visible"] boolValue] && !AXBParked(self.data, self.owner); }
 - (NSString *)accessibilityIdentifier { return self.identifier; }
 - (NSString *)accessibilityLabel {
     // VoiceOver reads an image's label, not AXValue. Include its current text
@@ -918,6 +934,9 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     NSMutableOrderedSet<AXBNode *> *changedSelections = [NSMutableOrderedSet new];
     NSMutableOrderedSet<AXBNode *> *changedTextSelections = [NSMutableOrderedSet new];
     BOOL structureChanged = NO;
+    BOOL omittedBefore = self.omitOutsideWindow;
+    self.omitOutsideWindow = [snapshot[@"omitOutsideWindow"] boolValue];
+    if (omittedBefore != self.omitOutsideWindow) structureChanged = YES;
     for (NSDictionary *data in snapshot[@"nodes"]) {
         Class kind = @{@"textfield": AXBTextNode.class, @"table": AXBTableNode.class, @"row": AXBRowNode.class}[data[@"role"]] ?: AXBNode.class;
         if (data[@"grid"]) kind = AXBGridNode.class;
@@ -934,6 +953,7 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         BOOL gainedFocus = [data[@"focused"] boolValue] && ![node.data[@"focused"] boolValue];
         BOOL textSelectionChanged = node.data && ![node.data[@"selection"] isEqual:data[@"selection"]] && (node.data[@"selection"] || data[@"selection"]);
         BOOL selectionChanged = node.data && ![node.data[@"selected"] isEqual:data[@"selected"]] && [data[@"role"] isEqual:@"row"];
+        if (node.data && AXBParked(node.data, self) != AXBParked(data, self)) structureChanged = YES;
         for (NSString *key in @[@"visible", @"frame", @"clip", @"parent", @"index", @"label", @"labelledBy", @"linked", @"enabled"])
             if (node.data && (node.data[key] || data[key]) && ![node.data[key] isEqual:data[key]]) structureChanged = YES;
         node.data = data;
@@ -991,8 +1011,15 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         NSAccessibilityPostNotification(node, NSAccessibilityValueChangedNotification);
     }
     for (AXBNode *node in changedTextSelections) NSAccessibilityPostNotification(node, NSAccessibilitySelectedTextChangedNotification);
+    // When one refresh replaces the focused node (a field becoming editable on a host
+    // mode change), the destroyed element may be under the VoiceOver cursor. A bare
+    // layout change then sends VoiceOver to an ancestor, which ignores the focus change.
+    // Name the newly focused element in the layout change, and announce focus after it.
+    if (structureChanged) {
+        if (focusChanged) NSAccessibilityPostNotificationWithUserInfo(self.window, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[focused]});
+        else NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
+    }
     if (focusChanged) NSAccessibilityPostNotification(focused, NSAccessibilityFocusedUIElementChangedNotification);
-    if (structureChanged) NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
     NSDictionary *feedback = self.actionFeedback;
     if (([feedback[@"role"] isEqual:@"tab"] && focusChanged) ||
         (feedback[@"deadline"] && Now() >= [feedback[@"deadline"] doubleValue])) {

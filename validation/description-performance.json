@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "date": "2026-10-05",
+  "release": "0.24.0 development candidate",
+  "source_revision": "101af33f5c4b457bc9d59c59c83c4640ead3a394",
+  "base_revision": "1235496",
+  "scope": "Polling cost of Symphony's customer window (648 described nodes, 13 form instances) in compiled 4D 20.8 under Rosetta, measured with diagnostic timers in a disposable host",
+  "measurements": {
+    "beforeIdlePollMs": "1,150-1,450 per exchange; form description 1,070-1,400 of it; JSON serialization of the 337 KB snapshot 7-10; native exchange 53-72",
+    "descriptionBreakdownBefore": "control discovery about 120 ms; per-node loop about 900 ms, almost all in one statement assigning the inherited clip collection to each node ($copy.clip:=$clip, about 1.7-1.9 ms per node in subforms)",
+    "ruledOut": [
+      "label inference (1-2 ms per form)",
+      "application metrics wrappers (no active capture)",
+      "reading the request object passed through EXECUTE METHOD IN SUBFORM (a local copy of the clip was equally slow)"
+    ],
+    "afterFreshClipPollMs": "276-277 per exchange; form description 192-195",
+    "pendingTextStepBefore": "two descriptions per entered character, 2.54-2.93 s per character",
+    "wholeValueWriteBefore": "about 85-character note: 120-second budget exhausted after 46 characters",
+    "wholeValueWriteAfter": "34-39 s for the same note, including line breaks",
+    "voiceOverNotesWorkflowAfter": "complete read, edit, save and cancel in 2 min 44 s"
+  },
+  "changes": [
+    "Describe the form again after a pending step only when its confirmation produced a final receipt",
+    "Store a fresh four-value clip rectangle per described node"
+  ],
+  "application_workflow": {
+    "records": [
+      "Symphony Tools/AccessibilityBridge/validation/notes-assistive-multiline-2026-10-05.json",
+      "Symphony Tools/AccessibilityBridge/validation/notes-voiceover-performance-2026-10-05.json"
+    ]
+  },
+  "sources_sha256": {
+    "host/OptionalMethods/AXB_FormExchange.4dm": "f9a696492705f47f4fa52994f814570c1b42114e76b470cac321d38d7f2faf90",
+    "host/OptionalMethods/AXB_View.4dm": "a0b713357ed25690cfc0625da73190c8e867ccbcfa11bbe307a69897a7956a80"
+  }
+}
