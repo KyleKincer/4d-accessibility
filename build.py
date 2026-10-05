@@ -45,12 +45,12 @@ def main():
         common = ["-arch", arch, "-mmacosx-version-min=11.0", "-g", "-O1", "-fvisibility=hidden", "-I", SDK]
         run("xcrun", "clang", *common, "-std=c11", "-c", SDK / "4DPluginAPI.c", "-o", BUILD / f"sdk-{arch}.o")
         objects = []
-        for source in ("Plugin", "Area", "Session", "Grid", "Bridge", "GridNative", "NativeLayout"):
+        for source in ("Plugin", "Area", "Session", "Grid", "Bridge", "GridNative", "NativeLayout", "DrawnText", "MessageDialogs"):
             obj = BUILD / f"{source}-{arch}.o"
             run("xcrun", "clang++", *common, "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", f'-DAXB_VERSION="{VERSION}"', "-c", ROOT / "src" / f"{source}.mm", "-o", obj)
             objects.append(obj)
         binary = BUILD / f"AccessibilityBridge-{arch}"
-        run("xcrun", "clang++", "-arch", arch, "-mmacosx-version-min=11.0", "-bundle", BUILD / f"sdk-{arch}.o", *objects, "-framework", "Cocoa", "-framework", "CoreGraphics", "-o", binary)
+        run("xcrun", "clang++", "-arch", arch, "-mmacosx-version-min=11.0", "-bundle", BUILD / f"sdk-{arch}.o", *objects, "-framework", "Cocoa", "-framework", "CoreGraphics", "-framework", "CoreText", "-framework", "QuartzCore", "-o", binary)
         binaries.append(binary)
     executable = BUNDLE / "Contents/MacOS/AccessibilityBridge"
     run("xcrun", "lipo", "-create", *binaries, "-output", executable)

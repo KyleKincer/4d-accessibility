@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "tests"))
 
 COMPILE_SOURCES = ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm",
-                   "src/NativeLayout.mm", "tests/NativeOutlineFixture.mm"]
+                   "src/NativeLayout.mm", "src/DrawnText.mm", "src/MessageDialogs.mm", "tests/NativeOutlineFixture.mm"]
 SOURCES = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "src").glob("*") if p.is_file()) + [
     "tests/NativeOutlineFixture.mm", "test_native_outlines.py", "tests/mac_ax.py", "tests/voiceover.py", "tests/ReadScreen.swift"]
 TITLE = "AXB native outline fixture"
@@ -45,7 +45,7 @@ def main():
     binary = build / "NativeOutlineFixture"
     subprocess.run(["xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
                     *[str(ROOT / name) for name in COMPILE_SOURCES],
-                    "-framework", "Cocoa", "-o", str(binary)], check=True)
+                    "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary)], check=True)
     report["binarySHA256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
     save()
     if not args.run:
