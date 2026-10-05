@@ -28,6 +28,8 @@ An application can set `omitOutsideWindow` for a form in a fixed window. Top-lev
 
 An application can declare an automatic-multiline input with `controls.<name>.multiline`, so accessibility text entry accepts line breaks there. 4D's automatic rule depends on height and font metrics; a 4D 20.8 probe recorded the thresholds documented in the integration guide. This is an unreleased development candidate.
 
+Polling a large form is about four times cheaper. In Symphony's customer window, 648 nodes in compiled Rosetta 4D, one poll fell from about 1.3 seconds to under 0.3 seconds. Nearly all of the cost was one shared clip collection assigned to every subform node; each node now receives its own rectangle. A pending text-entry step no longer describes the form a second time. A whole-value write of an 85-character note now completes in under 40 seconds, and the VoiceOver Notes workflow in under three minutes. [Evidence](../../../validation/description-performance.json). This is an unreleased development candidate.
+
 Local 0.21.0 acceptance passes. For signed distribution, use the published [GitHub release](https://github.com/KyleKincer/4d-accessibility/releases); its notes and attached report record the exact signed-download checks. CI artifacts are development builds. [Candidate evidence](../../../validation/stable-identifiers-0.21.0.json) retains each tested package and source hash.
 
 Build branch kits using [the build guide](../../../CONTRIBUTING.md). Install the plugin, component and helpers from the same kit. A newer helper with an older native plugin does not add a native capability.
