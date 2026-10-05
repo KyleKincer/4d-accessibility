@@ -25,7 +25,7 @@ sys.path.insert(0, str(ROOT / "tests"))
 BUILD = ROOT / "build"
 FIXTURE = BUILD / "native-messages-fixture"
 PIXELS = BUILD / "native-messages-pixels"
-PHASES = ("confirm-cancel", "confirm-accept", "alert", "request-accept", "request-reject", "request-empty")
+PHASES = ("confirm-cancel", "confirm-accept", "confirm-immediate", "alert", "request-accept", "request-reject", "request-empty")
 BUNDLE = BUILD / "AccessibilityBridge.bundle"
 DESKTOP = Path("/Applications/4D/4D.app/Contents/MacOS/4D")
 
@@ -37,6 +37,9 @@ File("/RESOURCES/results.json").setText(JSON Stringify(New object("confirmCancel
 File("/RESOURCES/phase.json").setText(JSON Stringify(New object("phase"; "confirm-accept")))
 CONFIRM("Send the invoice now?"; "Send"; "Later")
 File("/RESOURCES/results.json").setText(JSON Stringify(New object("confirmCancel"; JSON Parse(File("/RESOURCES/results.json").getText()).confirmCancel; "confirmAccept"; OK)))
+File("/RESOURCES/phase.json").setText(JSON Stringify(New object("phase"; "confirm-immediate")))
+CONFIRM("Archive the report?"; "Archive"; "Cancel")
+File("/RESOURCES/immediate.json").setText(JSON Stringify(New object("ok"; OK)))
 File("/RESOURCES/phase.json").setText(JSON Stringify(New object("phase"; "alert")))
 ALERT("The export finished."; "Close")
 File("/RESOURCES/phase.json").setText(JSON Stringify(New object("phase"; "request-accept")))
@@ -66,7 +69,7 @@ def prepare(plugin=True):
         (FIXTURE / "Plugins").mkdir(exist_ok=True)
         shutil.copytree(BUNDLE, FIXTURE / "Plugins/AccessibilityBridge.bundle")
     (FIXTURE / "Project/Sources/DatabaseMethods/onStartup.4dm").write_text(STARTUP)
-    for name in ("phase.json", "results.json", "request.json", "reject.json", "empty.json"):
+    for name in ("phase.json", "results.json", "request.json", "reject.json", "empty.json", "immediate.json"):
         (FIXTURE / "Resources" / name).unlink(missing_ok=True)
 
 
@@ -208,8 +211,17 @@ def main():
             vo.key("space", vo.VO)
         else:
             check(nodes["ok"].press() == 0, "the default button is pressed through accessibility")
-        wait_phase("alert")
+        wait_phase("confirm-immediate")
         check(read("results.json").get("confirmAccept") == 1, "CONFIRM returns OK = 1 for its default button")
+        # A press the moment the window is published, as a fast automation client makes it.
+        nodes = elements(["main", "cancel", "ok"])
+        if args.voiceover:
+            phrase_until(lambda p: "Archive button" in p, 0)
+            vo.key("space", vo.VO)
+        else:
+            check(nodes["ok"].press() == 0, "a press is accepted as soon as the window is published")
+        wait_phase("alert", 10)
+        check(read("immediate.json").get("ok") == 1, "a press made as soon as the window appears takes effect without a retry")
         # ALERT.
         nodes = elements(["main", "ok"])
         compare("alert")
