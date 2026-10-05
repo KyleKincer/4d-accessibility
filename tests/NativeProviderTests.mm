@@ -4,16 +4,21 @@
 #import "Bridge.h"
 #import "BridgePrivate.h"
 #import "NativeLayout.h"
+#import "DrawnText.h"
+#import "MessageDialogs.h"
+#import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <cstdio>
 #include <cstdlib>
 #include <thread>
 
 #undef NSAccessibilityPostNotificationWithUserInfo
-static NSMutableArray<NSDictionary *> *Announcements;
+static NSMutableArray<NSDictionary *> *Announcements, *TextEdits;
 void AXBTestPostNotificationWithUserInfo(id element, NSAccessibilityNotificationName notification, NSDictionary *userInfo) {
     if ([notification isEqual:NSAccessibilityAnnouncementRequestedNotification] && Announcements)
         [Announcements addObject:@{@"element": element, @"info": userInfo ?: @{}}];
+    if ([notification isEqual:NSAccessibilityValueChangedNotification] && userInfo[@"AXTextChangeValues"] && TextEdits)
+        [TextEdits addObject:@{@"element": element, @"info": userInfo}];
     NSAccessibilityPostNotificationWithUserInfo(element, notification, userInfo);
 }
 
@@ -466,6 +471,137 @@ static void ButtonInputTest(void) {
     Exchange(window, 9025, 1, session, snapshot); Pump();
     Check(canvas.presses == 1 && ![Exchange(window, 9025, 1, session, snapshot)[@"controlInputResult"][@"accepted"] boolValue], "disabling a button before native dispatch prevents its handler");
     [window close]; Pump();
+}
+static CALayer *MessageLayer(CALayer *form, NSString *name, NSRect frame, NSArray<NSString *> *texts) {
+    CALayer *layer = [CALayer layer];
+    layer.name = name; layer.frame = frame;
+    [form addSublayer:layer];
+    if (texts) AXBDrawnTextRecordForTesting(layer, texts);
+    return layer;
+}
+static NSArray *MessageChildren(NSView *form) {
+    for (NSView *view in form.subviews) if (![view isKindOfClass:AXBWindowView.class] && view.accessibilityChildren.count) return view.accessibilityChildren;
+    return @[];
+}
+static id MessageElement(NSView *form, NSString *name) {
+    for (id element in MessageChildren(form)) if ([[element accessibilityIdentifier] isEqual:[@"axb/message/" stringByAppendingString:name]]) return element;
+    return nil;
+}
+static void MessageDialogsTest(void) {
+    // A standard 4D message is an internal form whose objects are named layers.
+    AXBMessagesEnableForTesting();
+    NSWindow *window = Window(@"AXB standard message");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    MessageLayer(context, @"main", NSMakeRect(20, 100, 360, 40), @[@"Delete the selected order?"]);
+    MessageLayer(context, @"comment", NSMakeRect(20, 60, 360, 30), nil);
+    CALayer *cancel = MessageLayer(context, @"cancel", NSMakeRect(200, 10, 80, 30), @[@"Keep"]);
+    CALayer *ok = MessageLayer(context, @"ok", NSMakeRect(290, 10, 90, 30), @[@"Delete"]);
+    MessageLayer(context, @"icon", NSMakeRect(10, 100, 40, 40), nil);
+    Check(AXBMessagesRefreshWindow(window), "a window whose form objects are standard message layers is published");
+    NSArray *children = MessageChildren(form);
+    Check(children.count == 3, "message text and both buttons are published; empty and decorative layers are not");
+    id main = MessageElement(form, @"main"), keep = MessageElement(form, @"cancel"), remove = MessageElement(form, @"ok");
+    Check([[main accessibilityRole] isEqual:NSAccessibilityStaticTextRole] && [[main accessibilityValue] isEqual:@"Delete the selected order?"],
+          "the message is static text with its drawn value");
+    Check([[keep accessibilityRole] isEqual:NSAccessibilityButtonRole] && [[keep accessibilityLabel] isEqual:@"Keep"] &&
+          [[remove accessibilityLabel] isEqual:@"Delete"] && [children indexOfObject:keep] < [children indexOfObject:remove],
+          "buttons carry their drawn titles in reading order");
+    Check(NSApp.accessibilityApplicationFocusedUIElement == remove, "focus starts on the default button");
+    NSRect frame = [remove accessibilityFrame];
+    NSPoint expected = [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))];
+    Check([remove accessibilityPerformPress], "a button press is accepted");
+    NSEvent *down = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSEvent *up = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(down && up && down.window == window && fabs(down.locationInWindow.x - expected.x) < 2 && fabs(down.locationInWindow.y - expected.y) < 2,
+          "the press is an ordinary click at the button's center");
+    Check(![main accessibilityPerformPress] && ![main isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)], "message text is not actionable");
+    AXBDrawnTextRecordForTesting(ok, @[@"Remove"]);
+    AXBMessagesRefreshWindow(window);
+    Check([[MessageElement(form, @"ok") accessibilityLabel] isEqual:@"Remove"], "redrawn text updates the published title");
+    cancel.hidden = YES;
+    AXBMessagesRefreshWindow(window);
+    Check(!MessageElement(form, @"cancel"), "a hidden button leaves the tree");
+    CALayer *box = MessageLayer(context, @"box", NSMakeRect(20, 50, 360, 24), @[@"Default"]);
+    AXBMessagesRefreshWindow(window);
+    id field = MessageElement(form, @"box");
+    Check([[field accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[field accessibilityValue] isEqual:@"Default"] &&
+          [field isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)], "a Request field is an editable text field");
+    Check(NSApp.accessibilityApplicationFocusedUIElement == field, "a Request field drawn after the buttons takes the initial focus");
+    Check(NSEqualRanges([field accessibilitySelectedTextRange], NSMakeRange(0, 7)), "the Request answer starts selected, as 4D shows it");
+    TextEdits = [NSMutableArray new];
+    AXBDrawnTextRecordForTesting(box, @[@"L"]);
+    AXBMessagesRefreshWindow(window);
+    AXBDrawnTextRecordForTesting(box, @[@"La"]);
+    AXBMessagesRefreshWindow(window);
+    NSDictionary *first = TextEdits.firstObject[@"info"], *second = TextEdits.lastObject[@"info"];
+    Check(TextEdits.count == 2 && TextEdits.firstObject[@"element"] == field && [first[@"AXTextStateChangeType"] isEqual:@1] &&
+          [first[@"AXTextChangeValues"] isEqual:(@[@{@"AXTextEditType": @1, @"AXTextChangeValue": @"Default"}, @{@"AXTextEditType": @3, @"AXTextChangeValue": @"L"}])],
+          "replacing the selected answer is announced as its removal and the typed character");
+    Check([second[@"AXTextChangeValues"] isEqual:(@[@{@"AXTextEditType": @3, @"AXTextChangeValue": @"a"}])] &&
+          NSEqualRanges([field accessibilitySelectedTextRange], NSMakeRange(2, 0)) && [field accessibilityNumberOfCharacters] == 2,
+          "each typed character is announced and the caret follows it");
+    AXBDrawnTextRecordForTesting(box, @[@"L"]);
+    AXBMessagesRefreshWindow(window);
+    Check([TextEdits.lastObject[@"info"][@"AXTextChangeValues"] isEqual:(@[@{@"AXTextEditType": @1, @"AXTextChangeValue": @"a"}])] &&
+          NSEqualRanges([field accessibilitySelectedTextRange], NSMakeRange(1, 0)), "a deletion is announced with the removed text");
+    [box removeFromSuperlayer];
+    box = MessageLayer(context, @"box", NSMakeRect(20, 50, 360, 24), @[@"Lo"]);
+    AXBMessagesRefreshWindow(window);
+    Check(MessageElement(form, @"box") == field && [[field accessibilityValue] isEqual:@"Lo"] &&
+          [TextEdits.lastObject[@"info"][@"AXTextChangeValues"] isEqual:(@[@{@"AXTextEditType": @3, @"AXTextChangeValue": @"o"}])],
+          "a replaced field layer keeps its element, so focus and typing echo continue");
+    AXBDrawnTextRecordForTesting(box, nil);
+    AXBMessagesRefreshWindow(window);
+    Check(MessageElement(form, @"box") == field && [[field accessibilityValue] isEqual:@""] &&
+          [TextEdits.lastObject[@"info"][@"AXTextChangeValues"] isEqual:(@[@{@"AXTextEditType": @1, @"AXTextChangeValue": @"Lo"}])],
+          "deleting the whole answer leaves an empty, still-published field");
+    TextEdits = nil;
+    MessageLayer(context, @"customButton", NSMakeRect(20, 10, 80, 30), @[@"Other"]);
+    Check(!AXBMessagesRefreshWindow(window) && MessageChildren(form).count == 0, "any other object name leaves the window untouched");
+    Check(NSApp.accessibilityApplicationFocusedUIElement != field, "an unpublished message window releases the application focus");
+    [window close]; Pump();
+    // An empty default answer is still an editable field, and closing returns focus to AppKit.
+    NSWindow *request = Window(@"AXB standard request");
+    [request makeKeyAndOrderFront:nil]; Pump();
+    NSView *requestForm = [[NSView alloc] initWithFrame:request.contentView.bounds];
+    requestForm.wantsLayer = YES;
+    [request.contentView addSubview:requestForm];
+    CALayer *requestContext = [CALayer layer]; requestContext.name = @"formContext"; requestContext.frame = requestForm.layer.bounds;
+    [requestForm.layer addSublayer:requestContext];
+    MessageLayer(requestContext, @"main", NSMakeRect(20, 100, 360, 40), @[@"Name?"]);
+    MessageLayer(requestContext, @"box", NSMakeRect(20, 60, 360, 24), @[]);
+    MessageLayer(requestContext, @"ok", NSMakeRect(290, 10, 90, 30), @[@"OK"]);
+    Check(AXBMessagesRefreshWindow(request), "a Request with an empty default answer is published");
+    id empty = MessageElement(requestForm, @"box");
+    Check(empty && [[empty accessibilityValue] isEqual:@""] && NSApp.accessibilityApplicationFocusedUIElement == empty, "an empty Request field is published and focused");
+    [request close]; Pump();
+    Check(NSApp.accessibilityApplicationFocusedUIElement != empty, "closing a message window releases its focus override");
+    // Text follows an image only while that image lives; a new image at a reused address has none.
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef bitmap = CGBitmapContextCreate(NULL, 4, 4, 8, 16, space, kCGImageAlphaPremultipliedLast);
+    uintptr_t freed = 0;
+    @autoreleasepool {
+        CGImageRef image = CGBitmapContextCreateImage(bitmap);
+        AXBDrawnTextRecordImageForTesting(image, @[@"Old"]);
+        Check([AXBDrawnTextForImageForTesting(image) isEqual:@[@"Old"]], "drawn text follows its image");
+        freed = (uintptr_t)image;
+        CGImageRelease(image);
+    }
+    BOOL clean = YES;
+    for (int i = 0; i < 64; i++) {
+        CGImageRef image = CGBitmapContextCreateImage(bitmap);
+        clean = clean && AXBDrawnTextForImageForTesting(image) == nil;
+        BOOL reused = (uintptr_t)image == freed;
+        CGImageRelease(image);
+        if (reused) break;
+    }
+    CGContextRelease(bitmap); CGColorSpaceRelease(space);
+    Check(clean, "a freed image's text never attaches to a later image");
 }
 static void GridControlsTest(void) {
     NSWindow *window = Window(@"AXB typed grid controls");
@@ -1152,6 +1288,7 @@ int main(void) {
         CheckboxFeedbackTest();
         AdjustableTest();
         ButtonInputTest();
+        MessageDialogsTest();
         SelectionInputTest();
         ComboPopupTest();
         NSWindow *first = Window(@"AXB native test 1");

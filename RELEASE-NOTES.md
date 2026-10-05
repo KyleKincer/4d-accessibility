@@ -6,6 +6,8 @@ Rows and their disclosure triangles support VoiceOver activation. A receipt-back
 
 [The acceptance record](validation/grouped-disclosure-development.json) passes 904 live 4D checks, 37 whole-window comparisons with zero changed RGBA pixels, 37 pure host checks and nine fresh flat-grid speech cases with 135 checks. Read [configuration and gate reproduction](tests/GROUPED-DISCLOSURE.md). Complete break selection, reveal, editing, classic trees and actual Symphony hierarchy workflows remain pending. Upgrade the plugin, component and helpers together; this is a development build, with signed distribution separate.
 
+Standard 4D `ALERT`, `CONFIRM` and `Request` windows are accessible with only the native plugin installed. The plugin publishes the message, the Request field and named buttons from the text 4D draws, and presses with an ordinary click. `OK` and answers are unchanged, and VoiceOver echoes typing. No host method or component change is needed. Every window is pixel-identical to the plugin-free window. [The acceptance record](validation/native-messages-provider.json) passes 252 checks: interpreted and compiled, native ARM and Rosetta, with and without VoiceOver. Client/server, Request caret movement and other built-in windows remain open.
+
 # 0.23.0 development, read-only grouped arrays
 
 Array listbox hierarchies can expose their text/date groups and disclosed leaves through the parent lifecycle area. Configure `kind: outline` and an existing hidden column of stable row keys. The adapter preserves native arrays, visible layout, handlers and selection. Group identity includes the exact typed caption value, parent and member keys. Changed membership retires old handles.

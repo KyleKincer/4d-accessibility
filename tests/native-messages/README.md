@@ -12,3 +12,13 @@ An automation runner can launch the project with `--dataless --opening-mode inte
 The expected accessible result is a readable message and separately named buttons whose actions preserve 4D's normal confirmation result. Missing elements block semantic automation and screen-reader navigation even when a sighted user can use the keyboard.
 
 The [recorded run](../../validation/native-messages.json) reproduces missing message text and buttons on 4D 20.8 build 20.102009/macOS 26.7 in native ARM and Rosetta execution. [Prepared support request](SUPPORT-REQUEST.md). The report remains failed until the original dialogs expose these controls.
+
+## With the native plugin
+
+`test_native_messages.py` copies this project into `build/`, adds the built plugin and opens two CONFIRMs, an ALERT and three Requests in turn. It reads each window and operates every choice through accessibility, then checks 4D's own `OK` and answer:
+
+- `--run` adds AX checks in native ARM; add `--intel` for Rosetta. `--compiled --server /path/to/4D\ Server.app` compiles the copy first.
+- `--voiceover` uses VoiceOver navigation, activation and typing echo.
+- `--baseline` first records this project's plugin-free windows. A later `--run` then requires the same pixels before any action.
+
+The [provider record](../../validation/native-messages-provider.json) passes all eight combinations. This plugin-free project and its failed record stay unchanged as the vendor reproduction.

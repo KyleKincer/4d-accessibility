@@ -17,7 +17,7 @@ import uuid
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "tests"))
 CASES = ("offscreen-delayed", "onscreen-delayed", "offscreen-immediate", "fast-update", "leave", "leave-after-load", "inspection")
-COMPILE = ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "tests/NativeOutlineFixture.mm")
+COMPILE = ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/MessageDialogs.mm", "tests/NativeOutlineFixture.mm")
 SOURCES = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "src").glob("*") if p.is_file()) + [
     "tests/NativeOutlineFixture.mm", "tests/mac_ax.py", "tests/voiceover.py", "tests/ReadScreen.swift", "test_outline_value_speech.py"]
 TITLE = "AXB native outline fixture"
@@ -41,7 +41,7 @@ def main():
     report["sourceSHA256"] = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in SOURCES}
     binary, ocr = output / "NativeOutlineFixture", output / "ReadScreen"
     subprocess.run(["xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
-                    *[str(ROOT / name) for name in COMPILE], "-framework", "Cocoa", "-o", str(binary)], check=True)
+                    *[str(ROOT / name) for name in COMPILE], "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary)], check=True)
     report["binarySHA256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
     save()
     if not args.run:
