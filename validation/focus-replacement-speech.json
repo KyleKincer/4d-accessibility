@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "date": "2026-10-04",
+  "release": "0.24.0 development candidate",
+  "source_revision": "8d075c12f1db2666e0f45d364a65b14c9100793c",
+  "base_revision": "1235496",
+  "scope": "Owned AppKit window with the production native provider, macOS 26.7 VoiceOver read through its AppleScript last phrase",
+  "finding": "When one refresh made the focused read-only field editable, its element was replaced. A bare window layout change then moved VoiceOver to the containing group, which ignored the focus change. On origin/main this depended on notification delivery order and was intermittent; posting layout before focus without naming the element failed every trial.",
+  "correction": "A refresh that changes focus names the newly focused element in its layout change (NSAccessibilityUIElementsKey) and posts focus afterwards. Losing editability still retires the writable element.",
+  "fixture": {
+    "driver": "test_focus_replacement_speech.py --run",
+    "siblingFields": 40,
+    "after": {
+      "passed": true,
+      "trials": 6,
+      "announced": 6,
+      "heard": [
+        "Latest note edit text Insertion at end of text. First line",
+        "Latest note edit text Insertion at end of text. First line",
+        "Latest note edit text Insertion at end of text. First line",
+        "Latest note edit text Insertion at end of text. First line",
+        "Latest note edit text Insertion at end of text. First line",
+        "Latest note edit text Insertion at end of text. First line"
+      ]
+    },
+    "beforeOnOriginMain": {
+      "passed": false,
+      "trials": 3,
+      "announced": 2,
+      "heard": [
+        "Ready You are currently on a group. To interact with items in this group, press Control-Option-Shift-Down Arrow.",
+        "Latest note edit text Insertion at end of text. First line",
+        "Latest note edit text Insertion at end of text. First line"
+      ]
+    },
+    "diagnosticLayoutFirstUnnamedFailed": "0 of 5 announced"
+  },
+  "sources_sha256": {
+    "src/Bridge.mm": "68ad4e3321495c47108a35cc2aa8b33a92d937fda8fc25b3e3a1026e81cca94f",
+    "tests/FocusReplacementFixture.mm": "156268bf3bf7471a0a86ff44c616d43c33fb9af174b058411c72b5d6913fff8a",
+    "test_focus_replacement_speech.py": "7c7ad63f27d125b015da5bcce95378cdea0f0357af0ae5382d88637944e90ca2",
+    "tests/NativeProviderTests.mm": "3c1bee6e35fb833a58079c2f2cab8ea0cd8a00c487481b4b99a64c653e9c0f48",
+    "tests/NotificationProbe.h": "e8afb3a913f405d6e9976beed5d72ec83310265583ed137b2e33e304cdf6b713"
+  },
+  "native_sha256": "67d0648cacd175b82410cedf97c8f9075f7f3af287e26fbb26869d4bd7fcfa85",
+  "application_workflow": {
+    "record": "Symphony Tools/AccessibilityBridge/validation/notes-voiceover-workflow-2026-10-04.json",
+    "result": "Compiled Rosetta 4D 20.8 with this candidate plugin: VoiceOver reads the latest note, VO-Space enters the original Notes Modify and is announced as edit text twice, typing is echoed, keypad Enter saves, Command-period cancels, and VoiceOver reads the saved and cancelled note; two runs with the vendored 0.24.0 plugin and two layout-first candidate runs retain the group fallback"
+  },
+  "nativeProviderChecks": 356
+}
