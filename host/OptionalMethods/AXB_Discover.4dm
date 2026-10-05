@@ -192,6 +192,11 @@ For ($i; 1; Size of array($names))
     If ($role="textfield")
      $node.combo:=$type=Object type combobox
      $node.multiline:=Not($node.combo) && (OBJECT Get multiline(*; $name)=Multiline Yes)
+     // 4D's automatic multiline depends on the field's height and font metrics. The application
+     // declares an automatic field that accepts line breaks; an explicit single-line field stays so.
+     If (Not($node.multiline) && Not($node.combo) && ($metadata#Null) && ($metadata.multiline=True) && (OBJECT Get multiline(*; $name)=Multiline Auto))
+      $node.multiline:=True
+     End if
      $node.placeholder:=OBJECT Get placeholder(*; $name)
      $node.editable:=OBJECT Get enterable(*; $name)
      $node.styled:=$styledText#Null

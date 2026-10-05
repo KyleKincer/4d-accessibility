@@ -66,6 +66,10 @@ $snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current 
 If (Value type($context.view.options.automationKey)=Is text)
  $snapshot.automationKey:=$context.view.options.automationKey
 End if
+// The application asserts that this form's window does not scroll; controls parked outside it are omitted.
+If ($context.view.options.omitOutsideWindow=True)
+ $snapshot.omitOutsideWindow:=True
+End if
 $state:=JSON Stringify($snapshot)
 If (Compare strings($state; $context.state; sk char codes)#0)
  $context.revision:=$context.revision+1
