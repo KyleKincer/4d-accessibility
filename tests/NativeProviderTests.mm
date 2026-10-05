@@ -522,6 +522,9 @@ static void MessageDialogsTest(void) {
     NSRect frame = [remove accessibilityFrame];
     NSPoint expected = [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))];
     Check([remove accessibilityPerformPress], "a button press is accepted");
+    // 4D discards input queued before its modal loop starts; a press right after publication waits.
+    Check([NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:0.2] inMode:NSDefaultRunLoopMode dequeue:NO] == nil,
+          "a press right after the window is published is held until it settles");
     NSEvent *down = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
     NSEvent *up = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
     Check(down && up && down.window == window && fabs(down.locationInWindow.x - expected.x) < 2 && fabs(down.locationInWindow.y - expected.y) < 2,

@@ -15,7 +15,7 @@ The [recorded run](../../validation/native-messages.json) reproduces missing mes
 
 ## With the native plugin
 
-`test_native_messages.py` copies this project into `build/`, adds the built plugin and opens two CONFIRMs, an ALERT and three Requests in turn. It reads each window and operates every choice through accessibility, then checks 4D's own `OK` and answer:
+`test_native_messages.py` copies this project into `build/`, adds the built plugin and opens three CONFIRMs, an ALERT and three Requests in turn. It reads each window and operates every choice through accessibility, then checks 4D's own `OK` and answer:
 
 - `--run` adds AX checks in native ARM; add `--intel` for Rosetta. `--compiled --server /path/to/4D\ Server.app` compiles the copy first.
 - `--voiceover` uses VoiceOver navigation, activation and typing echo.

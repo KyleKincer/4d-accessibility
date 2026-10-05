@@ -32,6 +32,8 @@ static NSSet<NSString *> *MessageNames(void) {
 @property(nonatomic, strong) NSMutableDictionary<NSString *, AXBMessageElement *> *elements;
 @property(nonatomic, copy) NSArray<NSString *> *order;
 @property(nonatomic, weak) AXBMessageElement *placedFocus;
+@property(nonatomic) NSTimeInterval publishedAt;
+- (void)whenSettled:(dispatch_block_t)block;
 - (BOOL)update;
 - (NSRect)screenFrameForLayer:(CALayer *)layer;
 - (BOOL)clickLayer:(CALayer *)layer;
@@ -172,20 +174,44 @@ static id KeyObserver, CloseObserver;
     if (view.layer.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
     return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
 }
+// 4D discards input that arrives before its modal loop has started, shortly after the
+// window is drawn: an immediate press was lost in half of the trials, one 250 ms later
+// in none. Hold input until the window has been published for twice that long, then
+// deliver it through every run-loop mode, including 4D's own.
+static const NSTimeInterval SettleInterval = 0.5;
+- (void)whenSettled:(dispatch_block_t)block {
+    NSTimeInterval wait = self.publishedAt + SettleInterval - NSProcessInfo.processInfo.systemUptime;
+    if (wait <= 0) { block(); return; }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(wait * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        CFRunLoopRef main = CFRunLoopGetMain();
+        CFArrayRef modes = CFRunLoopCopyAllModes(main);
+        if (!modes) return;
+        CFRunLoopPerformBlock(main, modes, block);
+        CFRelease(modes);
+        CFRunLoopWakeUp(main);
+    });
+}
 - (BOOL)clickLayer:(CALayer *)layer {
     NSView *view = self.formView;
     NSWindow *window = view.window;
     if (!window || !layer || layer.hidden || !window.isVisible) return NO;
-    NSRect frame = [self screenFrameForLayer:layer];
-    NSPoint center = [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))];
-    // Queue an ordinary click so 4D's own modal loop handles it, exactly as for the mouse.
-    NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
-    for (NSEventType type : {NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp}) {
-        NSEvent *event = [NSEvent mouseEventWithType:type location:center modifierFlags:0 timestamp:now windowNumber:window.windowNumber
-                                             context:nil eventNumber:0 clickCount:1 pressure:type == NSEventTypeLeftMouseDown ? 1.0 : 0.0];
-        if (!event) return NO;
-        [NSApp postEvent:event atStart:NO];
-    }
+    __weak AXBMessageView *weakSelf = self;
+    __weak CALayer *weakLayer = layer;
+    [self whenSettled:^{
+        AXBMessageView *strongSelf = weakSelf;
+        CALayer *target = weakLayer;
+        NSWindow *current = strongSelf.formView.window;
+        if (!strongSelf || !target || target.hidden || !current.isVisible) return;
+        NSRect frame = [strongSelf screenFrameForLayer:target];
+        NSPoint center = [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))];
+        // Queue an ordinary click so 4D's own modal loop handles it, exactly as for the mouse.
+        NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        for (NSEventType type : {NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp}) {
+            NSEvent *event = [NSEvent mouseEventWithType:type location:center modifierFlags:0 timestamp:now windowNumber:current.windowNumber
+                                                 context:nil eventNumber:0 clickCount:1 pressure:type == NSEventTypeLeftMouseDown ? 1.0 : 0.0];
+            if (event) [NSApp postEvent:event atStart:NO];
+        }
+    }];
     return YES;
 }
 - (BOOL)typeText:(NSString *)text {
@@ -195,18 +221,24 @@ static id KeyObserver, CloseObserver;
     // an ordinary key event so 4D's own editor applies it. Line breaks would end entry.
     for (NSUInteger i = 0; i < text.length; i++)
         if ([NSCharacterSet.controlCharacterSet characterIsMember:[text characterAtIndex:i]]) return NO;
-    NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
-    void (^post)(NSString *, NSString *, NSEventModifierFlags, unsigned short) = ^(NSString *characters, NSString *plain, NSEventModifierFlags flags, unsigned short code) {
-        for (NSEventType type : {NSEventTypeKeyDown, NSEventTypeKeyUp}) {
-            NSEvent *event = [NSEvent keyEventWithType:type location:NSZeroPoint modifierFlags:flags timestamp:now windowNumber:window.windowNumber
-                                               context:nil characters:characters charactersIgnoringModifiers:plain isARepeat:NO keyCode:code];
-            if (event) [NSApp postEvent:event atStart:NO];
-        }
-    };
-    post(@"a", @"a", NSEventModifierFlagCommand, 0);
-    [text enumerateSubstringsInRange:NSMakeRange(0, text.length) options:NSStringEnumerationByComposedCharacterSequences
-                          usingBlock:^(NSString *character, NSRange r1, NSRange r2, BOOL *stop) { (void)r1; (void)r2; (void)stop; post(character, character, 0, 0); }];
-    if (!text.length) post(@"\x7f", @"\x7f", 0, 51);
+    NSString *answer = [text copy];
+    __weak NSWindow *weakWindow = window;
+    [self whenSettled:^{
+        NSWindow *current = weakWindow;
+        if (!current.isVisible || !current.isKeyWindow) return;
+        NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        void (^post)(NSString *, NSString *, NSEventModifierFlags, unsigned short) = ^(NSString *characters, NSString *plain, NSEventModifierFlags flags, unsigned short code) {
+            for (NSEventType type : {NSEventTypeKeyDown, NSEventTypeKeyUp}) {
+                NSEvent *event = [NSEvent keyEventWithType:type location:NSZeroPoint modifierFlags:flags timestamp:now windowNumber:current.windowNumber
+                                                   context:nil characters:characters charactersIgnoringModifiers:plain isARepeat:NO keyCode:code];
+                if (event) [NSApp postEvent:event atStart:NO];
+            }
+        };
+        post(@"a", @"a", NSEventModifierFlagCommand, 0);
+        [answer enumerateSubstringsInRange:NSMakeRange(0, answer.length) options:NSStringEnumerationByComposedCharacterSequences
+                                usingBlock:^(NSString *character, NSRange r1, NSRange r2, BOOL *stop) { (void)r1; (void)r2; (void)stop; post(character, character, 0, 0); }];
+        if (!answer.length) post(@"\x7f", @"\x7f", 0, 51);
+    }];
     return YES;
 }
 - (BOOL)update {
@@ -281,6 +313,7 @@ BOOL AXBMessagesRefreshWindow(NSWindow *window) {
         overlay.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
         overlay.formView = view; overlay.formLayer = FormContext(view);
         overlay.elements = [NSMutableDictionary new]; overlay.order = @[];
+        overlay.publishedAt = NSProcessInfo.processInfo.systemUptime;
         created = YES;
     }
     if (![overlay update]) {
