@@ -138,19 +138,19 @@ def main():
         report["checks"].append(description)
         print("PASS: " + description, flush=True)
 
-    def outline():
+    def outline(label="Product catalog"):
         front()
         pending = [window()] if window() else []
         while pending:
             element = pending.pop(0)
-            if element.read("AXRole") == "AXOutline":
+            if element.read("AXRole") == "AXOutline" and element.read("AXDescription") == label:
                 return element
             pending.extend(child for child in element.read("AXChildren") or [] if isinstance(child, ax.Element))
 
-    def rows():
+    def rows(label="Product catalog"):
         """Rows by item key, with level, text, disclosure and selection, after pages load."""
         result = {}
-        for row in outline().read("AXRows") or []:
+        for row in outline(label).read("AXRows") or []:
             key = row.read("AXIdentifier").split("/")[-1].replace("%3A", ":")
             cell = (row.read("AXChildren") or [None])[0]
             content = (cell.read("AXChildren") or [None])[0] if cell else None
@@ -159,8 +159,18 @@ def main():
                            "disclosing": row.read("AXDisclosing"), "selected": row.read("AXSelected") is True}
         return result
 
-    def settled(predicate, message, timeout=20):
-        return ax.wait_for(lambda: (lambda r: r if predicate(r) else None)(rows()), message, timeout=timeout)
+    def settled(predicate, message, timeout=20, label="Product catalog"):
+        return ax.wait_for(lambda: (lambda r: r if predicate(r) else None)(rows(label)), message, timeout=timeout)
+
+    def picks_after(since, wanted, timeout=15):
+        """The multiple-selection list's own events from since, once one reports exactly wanted."""
+        limit = time.time() + timeout
+        while time.time() < limit:
+            found = [e for e in events()[since:] if e.get("object") == "Picks"]
+            if found and sorted(found[-1]["picks"]) == sorted(wanted):
+                return found
+            time.sleep(0.2)
+        return [e for e in events()[since:] if e.get("object") == "Picks"]
 
     def receipt():
         return [child.read("AXHelp") for child in window().read("AXChildren") or [] if child.read("AXHelp")]
@@ -211,7 +221,24 @@ def main():
             check(phrase_until(lambda p: p.startswith("Cables") and "row 5 of 14" in p, mark), "VoiceOver moves to the next item")
             since = len(events()); say("space", vo.VO)
             found = new_events(since, [ON_SELECTION_CHANGE])
-            check(any(e["event"] == ON_SELECTION_CHANGE and e["selected"] == 30 for e in found), "VO-Space selects the item through the list's own events")
+            check(any(e["event"] == ON_SELECTION_CHANGE and e.get("selected") == 30 for e in found), "VO-Space selects the item through the list's own events")
+            # In the multiple-selection list, the user's own Shift+Down extends the selection.
+            say("up", vo.VO + ("shift",)); time.sleep(1.5)
+            for _ in range(6):
+                mark = say("right", vo.VO); time.sleep(1.5)
+                if any("Picks" in p for _, p in heard.since(mark)):
+                    break
+            check(any("Picks" in p for _, p in heard.since(mark)), "VoiceOver reaches the multiple-selection list")
+            mark = say("down", vo.VO + ("shift",)); time.sleep(2)
+            # VO-Space on the next item selects it and gives the list keyboard focus.
+            mark = say("down", vo.VO)
+            check(phrase_until(lambda p: p.startswith("Pick 2"), mark), "VoiceOver moves to Pick 2")
+            since = len(events()); say("space", vo.VO)
+            check(picks_after(since, [202]), "VO-Space selects Pick 2 through the list's own events")
+            since = len(events()); front(); vo.key("down", ("shift",))
+            check(picks_after(since, [202, 203]), "Shift+Down extends the selection through the list's own events")
+            check(settled(lambda r: r["i:202"]["selected"] and r["i:203"]["selected"], "Extended selection published", label="Picks"),
+                  "the extended selection is published")
             # Only the fixture's own speech is recorded; other applications are not.
             run = [p for _, p in heard.since(0)]
             report["speech"] = run[next((i for i, p in enumerate(run) if "Product catalog" in p), len(run)):]
@@ -246,12 +273,12 @@ def main():
         since = len(events())
         check(rows()["i:33"]["row"].set_boolean("AXSelected", True) == 0, "selecting Straps in a partly scrolled list is accepted")
         found = new_events(since, [ON_SELECTION_CHANGE])
-        check(any(e["event"] == ON_SELECTION_CHANGE and e["selected"] == 33 for e in found), "a partly scrolled list selects exactly the requested item")
+        check(any(e["event"] == ON_SELECTION_CHANGE and e.get("selected") == 33 for e in found), "a partly scrolled list selects exactly the requested item")
         current = settled(lambda r: r["i:33"]["selected"], "Straps selected")
         since = len(events())
         check(current["i:31"]["row"].set_boolean("AXSelected", True) == 0, "selecting Stands is accepted through accessibility")
         found = new_events(since, [ON_SELECTION_CHANGE, ON_CLICKED])
-        check(any(e["event"] == ON_SELECTION_CHANGE and e["selected"] == 31 for e in found) and any(e["event"] == ON_CLICKED for e in found),
+        check(any(e["event"] == ON_SELECTION_CHANGE and e.get("selected") == 31 for e in found) and any(e["event"] == ON_CLICKED for e in found),
               "the list's own selection and click events run for Stands")
         check(settled(lambda r: r["i:31"]["selected"] and not r["i:12"]["selected"], "Selection published")["i:31"]["selected"], "the new selection is published")
         check(found[-1].get("compiled") is args.compiled, "4D runs in the requested " + report["mode"] + " mode")
@@ -292,7 +319,34 @@ def main():
         since = len(events())
         check(rows()["i:39"]["row"].set_boolean("AXSelected", True) == 0, "selecting the revealed item is accepted")
         found = new_events(since, [ON_SELECTION_CHANGE])
-        check(any(e["event"] == ON_SELECTION_CHANGE and e["selected"] == 39 for e in found), "the click after scrolling selects exactly Headphones")
+        check(any(e["event"] == ON_SELECTION_CHANGE and e.get("selected") == 39 for e in found), "the click after scrolling selects exactly Headphones")
+
+        # A list that accepts multiple selections: the user extends it with Shift and an
+        # arrow key, and the bridge publishes the whole selection. 4D reads the physical
+        # Shift key for that, so accessibility requests select one item at a time.
+        picks = outline("Picks") or ax.wait_for(lambda: outline("Picks"), "The multiple-selection list is published", timeout=20)
+        current = settled(lambda r: all(v["text"] not in (None, "", "Loading") for v in r.values()), "Picks load", label="Picks")
+        check(list(current) == [f"i:{200 + i}" for i in range(1, 7)] and current["i:201"]["selected"] and sum(v["selected"] for v in current.values()) == 1,
+              "a multiple-selection list reports its own selection")
+        since = len(events())
+        check(current["i:202"]["row"].set_boolean("AXSelected", True) == 0, "selecting Pick 2 is accepted")
+        found = picks_after(since, [202])
+        check(found and found[-1]["picks"] == [202] and any(e["event"] == ON_SELECTION_CHANGE for e in found), "Pick 2 alone is selected through the list's own events")
+        settled(lambda r: r["i:202"]["selected"] and not r["i:201"]["selected"], "Pick 2 published", label="Picks")
+        since = len(events())
+        if ax.application(process.pid).read("AXFrontmost") is not True:
+            raise RuntimeError("The fixture lost the foreground; refusing to post Shift+Down")
+        import voiceover_session as keys
+        keys.set_guard(keys.guard_frontmost(process.pid, ax))
+        keys.key("down", ("shift",)); keys.key("down", ("shift",))
+        found = picks_after(since, [202, 203, 204])
+        check(found and sorted(found[-1]["picks"]) == [202, 203, 204], "the user's Shift+Down extends the selection through the list's own events")
+        check(settled(lambda r: [k for k, v in r.items() if v["selected"]] == ["i:202", "i:203", "i:204"], "Extended selection published", label="Picks"),
+              "the whole multiple selection is published")
+        since = len(events())
+        check(rows("Picks")["i:206"]["row"].set_boolean("AXSelected", True) == 0, "selecting Pick 6 is accepted")
+        found = picks_after(since, [206])
+        check(found and found[-1]["picks"] == [206], "an accessibility selection replaces the multiple selection, as a click does")
         report["passed"] = True
     finally:
         if heard:

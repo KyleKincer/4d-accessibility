@@ -1,9 +1,9 @@
 {
   "passed": true,
   "date": "2026-10-06",
-  "scope": "Classic hierarchical list discovered automatically in an area-owned form: order, depth, expansion, selection, keyboard-driven selection and disclosure with the list's own events, reveal, VoiceOver navigation and operation",
+  "scope": "Classic hierarchical list discovered automatically in an area-owned form: order, depth, expansion, selection, keyboard-driven selection and disclosure with the list's own events, reveal, VoiceOver navigation and operation; a multiple-selection list: its own selection, a user's Shift+Down extension published in full, and an accessibility selection replacing it",
   "fixture": "prepare_hlist_fixture.py and test_hlist_fixture.py",
-  "pluginSHA256": "b52fa7ec3976067416a1b54868d6f9ee3a1a64e339eae97f4ff4dfabf7671bc4",
+  "pluginSHA256": "b779f47bda81df3055429ad4407748c339918221138f3f652555be11c090cb24",
   "environment": {
     "4D": "20.8 build 20.102009",
     "macOS": "26.7.1",
@@ -42,7 +42,14 @@
         "revealing Headphones, below the visible lines, is accepted",
         "the list scrolls Headphones into view",
         "selecting the revealed item is accepted",
-        "the click after scrolling selects exactly Headphones"
+        "the click after scrolling selects exactly Headphones",
+        "a multiple-selection list reports its own selection",
+        "selecting Pick 2 is accepted",
+        "Pick 2 alone is selected through the list's own events",
+        "the user's Shift+Down extends the selection through the list's own events",
+        "the whole multiple selection is published",
+        "selecting Pick 6 is accepted",
+        "an accessibility selection replaces the multiple selection, as a click does"
       ],
       "changedPixels": {
         "window": 0,
@@ -61,7 +68,12 @@
         "VO-Space expands the group through the list's own On Expand and announces it",
         "VoiceOver's disclosure command collapses it through On Collapse and announces it",
         "VoiceOver moves to the next item",
-        "VO-Space selects the item through the list's own events"
+        "VO-Space selects the item through the list's own events",
+        "VoiceOver reaches the multiple-selection list",
+        "VoiceOver moves to Pick 2",
+        "VO-Space selects Pick 2 through the list's own events",
+        "Shift+Down extends the selection through the list's own events",
+        "the extended selection is published"
       ],
       "speech": [
         "4D AX bridge hierarchical list window Product catalog table",
@@ -72,7 +84,14 @@
         "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
         "Guitars: collapsed",
         "Cables row 5 of 14",
-        ""
+        "",
+        "Out of Product catalog table",
+        "Picks table",
+        "You are currently on a table, inside of a group. To enter this table, press Control-Option-Shift-Down Arrow. To exit this group, press Control-Option-Shift-Up Arrow.",
+        "In Picks table Picks Pick 1 row 1 of 6",
+        "Pick 2 row 2 of 6",
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow."
       ]
     },
     "arm64-compiled": {
@@ -106,7 +125,14 @@
         "revealing Headphones, below the visible lines, is accepted",
         "the list scrolls Headphones into view",
         "selecting the revealed item is accepted",
-        "the click after scrolling selects exactly Headphones"
+        "the click after scrolling selects exactly Headphones",
+        "a multiple-selection list reports its own selection",
+        "selecting Pick 2 is accepted",
+        "Pick 2 alone is selected through the list's own events",
+        "the user's Shift+Down extends the selection through the list's own events",
+        "the whole multiple selection is published",
+        "selecting Pick 6 is accepted",
+        "an accessibility selection replaces the multiple selection, as a click does"
       ],
       "changedPixels": {
         "window": 0,
@@ -125,7 +151,12 @@
         "VO-Space expands the group through the list's own On Expand and announces it",
         "VoiceOver's disclosure command collapses it through On Collapse and announces it",
         "VoiceOver moves to the next item",
-        "VO-Space selects the item through the list's own events"
+        "VO-Space selects the item through the list's own events",
+        "VoiceOver reaches the multiple-selection list",
+        "VoiceOver moves to Pick 2",
+        "VO-Space selects Pick 2 through the list's own events",
+        "Shift+Down extends the selection through the list's own events",
+        "the extended selection is published"
       ],
       "speech": [
         "4D AX bridge hierarchical list window Product catalog table",
@@ -136,7 +167,15 @@
         "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
         "Guitars: collapsed",
         "Cables row 5 of 14",
-        ""
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow.",
+        "Out of Product catalog table",
+        "Picks table",
+        "You are currently on a table, inside of a group. To enter this table, press Control-Option-Shift-Down Arrow. To exit this group, press Control-Option-Shift-Up Arrow.",
+        "In Picks table Picks Pick 1 row 1 of 6",
+        "Pick 2 row 2 of 6",
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow."
       ]
     },
     "x86_64": {
@@ -170,10 +209,17 @@
         "revealing Headphones, below the visible lines, is accepted",
         "the list scrolls Headphones into view",
         "selecting the revealed item is accepted",
-        "the click after scrolling selects exactly Headphones"
+        "the click after scrolling selects exactly Headphones",
+        "a multiple-selection list reports its own selection",
+        "selecting Pick 2 is accepted",
+        "Pick 2 alone is selected through the list's own events",
+        "the user's Shift+Down extends the selection through the list's own events",
+        "the whole multiple selection is published",
+        "selecting Pick 6 is accepted",
+        "an accessibility selection replaces the multiple selection, as a click does"
       ],
       "changedPixels": {
-        "window": 430,
+        "window": 0,
         "belowTitleBar": 0
       }
     },
@@ -189,7 +235,12 @@
         "VO-Space expands the group through the list's own On Expand and announces it",
         "VoiceOver's disclosure command collapses it through On Collapse and announces it",
         "VoiceOver moves to the next item",
-        "VO-Space selects the item through the list's own events"
+        "VO-Space selects the item through the list's own events",
+        "VoiceOver reaches the multiple-selection list",
+        "VoiceOver moves to Pick 2",
+        "VO-Space selects Pick 2 through the list's own events",
+        "Shift+Down extends the selection through the list's own events",
+        "the extended selection is published"
       ],
       "speech": [
         "4D AX bridge hierarchical list window Product catalog table",
@@ -200,7 +251,15 @@
         "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
         "Guitars: collapsed",
         "Cables row 5 of 14",
-        ""
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow.",
+        "Out of Product catalog table",
+        "Picks table",
+        "You are currently on a table, inside of a group. To enter this table, press Control-Option-Shift-Down Arrow. To exit this group, press Control-Option-Shift-Up Arrow.",
+        "In Picks table Picks Pick 1 row 1 of 6",
+        "Pick 2 row 2 of 6",
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow."
       ]
     },
     "x86_64-compiled": {
@@ -234,7 +293,14 @@
         "revealing Headphones, below the visible lines, is accepted",
         "the list scrolls Headphones into view",
         "selecting the revealed item is accepted",
-        "the click after scrolling selects exactly Headphones"
+        "the click after scrolling selects exactly Headphones",
+        "a multiple-selection list reports its own selection",
+        "selecting Pick 2 is accepted",
+        "Pick 2 alone is selected through the list's own events",
+        "the user's Shift+Down extends the selection through the list's own events",
+        "the whole multiple selection is published",
+        "selecting Pick 6 is accepted",
+        "an accessibility selection replaces the multiple selection, as a click does"
       ],
       "changedPixels": {
         "window": 430,
@@ -253,7 +319,12 @@
         "VO-Space expands the group through the list's own On Expand and announces it",
         "VoiceOver's disclosure command collapses it through On Collapse and announces it",
         "VoiceOver moves to the next item",
-        "VO-Space selects the item through the list's own events"
+        "VO-Space selects the item through the list's own events",
+        "VoiceOver reaches the multiple-selection list",
+        "VoiceOver moves to Pick 2",
+        "VO-Space selects Pick 2 through the list's own events",
+        "Shift+Down extends the selection through the list's own events",
+        "the extended selection is published"
       ],
       "speech": [
         "4D AX bridge hierarchical list window Product catalog table",
@@ -264,15 +335,23 @@
         "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
         "Guitars: collapsed",
         "Cables row 5 of 14",
-        ""
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow.",
+        "Out of Product catalog table",
+        "Picks table",
+        "You are currently on a table, inside of a group. To enter this table, press Control-Option-Shift-Down Arrow. To exit this group, press Control-Option-Shift-Up Arrow.",
+        "In Picks table Picks Pick 1 row 1 of 6",
+        "Pick 2 row 2 of 6",
+        "",
+        "You are currently on a cell, inside of a table. To navigate the cells within a table, press @VOModifier() and then Up Arrow, Down Arrow, Left Arrow, or Right Arrow. To exit this table, press Control-Option-Shift-Up Arrow."
       ]
     }
   },
   "rejectedApproach": "Pointer clicks at computed item points. After a half-line trackpad scroll, 4D reports the next whole line, and a click selected the item above the requested one. Keyboard selection and disclosure need no geometry.",
   "notCovered": [
     "Item editing",
-    "Multiple selection",
     "Icons, styles and colors",
-    "Client/server and very large lists"
+    "Client/server and very large lists",
+    "Extending a list's selection through accessibility: 4D extends it only while the physical Shift or Command key is down, which the bridge never posts"
   ]
 }
