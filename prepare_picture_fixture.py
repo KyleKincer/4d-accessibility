@@ -1,7 +1,7 @@
 """Build an area-owned synthetic form with 4D's picture-based controls.
 
 Two button grids (one with configured cell labels), a picture button, a spinner,
-a picture popup menu and a splitter. Each control's object method records its
+a configured picture popup menu and a splitter. Each control's object method records its
 events with its value, so a test can tell which of the application's own events ran.
 """
 import argparse
@@ -41,10 +41,11 @@ End if
 $file.setText($previous+JSON Stringify(New object("runId"; Form.config.runId; "compiled"; Is compiled mode; "object"; $name; "event"; Form event code; "value"; OBJECT Get value($name)))+Char(10))
 '''
 
-CONFIGURE = '''// Application configuration: the alignment grid's pictures need words.
+CONFIGURE = '''// Application configuration: the alignment grid's and color menu's pictures need words.
 #DECLARE($form : Text) -> $options : Object
 If ($form="Controls")
- $options:=New object("controls"; New object("Align"; New object("cells"; New collection("Left"; "Center"; "Right"))))
+ $options:=New object("controls"; New object("Align"; New object("cells"; New collection("Left"; "Center"; "Right")); \
+  "Color"; New object("cells"; New collection("Blue"; "Indigo"; "Violet"))))
 End if
 '''
 

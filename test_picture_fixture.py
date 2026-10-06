@@ -4,7 +4,8 @@
 Prepares the picture-controls fixture with --server. Button grids are published as groups of
 cell buttons, labeled from configuration or numbered, and each press must run the grid's own
 On Clicked with that cell's value. A picture button advances its state; a spinner is a progress
-indicator; a picture popup menu stays unpublished and a splitter is a splitter. --baseline records the same
+indicator; a picture popup menu is a popup whose choices the plugin offers in a menu of its own,
+each chosen through 4D's palette and the control's own On Clicked; a splitter is a splitter. --baseline records the same
 window without any plugin, component or helpers; a later --run then requires an unchanged form.
 """
 import argparse
@@ -129,7 +130,7 @@ def main():
         result = {}
         for element in root().read("AXChildren") or []:
             name = (element.read("AXIdentifier") or "").split("/")[-1]
-            result[name] = {"element": element, "role": element.read("AXRole"), "label": element.read("AXDescription"),
+            result[name] = {"element": element, "role": element.read("AXRole"), "label": element.read("AXDescription"), "value": element.read("AXValue"),
                             "cells": [{"element": cell, "label": cell.read("AXDescription"), "role": cell.read("AXRole"),
                                        "position": cell.read("AXPosition"), "identifier": cell.read("AXIdentifier")}
                                       for cell in element.read("AXChildren") or []]}
@@ -174,7 +175,9 @@ def main():
         check(p[0][1] == p[1][1] < p[2][1] == p[3][1] and p[0][0] == p[2][0] < p[1][0] == p[3][0], "a 2 by 2 grid's cells are numbered row by row")
         check(controls["Mode"]["role"] == "AXButton" and controls["Mode"]["label"] == "Mode", "a picture button is a button")
         check(controls["Busy"]["role"] == "AXProgressIndicator" and controls["Busy"]["label"] == "Loading", "a spinner is a progress indicator")
-        check("Color" not in controls, "a picture popup menu stays unpublished")
+        color = controls["Color"]
+        check(color["role"] == "AXPopUpButton" and color["label"] == "Color" and color["value"] == "Blue",
+              "a picture popup menu is a popup labeled by its help tip, showing its chosen cell's label")
         check(controls["Divider"]["role"] == "AXSplitter", "a splitter is a splitter")
         reference = PIXELS / f"baseline-{architecture}.png"
         if reference.exists() and not args.voiceover:
@@ -205,6 +208,25 @@ def main():
                 time.sleep(0.2)
             found = [e for e in events()[since:] if e["object"] == "Align" and e["event"] == ON_CLICKED]
             check(found and found[-1]["value"] == 2, "VO-Space presses the cell through the grid's own On Clicked")
+            # Leave the grid, find the color menu, and choose its last cell from the keyboard.
+            front(); vo.key("up", vo.VO + ("shift",))
+            for _ in range(10):
+                front(); mark = heard.mark(); vo.key("right", vo.VO)
+                time.sleep(1.5)
+                if any("Color pop up button" in ph for _, ph in heard.since(mark)):
+                    break
+            # Never press with the cursor anywhere else: Done would close the form.
+            check(any("Blue" in ph and "Color pop up button" in ph for _, ph in heard.since(mark)), "VoiceOver reads the picture popup as a labeled popup with its chosen cell")
+            front(); mark = heard.mark(); vo.key("space", vo.VO)
+            check(phrase_until(lambda ph: "Blue" in ph, mark), "VO-Space opens its choices at the current one")
+            front(); mark = heard.mark(); vo.key("down"); vo.key("down")
+            check(phrase_until(lambda ph: "Violet" in ph, mark), "the arrow keys move through the labeled choices")
+            since = len(events()); front(); vo.key("return")
+            limit = time.time() + 10
+            while time.time() < limit and not any(e["object"] == "Color" and e["event"] == ON_CLICKED for e in events()[since:]):
+                time.sleep(0.2)
+            found = [e for e in events()[since:] if e["object"] == "Color" and e["event"] == ON_CLICKED]
+            check(found and found[-1]["value"] == 3, "Return chooses the cell through the control's own On Clicked")
             run = [ph for _, ph in heard.since(0)]
             report["speech"] = run[next((i for i, ph in enumerate(run) if "AX bridge picture controls" in ph), len(run)):]
         else:
@@ -217,6 +239,28 @@ def main():
             check(event.get("compiled") is args.compiled, "4D runs in the requested " + report["mode"] + " mode")
             event = pressed(controls["Mode"]["element"], "Mode")
             check(event and event["value"] == 2, "pressing the picture button advances its state")
+            # Pressing the popup offers its labeled cells in a native menu.
+            ax.wait_for(lambda: root().read("AXHelp") not in ("Action queued", "Waiting for the application to complete the action"), "Bridge idle", timeout=10)
+            front()
+            assert color["element"].press() == 0
+            menu = ax.wait_for(lambda: (lambda f: f if f and f.read("AXRole") == "AXMenu" else None)(ax.application(process.pid).read("AXFocusedUIElement")),
+                               "The choices menu", timeout=10)
+            items = menu.read("AXChildren") or []
+            check([i.read("AXTitle") for i in items] == ["Blue", "Indigo", "Violet"], "its menu lists every cell's label in 4D's cell order")
+            check([bool(i.read("AXMenuItemMarkChar")) for i in items] == [True, False, False], "the chosen cell is marked")
+            check([i.read("AXSelected") is True for i in items] == [True, False, False], "the menu opens with the chosen cell highlighted, like a popup button")
+            since = len(events())
+            if ax.application(process.pid).read("AXFrontmost") is not True:
+                raise RuntimeError("The fixture lost the foreground; refusing to choose")
+            assert items[2].press() == 0
+            limit = time.time() + 10
+            while time.time() < limit and not any(e["object"] == "Color" and e["event"] == ON_CLICKED for e in events()[since:]):
+                time.sleep(0.2)
+            found = [e for e in events()[since:] if e["object"] == "Color" and e["event"] == ON_CLICKED]
+            check(len(found) == 1 and found[0]["value"] == 3, "choosing Violet runs the control's own On Clicked once, with value 3")
+            check(ax.wait_for(lambda: published()["Color"]["value"] == "Violet", "Chosen value", timeout=10), "the popup then shows the chosen cell")
+            focused = ax.application(process.pid).read("AXFocusedUIElement")
+            check(not focused or focused.read("AXRole") != "AXMenu", "4D's palette closes after the choice")
         report["passed"] = True
     finally:
         if heard:

@@ -96,6 +96,24 @@ Case of
   GOTO OBJECT(*; $target.objectName)
   $result:=New object("status"; "pending"; "confirm"; Formula(AXB_ControlKey($1)); "data"; New object("objectName"; $target.objectName; "operation"; "press"; "role"; $target.role; "previousValue"; $target.value))
   return
+ : (($action.operation="choose") & ($target.choices#Null))
+  // 4D's picture popup palette is a menu of one unlabeled picture. The plugin
+  // opens it with the control's own click and selects the cell as releasing
+  // over it does, so 4D sets the value and runs the control's On Clicked.
+  If ((Value type($action.value)#Is real) || ($action.value#Int($action.value)) || ($action.value<1) || ($action.value>$target.choices.length))
+   return
+  End if
+  OBJECT GET COORDINATES(*; $target.objectName; $left; $top; $right; $bottom)
+  $point:=AXB_ControlPoint($target; $description; $options; New collection($left; $top; $right; $bottom))
+  If ($point.length#2)
+   $result.message:="Control is overlapped"
+   return
+  End if
+  $x:=$point[0]
+  $y:=$point[1]
+  CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
+  AXB_PollGuard.context.controlInput:=New object("action"; $action.id; "point"; New collection($x; $y); "choice"; $action.value)
+  return New object("status"; "pending"; "confirm"; Formula(AXB_ControlConfirm($1)); "data"; New object("nativeButton"; True; "actionID"; $action.id; "objectName"; $target.objectName; "choice"; $action.value; "deadline"; Milliseconds+2000))
  : (($action.operation="press") & (New collection("button"; "checkbox"; "radio"; "popup"; "tab").indexOf($target.role)>=0))
   // A tab or a button-grid cell is one part of its object; press its own frame.
   If (($target.role="tab") | ($target.cell#Null))

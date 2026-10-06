@@ -178,6 +178,14 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             if (!Bool(n[@"value"]) && !(Number(n[@"value"]) && [n[@"value"] doubleValue] == 2)) return @"invalid checkbox state";
         } else if ([@[@"radio", @"tab"] containsObject:n[@"role"]] ? !Bool(n[@"value"]) : !Text(n[@"value"], AXBLimits::text)) return @"invalid node value";
         if (n[@"valueDescription"] && !Text(n[@"valueDescription"], AXBLimits::text)) return @"invalid value description";
+        if (n[@"choices"] || n[@"choice"]) {
+            // A picture popup menu's labeled cells, and the chosen one or 0.
+            NSArray *choices = n[@"choices"];
+            if (![n[@"role"] isEqual:@"popup"] || ![choices isKindOfClass:NSArray.class] || !choices.count || choices.count > 256 ||
+                !Number(n[@"choice"]) || [n[@"choice"] doubleValue] < 0 || [n[@"choice"] doubleValue] > choices.count ||
+                floor([n[@"choice"] doubleValue]) != [n[@"choice"] doubleValue]) return @"invalid choices";
+            for (id choice in choices) if (!Text(choice, 512) || ![choice length]) return @"invalid choices";
+        }
         for (NSString *key in @[@"focused", @"focusable", @"editable", @"protected", @"multiline", @"combo", @"revealable"])
             if (n[key] && !Bool(n[key])) return @"invalid control capability";
         if ([n[@"combo"] boolValue] && (![n[@"role"] isEqual:@"textfield"] || [n[@"multiline"] boolValue])) return @"combo requires single-line text";
@@ -267,7 +275,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             return @"invalid control input point";
         id serial = controlInput[@"serial"];
         if (serial && (!point || !Number(serial) || [serial doubleValue] < 1 || [serial doubleValue] > 10000 || floor([serial doubleValue]) != [serial doubleValue])) return @"invalid control input serial";
-        if (controlInput.count != (point ? 2 : 1) + (serial ? 1 : 0)) return @"invalid control input";
+        id choice = controlInput[@"choice"];
+        if (choice && (!point || serial || !Number(choice) || [choice doubleValue] < 1 || [choice doubleValue] > 256 || floor([choice doubleValue]) != [choice doubleValue])) return @"invalid control input choice";
+        if (controlInput.count != (point ? 2 : 1) + (serial ? 1 : 0) + (choice ? 1 : 0)) return @"invalid control input";
     }
     return nil;
 }
@@ -331,7 +341,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         ![snapshot[@"enabled"] boolValue]) return nil;
     for (NSDictionary *node in snapshot[@"nodes"]) if ([node[@"id"] isEqual:_pending[@"node"]]) {
         if (![node[@"enabled"] boolValue] || ![node[@"visible"] boolValue]) return nil;
-        if ([_pending[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:node[@"role"]]) {
+        BOOL choose = [_pending[@"operation"] isEqual:@"choose"] && node[@"choices"] && [input[@"choice"] isEqual:_pending[@"value"]];
+        if (([_pending[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:node[@"role"]]) || choose) {
             NSArray *point = input[@"point"], *frame = node[@"frame"];
             if (!point) return nil;
             double x = [point[0] doubleValue], y = [point[1] doubleValue];
@@ -629,6 +640,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             if (![node[@"combo"] boolValue]) return NO;
         } else if ([@[@"increment", @"decrement"] containsObject:operation]) {
             if (![@[@"slider", @"stepper", @"splitter"] containsObject:role] || ![node[@"adjustable"] boolValue] || value) return NO;
+        } else if ([operation isEqual:@"choose"]) {
+            if (!node[@"choices"] || !Number(value) || [value doubleValue] < 1 || [value doubleValue] > [node[@"choices"] count] ||
+                floor([value doubleValue]) != [value doubleValue]) return NO;
         } else if ([operation isEqual:@"reveal"]) {
             if (![node[@"revealable"] boolValue] || value) return NO;
         } else if ([operation isEqual:@"focus"]) {

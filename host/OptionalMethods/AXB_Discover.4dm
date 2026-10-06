@@ -12,7 +12,7 @@ var $parts; $labels : Collection
 var $valueType : Integer
 var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end : Integer
 var $windowLeft; $windowTop; $windowRight; $windowBottom : Integer
-var $node; $other; $metadata; $popup; $styledText; $tabs; $cells : Object
+var $node; $other; $metadata; $popup; $styledText; $tabs; $cells; $choices : Object
 var $value : Variant
 var $protected : Boolean
 ARRAY TEXT($names; 0)
@@ -111,8 +111,10 @@ For ($i; 1; Size of array($names))
     $result.nodes:=$result.nodes.concat($cells.nodes)
     $result.unsupported:=$result.unsupported.concat($cells.unsupported)
    : ($type=Object type picture popup menu)
-    // Its palette is drawn by 4D and opens where the current picture lies.
-    $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "picturePopupPending"))
+    $role:="popup"
+    $choices:=AXB_PicturePopup($name; $metadata)
+    $value:=$choices.value
+    $result.unsupported:=$result.unsupported.concat($choices.unsupported)
    : ($type=Object type groupbox)
     $role:="group"
     $label:=OBJECT Get title(*; $name)
@@ -221,6 +223,10 @@ For ($i; 1; Size of array($names))
        $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; Choose($styledText.ok; "styledTextReferencesPending"; "invalidStyledText")))
       End if
      End if
+    End if
+    If ($type=Object type picture popup menu)
+     $node.choices:=$choices.choices
+     $node.choice:=$choices.choice
     End if
     If (New collection("group"; "image"; "progress"; "splitter").indexOf($role)>=0)
      $node.focusable:=False

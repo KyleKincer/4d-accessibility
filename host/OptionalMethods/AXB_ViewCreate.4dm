@@ -57,7 +57,7 @@ If ($options.controls#Null)
     return New object("ok"; False; "error"; "invalidControlLayer")
    End if
   End if
-  // Labels for a button grid's cells, in 4D's row-by-row cell order.
+  // Labels for the cells of a button grid or picture popup menu, in 4D's row-by-row order.
   If (OB Is defined($metadata; "cells"))
    If (($metadata.cells=Null) || (Value type($metadata.cells)#Is collection) || ($metadata.cells.length<1) || ($metadata.cells.length>256))
     return New object("ok"; False; "error"; "invalidControlCells")
