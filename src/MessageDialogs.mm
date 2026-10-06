@@ -20,8 +20,13 @@ static NSSet<NSString *> *MessageNames(void) {
 @property(nonatomic, weak) CALayer *layer;
 @property(nonatomic, copy) NSString *objectName;
 @property(nonatomic, copy) NSString *publishedText;
-// The Request field's caret as last inferred from its edits; 4D starts with the answer selected.
+// The Request field's caret inferred from its edits, used only when 4D's editor cannot report it;
+// 4D starts with the answer selected.
 @property(nonatomic) NSRange selection;
+// The caret last announced, so a move by the arrow keys can be announced in turn.
+@property(nonatomic) NSRange announcedSelection;
+- (BOOL)nativeSelection:(NSRange *)range;
+- (void)noticeCaret;
 - (NSRange)clampedSelection;
 - (void)publishEditFrom:(NSString *)previous to:(NSString *)text;
 @end
@@ -73,6 +78,10 @@ static NSString *Joined(NSArray<NSString *> *texts) {
 }
 - (NSInteger)accessibilityNumberOfCharacters { return (NSInteger)[self.accessibilityValue length]; }
 - (NSRange)accessibilitySelectedTextRange { return [self.objectName isEqual:@"box"] ? [self clampedSelection] : NSMakeRange(0, 0); }
+- (NSArray<NSValue *> *)accessibilitySelectedTextRanges {
+    if (![self.objectName isEqual:@"box"]) return nil;
+    return @[[NSValue valueWithRange:[self clampedSelection]]];
+}
 - (NSString *)accessibilitySelectedText {
     NSString *value = self.accessibilityValue;
     return [self.objectName isEqual:@"box"] ? [value substringWithRange:[self clampedSelection]] : nil;
@@ -87,14 +96,53 @@ static NSString *Joined(NSArray<NSString *> *texts) {
     NSString *value = self.accessibilityValue;
     return range.location <= value.length && range.length <= value.length - range.location ? [value substringWithRange:range] : nil;
 }
+// The answer is plain text: one style run, and composed characters for each index.
+- (NSRange)accessibilityStyleRangeForIndex:(NSInteger)index {
+    NSUInteger length = [self.accessibilityValue length];
+    return index >= 0 && (NSUInteger)index <= length ? NSMakeRange(0, length) : NSMakeRange(NSNotFound, 0);
+}
+- (NSRange)accessibilityRangeForIndex:(NSInteger)index {
+    NSString *value = self.accessibilityValue;
+    return index >= 0 && (NSUInteger)index < value.length ? [value rangeOfComposedCharacterSequenceAtIndex:(NSUInteger)index] : NSMakeRange(NSNotFound, 0);
+}
+// 4D's editor reports where each character lies, as AppKit fields do.
+- (NSRect)accessibilityFrameForRange:(NSRange)range {
+    NSResponder *responder = self.owner.window.firstResponder;
+    NSUInteger length = [self.accessibilityValue length];
+    if (![self.objectName isEqual:@"box"] || ![responder conformsToProtocol:@protocol(NSTextInputClient)] ||
+        range.location > length || range.length > length - range.location) return NSZeroRect;
+    NSRange actual = NSMakeRange(NSNotFound, 0);
+    return [(id<NSTextInputClient>)responder firstRectForCharacterRange:range actualRange:&actual];
+}
 - (NSAttributedString *)accessibilityAttributedStringForRange:(NSRange)range {
     NSString *text = [self accessibilityStringForRange:range];
     return text ? [[NSAttributedString alloc] initWithString:text] : nil;
 }
+// 4D's editor for the field is the window's text-input client while it has focus.
+// Its selection is the actual caret, including moves by the arrow keys.
+- (BOOL)nativeSelection:(NSRange *)range {
+    NSResponder *responder = self.owner.window.firstResponder;
+    if (![self.objectName isEqual:@"box"] || ![responder conformsToProtocol:@protocol(NSTextInputClient)]) return NO;
+    id<NSTextInputClient> client = (id<NSTextInputClient>)responder;
+    NSRange selected = client.selectedRange;
+    NSUInteger length = [self.accessibilityValue length];
+    if (client.hasMarkedText || selected.location == NSNotFound || selected.location > length || selected.length > length - selected.location) return NO;
+    *range = selected;
+    return YES;
+}
 - (NSRange)clampedSelection {
+    NSRange native;
+    if ([self nativeSelection:&native]) return native;
     NSUInteger length = [self.accessibilityValue length];
     NSUInteger location = MIN(self.selection.location, length);
     return NSMakeRange(location, MIN(self.selection.length, length - location));
+}
+- (void)noticeCaret {
+    NSRange native;
+    if (![self nativeSelection:&native] || NSEqualRanges(native, self.announcedSelection)) return;
+    self.announcedSelection = native;
+    // An AppKit field announces a caret move with this notification alone.
+    NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
 }
 // Announce a Request edit as typing, the way AppKit and WebKit fields describe it, so
 // VoiceOver echoes the characters. The caret follows the end of the changed text.
@@ -106,6 +154,8 @@ static NSString *Joined(NSArray<NSString *> *texts) {
     NSString *inserted = [text substringWithRange:NSMakeRange(prefix, text.length - prefix - suffix)];
     NSString *removed = [previous substringWithRange:NSMakeRange(prefix, previous.length - prefix - suffix)];
     self.selection = NSMakeRange(prefix + inserted.length, 0);
+    NSRange native;
+    self.announcedSelection = [self nativeSelection:&native] ? native : self.selection;
     NSMutableArray *changes = [NSMutableArray new];
     if (removed.length) [changes addObject:@{@"AXTextEditType": @1, @"AXTextChangeValue": removed}];
     if (inserted.length) [changes addObject:@{@"AXTextEditType": @3, @"AXTextChangeValue": inserted}];
@@ -153,7 +203,7 @@ static void RemoveOverlay(NSWindow *window, AXBMessageView *overlay) {
     [Overlays removeObjectForKey:window];
 }
 
-static id KeyObserver, CloseObserver;
+static id KeyObserver, CloseObserver, UpdateObserver;
 
 @implementation AXBMessageView
 - (NSView *)hitTest:(NSPoint)point { (void)point; return nil; }
@@ -234,7 +284,18 @@ static const NSTimeInterval SettleInterval = 0.5;
                 if (event) [NSApp postEvent:event atStart:NO];
             }
         };
-        post(@"a", @"a", NSEventModifierFlagCommand, 0);
+        // Replace the whole answer. 4D starts with it selected; after a caret move, go to
+        // its end with the Right arrow and delete it, as a keyboard user would.
+        AXBMessageElement *box = self.elements[@"box"];
+        NSUInteger length = [box.accessibilityValue length];
+        NSRange selected;
+        if (![box nativeSelection:&selected]) post(@"a", @"a", NSEventModifierFlagCommand, 0);
+        else if (selected.location != 0 || selected.length != length) {
+            NSString *right = [NSString stringWithFormat:@"%C", (unichar)NSRightArrowFunctionKey];
+            NSUInteger moves = (selected.length ? 1 : 0) + length - NSMaxRange(selected);
+            for (NSUInteger i = 0; i < moves; i++) post(right, right, NSEventModifierFlagFunction | NSEventModifierFlagNumericPad, 124);
+            for (NSUInteger i = 0; i < length; i++) post(@"\x7f", @"\x7f", 0, 51);
+        }
         [answer enumerateSubstringsInRange:NSMakeRange(0, answer.length) options:NSStringEnumerationByComposedCharacterSequences
                                 usingBlock:^(NSString *character, NSRange r1, NSRange r2, BOOL *stop) { (void)r1; (void)r2; (void)stop; post(character, character, 0, 0); }];
         if (!answer.length) post(@"\x7f", @"\x7f", 0, 51);
@@ -356,6 +417,11 @@ static void ObserveWindows(void) {
                                                               usingBlock:^(NSNotification *note) { AXBMessagesRefreshWindow(note.object); }];
     CloseObserver = [NSNotificationCenter.defaultCenter addObserverForName:NSWindowWillCloseNotification object:nil queue:nil
                                                                 usingBlock:^(NSNotification *note) { RemoveOverlay(note.object, [Overlays objectForKey:note.object]); }];
+    // A caret move changes no drawn text; check the Request field after each window update.
+    UpdateObserver = [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidUpdateNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+        AXBMessageView *view = [Overlays objectForKey:note.object];
+        if (view && ((NSWindow *)note.object).isKeyWindow) [view.elements[@"box"] noticeCaret];
+    }];
 }
 
 void AXBMessagesInitialize(void) {
@@ -375,7 +441,8 @@ void AXBMessagesShutdown(void) {
     AXBDrawnTextSetObserver(nil, nil);
     if (KeyObserver) [NSNotificationCenter.defaultCenter removeObserver:KeyObserver];
     if (CloseObserver) [NSNotificationCenter.defaultCenter removeObserver:CloseObserver];
-    KeyObserver = CloseObserver = nil;
+    if (UpdateObserver) [NSNotificationCenter.defaultCenter removeObserver:UpdateObserver];
+    KeyObserver = CloseObserver = UpdateObserver = nil;
     for (NSWindow *window in Overlays.keyEnumerator.allObjects) RemoveOverlay(window, [Overlays objectForKey:window]);
     Overlays = nil;
 }
