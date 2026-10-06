@@ -19,7 +19,7 @@ TITLE = 'AX bridge hierarchical list'
 ACCESSORIES = ['Cables', 'Stands', 'Cases', 'Straps', 'Picks', 'Strings', 'Tuners', 'Capos', 'Pedals', 'Headphones']
 
 STARTUP = '''ON ERR CALL("AXBH_Error")
-var $list; $sub; $deep : Integer
+var $list; $sub; $deep; $picks; $i : Integer
 var $window : Integer
 var $data : Object
 $list:=New list
@@ -39,12 +39,20 @@ APPEND TO LIST($sub; "Acoustic"; 22)
 SET LIST ITEM($list; 2; "Guitars"; 2; $sub; False)
 __ACCESSORIES__
 SELECT LIST ITEMS BY REFERENCE($list; 12)
-$data:=New object("tree"; $list; "config"; JSON Parse(File("/RESOURCES/launch.json").getText()))
+// A flat list that accepts multiple selections.
+$picks:=New list
+For ($i; 1; 6)
+ APPEND TO LIST($picks; "Pick "+String($i); 200+$i)
+End for
+SET LIST PROPERTIES($picks; 0; 0; 18; 0; 1; 0)
+SELECT LIST ITEMS BY REFERENCE($picks; 201)
+$data:=New object("tree"; $list; "picks"; $picks; "config"; JSON Parse(File("/RESOURCES/launch.json").getText()))
 File("/RESOURCES/events.jsonl").delete()
 $window:=Open form window("Probe"; Plain form window)
 DIALOG("Probe"; $data)
 File("/RESOURCES/closed.json").setText(JSON Stringify(New object("runId"; $data.config.runId; "failure"; $data.axbFailure)))
 CLEAR LIST($list; *)
+CLEAR LIST($picks; *)
 QUIT 4D
 '''
 
@@ -67,6 +75,23 @@ If ($file.exists)
  $previous:=$file.getText()
 End if
 $file.setText($previous+JSON Stringify(New object("runId"; Form.config.runId; "compiled"; Is compiled mode; "event"; Form event code; "selected"; Selected list items(Form.tree; *); "visible"; Count list items(Form.tree); "expanded"; $expandedItems))+Char(10))
+'''
+
+
+PICKS_EVENT = '''// Record each event of the multiple-selection list with its selected references.
+var $file : 4D.File
+var $previous : Text
+var $count : Integer
+var $selected : Collection
+ARRAY LONGINT($refs; 0)
+$count:=Selected list items(Form.picks; $refs; *)
+$selected:=New collection
+ARRAY TO COLLECTION($selected; $refs)
+$file:=File("/RESOURCES/events.jsonl")
+If ($file.exists)
+ $previous:=$file.getText()
+End if
+$file.setText($previous+JSON Stringify(New object("runId"; Form.config.runId; "compiled"; Is compiled mode; "object"; "Picks"; "event"; Form event code; "picks"; $selected))+Char(10))
 '''
 
 
@@ -98,6 +123,8 @@ def main():
         'Catalog': {'type': 'list', 'left': 20, 'top': 20, 'width': 240, 'height': 200, 'dataSource': 'Form.tree', 'dataSourceTypeHint': 'integer',
                     'tooltip': 'Product catalog', 'method': 'ObjectMethods/Catalog.4dm',
                     'events': ['onClick', 'onDoubleClick', 'onExpand', 'onCollapse', 'onSelectionChange']},
+        'Picks': {'type': 'list', 'left': 290, 'top': 20, 'width': 200, 'height': 200, 'dataSource': 'Form.picks', 'dataSourceTypeHint': 'integer',
+                  'tooltip': 'Picks', 'method': 'ObjectMethods/Picks.4dm', 'events': ['onClick', 'onSelectionChange']},
         'Done': {'type': 'button', 'text': 'Done', 'left': 420, 'top': 320, 'width': 80, 'height': 24, 'action': 'accept'},
     }}]}
     from install_host_methods import area_form
@@ -105,6 +132,7 @@ def main():
     form_path = sources / 'Forms/Probe'
     (form_path / 'ObjectMethods').mkdir(parents=True)
     (form_path / 'ObjectMethods/Catalog.4dm').write_text(EVENT)
+    (form_path / 'ObjectMethods/Picks.4dm').write_text(PICKS_EVENT)
     (form_path / 'form.4DForm').write_text(json.dumps(named, indent=2) + '\n')
     (FIXTURE / 'Resources/launch.json').write_text(json.dumps({'runId': uuid.uuid4().hex}) + '\n')
     before = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob('*') if p.is_file()}
