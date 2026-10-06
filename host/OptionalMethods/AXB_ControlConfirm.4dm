@@ -15,6 +15,16 @@ If ($request.nativeButton=True)
  If (Not($native.accepted=True))
   return New object("status"; "rejected"; "message"; "Control changed before native input delivery")
  End if
+ If ($request.choice#Null)
+  // The palette's click returns before 4D applies the chosen cell.
+  If (Num(OBJECT Get value($request.objectName))=$request.choice)
+   return New object("status"; "completed"; "message"; "Choice confirmed")
+  End if
+  If (Milliseconds<$request.deadline)
+   return New object("status"; "pending"; "confirm"; Formula(AXB_ControlConfirm($1)); "data"; $request)
+  End if
+  return New object("status"; "rejected"; "message"; "Application did not accept the choice")
+ End if
  return
 End if
 If (New collection("increment"; "decrement").indexOf($request.operation)>=0)

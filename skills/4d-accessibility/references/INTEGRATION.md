@@ -271,12 +271,18 @@ $options.controls.Remarks:=New object("label"; "Remarks"; "multiline"; True)
 
 Declare only automatic fields that actually accept Return as a line break. A field explicitly set to **No** stays single-line regardless.
 
-### Name button-grid cells
+### Name button-grid and picture-menu cells
 
 A button grid is published as a group of cell buttons. Its pictures carry no text, so name each cell in 4D's row-by-row order; otherwise the cells are numbered and the grid reports `missingLabel`. A press clicks the cell, running the grid's own On Clicked. See [picture-based controls](../../../tests/PICTURE-CONTROLS.md).
 
 ```4d
 $options.controls.Align:=New object("cells"; New collection("Left"; "Center"; "Right"))
+```
+
+A picture popup menu is a popup whose value is its chosen cell. Name its cells the same way. Pressing it through accessibility opens a native menu of those labels. A choice goes through 4D's own palette, so the control's On Clicked runs with that cell's value.
+
+```4d
+$options.controls.Color:=New object("cells"; New collection("Blue"; "Indigo"; "Violet"))
 ```
 
 ### Splitters

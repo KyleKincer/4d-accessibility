@@ -45,6 +45,9 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic, strong) NSDictionary *popupRequest;
 @property(nonatomic, strong) NSMenu *adoptedMenu;
 @property(nonatomic, strong) id menuNativeParent;
+@property(nonatomic, strong) NSMenu *choiceMenu;
+@property(nonatomic, weak) AXBNode *choiceNode;
+@property(nonatomic, strong) NSDictionary *pictureChoice;
 @property(nonatomic) BOOL live;
 @property(nonatomic) BOOL omitOutsideWindow;
 - (void)refresh;
@@ -58,6 +61,8 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 - (void)expectDisclosureFrom:(id<NSAccessibility>)element previousValue:(NSNumber *)value;
 - (void)adoptPopupMenu:(NSMenu *)menu;
 - (void)restorePopupMenu;
+- (BOOL)showChoicesFor:(AXBNode *)node;
+- (BOOL)choosePictureCell:(NSMenu *)menu;
 @end
 
 @interface AXBGridNode : AXBNode
