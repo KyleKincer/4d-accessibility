@@ -17,9 +17,24 @@ _graphics.CGEventPost.argtypes = (c.c_uint32, c.c_void_p)
 _graphics.CGEventKeyboardSetUnicodeString.argtypes = (c.c_void_p, c.c_ulong, c.POINTER(c.c_uint16))
 _foundation.CFRelease.argtypes = (c.c_void_p,)
 
-CODES = {"right": 124, "left": 123, "down": 125, "up": 126, "space": 49, "return": 36, "escape": 53, "tab": 48, "delete": 51}
+CODES = {"right": 124, "left": 123, "down": 125, "up": 126, "space": 49, "return": 36, "escape": 53, "tab": 48, "delete": 51, "backslash": 42}
 MODIFIERS = {"ctrl": (59, 1 << 18), "option": (58, 1 << 19), "shift": (56, 1 << 17), "cmd": (55, 1 << 20)}
 VO = ("ctrl", "option")
+_guard = None
+
+
+def set_guard(check):
+    """Run check() before every posted key; it must raise when input could reach another application."""
+    global _guard
+    _guard = check
+
+
+def guard_frontmost(pid, ax):
+    """A guard that requires the owned process to be the frontmost application."""
+    def check():
+        if ax.application(pid).read("AXFrontmost") is not True:
+            raise RuntimeError("The owned application lost the foreground; refusing to post input")
+    return check
 
 
 def _post(code, down, flags, modifier=False):
@@ -32,6 +47,8 @@ def _post(code, down, flags, modifier=False):
 
 
 def key(name, modifiers=()):
+    if _guard:
+        _guard()
     active = 0
     held = [MODIFIERS[m] for m in modifiers]
     for code, bit in held:
@@ -52,6 +69,8 @@ def key(name, modifiers=()):
 
 def type_text(text):
     for character in text:
+        if _guard:
+            _guard()
         units = (c.c_uint16 * 1)(ord(character))
         for down in (True, False):
             event = _graphics.CGEventCreateKeyboardEvent(None, 49 if character == " " else 0, down)

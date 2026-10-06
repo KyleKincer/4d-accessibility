@@ -408,6 +408,28 @@ static void GridRefreshDelayTest(void) {
     if (self.menu) [NSNotificationCenter.defaultCenter postNotificationName:NSMenuDidBeginTrackingNotification object:self.menu]; }
 - (void)mouseUp:(NSEvent *)event { (void)event; self.releases++; }
 @end
+static void SingleSelectionRowTest(void) {
+    // A row's selected setter in a single-selection grid requests only that row.
+    NSWindow *window = Window(@"AXB single selection rows");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9042);
+    NSMutableDictionary *grid = [@{@"generation": @"single", @"order": @1, @"rows": @[@"g", @"l"],
+        @"columns": @[@{@"id": @"item", @"label": @"Item", @"enabled": @YES, @"editable": @NO, @"selectionTarget": @YES}],
+        @"visible": @[@"g", @"l"], @"selected": @[@"g"], @"selectionMode": @"single",
+        @"actions": @{@"disclose": @YES, @"select": @YES},
+        @"outline": @{@"g": @{@"parent": @"", @"level": @0, @"kind": @"group", @"label": @"Guitars", @"expanded": @NO, @"frame": @[@10, @20, @300, @18]},
+                      @"l": @{@"parent": @"", @"level": @0, @"kind": @"leaf"}},
+        @"frames": @{@"g": @{@"item": @[@10, @20, @300, @18]}, @"l": @{@"item": @[@10, @38, @300, @18]}}} mutableCopy];
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"List", @"enabled": @YES, @"nodes": @[
+        @{@"id": @"grid", @"role": @"table", @"label": @"Catalog", @"value": @"", @"visible": @YES, @"enabled": @YES,
+          @"frame": @[@10, @20, @300, @140], @"grid": grid}]} mutableCopy];
+    Check([Exchange(window, 9042, 1, session, snapshot)[@"ok"] boolValue], "single-selection outline accepted"); Pump();
+    AXBGridNode *outline = Provider(window).accessibilityChildren.firstObject;
+    [outline.accessibilityRows[1] setAccessibilitySelected:YES];
+    NSDictionary *action = Exchange(window, 9042, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"gridSelect"] && [action[@"value"] isEqual:@[@"l"]], "selecting a row of a single-selection grid requests only that row");
+    [window close]; Pump();
+}
 static void SelectionInputTest(void) {
     NSWindow *window = Window(@"AXB native row selection");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -1376,6 +1398,7 @@ int main(void) {
         StableIdentifierTest();
         OutlineSemanticsTest();
         OutlineDisclosureTest();
+        SingleSelectionRowTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();

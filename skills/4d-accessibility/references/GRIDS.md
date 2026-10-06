@@ -55,6 +55,10 @@ For disclosure with matching 0.24.0 packages, add `"setExpanded"; Formula(My_Set
 
 Live group rows expose `AXDisclosing`; rows, first cells and virtual disclosure triangles expose `AXPress`. Wait for the completion receipt, then verify application state. Disclosure bypasses ancestor scrolling, including offscreen and fully clipped targets. The native command retains its ordinary effects inside the listbox, including deselection of newly hidden leaves. [The disclosure guide](../../../tests/GROUPED-DISCLOSURE.md) specifies failure behavior, VoiceOver feedback and the repeated/nested acceptance gate. This adds targeted disclosure only; whole-workflow accessibility still requires the remaining interactive controls.
 
+## Classic hierarchical lists
+
+A `list` form object needs no `grids` entry. Discovery publishes it as an outline keyed by item reference, and selection, disclosure and reveal run through 4D's own keyboard handling and list events. Keep item references unique. See [hierarchical lists](../../../tests/HIERARCHICAL-LISTS.md) for behavior, tests and limits.
+
 ## Use a collection or entity-selection list box
 
 Keep the lifecycle area and ordinary controls. Configure the actual list box, without copying its rows into accessibility arrays. For example, a collection list box named `Items` has data source `Form.lines`, selected items `Form.selectedLines`, and columns such as `This.description` and `This.amount`:

@@ -91,6 +91,16 @@ python3 test_focus_replacement_speech.py --run
 
 An owned synthetic window publishes a focused read-only note beside forty sibling fields, then makes every field editable in one refresh, as a 4D form does when it enters Modify. VoiceOver must announce the note as editable text in every trial rather than moving to the containing group. It starts its own VoiceOver session and reads speech with VoiceOver's AppleScript `last phrase`, so "Allow VoiceOver to be controlled with AppleScript" must be enabled. Omit `--run` to compile only.
 
+For classic hierarchical lists, with 4D desktop and a licensed `--server` compiler:
+
+```sh
+python3 test_hlist_fixture.py --server /path/to/4D\ Server.app --baseline
+python3 test_hlist_fixture.py --server /path/to/4D\ Server.app --run
+python3 test_hlist_fixture.py --server /path/to/4D\ Server.app --run --voiceover
+```
+
+Add `--compiled` or `--intel` for the other modes. [Hierarchical lists](tests/HIERARCHICAL-LISTS.md) describes what each run checks.
+
 For VoiceOver test-session cleanup:
 
 ```sh

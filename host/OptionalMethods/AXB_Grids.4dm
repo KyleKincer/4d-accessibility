@@ -31,6 +31,15 @@ For ($position; 1; Size of array($objects))
    $configured[$name]:=New object("kind"; "listSubform"; "label"; $name)
   End if
  End if
+ If ((OBJECT Get type(*; $name)=Object type hierarchical list) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
+  // A hierarchical list needs no configuration; a configured label still wins.
+  $configured[$name]:=New object("kind"; "hierarchicalList")
+  If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && (Value type($view.options.controls[$name].label)=Is text) && ($view.options.controls[$name].label#""))
+   $configured[$name].label:=$view.options.controls[$name].label
+  Else
+   $configured[$name].label:=Choose(OBJECT Get help tip(*; $name)#""; OBJECT Get help tip(*; $name); $name)
+  End if
+ End if
 End for
 For each ($name; $configured)
  If ((Find in array($objects; $name)>0) && OBJECT Get visible(*; $name))
@@ -99,6 +108,29 @@ For each ($name; $configured)
    If (Not($view.nativeOutlineDisclosure=True))
     return New object("ok"; False; "error"; "nativeOutlineDisclosureUnavailable")
    End if
+  End if
+  If ($options.kind="hierarchicalList")
+   // The plugin's outline rows and disclosure carry the list; nothing else is native.
+   If ($view.hierarchicalLists=Null)
+    $reply:=AXB_Host("info"; New object)
+    $view.hierarchicalLists:=($reply.ok=True) && (Value type($reply.nativeStatus)=Is text) && (Position("; nativeOutlines 1;"; $reply.nativeStatus)>0) && (Position("; nativeOutlineDisclosure 1;"; $reply.nativeStatus)>0)
+   End if
+   If (Not($view.hierarchicalLists=True))
+    $result.unsupported.push(New object("object"; $name; "reason"; "hierarchicalListsUnavailable"))
+    continue
+   End if
+   If (($request.operation="describe") | ($request.node=$id))
+    $reply:=AXB_HList($request.operation; $options; $state; $request)
+    If ($request.operation#"describe")
+     return $reply
+    End if
+    If (Not($reply.ok=True))
+     return $reply
+    End if
+    $result.nodes:=$result.nodes.concat($reply.nodes)
+    $result.unsupported:=$result.unsupported.concat($reply.unsupported)
+   End if
+   continue
   End if
   If ($options.kind="listSubform")
    If (($request.operation="describe") | ($request.node=$id))

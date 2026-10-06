@@ -45,6 +45,7 @@ jobs:
           python3 test_grouped_disclosure_subforms.py --help
           python3 test_native_outlines.py --help
           python3 test_native_messages.py --help
+          python3 test_hlist_fixture.py --help
           python3 test_appium_list_fixture.py --help
           python3 prepare_alp_subforms.py --help
       - name: Test session and grid models

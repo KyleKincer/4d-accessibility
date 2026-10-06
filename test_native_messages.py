@@ -125,6 +125,9 @@ def main():
         vo.start()
         heard.start()
     process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if vo:
+        # Keys reach whatever is frontmost; never post one into another application.
+        vo.set_guard(vo.guard_frontmost(process.pid, ax))
     # Only speech during the fixture's own run is recorded; other applications are not.
     spoken = [heard.mark() if heard else 0, None]
 
@@ -424,6 +427,7 @@ def baseline(args):
     if args.intel:
         command = ["/usr/bin/arch", "-x86_64"] + command
     process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    keys.set_guard(keys.guard_frontmost(process.pid, ax))
     try:
         def front():
             subprocess.run(["osascript", "-e", f'tell application "System Events" to set frontmost of (first process whose unix id is {process.pid}) to true'],
