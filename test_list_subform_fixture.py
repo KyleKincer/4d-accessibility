@@ -261,15 +261,16 @@ def main():
             lambda: table.count("AXRows") == 600, "Missing logical rows", timeout=20
         )
         check(
-            table.count("AXColumns") == 4,
-            "every scalar row control becomes a logical column",
+            table.count("AXColumns") == 5,
+            "every scalar row control and the row button becomes a logical column",
         )
         check(
             not table.cell(0, 0).read("AXChildren")[0].is_settable("AXValue"),
             "native read-only field exposes no editing action",
         )
         if compiled["header"]:
-            headers = [column.read("AXHeader") for column in table.read("AXColumns")]
+            # The row button's column has no heading of its own.
+            headers = [header for column in table.read("AXColumns") if (header := column.read("AXHeader"))]
             check(
                 [header.read("AXDescription") for header in headers]
                 == ["ID", "Description", "Amount", "Approved"],
@@ -361,21 +362,18 @@ def main():
             report["passed"] = True
             return
         if args.voiceover:
-            from voiceover import VoiceOver
+            from voiceover_session import Session
 
-            vo = VoiceOver(
-                process,
-                project,
-                TITLE,
-                BUILD / "list-subform-voiceover",
-                BUILD / "read-fixture-screen",
-            )
+            assert subprocess.run(["pgrep", "-x", "VoiceOver"], capture_output=True).returncode != 0, "Existing VoiceOver session belongs to the user"
+            vo = Session(process.pid, ax)
             vo.start()
             vo.key("home")
             vo.key("down", shift=True)
             vo.key("home")
             vo.key("right")
             end = vo.key("end")
+            # End reaches the row button's column; the description is three columns back.
+            vo.key("left")
             vo.key("left")
             final_caption = vo.key("left")
             check(
@@ -496,6 +494,26 @@ def main():
                 saved["approved"] is True,
                 "VoiceOver checkbox result persists through the native editor",
             )
+            # Back in the list, VO-Space on a row button runs its own handler for that row.
+            for _ in range(8):
+                caption = vo.key("left")
+                if "Items" in caption and "table" in caption.lower():
+                    break
+            else:
+                raise AssertionError("VoiceOver did not return to the list")
+            vo.key("down", shift=True)
+            caption = vo.key("end")
+            if not ("Flag" in caption and "button" in caption.lower()):
+                raise AssertionError("VoiceOver did not reach a row button: " + caption)
+            check(True, "VoiceOver reads a row button by its title")
+            before = len(state()["events"])
+            vo.key("space")
+            pressed = ax.wait_for(
+                lambda: [e for e in state()["events"][before:] if e["object"] == "Flag" and e["event"] == 4] or None,
+                "VoiceOver did not press the row button",
+                timeout=20,
+            )
+            check(len(pressed) == 1, "VO-Space runs the row button's own On Clicked once")
             report["speech"] = vo.steps
             report["passed"] = True
             return
@@ -634,6 +652,23 @@ def main():
             == 1,
             "original checkbox click handler runs exactly once",
         )
+        # A row button runs its own handler on its own row's record, here a row
+        # beside the checkbox's, which the list has scrolled into view.
+        flag = table.cell(4, 598).read("AXChildren")[0]
+        identifier = int(table.cell(0, 598).read("AXValue"))
+        check(
+            flag.read("AXRole") == "AXButton" and flag.read("AXDescription") == "Flag",
+            "a row button is a button labeled by its title",
+        )
+        before = len(state()["events"])
+        check(flag.perform("AXPress") == 0, "a row button accepts AXPress")
+        completed("Row button pressed through its own handler")
+        pressed = [e for e in state()["events"][before:] if e["object"] == "Flag" and e["event"] == 4]
+        check(
+            len(pressed) == 1 and pressed[0]["record"] == identifier - 1,
+            "the row button's On Clicked runs once, on its own row's record",
+        )
+        leave_editor()
         mode = compiled["selectionMode"]
         if mode in ("none", "default"):
             check(

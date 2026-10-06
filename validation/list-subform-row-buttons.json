@@ -1,0 +1,38 @@
+{
+  "passed": true,
+  "date": "2026-10-06",
+  "scope": "A button in a classic list subform's row: published as a button cell labeled by its title, pressed with an ordinary click at that row's button so 4D makes the row's record current and runs the button's own On Clicked; by AX and by VoiceOver",
+  "fixture": "prepare_list_subform_fixture.py and test_list_subform_fixture.py (Flag button beside the Approved checkbox)",
+  "pluginSHA256": "a54f5eb007c5acfc2846536f809e23292acead30be626041bcc15a5e5d9d7a08",
+  "environment": {
+    "4D": "20.8 build 20.102009",
+    "macOS": "26.7.1"
+  },
+  "runs": {
+    "arm64": 51,
+    "arm64-compiled": 51,
+    "x86_64": 51,
+    "x86_64-compiled": 51,
+    "arm64-voiceover": 21,
+    "arm64-compiled-voiceover": 21
+  },
+  "checks": [
+    "every scalar row control and the row button becomes a logical column",
+    "a row button is a button labeled by its title",
+    "a row button accepts AXPress",
+    "the row button's On Clicked runs once, on its own row's record",
+    "VoiceOver reads a row button by its title",
+    "VO-Space runs the row button's own On Clicked once"
+  ],
+  "regressions": {
+    "test.py": "316 checks",
+    "test_grids.py": "246 checks",
+    "native provider suite": "421 checks",
+    "test_grid_controls_fixture.py": "209 checks"
+  },
+  "notCovered": [
+    "Pressing a row button whose row is off screen (as for row checkboxes)",
+    "Buttons in list subform headers and footers",
+    "Client/server"
+  ]
+}

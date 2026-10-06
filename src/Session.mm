@@ -378,7 +378,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             NSArray *point = input[@"point"], *frame = grid[@"frames"][target[@"row"]][target[@"column"]];
             if (!point || !frame || ![grid[@"generation"] isEqual:target[@"generation"]] ||
                 ![grid[@"actions"][@"edit"] boolValue] || !AXBGridRowAllowsEditing(grid, target[@"row"]) ||
-                ![@[@"checkbox", @"popup"] containsObject:expected[@"role"] ?: @""] ||
+                ![@[@"checkbox", @"popup", @"button"] containsObject:expected[@"role"] ?: @""] ||
                 ![expected[@"enabled"] boolValue] || ![expected[@"editable"] boolValue]) return nil;
             double x = [point[0] doubleValue], y = [point[1] doubleValue];
             if (x < [frame[0] doubleValue] || y < [frame[1] doubleValue] ||
@@ -705,7 +705,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 NSDictionary *column = grid.descriptor[@"columns"][[grid indexOfColumn:value[@"column"]]];
                 gridValue = [grid cellForRow:value[@"row"] column:value[@"column"] now:now];
                 if (![column[@"editable"] boolValue] || ![column[@"enabled"] boolValue] || ![gridValue[@"editable"] boolValue] || ![gridValue[@"enabled"] boolValue]) return NO;
-                BOOL widget = [@[@"checkbox", @"popup"] containsObject:gridValue[@"role"] ?: @""];
+                BOOL widget = [@[@"checkbox", @"popup", @"button"] containsObject:gridValue[@"role"] ?: @""];
                 if ([operation isEqual:@"gridPress"] && !widget) return NO;
                 if ([operation isEqual:@"gridEdit"] && gridValue[@"focusable"] && ![gridValue[@"focusable"] boolValue]) return NO;
                 if (widget && ![@[@"gridPress", @"gridEdit"] containsObject:operation]) return NO;

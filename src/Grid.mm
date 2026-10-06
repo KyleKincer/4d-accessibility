@@ -186,7 +186,7 @@ NSString *AXBValidateGridPage(id page) {
         for (id cell in row[@"cells"]) {
             if (![cell isKindOfClass:NSDictionary.class] || !Text(cell[@"column"], 256, YES) ||
                 !Text(cell[@"value"], AXBLimits::text) || !Bool(cell[@"enabled"]) || !Bool(cell[@"editable"])) return @"invalid grid cell";
-            if (cell[@"role"] && ![@[@"text", @"checkbox", @"popup"] containsObject:cell[@"role"]]) return @"invalid grid cell role";
+            if (cell[@"role"] && ![@[@"text", @"checkbox", @"popup", @"button"] containsObject:cell[@"role"]]) return @"invalid grid cell role";
             if (cell[@"label"] && !Text(cell[@"label"], 512)) return @"invalid grid cell label";
             if (cell[@"focusable"] && !Bool(cell[@"focusable"])) return @"invalid grid cell focus capability";
             if ([cell[@"role"] isEqual:@"checkbox"]) {
