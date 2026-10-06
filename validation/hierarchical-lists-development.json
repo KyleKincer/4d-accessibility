@@ -1,0 +1,278 @@
+{
+  "passed": true,
+  "date": "2026-10-06",
+  "scope": "Classic hierarchical list discovered automatically in an area-owned form: order, depth, expansion, selection, keyboard-driven selection and disclosure with the list's own events, reveal, VoiceOver navigation and operation",
+  "fixture": "prepare_hlist_fixture.py and test_hlist_fixture.py",
+  "pluginSHA256": "b52fa7ec3976067416a1b54868d6f9ee3a1a64e339eae97f4ff4dfabf7671bc4",
+  "environment": {
+    "4D": "20.8 build 20.102009",
+    "macOS": "26.7.1",
+    "compiler": "4D Server 20.8 Compile project, arm64_macOS_lib and x86_64_generic"
+  },
+  "pixels": "Each AX run compares the form, before any action, with the same window built without plugin, component or helpers: zero changed pixels below the title bar. Under Rosetta, interpreted, AppKit's window-title text differed by one antialiasing level in 430 pixels.",
+  "runs": {
+    "arm64": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "arm64",
+      "voiceover": false,
+      "checks": [
+        "the list is an outline labeled by its help tip",
+        "visible items appear in 4D's order, collapsed children omitted",
+        "each item reports its depth",
+        "expanded and collapsed groups report their state",
+        "the list's own selection is reported",
+        "the form is pixel-identical to the plugin-free form",
+        "selecting Straps in a partly scrolled list is accepted",
+        "a partly scrolled list selects exactly the requested item",
+        "selecting Stands is accepted through accessibility",
+        "the list's own selection and click events run for Stands",
+        "the new selection is published",
+        "4D runs in the requested interpreted mode",
+        "expanding Guitars is accepted through accessibility",
+        "the list's own On Expand event runs for Guitars",
+        "Guitars' children appear beneath it at the next level",
+        "expanding an expanded group is accepted",
+        "an expanded group is left alone, without a click or event",
+        "expanding the nested Keyboards group is accepted",
+        "a nested group's children appear two levels deep",
+        "collapsing Guitars is accepted through accessibility",
+        "the list's own On Collapse event runs",
+        "a collapsed group's children leave the outline",
+        "revealing Headphones, below the visible lines, is accepted",
+        "the list scrolls Headphones into view",
+        "selecting the revealed item is accepted",
+        "the click after scrolling selects exactly Headphones"
+      ],
+      "changedPixels": {
+        "window": 0,
+        "belowTitleBar": 0
+      }
+    },
+    "arm64-voiceover": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "arm64",
+      "voiceover": true,
+      "checks": [
+        "VoiceOver reaches the list by its label",
+        "interacting starts on the selected item, with its position and level",
+        "a collapsed group is read with its state and disclosure triangle",
+        "VO-Space expands the group through the list's own On Expand and announces it",
+        "VoiceOver's disclosure command collapses it through On Collapse and announces it",
+        "VoiceOver moves to the next item",
+        "VO-Space selects the item through the list's own events"
+      ],
+      "speech": [
+        "4D AX bridge hierarchical list window Product catalog table",
+        "In Product catalog table Product catalog Synthesizers row 3 of 14 level 1 level 1",
+        "Guitars collapsed disclosure triangle row 4 of 14 collapsed",
+        "",
+        "Guitars: expanded",
+        "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
+        "Guitars: collapsed",
+        "Cables row 5 of 14",
+        ""
+      ]
+    },
+    "arm64-compiled": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "arm64",
+      "voiceover": false,
+      "checks": [
+        "the list is an outline labeled by its help tip",
+        "visible items appear in 4D's order, collapsed children omitted",
+        "each item reports its depth",
+        "expanded and collapsed groups report their state",
+        "the list's own selection is reported",
+        "the form is pixel-identical to the plugin-free form",
+        "selecting Straps in a partly scrolled list is accepted",
+        "a partly scrolled list selects exactly the requested item",
+        "selecting Stands is accepted through accessibility",
+        "the list's own selection and click events run for Stands",
+        "the new selection is published",
+        "4D runs in the requested compiled mode",
+        "expanding Guitars is accepted through accessibility",
+        "the list's own On Expand event runs for Guitars",
+        "Guitars' children appear beneath it at the next level",
+        "expanding an expanded group is accepted",
+        "an expanded group is left alone, without a click or event",
+        "expanding the nested Keyboards group is accepted",
+        "a nested group's children appear two levels deep",
+        "collapsing Guitars is accepted through accessibility",
+        "the list's own On Collapse event runs",
+        "a collapsed group's children leave the outline",
+        "revealing Headphones, below the visible lines, is accepted",
+        "the list scrolls Headphones into view",
+        "selecting the revealed item is accepted",
+        "the click after scrolling selects exactly Headphones"
+      ],
+      "changedPixels": {
+        "window": 0,
+        "belowTitleBar": 0
+      }
+    },
+    "arm64-compiled-voiceover": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "arm64",
+      "voiceover": true,
+      "checks": [
+        "VoiceOver reaches the list by its label",
+        "interacting starts on the selected item, with its position and level",
+        "a collapsed group is read with its state and disclosure triangle",
+        "VO-Space expands the group through the list's own On Expand and announces it",
+        "VoiceOver's disclosure command collapses it through On Collapse and announces it",
+        "VoiceOver moves to the next item",
+        "VO-Space selects the item through the list's own events"
+      ],
+      "speech": [
+        "4D AX bridge hierarchical list window Product catalog table",
+        "In Product catalog table Product catalog Synthesizers row 3 of 14 level 1 level 1",
+        "Guitars collapsed disclosure triangle row 4 of 14 collapsed",
+        "",
+        "Guitars: expanded",
+        "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
+        "Guitars: collapsed",
+        "Cables row 5 of 14",
+        ""
+      ]
+    },
+    "x86_64": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "x86_64",
+      "voiceover": false,
+      "checks": [
+        "the list is an outline labeled by its help tip",
+        "visible items appear in 4D's order, collapsed children omitted",
+        "each item reports its depth",
+        "expanded and collapsed groups report their state",
+        "the list's own selection is reported",
+        "the form is pixel-identical to the plugin-free form",
+        "selecting Straps in a partly scrolled list is accepted",
+        "a partly scrolled list selects exactly the requested item",
+        "selecting Stands is accepted through accessibility",
+        "the list's own selection and click events run for Stands",
+        "the new selection is published",
+        "4D runs in the requested interpreted mode",
+        "expanding Guitars is accepted through accessibility",
+        "the list's own On Expand event runs for Guitars",
+        "Guitars' children appear beneath it at the next level",
+        "expanding an expanded group is accepted",
+        "an expanded group is left alone, without a click or event",
+        "expanding the nested Keyboards group is accepted",
+        "a nested group's children appear two levels deep",
+        "collapsing Guitars is accepted through accessibility",
+        "the list's own On Collapse event runs",
+        "a collapsed group's children leave the outline",
+        "revealing Headphones, below the visible lines, is accepted",
+        "the list scrolls Headphones into view",
+        "selecting the revealed item is accepted",
+        "the click after scrolling selects exactly Headphones"
+      ],
+      "changedPixels": {
+        "window": 430,
+        "belowTitleBar": 0
+      }
+    },
+    "x86_64-voiceover": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "x86_64",
+      "voiceover": true,
+      "checks": [
+        "VoiceOver reaches the list by its label",
+        "interacting starts on the selected item, with its position and level",
+        "a collapsed group is read with its state and disclosure triangle",
+        "VO-Space expands the group through the list's own On Expand and announces it",
+        "VoiceOver's disclosure command collapses it through On Collapse and announces it",
+        "VoiceOver moves to the next item",
+        "VO-Space selects the item through the list's own events"
+      ],
+      "speech": [
+        "4D AX bridge hierarchical list window Product catalog table",
+        "In Product catalog table Product catalog Synthesizers row 3 of 14 level 1 level 1",
+        "Guitars collapsed disclosure triangle row 4 of 14 collapsed",
+        "",
+        "Guitars: expanded",
+        "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
+        "Guitars: collapsed",
+        "Cables row 5 of 14",
+        ""
+      ]
+    },
+    "x86_64-compiled": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "x86_64",
+      "voiceover": false,
+      "checks": [
+        "the list is an outline labeled by its help tip",
+        "visible items appear in 4D's order, collapsed children omitted",
+        "each item reports its depth",
+        "expanded and collapsed groups report their state",
+        "the list's own selection is reported",
+        "the form is pixel-identical to the plugin-free form",
+        "selecting Straps in a partly scrolled list is accepted",
+        "a partly scrolled list selects exactly the requested item",
+        "selecting Stands is accepted through accessibility",
+        "the list's own selection and click events run for Stands",
+        "the new selection is published",
+        "4D runs in the requested compiled mode",
+        "expanding Guitars is accepted through accessibility",
+        "the list's own On Expand event runs for Guitars",
+        "Guitars' children appear beneath it at the next level",
+        "expanding an expanded group is accepted",
+        "an expanded group is left alone, without a click or event",
+        "expanding the nested Keyboards group is accepted",
+        "a nested group's children appear two levels deep",
+        "collapsing Guitars is accepted through accessibility",
+        "the list's own On Collapse event runs",
+        "a collapsed group's children leave the outline",
+        "revealing Headphones, below the visible lines, is accepted",
+        "the list scrolls Headphones into view",
+        "selecting the revealed item is accepted",
+        "the click after scrolling selects exactly Headphones"
+      ],
+      "changedPixels": {
+        "window": 430,
+        "belowTitleBar": 0
+      }
+    },
+    "x86_64-compiled-voiceover": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "x86_64",
+      "voiceover": true,
+      "checks": [
+        "VoiceOver reaches the list by its label",
+        "interacting starts on the selected item, with its position and level",
+        "a collapsed group is read with its state and disclosure triangle",
+        "VO-Space expands the group through the list's own On Expand and announces it",
+        "VoiceOver's disclosure command collapses it through On Collapse and announces it",
+        "VoiceOver moves to the next item",
+        "VO-Space selects the item through the list's own events"
+      ],
+      "speech": [
+        "4D AX bridge hierarchical list window Product catalog table",
+        "In Product catalog table Product catalog Synthesizers row 3 of 14 level 1 level 1",
+        "Guitars collapsed disclosure triangle row 4 of 14 collapsed",
+        "",
+        "Guitars: expanded",
+        "collapsing Guitars expanded disclosure triangle row 4 of 16 expanded disclosure triangle cell",
+        "Guitars: collapsed",
+        "Cables row 5 of 14",
+        ""
+      ]
+    }
+  },
+  "rejectedApproach": "Pointer clicks at computed item points. After a half-line trackpad scroll, 4D reports the next whole line, and a click selected the item above the requested one. Keyboard selection and disclosure need no geometry.",
+  "notCovered": [
+    "Item editing",
+    "Multiple selection",
+    "Icons, styles and colors",
+    "Client/server and very large lists"
+  ]
+}

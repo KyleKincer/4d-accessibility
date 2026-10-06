@@ -20,7 +20,7 @@ For each ($name; $grids)
    return
   End if
  End if
- If (New collection("array"; "outline"; "areaList"; "collection"; "entity"; "selection"; "listSubform").indexOf($options.kind)<0)
+ If (New collection("array"; "outline"; "areaList"; "collection"; "entity"; "selection"; "listSubform"; "hierarchicalList").indexOf($options.kind)<0)
   return
  End if
  If (New collection("array"; "outline").indexOf($options.kind)>=0)
@@ -95,6 +95,10 @@ For each ($name; $grids)
  If (($options.kind="outline") & (OB Is defined($options; "selection") | OB Is defined($options; "onSelection")))
   // Complete native break selection is unavailable. Do not imply that a
   // leaf callback supplies it or allow the flat selection mutation path.
+  return
+ End if
+ // A hierarchical list supplies its own items, keys, selection and disclosure.
+ If (($options.kind="hierarchicalList") & (OB Is defined($options; "columns") | OB Is defined($options; "keyProperty") | OB Is defined($options; "keyColumn") | OB Is defined($options; "selection") | OB Is defined($options; "onSelection") | OB Is defined($options; "meta")))
   return
  End if
  If (OB Is defined($options; "setExpanded") & ($options.kind#"outline"))
