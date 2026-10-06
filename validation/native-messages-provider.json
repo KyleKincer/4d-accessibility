@@ -769,7 +769,7 @@
   "notPassed": [
     "4D Server and remote clients are not exercised by this record.",
     "The Request field's selection is 4D's own caret and follows Left/Right moves, but VoiceOver does not yet read the characters such a move passes; it reads the new selection without speaking.",
-    "4D's own empty window-title text element remains beside the published elements.",
+    "An empty window-title text element remains beside the published elements; AppKit publishes the same element for any window with an empty title.",
     "Long, wrapped and localized messages and other built-in windows (DISPLAY SELECTION, file and print dialogs) are separate work."
   ],
   "earlyPress": "A press made within about 40 ms of a window being published was discarded by 4D in 4 of 8 trials; with input held until the window has been published for 0.5 s, 8 of 8 immediate presses took effect. Each run now includes a CONFIRM pressed the moment it is published."
