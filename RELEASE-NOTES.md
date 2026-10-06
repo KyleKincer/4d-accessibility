@@ -1,3 +1,17 @@
+# 0.27.0, picture popup menus, editable pictures and two regression fixes
+
+Picture popup menus are published as popups whose value is the chosen cell. Name the cells with `controls.<name>.cells`, as for a button grid. 4D's own palette is a menu holding one unlabeled picture, with no keyboard navigation. Pressing the popup through accessibility therefore opens a native menu of the cell labels, with the current cell checked and highlighted. A choice opens 4D's palette with the control's own click, and the plugin selects that cell there. 4D then sets the value and runs the control's own On Clicked. Mouse use is unchanged.
+
+Editable pictures are published as images with Cut, Copy, Paste and Clear as accessibility actions. While empty, a picture offers only Paste and reads "No picture". Each action focuses the picture and runs 4D's standard action, so the field's After Edit and Data Change run as they do for the keyboard commands. VoiceOver performs a single action with VO-Space and lists several in its action menu. [Picture-based controls](tests/PICTURE-CONTROLS.md); [acceptance](validation/picture-controls-development.json), 216 checks.
+
+Sorting a classic current- or named-selection list box no longer retires its table and every retained row. This regression came from 0.25.0's cheaper polling: reordering reported the grid as loading until its private read finished. A published grid now waits briefly for that read.
+
+An action queued just before 4D assigned initial focus to its own text field was rejected as changed before dispatch, because the field gains its editor's selection with focus. The dispatch check now accepts that selection on the exact target. Values, existing selections and focus elsewhere remain strict guards.
+
+Live fixtures now bring their own 4D window to the front, which current macOS no longer does for an application launched from a script. Several stale fixtures were repaired.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.26.0, hierarchical lists, button grids and splitters
 
 Classic hierarchical lists (`New list`, `APPEND TO LIST`) are discovered automatically and published as outlines, with no configuration. Each visible item is a row keyed by its list reference, with its depth, its expanded state and the list's own selection. Selection, expansion, collapse and reveal use 4D's own keyboard handling, so the list's normal events run: On Selection Change, On Clicked, On Expand and On Collapse. Pointer clicks were rejected for these actions, because 4D reports a list's scroll position rounded up to a whole line. [Hierarchical lists](tests/HIERARCHICAL-LISTS.md); [acceptance](validation/hierarchical-lists-development.json).
