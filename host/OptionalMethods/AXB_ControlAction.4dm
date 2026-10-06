@@ -22,6 +22,25 @@ Case of
  : ((New collection("setValue"; "replaceSelection"; "setSelection").indexOf($action.operation)>=0) & ($target.role="textfield") & $target.editable)
   $result:=AXB_TextAction($action; $target; $options)
   return
+ : ((New collection("increment"; "decrement"; "setValue").indexOf($action.operation)>=0) && ($target.role="splitter") && $target.adjustable)
+  // 4D's dragging tracker follows the physical pointer, which posted events do
+  // not move. Assigning the offset runs the same splitter handling: the same
+  // limits and the same attached objects, without the drag's On Clicked.
+  // VoiceOver writes the position it wants; increments move by one step.
+  Case of
+   : ($action.operation="increment")
+    $value:=$target.step
+   : ($action.operation="decrement")
+    $value:=-$target.step
+   Else
+    $value:=Round(Num($action.value)-$target.value; 0)
+  End case
+  If ($value=0)
+   return New object("status"; "completed"; "message"; "Splitter already at that position")
+  End if
+  OBJECT SET VALUE($target.objectName; $value)
+  $result:=New object("status"; "pending"; "confirm"; Formula(AXB_SplitterConfirm($1)); "data"; New object("objectName"; $target.objectName; "operation"; Choose($value>0; "increment"; "decrement"); "vertical"; $target.vertical; "previousValue"; $target.value; "actionID"; $action.id; "deadline"; Milliseconds+2000))
+  return
  : ((New collection("increment"; "decrement").indexOf($action.operation)>=0) && (New collection("slider"; "stepper").indexOf($target.role)>=0) && $target.adjustable)
   $value:=OBJECT Get value($target.objectName)
   $valueType:=Value type($value)

@@ -1,0 +1,193 @@
+{
+  "passed": true,
+  "date": "2026-10-06",
+  "scope": "A vertical splitter in an area-owned form: role, orientation, label, position and range; increment, decrement, written positions and 4D's own limit, with the attached pane resizing; VoiceOver reading and adjustment",
+  "fixture": "prepare_splitter_fixture.py and test_splitter_fixture.py",
+  "pluginSHA256": "6c9fb9a5f679b6bdd63e407224168fa773a75bddb3d3e2a2ff935112999534f3",
+  "environment": {
+    "4D": "20.8 build 20.102009",
+    "macOS": "26.7.1",
+    "compiler": "4D Server 20.8 Compile project, arm64_macOS_lib and x86_64_generic"
+  },
+  "pixels": "Each AX run compares the form, before any adjustment, with the same window built without plugin, component or helpers: zero changed pixels below the title bar.",
+  "runs": {
+    "arm64": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "arm64",
+      "voiceover": false,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "the form is pixel-identical to the plugin-free form",
+        "an increment moves the splitter one step and widens the pane by the same amount",
+        "a decrement moves it back",
+        "writing a position moves the splitter there through 4D's splitter handling",
+        "writing the current position changes nothing",
+        "a position past its limit stops where 4D's own limit holds it"
+      ],
+      "changedPixels": 0,
+      "limit": 26.0
+    },
+    "arm64-voiceover": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "arm64",
+      "voiceover": true,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "VoiceOver reaches the form",
+        "VoiceOver reads the splitter by its label",
+        "interacting offers VoiceOver's splitter adjustment",
+        "VO-Right moves the splitter and resizes the pane with it",
+        "VO-Left moves it back"
+      ],
+      "speech": [
+        "4D AX bridge splitter window Left pane Insertion at beginning of text. Notes edit text has keyboard focus",
+        "vertical splitter Pane divider collapsed on left",
+        "In vertical splitter",
+        "You are currently on a vertical splitter, inside of a group. To change the splitter position, press @VOModifier() and then Left Arrow or Right Arrow.To stop interacting with the splitter, press Control-Option-Shift-Up Arrow.",
+        "Pane divider"
+      ]
+    },
+    "arm64-compiled": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "arm64",
+      "voiceover": false,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "the form is pixel-identical to the plugin-free form",
+        "an increment moves the splitter one step and widens the pane by the same amount",
+        "a decrement moves it back",
+        "writing a position moves the splitter there through 4D's splitter handling",
+        "writing the current position changes nothing",
+        "a position past its limit stops where 4D's own limit holds it"
+      ],
+      "changedPixels": 0,
+      "limit": 26.0
+    },
+    "arm64-compiled-voiceover": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "arm64",
+      "voiceover": true,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "VoiceOver reaches the form",
+        "VoiceOver reads the splitter by its label",
+        "interacting offers VoiceOver's splitter adjustment",
+        "VO-Right moves the splitter and resizes the pane with it",
+        "VO-Left moves it back"
+      ],
+      "speech": [
+        "4D AX bridge splitter window Left pane Insertion at beginning of text. Notes edit text has keyboard focus",
+        "vertical splitter Pane divider collapsed on left",
+        "In vertical splitter",
+        "You are currently on a vertical splitter, inside of a group. To change the splitter position, press @VOModifier() and then Left Arrow or Right Arrow.To stop interacting with the splitter, press Control-Option-Shift-Up Arrow.",
+        "Pane divider"
+      ]
+    },
+    "x86_64": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "x86_64",
+      "voiceover": false,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "the form is pixel-identical to the plugin-free form",
+        "an increment moves the splitter one step and widens the pane by the same amount",
+        "a decrement moves it back",
+        "writing a position moves the splitter there through 4D's splitter handling",
+        "writing the current position changes nothing",
+        "a position past its limit stops where 4D's own limit holds it"
+      ],
+      "changedPixels": 0,
+      "limit": 26.0
+    },
+    "x86_64-voiceover": {
+      "passed": true,
+      "mode": "interpreted",
+      "architecture": "x86_64",
+      "voiceover": true,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "VoiceOver reaches the form",
+        "VoiceOver reads the splitter by its label",
+        "interacting offers VoiceOver's splitter adjustment",
+        "VO-Right moves the splitter and resizes the pane with it",
+        "VO-Left moves it back"
+      ],
+      "speech": [
+        "4D AX bridge splitter window Left pane Insertion at beginning of text. Notes edit text has keyboard focus",
+        "vertical splitter Pane divider collapsed on left",
+        "In vertical splitter",
+        "You are currently on a vertical splitter, inside of a group. To change the splitter position, press @VOModifier() and then Left Arrow or Right Arrow.To stop interacting with the splitter, press Control-Option-Shift-Up Arrow.",
+        "Pane divider"
+      ]
+    },
+    "x86_64-compiled": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "x86_64",
+      "voiceover": false,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "the form is pixel-identical to the plugin-free form",
+        "an increment moves the splitter one step and widens the pane by the same amount",
+        "a decrement moves it back",
+        "writing a position moves the splitter there through 4D's splitter handling",
+        "writing the current position changes nothing",
+        "a position past its limit stops where 4D's own limit holds it"
+      ],
+      "changedPixels": 0,
+      "limit": 26.0
+    },
+    "x86_64-compiled-voiceover": {
+      "passed": true,
+      "mode": "compiled",
+      "architecture": "x86_64",
+      "voiceover": true,
+      "checks": [
+        "a tall splitter is a vertical splitter labeled by its help tip",
+        "its value is its position within the window's width",
+        "it can be stepped or moved to a position",
+        "VoiceOver reaches the form",
+        "VoiceOver reads the splitter by its label",
+        "interacting offers VoiceOver's splitter adjustment",
+        "VO-Right moves the splitter and resizes the pane with it",
+        "VO-Left moves it back"
+      ],
+      "speech": [
+        "4D AX bridge splitter window Left pane Insertion at beginning of text. Notes edit text has keyboard focus",
+        "vertical splitter Pane divider collapsed on left",
+        "In vertical splitter",
+        "You are currently on a vertical splitter, inside of a group. To change the splitter position, press @VOModifier() and then Left Arrow or Right Arrow.To stop interacting with the splitter, press Control-Option-Shift-Up Arrow.",
+        "Pane divider"
+      ]
+    }
+  },
+  "rejectedApproach": "Native posted drags. A physical drag moves the splitter and runs On Clicked at each step, but 4D's tracker follows the physical pointer and posted mouse events left it unmoved.",
+  "knownDifferences": [
+    "An accessibility adjustment does not run the splitter's On Clicked",
+    "VoiceOver introduces the splitter as collapsed on left, because 4D's panes are not grouped as a split view"
+  ],
+  "notCovered": [
+    "Horizontal splitters",
+    "Splitters inside subforms",
+    "Client/server"
+  ]
+}

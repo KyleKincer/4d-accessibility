@@ -11,6 +11,7 @@ var $description : Variant
 var $parts; $labels : Collection
 var $valueType : Integer
 var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end : Integer
+var $windowLeft; $windowTop; $windowRight; $windowBottom : Integer
 var $node; $other; $metadata; $popup; $styledText; $tabs; $cells : Object
 var $value : Variant
 var $protected : Boolean
@@ -112,8 +113,6 @@ For ($i; 1; Size of array($names))
    : ($type=Object type picture popup menu)
     // Its palette is drawn by 4D and opens where the current picture lies.
     $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "picturePopupPending"))
-   : ($type=Object type splitter)
-    $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "splitterAdjustmentPending"))
    : ($type=Object type groupbox)
     $role:="group"
     $label:=OBJECT Get title(*; $name)
@@ -171,6 +170,13 @@ For ($i; 1; Size of array($names))
      // A list form repeats records. Its current field buffer is not a row.
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "listSubformPending"))
     End if
+   : ($type=Object type splitter)
+    // A splitter's value moves it by that offset, within its own limits.
+    $role:="splitter"
+    $label:=OBJECT Get help tip(*; $name)
+    If ($label="")
+     $label:="Splitter"
+    End if
    Else
     If (New collection(Object type line; Object type rectangle; Object type rounded rectangle; Object type oval).indexOf($type)<0)
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "providerPending"))
@@ -216,8 +222,22 @@ For ($i; 1; Size of array($names))
       End if
      End if
     End if
-    If (New collection("group"; "image"; "progress").indexOf($role)>=0)
+    If (New collection("group"; "image"; "progress"; "splitter").indexOf($role)>=0)
      $node.focusable:=False
+    End if
+    If ($role="splitter")
+     $node.adjustable:=OBJECT Get enabled(*; $name)
+     $node.vertical:=($bottom-$top)>($right-$left)
+     $node.value:=Choose($node.vertical; $left; $top)
+     // Its position within the window; VoiceOver reads a splitter against its range.
+     GET WINDOW RECT($windowLeft; $windowTop; $windowRight; $windowBottom; Current form window)
+     $node.min:=0
+     $node.max:=Choose($node.vertical; $windowRight-$windowLeft; $windowBottom-$windowTop)
+     $node.valueDescription:=$label
+     $node.step:=10
+     If (($metadata#Null) && (Value type($metadata.step)=Is real) && ($metadata.step>0))
+      $node.step:=$metadata.step
+     End if
     End if
     If (New collection("slider"; "stepper").indexOf($role)>=0)
      $node.adjustable:=OBJECT Get enterable(*; $name)

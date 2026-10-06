@@ -52,7 +52,7 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute) {
     NSString *role = element.accessibilityRole;
     SEL selector = nil;
     if ([attribute isEqual:NSAccessibilityFocusedAttribute]) selector = @selector(setAccessibilityFocused:);
-    else if ([attribute isEqual:NSAccessibilityValueAttribute] && [@[NSAccessibilityTextFieldRole, NSAccessibilityTextAreaRole, NSAccessibilityComboBoxRole, NSAccessibilityCellRole] containsObject:role]) selector = @selector(setAccessibilityValue:);
+    else if ([attribute isEqual:NSAccessibilityValueAttribute] && [@[NSAccessibilityTextFieldRole, NSAccessibilityTextAreaRole, NSAccessibilityComboBoxRole, NSAccessibilityCellRole, NSAccessibilitySplitterRole] containsObject:role]) selector = @selector(setAccessibilityValue:);
     else if ([attribute isEqual:NSAccessibilitySelectedAttribute] && [role isEqual:NSAccessibilityRowRole]) selector = @selector(setAccessibilitySelected:);
     else if ([attribute isEqual:NSAccessibilityDisclosingAttribute] && [role isEqual:NSAccessibilityRowRole]) selector = @selector(setAccessibilityDisclosed:);
     else if ([attribute isEqual:NSAccessibilitySelectedRowsAttribute] && [@[NSAccessibilityTableRole, NSAccessibilityOutlineRole] containsObject:role]) selector = @selector(setAccessibilitySelectedRows:);
@@ -169,7 +169,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
         @"textfield": NSAccessibilityTextFieldRole, @"text": NSAccessibilityStaticTextRole,
         @"table": NSAccessibilityTableRole, @"row": NSAccessibilityRowRole, @"cell": NSAccessibilityCellRole,
         @"group": NSAccessibilityGroupRole, @"tabgroup": NSAccessibilityTabGroupRole, @"tab": NSAccessibilityRadioButtonRole,
-        @"image": NSAccessibilityImageRole, @"progress": NSAccessibilityProgressIndicatorRole, @"slider": NSAccessibilitySliderRole, @"stepper": NSAccessibilityIncrementorRole}[self.data[@"role"]];
+        @"image": NSAccessibilityImageRole, @"progress": NSAccessibilityProgressIndicatorRole, @"slider": NSAccessibilitySliderRole, @"stepper": NSAccessibilityIncrementorRole, @"splitter": NSAccessibilitySplitterRole}[self.data[@"role"]];
 }
 - (NSString *)accessibilitySubrole {
     if ([self.data[@"protected"] boolValue]) return NSAccessibilitySecureTextFieldSubrole;
@@ -224,11 +224,11 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 }
 - (NSString *)accessibilityValueDescription { return self.data[@"valueDescription"]; }
 - (NSAccessibilityOrientation)accessibilityOrientation {
-    if (![@[@"slider", @"progress"] containsObject:self.data[@"role"]]) return NSAccessibilityOrientationUnknown;
+    if (![@[@"slider", @"progress", @"splitter"] containsObject:self.data[@"role"]]) return NSAccessibilityOrientationUnknown;
     return [self.data[@"vertical"] boolValue] ? NSAccessibilityOrientationVertical : NSAccessibilityOrientationHorizontal;
 }
-- (id)accessibilityMinValue { return [@[@"progress", @"slider", @"stepper"] containsObject:self.data[@"role"]] && ![self.data[@"indeterminate"] boolValue] ? self.data[@"min"] : nil; }
-- (id)accessibilityMaxValue { return [@[@"progress", @"slider", @"stepper"] containsObject:self.data[@"role"]] && ![self.data[@"indeterminate"] boolValue] ? self.data[@"max"] : nil; }
+- (id)accessibilityMinValue { return [@[@"progress", @"slider", @"stepper", @"splitter"] containsObject:self.data[@"role"]] && ![self.data[@"indeterminate"] boolValue] ? self.data[@"min"] : nil; }
+- (id)accessibilityMaxValue { return [@[@"progress", @"slider", @"stepper", @"splitter"] containsObject:self.data[@"role"]] && ![self.data[@"indeterminate"] boolValue] ? self.data[@"max"] : nil; }
 - (BOOL)isAccessibilityEnabled { return self.live && [self.data[@"enabled"] boolValue] && [self.owner canAct]; }
 - (NSRect)accessibilityFrame {
     if ([self.data[@"revealable"] boolValue] && self.live && self.owner.window) {
@@ -301,6 +301,10 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 - (BOOL)accessibilityPerformPress { return [self queue:[self.data[@"combo"] boolValue] ? @"showMenu" : @"press" value:nil]; }
 - (BOOL)accessibilityPerformIncrement { return [self queue:@"increment" value:nil]; }
 - (BOOL)accessibilityPerformDecrement { return [self queue:@"decrement" value:nil]; }
+// VoiceOver moves a splitter by writing the position it wants; 4D still limits it.
+- (void)setAccessibilityValue:(id)value {
+    if ([self.data[@"role"] isEqual:@"splitter"] && [value isKindOfClass:NSNumber.class]) (void)[self queue:@"setValue" value:value];
+}
 - (BOOL)accessibilityPerformShowMenu {
     if (!self.isAccessibilityElement || !self.isAccessibilityEnabled) return NO;
     [self.owner refreshComboPopup];
@@ -316,9 +320,10 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
     if (selector == @selector(accessibilityPerformIncrement) || selector == @selector(accessibilityPerformDecrement))
-        return [@[@"slider", @"stepper"] containsObject:self.data[@"role"]] && [self.data[@"adjustable"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
+        return [@[@"slider", @"stepper", @"splitter"] containsObject:self.data[@"role"]] && [self.data[@"adjustable"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(setAccessibilityFocused:)) return [self.data[@"focusable"] boolValue] && self.isAccessibilityEnabled;
-    if (selector == @selector(setAccessibilityValue:)) return [self.data[@"role"] isEqual:@"textfield"] && (!self.data[@"editable"] || [self.data[@"editable"] boolValue]) && self.isAccessibilityEnabled;
+    if (selector == @selector(setAccessibilityValue:)) return (([self.data[@"role"] isEqual:@"textfield"] && (!self.data[@"editable"] || [self.data[@"editable"] boolValue])) ||
+        ([self.data[@"role"] isEqual:@"splitter"] && [self.data[@"adjustable"] boolValue])) && self.isAccessibilityEnabled;
     if (selector == @selector(accessibilityPerformPress)) return ([@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:self.data[@"role"]] || [self.data[@"combo"] boolValue]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformShowMenu)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformConfirm)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;

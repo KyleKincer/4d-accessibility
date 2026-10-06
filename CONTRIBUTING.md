@@ -111,6 +111,16 @@ python3 test_picture_fixture.py --server /path/to/4D\ Server.app --run --voiceov
 
 Add `--compiled` or `--intel` for the other modes. [Picture-based controls](tests/PICTURE-CONTROLS.md) describes what each run checks.
 
+For splitters, with 4D desktop and a licensed `--server` compiler:
+
+```sh
+python3 test_splitter_fixture.py --server /path/to/4D\ Server.app --baseline
+python3 test_splitter_fixture.py --server /path/to/4D\ Server.app --run
+python3 test_splitter_fixture.py --server /path/to/4D\ Server.app --run --voiceover
+```
+
+Add `--compiled` or `--intel` for the other modes. [Splitters](tests/SPLITTERS.md) describes what each run checks.
+
 For VoiceOver test-session cleanup:
 
 ```sh

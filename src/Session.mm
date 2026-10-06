@@ -115,7 +115,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     NSMutableSet *ids = [NSMutableSet new];
     NSMutableSet *locators = [NSMutableSet new];
     NSMutableDictionary *byID = [NSMutableDictionary new];
-    NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper", @"tabgroup", @"tab"]];
+    NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper", @"tabgroup", @"tab", @"splitter"]];
     for (id raw in nodes) {
         if (![raw isKindOfClass:NSDictionary.class]) return @"invalid node";
         NSDictionary *n = raw;
@@ -162,6 +162,11 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 if (n[@"min"] || n[@"max"]) return @"formatted date stepper cannot claim a numeric range";
             } else if (!Number(n[@"value"]) || !Number(n[@"min"]) || !Number(n[@"max"]) ||
                        [n[@"min"] doubleValue] > [n[@"max"] doubleValue]) return @"invalid adjustable range";
+        } else if ([n[@"role"] isEqual:@"splitter"]) {
+            // The host moves a splitter through 4D's own splitter handling by one step.
+            if (!Bool(n[@"adjustable"]) || !Number(n[@"step"]) || [n[@"step"] doubleValue] <= 0 || !Bool(n[@"vertical"]) ||
+                n[@"adjustment"] || !Number(n[@"value"]) || !Number(n[@"min"]) || !Number(n[@"max"]) ||
+                [n[@"min"] doubleValue] > [n[@"max"] doubleValue]) return @"invalid splitter";
         } else if ([n[@"role"] isEqual:@"progress"]) {
             if (n[@"vertical"] && !Bool(n[@"vertical"])) return @"invalid progress orientation";
             if (!Bool(n[@"indeterminate"])) return @"invalid progress mode";
@@ -623,11 +628,13 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         } else if ([@[@"showMenu", @"confirm", @"dismissMenu"] containsObject:operation]) {
             if (![node[@"combo"] boolValue]) return NO;
         } else if ([@[@"increment", @"decrement"] containsObject:operation]) {
-            if (![@[@"slider", @"stepper"] containsObject:role] || ![node[@"adjustable"] boolValue] || value) return NO;
+            if (![@[@"slider", @"stepper", @"splitter"] containsObject:role] || ![node[@"adjustable"] boolValue] || value) return NO;
         } else if ([operation isEqual:@"reveal"]) {
             if (![node[@"revealable"] boolValue] || value) return NO;
         } else if ([operation isEqual:@"focus"]) {
             if (![node[@"focusable"] boolValue] || !Bool(value) || ![value boolValue]) return NO;
+        } else if ([operation isEqual:@"setValue"] && [role isEqual:@"splitter"]) {
+            if (![node[@"adjustable"] boolValue] || !Number(value) || fabs([value doubleValue]) > 100000) return NO;
         } else if ([operation isEqual:@"setValue"] || [operation isEqual:@"replaceSelection"]) {
             if (![role isEqual:@"textfield"] || !Text(value, AXBLimits::text) || (node[@"editable"] && ![node[@"editable"] boolValue])) return NO;
             if ([operation isEqual:@"replaceSelection"] && (!node[@"selection"] || [node[@"protected"] boolValue])) return NO;
