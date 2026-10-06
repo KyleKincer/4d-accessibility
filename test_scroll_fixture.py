@@ -210,9 +210,9 @@ def main():
         check(state()["scroll"]["Right"][1] < 20, "disabled child reveals its offscreen label without enabling input")
         button("Disable right")
         retained = find("Nested: Last", "AXTextField")
-        identifier = retained.read("AXIdentifier")
         button("Change record")
-        ax.wait_for(lambda: find("Nested: Last", "AXTextField").read("AXIdentifier") != identifier, "Ancestor scope did not retire nested child")
+        # Its readable locator stays the same in the new record; the element itself is replaced.
+        ax.wait_for(lambda: not find("Nested: Last", "AXTextField").same_as(retained), "Ancestor scope did not retire nested child")
         retained.set_text("Stale record edit")
         time.sleep(.3)
         check(state()["panel"]["inner"]["last"] == "Nested edited 🎸", "ancestor record change rejects retained nested edit")

@@ -2,7 +2,7 @@
 // current selection and unsaved values never become a temporary export buffer.
 #DECLARE($options : Object; $state : Object; $list : Object) -> $result : Object
 var $table : Pointer
-var $tableNumber; $row; $process; $field; $fieldType : Integer
+var $tableNumber; $row; $process; $field; $fieldType; $start : Integer
 var $selectionName; $highlight; $signature; $keyProperty; $key : Text
 var $dataClass; $attribute; $pending; $latest; $column; $fieldInfo : Object
 var $records; $rawKeys; $readFields : Collection
@@ -120,6 +120,24 @@ If ($state.selectionRead=Null)
  End if
  $state.selectionRead:=$pending
  $process:=New process("AXB_SelectionRead"; 0; "AXB selection read"; $pending)
+End if
+// A published grid that reorders (a sort) would otherwise report loading and
+// lose its rows until the next poll. Its read usually takes milliseconds;
+// yield briefly for it. A first read, or a slow one, still reports loading.
+$pending:=$state.selectionRead
+If (($state.selectionSource#Null) && ($pending#Null) && ($pending.signature=$signature))
+ $start:=Milliseconds
+ While (($pending.done#True) & ((Milliseconds-$start)<250))
+  DELAY PROCESS(Current process; 0)
+ End while
+ If ($pending.done=True)
+  $state.selectionError:=$pending.error
+  $state.selectionSource:=Null
+  If ($pending.error=Null)
+   $state.selectionSource:=$pending
+  End if
+  $state.selectionRead:=Null
+ End if
 End if
 $latest:=$state.selectionSource
 If (($latest=Null) || ($latest.signature#$signature))
