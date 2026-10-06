@@ -96,6 +96,12 @@ Case of
   GOTO OBJECT(*; $target.objectName)
   $result:=New object("status"; "pending"; "confirm"; Formula(AXB_ControlKey($1)); "data"; New object("objectName"; $target.objectName; "operation"; "press"; "role"; $target.role; "previousValue"; $target.value))
   return
+ : (($action.operation="pictureEdit") & ($target.pictureActions#Null))
+  If ((Value type($action.value)#Is text) || ($target.pictureActions.indexOf($action.value)<0))
+   return
+  End if
+  GOTO OBJECT(*; $target.objectName)
+  return New object("status"; "pending"; "confirm"; Formula(AXB_PictureEdit($1)); "data"; New object("objectName"; $target.objectName; "edit"; $action.value; "deadline"; Milliseconds+2000))
  : (($action.operation="choose") & ($target.choices#Null))
   // 4D's picture popup palette is a menu of one unlabeled picture. The plugin
   // opens it with the control's own click and selects the cell as releasing

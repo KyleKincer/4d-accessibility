@@ -1,7 +1,7 @@
 """Build an area-owned synthetic form with 4D's picture-based controls.
 
 Two button grids (one with configured cell labels), a picture button, a spinner,
-a configured picture popup menu and a splitter. Each control's object method records its
+a configured picture popup menu, an editable picture and a splitter. Each control's object method records its
 events with its value, so a test can tell which of the application's own events ran.
 """
 import argparse
@@ -22,7 +22,12 @@ TITLE = 'AX bridge picture controls'
 STARTUP = '''ON ERR CALL("AXBP_Error")
 var $window : Integer
 var $data : Object
-$data:=New object("align"; 0; "palette"; 0; "mode"; 1; "busy"; 1; "color"; 1; "config"; JSON Parse(File("/RESOURCES/launch.json").getText()))
+var $sample : Picture
+// The editable picture starts empty; the test pastes this sample into it. The
+// test saves and restores the user's clipboard around the run.
+READ PICTURE FILE(File("/RESOURCES/states.png").platformPath; $sample)
+SET PICTURE TO PASTEBOARD($sample)
+$data:=New object("align"; 0; "palette"; 0; "mode"; 1; "busy"; 1; "color"; 1; "photo"; $sample*0; "config"; JSON Parse(File("/RESOURCES/launch.json").getText()))
 File("/RESOURCES/events.jsonl").delete()
 $window:=Open form window("Controls"; Plain form window)
 DIALOG("Controls"; $data)
@@ -39,6 +44,18 @@ If ($file.exists)
  $previous:=$file.getText()
 End if
 $file.setText($previous+JSON Stringify(New object("runId"; Form.config.runId; "compiled"; Is compiled mode; "object"; $name; "event"; Form event code; "value"; OBJECT Get value($name)))+Char(10))
+'''
+
+PICTURE_EVENT = '''// Record each edit with the picture's width; 0 is no picture.
+var $file : 4D.File
+var $previous : Text
+var $width; $height : Integer
+PICTURE PROPERTIES(Form.photo; $width; $height)
+$file:=File("/RESOURCES/events.jsonl")
+If ($file.exists)
+ $previous:=$file.getText()
+End if
+$file.setText($previous+JSON Stringify(New object("runId"; Form.config.runId; "compiled"; Is compiled mode; "object"; "Photo"; "event"; Form event code; "value"; $width))+Char(10))
 '''
 
 CONFIGURE = '''// Application configuration: the alignment grid's and color menu's pictures need words.
@@ -99,6 +116,8 @@ def main():
         'Busy': {'type': 'spinner', 'left': 260, 'top': 90, 'width': 32, 'height': 32, 'dataSource': 'Form.busy', 'tooltip': 'Loading'},
         'Color': {'type': 'picturePopup', 'left': 340, 'top': 20, 'width': 32, 'height': 32, 'columnCount': 3, 'rowCount': 1,
                   'picture': '/RESOURCES/states.png', 'dataSource': 'Form.color', 'tooltip': 'Color', **logged},
+        'Photo': {'type': 'input', 'left': 340, 'top': 90, 'width': 120, 'height': 80, 'dataSource': 'Form.photo', 'dataSourceTypeHint': 'picture',
+                  'tooltip': 'Photo', 'method': 'ObjectMethods/LogPicture.4dm', 'events': ['onAfterEdit', 'onDataChange']},
         'Divider': {'type': 'splitter', 'left': 230, 'top': 10, 'width': 6, 'height': 240},
         'Done': {'type': 'button', 'text': 'Done', 'left': 420, 'top': 260, 'width': 80, 'height': 24, 'action': 'accept'},
     }}]}
@@ -107,6 +126,7 @@ def main():
     form_path = sources / 'Forms/Controls'
     (form_path / 'ObjectMethods').mkdir(parents=True)
     (form_path / 'ObjectMethods/Log.4dm').write_text(EVENT)
+    (form_path / 'ObjectMethods/LogPicture.4dm').write_text(PICTURE_EVENT)
     (form_path / 'form.4DForm').write_text(json.dumps(named, indent=2) + '\n')
     (FIXTURE / 'Resources/launch.json').write_text(json.dumps({'runId': uuid.uuid4().hex}) + '\n')
     before = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob('*') if p.is_file()}

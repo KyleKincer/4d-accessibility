@@ -234,7 +234,6 @@ This is an optional debugging/verification call, not another lifecycle hook. Do 
 | `providerPending` | Verify a complete native provider, or implement the missing bridge family. |
 | `popupValueTypePending` | The popup can open, but its selected value needs a supported reader. |
 | `adjustmentCallbackRequired` | Map the editable progress bar to its existing shared controller using [`controls.<name>.adjust`](#map-editable-progress-bars-to-a-controller). |
-| `pictureEditingPending` | Picture description is readable; editing remains unfinished bridge work. |
 | `adjustableValueTypePending`, `progressValueTypePending` | This control variant needs further bridge implementation. |
 | `gridLoading` | Wait for the configured loader; if it persists, check readiness and loaded-record identity. |
 | `gridUnavailable` | Read the table label first. A classic-selection grid can be loading or retrying a failed read; see [classic grid feedback](GRIDS.md#use-a-classic-current-or-named-selection). Otherwise correct the configuration or implement its unsupported layout. A table asking for a displayed-value description needs `columns.<objectName>.value`, or `decorative` for content with no meaning or action. |
@@ -284,6 +283,10 @@ A picture popup menu is a popup whose value is its chosen cell. Name its cells t
 ```4d
 $options.controls.Color:=New object("cells"; New collection("Blue"; "Indigo"; "Violet"))
 ```
+
+### Editable pictures
+
+An enterable picture field is an image with its standard edit actions: Cut, Copy, Paste and Clear, or only Paste while it is empty, when it reads as "No picture". VoiceOver lists them as the image's actions. Each one focuses the picture and runs 4D's own standard action, so the field's After Edit and Data Change events run as they do for the keyboard commands. A `description` still names the picture. See [picture-based controls](../../../tests/PICTURE-CONTROLS.md).
 
 ### Splitters
 

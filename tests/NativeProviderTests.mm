@@ -517,6 +517,32 @@ static void PicturePopupTest(void) {
     Check(![Exchange(window, 9044, 1, session, snapshot)[@"ok"] boolValue], "a chosen cell outside its choices is rejected");
     [window close]; Pump();
 }
+static void PictureEditTest(void) {
+    // An editable picture offers its standard edit actions as custom actions.
+    NSWindow *window = Window(@"AXB editable picture");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9045);
+    NSDictionary *photo = @{@"id": @"photo", @"role": @"image", @"label": @"Photo", @"value": @"No picture", @"enabled": @YES, @"visible": @YES,
+        @"pictureActions": @[@"paste"], @"frame": @[@20, @20, @120, @80]};
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Pictures", @"enabled": @YES, @"nodes": @[photo]} mutableCopy];
+    Check([Exchange(window, 9045, 1, session, snapshot)[@"ok"] boolValue], "an editable picture is accepted"); Pump();
+    AXBNode *node = Provider(window).accessibilityChildren.firstObject;
+    NSArray *actions = node.accessibilityCustomActions;
+    Check([[node accessibilityRole] isEqual:NSAccessibilityImageRole] && [[actions valueForKey:@"name"] isEqual:@[@"Paste"]],
+          "an empty editable picture offers only Paste");
+    Check(![node queue:@"pictureEdit" value:@"cut"] && ![node queue:@"pictureEdit" value:@"print"], "only an offered edit can be requested");
+    Check([actions.firstObject handler](), "performing Paste is accepted");
+    NSDictionary *action = Exchange(window, 9045, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"pictureEdit"] && [action[@"value"] isEqual:@"paste"], "the requested edit reaches the host");
+    Exchange(window, 9045, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"Picture edited"}); Pump();
+    NSMutableDictionary *full = [photo mutableCopy]; full[@"value"] = @""; full[@"pictureActions"] = @[@"cut", @"copy", @"paste", @"clear"];
+    snapshot[@"nodes"] = @[full]; snapshot[@"revision"] = @2;
+    Exchange(window, 9045, 1, session, snapshot); Pump();
+    Check([[node.accessibilityCustomActions valueForKey:@"name"] isEqual:@[@"Cut", @"Copy", @"Paste", @"Clear"]], "a picture with content offers every edit");
+    NSMutableDictionary *invalid = [photo mutableCopy]; invalid[@"role"] = @"button"; snapshot[@"nodes"] = @[invalid]; snapshot[@"revision"] = @3;
+    Check(![Exchange(window, 9045, 1, session, snapshot)[@"ok"] boolValue], "picture actions on another role are rejected");
+    [window close]; Pump();
+}
 static void SelectionInputTest(void) {
     NSWindow *window = Window(@"AXB native row selection");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -1488,6 +1514,7 @@ int main(void) {
         SingleSelectionRowTest();
         SplitterTest();
         PicturePopupTest();
+        PictureEditTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();

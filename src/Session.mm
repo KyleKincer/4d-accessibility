@@ -188,6 +188,13 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 floor([n[@"choice"] doubleValue]) != [n[@"choice"] doubleValue]) return @"invalid choices";
             for (id choice in choices) if (!Text(choice, 512) || ![choice length]) return @"invalid choices";
         }
+        if (n[@"pictureActions"]) {
+            // An editable picture's standard edit actions.
+            NSArray *actions = n[@"pictureActions"];
+            if (![n[@"role"] isEqual:@"image"] || ![actions isKindOfClass:NSArray.class] || !actions.count || actions.count > 4 ||
+                [NSSet setWithArray:actions].count != actions.count) return @"invalid picture actions";
+            for (id action in actions) if (![@[@"cut", @"copy", @"paste", @"clear"] containsObject:action]) return @"invalid picture actions";
+        }
         for (NSString *key in @[@"focused", @"focusable", @"editable", @"protected", @"multiline", @"combo", @"revealable"])
             if (n[key] && !Bool(n[key])) return @"invalid control capability";
         if ([n[@"combo"] boolValue] && (![n[@"role"] isEqual:@"textfield"] || [n[@"multiline"] boolValue])) return @"combo requires single-line text";
@@ -642,6 +649,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             if (![node[@"combo"] boolValue]) return NO;
         } else if ([@[@"increment", @"decrement"] containsObject:operation]) {
             if (![@[@"slider", @"stepper", @"splitter"] containsObject:role] || ![node[@"adjustable"] boolValue] || value) return NO;
+        } else if ([operation isEqual:@"pictureEdit"]) {
+            if (![node[@"pictureActions"] containsObject:value ?: @""]) return NO;
         } else if ([operation isEqual:@"choose"]) {
             if (!node[@"choices"] || !Number(value) || [value doubleValue] < 1 || [value doubleValue] > [node[@"choices"] count] ||
                 floor([value doubleValue]) != [value doubleValue]) return NO;

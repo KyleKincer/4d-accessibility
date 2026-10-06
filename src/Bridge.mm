@@ -302,6 +302,17 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     if (self.data[@"choices"]) return [self.owner showChoicesFor:self];
     return [self queue:[self.data[@"combo"] boolValue] ? @"showMenu" : @"press" value:nil];
 }
+// An editable picture offers 4D's standard edit actions; the host runs each
+// through the focused picture, as the keyboard commands do.
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions {
+    NSMutableArray *actions = [NSMutableArray new];
+    __weak AXBNode *weakSelf = self;
+    for (NSString *action in self.data[@"pictureActions"]) {
+        NSString *name = @{@"cut": @"Cut", @"copy": @"Copy", @"paste": @"Paste", @"clear": @"Clear"}[action];
+        if (name) [actions addObject:[[NSAccessibilityCustomAction alloc] initWithName:name handler:^BOOL { return [weakSelf queue:@"pictureEdit" value:action]; }]];
+    }
+    return actions;
+}
 - (BOOL)accessibilityPerformIncrement { return [self queue:@"increment" value:nil]; }
 - (BOOL)accessibilityPerformDecrement { return [self queue:@"decrement" value:nil]; }
 // VoiceOver moves a splitter by writing the position it wants; 4D still limits it.
