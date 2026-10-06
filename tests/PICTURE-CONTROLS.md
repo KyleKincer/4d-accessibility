@@ -1,6 +1,6 @@
 # Picture-based controls
 
-4D draws button grids, picture buttons, picture popup menus, spinners and splitters from pictures, with no text of their own.
+4D draws button grids, picture buttons, picture popup menus and spinners from pictures, with no text of their own.
 
 - **Button grid**: a group, labeled by its help tip or configured label, containing one button per cell. 4D divides the object evenly into its columns and rows and numbers cells row by row. A press is an ordinary click at the cell's center, so the grid's own On Clicked runs with that cell's value. Name the cells in configuration; otherwise each is numbered after the grid and the grid reports `missingLabel`:
 
@@ -12,7 +12,7 @@
 - **Picture button**: a button, labeled by its title, help tip or configuration. A press advances its picture through its On Clicked.
 - **Spinner**: a progress indicator labeled by its help tip.
 - **Picture popup menu**: not published; reports `picturePopupPending`. 4D draws its palette itself and opens it where the current picture lies.
-- **Splitter**: not published; reports `splitterAdjustmentPending`.
+- **Splitter**: published and adjustable; see [splitters](SPLITTERS.md).
 
 ## Test
 

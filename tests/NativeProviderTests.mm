@@ -430,6 +430,34 @@ static void SingleSelectionRowTest(void) {
     Check([action[@"operation"] isEqual:@"gridSelect"] && [action[@"value"] isEqual:@[@"l"]], "selecting a row of a single-selection grid requests only that row");
     [window close]; Pump();
 }
+static void SplitterTest(void) {
+    // A splitter is adjusted by the host through 4D's own splitter handling.
+    NSWindow *window = Window(@"AXB splitter");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9043);
+    NSDictionary *splitter = @{@"id": @"split", @"role": @"splitter", @"label": @"Divider", @"value": @100, @"enabled": @YES, @"visible": @YES,
+        @"focusable": @NO, @"adjustable": @YES, @"vertical": @YES, @"step": @10, @"min": @0, @"max": @520, @"frame": @[@100, @20, @6, @200]};
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Panes", @"enabled": @YES, @"nodes": @[splitter]} mutableCopy];
+    Check([Exchange(window, 9043, 1, session, snapshot)[@"ok"] boolValue], "a splitter node is accepted"); Pump();
+    id node = Provider(window).accessibilityChildren.firstObject;
+    Check([[node accessibilityRole] isEqual:NSAccessibilitySplitterRole] && [node accessibilityOrientation] == NSAccessibilityOrientationVertical &&
+          [[node accessibilityValue] isEqual:@100] && [[node accessibilityLabel] isEqual:@"Divider"], "a vertical splitter reports its role, orientation and position");
+    Check([node isAccessibilitySelectorAllowed:@selector(accessibilityPerformIncrement)] && [node isAccessibilitySelectorAllowed:@selector(accessibilityPerformDecrement)],
+          "a splitter can be adjusted in both directions");
+    Check([node accessibilityPerformIncrement], "an increment is accepted");
+    NSDictionary *action = Exchange(window, 9043, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"increment"], "the increment reaches the host");
+    Check(![Exchange(window, 9043, 1, session, snapshot, nil, nil, @{@"action": action[@"id"]})[@"ok"] boolValue], "a splitter takes no native pointer input");
+    Exchange(window, 9043, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"Splitter moved"}); Pump();
+    Check(AXBAttributeIsSettable(node, NSAccessibilityValueAttribute), "VoiceOver can write a splitter's position");
+    [node setAccessibilityValue:@126];
+    action = Exchange(window, 9043, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"setValue"] && [action[@"value"] isEqual:@126], "a written position reaches the host as the requested position");
+    Exchange(window, 9043, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"Splitter moved"}); Pump();
+    NSMutableDictionary *invalid = [splitter mutableCopy]; [invalid removeObjectForKey:@"vertical"]; snapshot[@"nodes"] = @[invalid]; snapshot[@"revision"] = @2;
+    Check(![Exchange(window, 9043, 1, session, snapshot)[@"ok"] boolValue], "a splitter without an orientation is rejected");
+    [window close]; Pump();
+}
 static void SelectionInputTest(void) {
     NSWindow *window = Window(@"AXB native row selection");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -1399,6 +1427,7 @@ int main(void) {
         OutlineSemanticsTest();
         OutlineDisclosureTest();
         SingleSelectionRowTest();
+        SplitterTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();

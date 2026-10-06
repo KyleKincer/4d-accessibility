@@ -279,6 +279,10 @@ A button grid is published as a group of cell buttons. Its pictures carry no tex
 $options.controls.Align:=New object("cells"; New collection("Left"; "Center"; "Right"))
 ```
 
+### Splitters
+
+A splitter is adjustable without configuration. `controls.<name>.step` sets its step in points (default 10). Adjustments use 4D's own splitter handling and limits, but do not run the On Clicked that a mouse drag sends at each step. See [splitters](../../../tests/SPLITTERS.md).
+
 ### Name groups, progress and image statuses
 
 The working semantic-control extension reads group-box captions, numeric progress values/ranges and busy indicators automatically. It groups each control under its unique innermost containing group box, preserving the control's identity and existing handlers. Overlapping boxes that do not establish a clear hierarchy produce an `ambiguousGroup` diagnostic. Set `group` to the exact containing object's name to resolve that case, or to an empty string to keep the control at the root.

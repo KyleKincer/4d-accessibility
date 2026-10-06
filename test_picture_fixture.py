@@ -4,7 +4,7 @@
 Prepares the picture-controls fixture with --server. Button grids are published as groups of
 cell buttons, labeled from configuration or numbered, and each press must run the grid's own
 On Clicked with that cell's value. A picture button advances its state; a spinner is a progress
-indicator; a picture popup menu and a splitter stay unpublished. --baseline records the same
+indicator; a picture popup menu stays unpublished and a splitter is a splitter. --baseline records the same
 window without any plugin, component or helpers; a later --run then requires an unchanged form.
 """
 import argparse
@@ -174,7 +174,8 @@ def main():
         check(p[0][1] == p[1][1] < p[2][1] == p[3][1] and p[0][0] == p[2][0] < p[1][0] == p[3][0], "a 2 by 2 grid's cells are numbered row by row")
         check(controls["Mode"]["role"] == "AXButton" and controls["Mode"]["label"] == "Mode", "a picture button is a button")
         check(controls["Busy"]["role"] == "AXProgressIndicator" and controls["Busy"]["label"] == "Loading", "a spinner is a progress indicator")
-        check("Color" not in controls and "Divider" not in controls, "a picture popup menu and a splitter stay unpublished")
+        check("Color" not in controls, "a picture popup menu stays unpublished")
+        check(controls["Divider"]["role"] == "AXSplitter", "a splitter is a splitter")
         reference = PIXELS / f"baseline-{architecture}.png"
         if reference.exists() and not args.voiceover:
             front()
