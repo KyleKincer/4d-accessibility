@@ -193,7 +193,9 @@ If (($editable#0) | OBJECT Get enterable(*; $name))
  $result.unsupported.push(New object("object"; $name; "reason"; "hierarchicalListEditingPending"))
 End if
 If ($multi#0)
- // One click replaces a multiple selection; extending it needs modifier clicks.
+ // A request selects one item, as a click does; the user's own Shift+arrow
+ // selection is published. 4D extends a selection only while the physical Shift
+ // or Command key is down, which the bridge never posts.
  $descriptor.selectionMode:="single"
  $result.unsupported.push(New object("object"; $name; "reason"; "hierarchicalListMultipleSelectionPending"))
 End if
