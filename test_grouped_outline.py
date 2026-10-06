@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Validate the development read-only grouped provider through live 4D and AX.
+"""Validate the development grouped provider through live 4D and AX.
 
-Native commands in the owned fixture change disclosure. This does not accept
-AX disclosure, selection, editing, lazy data, hidden rows or Symphony workflows.
+Native commands in the owned fixture change disclosure. Leaves are selected from
+the keyboard through the list box's own events, by AX and by VoiceOver navigation.
+This does not accept AX disclosure, editing, lazy data, hidden rows or Symphony workflows.
 """
 import argparse
 import ctypes as c
@@ -100,7 +101,7 @@ def main():
             ax.release(key)
 
     finished = False
-    vo = None
+    vo = heard = None
     bundle = fixture / "Plugins/AccessibilityBridge.bundle"
     held_bundle = BUILD / ("grouped-held-plugin-" + uuid.uuid4().hex + ".bundle")
     with (BUILD / ("grouped-outline-" + mode + ".log")).open("w") as log:
@@ -177,11 +178,28 @@ def main():
                 check(len(roots) == 4 and len({row.read("AXIdentifier") for row in roots}) == 4,
                       kind + " repeated native labels have distinct group identities")
                 check(all(row.read("AXParent").same_as(table) for row in current_rows), kind + " structural row parents remain the outline")
-                check(all(attribute(row, "AXSelected")[1] is None and not row.is_settable("AXSelected") for row in current_rows)
-                      and attribute(table, "AXSelectedRows")[1] is None and not table.is_settable("AXSelectedRows"),
-                      kind + " unavailable complete selection is omitted from every row and the outline")
-                check(all("AXPress" not in row.actions() and not row.is_settable("AXDisclosing") for row in current_rows),
-                      kind + " pending selection and disclosure actions are not advertised")
+                leaves = [row for row in current_rows if attribute(row, "AXDisclosing")[1] is None]
+                check(all(not row.is_settable("AXSelected") for row in groups) and all(row.is_settable("AXSelected") for row in leaves)
+                      and table.is_settable("AXSelectedRows"),
+                      kind + " leaves are selectable and group rows, which have no selection element, are not")
+                check(all("AXPress" not in row.actions() and not row.is_settable("AXDisclosing") for row in groups),
+                      kind + " disclosure without an application controller is not advertised")
+                if kind in ("singleText", "repeated"):
+                    # A leaf is selected from the keyboard through the list box's own events: the first
+                    # leaf from the one below it, a later leaf from the one above, and the first leaf of
+                    # the next group across the group row between them.
+                    targets = [leaves[0], leaves[1], next(row for row in leaves[1:] if not row.read("AXDisclosedByRow").same_as(leaves[0].read("AXDisclosedByRow")))]
+                    for number, target in enumerate(targets):
+                        before = len(state()["events"])
+                        identifier = target.read("AXIdentifier")
+                        check(target.set_boolean("AXSelected", True) == 0, kind + f" selecting leaf {number + 1} is accepted")
+                        value = ax.wait_for(lambda: v if (v := state()) and any(e["event"] == 31 for e in v["events"][before:]) and
+                                            sum(v["afterGroup"]["selection"]) == 1 and
+                                            any(r.read("AXSelected") is True and r.read("AXIdentifier") == identifier for r in rows(outline())) else None,
+                                            "Leaf selection did not run or publish", timeout=15)
+                        selected = value["afterGroup"]["selection"].index(True)
+                        check(identifier.endswith("/row/l%3A" + str(value["afterGroup"]["keys"][selected])),
+                              kind + f" leaf {number + 1} is the one selected array element, through On Selection Change")
                 headers = table.read("AXColumnHeaderUIElements") or []
                 check(headers and all("AXScrollToVisible" not in header.actions() and "AXPress" not in header.actions() for header in headers),
                       kind + " headers omit unsupported reveal and activation actions")
@@ -264,40 +282,71 @@ def main():
                 table = ax.wait_for(lambda: t if (t := outline()) and t.count("AXRows") == 17 else None, "Original grouped partition did not recover")
 
             if args.voiceover:
-                from voiceover import VoiceOver
-                assert not VoiceOver.pids("VoiceOver") and not VoiceOver.pids("VoiceOver Quickstart")
-                ocr = BUILD / "ReadScreen"
-                subprocess.run(["xcrun", "swiftc", str(ROOT / "tests/ReadScreen.swift"), "-o", str(ocr)], check=True)
-                vo = VoiceOver(process, project, TITLE, BUILD / ("grouped-outline-" + mode + "-captions"), ocr)
-                report["voiceover"] = vo.steps
-                vo.start()
-                caption = vo.key("home")
-                for _ in range(8):
-                    if "Grouped items" in caption:
-                        break
-                    caption = vo.key("right")
+                import voiceover_session as vos
+                assert not vos.running(), "Existing VoiceOver session belongs to the user"
+                heard = vos.Listener()
+                vos.start()
+                heard.start()
+                vo = vos
+                # Keys reach whatever is frontmost; never post one into another application.
+                vos.set_guard(vos.guard_frontmost(process.pid, ax))
+                if app.read("AXFrontmost") is not True:
+                    app.set_boolean("AXFrontmost", True)
+                ax.wait_for(lambda: app.read("AXFrontmost") is True, "Fixture did not regain foreground", timeout=10)
+                time.sleep(2)
+
+                def say(key, modifiers=vos.VO):
+                    mark = heard.mark()
+                    vos.key(key, modifiers)
+                    time.sleep(1.2)
+                    return " ".join(p for _, p in heard.since(mark))
+
+                # VoiceOver starts on the last control; search right, then left, for the outline.
+                caption = say("home")
+                spoken = [caption]
+                for direction in ("right", "left"):
+                    for _ in range(12):
+                        if "Grouped items" in caption:
+                            break
+                        caption = say(direction)
+                        spoken.append(caption)
                 report["entryCaption"] = caption
+                report["entrySpeech"] = spoken
                 check("Grouped items" in caption, "VoiceOver reaches the actual 4D grouped provider")
-                captions = [vo.key("down", shift=True)]
+                captions = [say("down", vos.VO + ("shift",))]
                 for _ in range(12):
-                    captions.append(vo.key("right"))
+                    captions.append(say("right"))
                 text = " ".join(captions)
                 check(any("shared" in caption and "level 1" in caption for caption in captions) and
                       any("Leaf 1" in caption and "level 2" in caption for caption in captions),
                       "VoiceOver reads native nested labels, leaf values and levels")
-                check("not responding" not in text.lower() and "selected" not in text.lower(),
-                      "VoiceOver remains responsive without fabricated selection")
-                caption = vo.key("end")
+                check("not responding" not in text.lower(), "VoiceOver remains responsive")
+                caption = say("end")
                 if "Leaf 8" not in caption:
                     final_cell = table.cell(2, table.count("AXRows") - 1)
                     report["initialEndAXValue"] = final_cell.read("AXValue")
                     ax.wait_for(lambda: final_cell.read("AXValue") == "Leaf 8", "Final VoiceOver cell value did not load", timeout=10)
                     report["loadedEndAXValue"] = final_cell.read("AXValue")
-                    caption = ax.wait_for(lambda: text if "Leaf 8" in (text := vo.read_caption()) else None,
+                    caption = ax.wait_for(lambda: p if "Leaf 8" in (p := vos.last_phrase()) else None,
                                           "VoiceOver did not announce the loaded final leaf", timeout=10)
                     report["loadedEndCaption"] = caption
                 check("Leaf 8" in caption, "VoiceOver End reaches the last disclosed leaf")
-                vo.stop()
+                # VoiceOver selects an outline row as its cursor reaches it; for a leaf that runs
+                # through the list box's own events, like the keyboard.
+                selected_before = state()["afterGroup"]["selection"].index(True) if True in state()["afterGroup"]["selection"] else None
+                before = len(state()["events"])
+                caption = say("up")
+                check("Leaf 7" in caption, "VoiceOver moves to the previous leaf")
+                value = ax.wait_for(lambda: v if (v := state()) and any(e["event"] == 31 for e in v["events"][before:]) and
+                                    sum(v["afterGroup"]["selection"]) == 1 and v["afterGroup"]["selection"].index(True) != selected_before else None,
+                                    "VoiceOver did not select the leaf it reached", timeout=15)
+                key = value["afterGroup"]["keys"][value["afterGroup"]["selection"].index(True)]
+                check(ax.wait_for(lambda: any(r.read("AXSelected") is True and r.read("AXIdentifier").endswith("/row/l%3A" + str(key)) for r in rows(outline())),
+                                  "Leaf selection not published", timeout=10),
+                      "the leaf VoiceOver reaches is selected through the list box's own On Selection Change and published")
+                report["speech"] = [p for _, p in heard.since(0)]
+                heard.stop()
+                vos.stop()
             report["finalState"] = state()
             check(report["driverSourceSHA256"] == {name: sha(ROOT / name) for name in DRIVER_SOURCES}
                   and prepared["canonicalSourceSHA256"] == canonical_sources(), "canonical helpers and desktop driver sources stay unchanged during acceptance")
@@ -308,7 +357,10 @@ def main():
             report["failure"] = repr(error)
             raise
         finally:
-            if vo and vo.owned:
+            # Stop the listener first: its AppleScript polling would relaunch VoiceOver.
+            if heard:
+                heard.stop()
+            if vo and vo.running():
                 try:
                     vo.stop()
                 except BaseException as error:
