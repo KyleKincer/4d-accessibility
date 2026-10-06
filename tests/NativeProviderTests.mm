@@ -1716,6 +1716,22 @@ int main(void) {
         Check([Exchange(reopenedWindow, 103, 1, inputSession, inputSnapshot)[@"ok"] isEqual:@NO], "old database session cannot dispatch in the new database");
         AXBInitialize();
         Check([OpenResult(reopenedWindow, 103, 1)[@"error"] isEqual:@"window already has another session"], "repeated initialization preserves the active session owner");
+        // A 4D help tip window: borderless, level 16, ignoring the mouse, its text field as content.
+        NSWindow *(^tipWindow)(BOOL) = ^NSWindow *(BOOL text) {
+            NSWindow *tip = [[NSWindow alloc] initWithContentRect:NSMakeRect(300, 300, 60, 18) styleMask:NSWindowStyleMaskBorderless backing:NSBackingStoreBuffered defer:NO];
+            tip.releasedWhenClosed = NO; tip.level = 16; tip.ignoresMouseEvents = YES;
+            if (text) {
+                NSTextField *field = [NSTextField labelWithString:@"Mode"]; field.frame = NSMakeRect(0, 0, 60, 18); tip.contentView = field;
+            }
+            return tip;
+        };
+        NSWindow *tip = tipWindow(YES), *other = tipWindow(NO);
+        Check(AXBIsHelpTipWindow(tip) && !AXBIsHelpTipWindow(other) && !AXBIsHelpTipWindow(focusCover), "only a help tip's shape is recognized as one");
+        [tip orderFrontRegardless]; [other orderFrontRegardless]; [tip update]; [other update]; Pump();
+        Check(!tip.isAccessibilityElement && !tip.contentView.isAccessibilityElement && ![NSApp.accessibilityWindows containsObject:tip],
+              "a shown help tip leaves the accessibility tree with its text");
+        Check(other.isAccessibilityElement, "another borderless window stays accessible");
+        [tip close]; [other close]; Pump();
         AXBShutdown();
         [reopenedWindow close]; Pump();
         puts("PASS: native provider lifecycle tests");
