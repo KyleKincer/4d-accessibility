@@ -25,7 +25,7 @@ Remaining scope:
 - long, wrapped and localized messages;
 - other built-in windows.
 
-4D's own empty title element remains. Continue to integrate application dialog forms as below; those integrations do not depend on this recognition.
+The window also publishes an empty title text element. That is AppKit's own: any window with an empty title publishes one, so the plugin leaves it in place. Continue to integrate application dialog forms as below; those integrations do not depend on this recognition.
 
 ## Use an existing application dialog
 
