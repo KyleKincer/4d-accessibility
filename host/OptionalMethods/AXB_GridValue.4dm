@@ -9,6 +9,10 @@ $result:=New object("ok"; True; "value"; ""; "editable"; False; "enabled"; True)
 If ($column.protected | ($column.blank=True))
  return
 End if
+If ($column.controlRole="button")
+ // A row button has no value of its own; it is pressed, not read.
+ return New object("ok"; True; "role"; "button"; "value"; ""; "label"; $column.label; "enabled"; $column.enabled; "editable"; $column.editable=True)
+End if
 $issue:=String($row)+":"+$column.name
 If ($state.valueIssues=Null)
  $state.valueIssues:=New object

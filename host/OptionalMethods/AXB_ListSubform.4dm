@@ -51,6 +51,13 @@ If ($operation#"describe")
    return
   End if
   $data:=New object("options"; $options; "state"; $state; "action"; $request.action; "generation"; $descriptor.generation; "deadline"; Milliseconds+2000)
+  If ($column.controlRole="button")
+   If (($request.action.operation#"gridPress") || ($request.action.value.expectedCell=Null) || ($request.action.value.expectedCell.role#"button"))
+    return
+   End if
+   $data.widget:=$reply
+   return New object("status"; "pending"; "confirm"; Formula(AXB_ListSubformWidget($1)); "data"; $data)
+  End if
   If ($column.controlRole="checkbox")
    If (($request.action.operation#"gridPress") || ($request.action.value.expectedCell=Null) || ($request.action.value.expectedCell.role#"checkbox") || ($reply.checked#$request.action.value.expectedCell.checked) || (Compare strings($reply.value; $request.action.value.expectedCell.value; sk char codes)#0))
     return
@@ -119,7 +126,7 @@ $columnLayout:=New collection
 $columnBindings:=New collection
 $canEdit:=False
 For each ($column; $info.columns)
- If (($column.value=Null) & ($binding.dataClass#Null))
+ If (($column.value=Null) & ($binding.dataClass#Null) & ($column.controlRole#"button"))
   $attribute:=$binding.dataClass[$column.property]
   If (($attribute=Null) || ($attribute.kind#"storage") || (New collection("string"; "number"; "date"; "bool").indexOf($attribute.type)<0))
    $result.unsupported.push(New object("object"; $name; "column"; $column.name; "reason"; "gridValueDescriptionRequired"))
@@ -127,13 +134,17 @@ For each ($column; $info.columns)
   End if
  End if
  $editable:=$column.nativeEditable & Not($column.protected) & ($column.property#"") & ($column.value=Null) & $info.enterable
+ If ($column.controlRole="button")
+  // A row button is pressable where the list accepts input in its rows.
+  $editable:=$info.enterable
+ End if
  $column.editable:=$editable
  $canEdit:=$canEdit | $editable
  $columns.push(New object("id"; $column.id; "label"; $column.label; "automationKey"; $column.automationKey; "enabled"; $column.enabled; "editable"; $editable; "selectionTarget"; ($column.controlRole="text") & Not($column.protected); "header"; New object("visible"; $column.hasHeader=True; "enabled"; True; "press"; False; "sortable"; False; "sort"; "none")))
  $columnsByID[$column.id]:=$column
  $columnBindings.push(New collection($column.name; $column.fieldNumber; $column.property; $column.controlRole; ($column.value#Null)))
  $columnLayout.push(New collection($info.origin[0]+$column.frame[0]; $column.frame[2]))
- If ($info.enterable & $column.nativeEditable & Not($column.protected) & Not($editable) & ($column.value=Null))
+ If ($info.enterable & $column.nativeEditable & Not($column.protected) & Not($editable) & ($column.value=Null) & ($column.controlRole#"button"))
   $result.unsupported.push(New object("object"; $name; "column"; $column.name; "reason"; "listSubformEditingPending"))
  End if
 End for each

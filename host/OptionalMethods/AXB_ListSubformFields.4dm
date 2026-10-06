@@ -61,6 +61,24 @@ For ($position; 1; Size of array($names))
  If ($metadata.decorative=True)
   continue
  End if
+ If (New collection(Object type push button; Object type 3D button; Object type picture button; Object type invisible button; Object type highlight button).indexOf($type)>=0)
+  // A row button acts on its own row's record; it is pressed with an ordinary click.
+  $label:=OBJECT Get title(*; $name)
+  If ($label="")
+   $label:=OBJECT Get help tip(*; $name)
+  End if
+  If ($metadata.label#Null)
+   $label:=$metadata.label
+  End if
+  If ($label="")
+   $label:=$name
+  End if
+  $column:=New object("name"; $name; "id"; $name; "label"; Substring($label; 1; 512); "property"; ""; "format"; ""; "protected"; False; "enabled"; OBJECT Get enabled(*; $name); \
+   "nativeEditable"; True; "editable"; False; "frame"; New collection($left; $top; $right-$left; $bottom-$top); "hasHeader"; False; "fieldNumber"; 0; "fieldType"; -1; \
+   "automationKey"; Choose($metadata.automationKey=Null; $name; $metadata.automationKey); "display"; lk numeric format; "controlRole"; "button")
+  $result.columns.push($column)
+  continue
+ End if
  If (New collection(Object type text input; Object type checkbox; Object type 3D checkbox).indexOf($type)<0)
   $result.unsupported.push(New object("column"; $name; "reason"; "listSubformControlPending"))
   continue
