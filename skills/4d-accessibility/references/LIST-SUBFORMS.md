@@ -28,7 +28,7 @@ Rerun the installer with your existing options to keep generated metadata curren
 
 A named table list form with stored scalar fields and a stored text or integer primary key supplies its own rows, column bindings and stable record keys. Column names reuse aligned header captions or checkbox titles, then field/object names. The table's name defaults to the parent subform object name. Supply a central `label` if that name is unclear.
 
-Text, numeric, date and time fields expose formatted scalar values. Boolean and integer checkboxes expose their checked state. Password fields remain unreadable and uneditable. Unsupported controls produce diagnostics rather than invented values or actions.
+Text, numeric, date and time fields expose formatted scalar values. Boolean and integer checkboxes expose their checked state. A button in the row, such as a per-row action, is a button cell labeled by its title, help tip or column `label`. Where the list accepts input in its rows (`enterableInList`), a press is an ordinary click at that row's button, so 4D makes the row's record current and runs the button's own handler. Like a row checkbox, the row must be on screen. Password fields remain unreadable and uneditable. Unsupported controls produce diagnostics rather than invented values or actions.
 
 Selection follows the parent's `selectionMode`. When it is absent, the tested native default is `none`. Editing also requires the parent's **Enterable in list** property, `enterableInList`, plus the native row field's permissions. The adapter does not enable either setting on behalf of the application.
 
@@ -92,7 +92,7 @@ The [owned fixture](../../../tests/LIST-SUBFORMS.md) provides reproducible comma
 | Disabled label ending in `row keys must be unique nonempty text` | Duplicate row key, or a text key longer than 254 characters. There is no separate reason code. Correct the existing data or select another identity field. |
 | Disabled label `Classic selection is loading` | No current table selection is available yet. Wait for the normal loader and inspect again. |
 | `gridValueDescriptionRequired` | No usable scalar value. Supply a description or mark a visual-only object decorative. |
-| `listSubformControlPending` | Body control type needs an adapter. |
+| `listSubformControlPending` | Body control type needs an adapter. Text inputs, checkboxes and buttons are supported. |
 | `listSubformStyledTextPending` | Styled row editor needs an adapter. |
 | `listSubformEditingPending` | Enterable body object has no direct field binding. Describe it read-only or implement its native editor path. |
 | `listSubformHeaderFooterControlPending` | Interactive header/footer control needs an adapter. |

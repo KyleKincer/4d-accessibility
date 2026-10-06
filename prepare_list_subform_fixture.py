@@ -153,8 +153,8 @@ def main():
     objects = {}
     for name, field, left, width, hint in [
         ("ItemID", "id", 0, 75, "integer"),
-        ("ItemName", "name", 80, 300, "text"),
-        ("ItemAmount", "amount", 390, 110, "number"),
+        ("ItemName", "name", 80, 230, "text"),
+        ("ItemAmount", "amount", 320, 110, "number"),
     ]:
         objects[name] = {
             "type": "input",
@@ -176,7 +176,7 @@ def main():
         }
     objects["Approved"] = {
         "type": "checkbox",
-        "left": 520,
+        "left": 440,
         "top": header,
         "width": 90,
         "height": height,
@@ -185,14 +185,25 @@ def main():
         "method": "AXBL_Field",
         "events": ["onDataChange", "onClick"],
     }
+    # A row button acts on its own row's record.
+    objects["Flag"] = {
+        "type": "button",
+        "left": 540,
+        "top": header,
+        "width": 90,
+        "height": height,
+        "text": "Flag",
+        "method": "AXBL_Field",
+        "events": ["onClick"],
+    }
     if args.multiline:
         objects["ItemName"]["multiline"] = "yes"
     if header:
         for name, text, left, width in [
             ("HeadingID", "ID", 0, 75),
-            ("HeadingName", "Description", 80, 300),
-            ("HeadingAmount", "Amount", 390, 110),
-            ("HeadingApproved", "Approved", 520, 90),
+            ("HeadingName", "Description", 80, 230),
+            ("HeadingAmount", "Amount", 320, 110),
+            ("HeadingApproved", "Approved", 440, 90),
         ]:
             objects[name] = {
                 "type": "text",

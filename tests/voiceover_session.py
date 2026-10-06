@@ -155,3 +155,41 @@ class Listener:
 
     def since(self, index):
         return list(self.heard[index:])
+
+
+class Session:
+    """An owned VoiceOver session for one fixture, with the older reader's interface:
+    key() returns what VoiceOver says after a VoiceOver command, read_caption() its
+    latest phrase. Keys are refused unless the fixture process is frontmost."""
+
+    def __init__(self, pid, ax):
+        self.pid, self.ax, self.steps = pid, ax, []
+        self.heard = None
+
+    def start(self):
+        start()
+        self.heard = Listener()
+        self.heard.start()
+        set_guard(guard_frontmost(self.pid, self.ax))
+        app = self.ax.application(self.pid)
+        if app.read("AXFrontmost") is not True:
+            app.set_boolean("AXFrontmost", True)
+        self.ax.wait_for(lambda: app.read("AXFrontmost") is True, "Fixture did not regain foreground", timeout=10)
+        time.sleep(2)
+
+    def key(self, name, shift=False, voiceover=True, wait=1.2):
+        mark = self.heard.mark()
+        key(name, (VO if voiceover else ()) + (("shift",) if shift else ()))
+        time.sleep(wait)
+        text = " ".join(phrase for _, phrase in self.heard.since(mark))
+        self.steps.append({"key": name, "shift": shift, "speech": text})
+        return text
+
+    def read_caption(self):
+        return last_phrase()
+
+    def stop(self):
+        # Stop the listener first: its AppleScript polling would relaunch VoiceOver.
+        if self.heard:
+            self.heard.stop()
+        stop()

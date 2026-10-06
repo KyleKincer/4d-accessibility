@@ -212,7 +212,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
         AXBGridRowAllowsEditing(self.table.grid.descriptor, self.row.key) &&
         [self.table.grid.descriptor[@"columns"][column][@"editable"] boolValue] && [self.value[@"editable"] boolValue];
 }
-- (BOOL)isWidget { return [@[@"checkbox", @"popup"] containsObject:self.value[@"role"] ?: @""]; }
+- (BOOL)isWidget { return [@[@"checkbox", @"popup", @"button"] containsObject:self.value[@"role"] ?: @""]; }
 - (BOOL)canFocus { return [self canEdit] && (!self.value[@"focusable"] || [self.value[@"focusable"] boolValue]); }
 - (BOOL)canDisclose { return self.isAccessibilityEnabled && [self.row canDisclose]; }
 - (BOOL)isAccessibilityFocused {
@@ -296,9 +296,14 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     NSMenu *menu = self.table.owner.adoptedMenu;
     return self.isAccessibilityElement && menu.accessibilityParent == self ? @[menu] : @[];
 }
-- (NSString *)accessibilityRole { return [self.role isEqual:@"checkbox"] ? NSAccessibilityCheckBoxRole : NSAccessibilityPopUpButtonRole; }
+- (NSString *)accessibilityRole {
+    return @{@"checkbox": NSAccessibilityCheckBoxRole, @"popup": NSAccessibilityPopUpButtonRole, @"button": NSAccessibilityButtonRole}[self.role];
+}
 - (NSString *)accessibilityLabel { return [self.cell.value[@"label"] length] ? self.cell.value[@"label"] : [self.table column:self.cell.columnKey].accessibilityLabel; }
-- (id)accessibilityValue { return self.isAccessibilityElement ? self.cell.value[([self.role isEqual:@"checkbox"] ? @"checked" : @"value")] : nil; }
+- (id)accessibilityValue {
+    if (!self.isAccessibilityElement || [self.role isEqual:@"button"]) return nil;
+    return self.cell.value[([self.role isEqual:@"checkbox"] ? @"checked" : @"value")];
+}
 - (NSRect)accessibilityFrame { return self.cell.accessibilityFrame; }
 - (BOOL)isAccessibilityEnabled { return self.isAccessibilityElement && [self.cell canEdit]; }
 - (BOOL)isAccessibilityFocused { return self.isAccessibilityElement && self.cell.isAccessibilityFocused; }
@@ -917,7 +922,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
             }
             NSDictionary *pending = cell ? [self.pendingValueNotifications objectForKey:cell] : nil;
             if (pending) {
-                if ([@[@"checkbox", @"popup"] containsObject:value[@"role"] ?: @""])
+                if ([@[@"checkbox", @"popup", @"button"] containsObject:value[@"role"] ?: @""])
                     [self.pendingValueNotifications removeObjectForKey:cell];
                 else {
                     // A model value can change and return before publication.
@@ -1001,7 +1006,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
             NSProcessInfo.processInfo.systemUptime - self.lastWaitingAt < 20 && self.owner.window.isKeyWindow;
         if (cell == self.lastWaitingCell) self.lastWaitingCell = nil;
         NSDictionary *value = cell.lastValue;
-        if ([@[@"checkbox", @"popup"] containsObject:value[@"role"] ?: @""])
+        if ([@[@"checkbox", @"popup", @"button"] containsObject:value[@"role"] ?: @""])
             NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[cell]});
         else {
             if (!self.pendingValueNotifications) self.pendingValueNotifications = [NSMapTable weakToStrongObjectsMapTable];
