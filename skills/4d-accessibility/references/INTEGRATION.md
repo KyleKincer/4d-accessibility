@@ -93,7 +93,7 @@ Every automatic form requires the full automatic-control capability set, even if
 | `incompatibleComponent`, `incompatibleNativePlugin`, `areaLifecycleUnavailable`, `nativeButtonInputUnavailable`, `scrollableControlsUnavailable`, `adjustableControlsUnavailable`, `checkboxStatesUnavailable`, `formOwnershipUnavailable`, `rootDataOwnershipUnavailable`, `sessionLifecycleUnavailable`, `comboControlsUnavailable`, `nativeInputConfirmationUnavailable`, `controlSemanticsUnavailable`, `logicalGridsUnavailable`, `gridRowStatesUnavailable`, `gridControlsUnavailable`, `gridHeadersUnavailable`, `automaticControlsUnavailable` | Rebuild both packages and reinstall helpers from one source commit. |
 | `too many active sessions` | 64 bridge windows are already open. Normal form behavior continues; close other bridge windows and reopen this form. |
 | `window already has another session`, `plugin stopped` | Check for competing low-level registration. Requests during database shutdown are rejected; the next plugin initialization enables new sessions without reviving old ones. Use one lifecycle owner per window. |
-| `invalidLabel`, `invalidControls`, `invalidControlMetadata`, `invalidControlAdjustment`, `invalidChildren`, `invalidGrids`, or another invalid option | Correct the configuration. Manual start requires a label; the area supplies its default. Each `controls` entry must be an object; `adjust` must be a Formula. |
+| `invalidLabel`, `invalidControls`, `invalidControlMetadata`, `invalidControlAdjustment`, `invalidControlCells`, `invalidChildren`, `invalidGrids`, or another invalid option | Correct the configuration. Manual start requires a label; the area supplies its default. Each `controls` entry must be an object; `adjust` must be a Formula. |
 | `noFormContext` | A manual start/restart must run in the root form context, with its actual `Form` object. |
 
 The current native plugin advertises `sessions 2`; its component advertises `sessionAllocation: 1`. A `sessionLifecycleUnavailable` result means these packages do not match the installed helpers. Application code does not allocate or exchange native IDs.
@@ -270,6 +270,14 @@ $options.controls.Remarks:=New object("label"; "Remarks"; "multiline"; True)
 ```
 
 Declare only automatic fields that actually accept Return as a line break. A field explicitly set to **No** stays single-line regardless.
+
+### Name button-grid cells
+
+A button grid is published as a group of cell buttons. Its pictures carry no text, so name each cell in 4D's row-by-row order; otherwise the cells are numbered and the grid reports `missingLabel`. A press clicks the cell, running the grid's own On Clicked. See [picture-based controls](../../../tests/PICTURE-CONTROLS.md).
+
+```4d
+$options.controls.Align:=New object("cells"; New collection("Left"; "Center"; "Right"))
+```
 
 ### Name groups, progress and image statuses
 
