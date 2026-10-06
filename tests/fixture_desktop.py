@@ -96,6 +96,34 @@ def activate_fixture(process, project, title):
     return app, window
 
 
+def activate(process, project, timeout=15):
+    """Bring the owned fixture to the front once its form is ready.
+
+    macOS does not activate an application launched from a background process,
+    and the bridge acts only on 4D's key form window. Activate only the 4D
+    process running this fixture's project."""
+    command = subprocess.check_output(["ps", "-p", str(process.pid), "-o", "command="], text=True)
+    assert f"--project {Path(project).resolve()}" in command and "/4D.app/Contents/MacOS/4D" in command, "Owned project identity changed"
+    app = ax.application(process.pid)
+    if app.read("AXFrontmost") is True:
+        return
+    if app.set_boolean("AXFrontmost", True) != 0:
+        subprocess.run(["/usr/bin/osascript", "-e", f'tell application "System Events" to set frontmost of (first process whose unix id is {process.pid}) to true'],
+                       capture_output=True, timeout=10)
+    ax.wait_for(lambda: app.read("AXFrontmost") is True, "Owned fixture did not activate", timeout=timeout)
+    # 4D assigns the form's initial focus as its window becomes key. Let that
+    # settle, so it cannot change focus under the test's first action.
+    def focus():
+        element = app.read("AXFocusedUIElement")
+        return (element.read("AXRole"), element.read("AXIdentifier"), element.read("AXDescription")) if element else None
+    previous, stable, deadline = focus(), 0, time.monotonic() + 5
+    while stable < 3 and time.monotonic() < deadline:
+        time.sleep(0.25)
+        current = focus()
+        stable = stable + 1 if current == previous else 0
+        previous = current
+
+
 def wait_for_start(process, project, ready, build, timeout=40, area_list_demo=False, area_list_title="AreaList Pro 11.4.2"):
     """Acknowledge only the vendor's application-mode notice, if it appears."""
     project = Path(project).resolve()
@@ -113,6 +141,7 @@ def wait_for_start(process, project, ready, build, timeout=40, area_list_demo=Fa
             raise AssertionError(f"Owned 4D process exited before form startup: {process.returncode}")
         value = ready()
         if value:
+            activate(process, project)
             return value, acknowledged
         if not acknowledged:
             image = build / "fixture-startup.png"

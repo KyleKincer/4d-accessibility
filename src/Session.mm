@@ -68,8 +68,9 @@ static NSDictionary *ActionState(NSDictionary *snapshot, NSDictionary *action) {
 
 // A newly activated 4D form can assign initial focus after the action was
 // queued. Accept only focus arriving on that exact target with every other
-// dependency unchanged. In particular, values, selections and prior focus
-// in another control remain strict guards. Never use this after dispatch.
+// dependency unchanged. A text field gains its editor's selection with focus;
+// otherwise values, selections and prior focus in another control remain
+// strict guards. Never use this after dispatch.
 static BOOL SameDispatchState(NSDictionary *before, NSDictionary *after, NSString *target) {
     if ([before isEqual:after]) return YES;
     if (!before || !after || [before[@"focused"] count] != 0 ||
@@ -79,6 +80,7 @@ static BOOL SameDispatchState(NSDictionary *before, NSDictionary *after, NSStrin
     NSMutableDictionary *normalizedNode = [newNode mutableCopy];
     if (oldNode[@"focused"]) normalizedNode[@"focused"] = oldNode[@"focused"];
     else [normalizedNode removeObjectForKey:@"focused"];
+    if (!oldNode[@"selection"]) [normalizedNode removeObjectForKey:@"selection"];
     NSMutableDictionary *nodes = [after[@"nodes"] mutableCopy];
     nodes[target] = normalizedNode;
     NSMutableDictionary *normalized = [after mutableCopy];

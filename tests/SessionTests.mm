@@ -147,11 +147,13 @@ int main(void) {
         backgroundUpdate = MutableCopy(Envelope(2));
         backgroundUpdate[@"snapshot"][@"nodes"][1][@"focused"] = @YES;
         Check([s exchange:backgroundUpdate now:2][@"action"] == nil, "focus context change cancels action even if target is unchanged");
-        for (NSString *mutation in @[@"initialFocus", @"initialFocusFalse", @"value", @"selection", @"otherFocus", @"priorFocus", @"expired"]) {
+        for (NSString *mutation in @[@"initialFocus", @"initialFocusFalse", @"initialFocusSelection", @"value", @"selection", @"otherFocus", @"priorFocus", @"expired"]) {
             NSMutableDictionary *beforeFocus = MutableCopy(Envelope(1));
             beforeFocus[@"snapshot"][@"nodes"][1][@"editable"] = @YES;
             beforeFocus[@"snapshot"][@"nodes"][1][@"focusable"] = @YES;
             beforeFocus[@"snapshot"][@"nodes"][1][@"selection"] = @[@0, @0];
+            // An unfocused 4D field has no selection; its editor's arrives with focus.
+            if ([mutation isEqual:@"initialFocusSelection"]) [beforeFocus[@"snapshot"][@"nodes"][1] removeObjectForKey:@"selection"];
             if ([mutation isEqual:@"initialFocusFalse"]) beforeFocus[@"snapshot"][@"nodes"][1][@"focused"] = @NO;
             if ([mutation isEqual:@"priorFocus"]) beforeFocus[@"snapshot"][@"nodes"][0][@"focused"] = @YES;
             s = [[AXBSession alloc] initWithIdentifier:@"initial-field-focus" windowID:1];
@@ -163,6 +165,7 @@ int main(void) {
             afterFocus[@"snapshot"][@"nodes"][1][@"focused"] = @YES;
             if ([mutation isEqual:@"value"]) afterFocus[@"snapshot"][@"nodes"][1][@"value"] = @"Changed";
             if ([mutation isEqual:@"selection"]) afterFocus[@"snapshot"][@"nodes"][1][@"selection"] = @[@1, @0];
+            if ([mutation isEqual:@"initialFocusSelection"]) afterFocus[@"snapshot"][@"nodes"][1][@"selection"] = @[@0, @0];
             if ([mutation isEqual:@"otherFocus"]) afterFocus[@"snapshot"][@"nodes"][0][@"focused"] = @YES;
             NSDictionary *focusReply = [s exchange:afterFocus now:[mutation isEqual:@"expired"] ? 5 : 2];
             Check((focusReply[@"action"] != nil) == [mutation hasPrefix:@"initialFocus"], "only initial focus on the unchanged requested field preserves its queued action");

@@ -25,13 +25,20 @@ TITLE = "AX bridge splitter"
 TITLE_BAR = 28
 
 
+# Notes has the initial focus, and its insertion point blinks at the start of its text.
+CARET = (18, 20 + TITLE_BAR - 4, 24, 20 + TITLE_BAR + 24)
+
+
 def content_changed_pixels(first, second):
-    """Changed pixels below the window's title bar, which AppKit draws."""
+    """Changed pixels below the window's title bar, which AppKit draws, outside the blinking caret."""
     from test_native_messages import rgba
     (size, a), (other, b) = rgba(first), rgba(second)
     if size != other:
         return size[0] * size[1]
-    return sum(1 for index in range(TITLE_BAR * size[0] * 4, len(a), 4) if a[index:index + 4] != b[index:index + 4])
+    width = size[0]
+    left, top, right, bottom = CARET
+    return sum(1 for index in range(TITLE_BAR * width * 4, len(a), 4) if a[index:index + 4] != b[index:index + 4]
+               and not (left <= (index // 4) % width < right and top <= (index // 4) // width < bottom))
 
 
 def set_number(ax, element, name, number):
