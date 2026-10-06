@@ -65,9 +65,9 @@ Case of
  : (OBJECT Get name(Object current)="Children")
   Form.hideChildren:=Not(Form.hideChildren=True)
   OBJECT SET VISIBLE(*; "Details"; Not(Form.hideChildren))
- : (OBJECT Get name(Object current)="Tabs")
-  Form.hideTabs:=Not(Form.hideTabs=True)
-  OBJECT SET VISIBLE(*; "UnsupportedTab"; Not(Form.hideTabs))
+ : (OBJECT Get name(Object current)="Web")
+  Form.hideWeb:=Not(Form.hideWeb=True)
+  OBJECT SET VISIBLE(*; "UnsupportedWeb"; Not(Form.hideWeb))
  : (OBJECT Get name(Object current)="Labels")
   $options:=New object("label"; "Coverage example"; "controls"; New object("Missing"; New object("label"; "Account")))
   $options.children:=New object("Details"; New object("controls"; New object("Missing"; New object("label"; "Contact")); "children"; New object("Inner"; New object("controls"; New object("Missing"; New object("label"; "Nested contact"))))))
@@ -83,9 +83,9 @@ End case
     field = {"type": "input", "dataSource": "Form.value", "left": 20, "top": 15, "width": 260, "height": 24}
     form("Leaf", {"Missing": field}, height=45)
     form("Child", {"Missing": field, "Inner": {"type": "subform", "detailForm": "Leaf", "dataSource": "Form.inner", "dataSourceTypeHint": "object", "left": 10, "top": 50, "width": 320, "height": 50}}, height=105)
-    objects = {"Missing": field, "UnsupportedTab": {"type": "tab", "dataSource": "Form.tab", "labels": ["General", "Notes"], "left": 20, "top": 55, "width": 300, "height": 24},
+    objects = {"Missing": field, "UnsupportedWeb": {"type": "webArea", "left": 20, "top": 55, "width": 300, "height": 24},
                "Details": {"type": "subform", "detailForm": "Child", "dataSource": "Form.details", "dataSourceTypeHint": "object", "left": 20, "top": 95, "width": 350, "height": 115}}
-    for i, (name, label) in enumerate([("Children", "Toggle details"), ("Tabs", "Toggle tabs"), ("Labels", "Name inputs"), ("Close", "Close")]):
+    for i, (name, label) in enumerate([("Children", "Toggle details"), ("Web", "Toggle web area"), ("Labels", "Name inputs"), ("Close", "Close")]):
         objects[name] = {"type": "button", "text": label, "left": 10 + 117 * i, "top": 240, "width": 112, "height": 28, "method": "DiagAction", "events": ["onClick"]}
     objects["Close"]["action"] = "cancel"
     form("Root", objects, windowTitle=TITLE, method="DiagForm", events=["onLoad", "onTimer", "onUnload"])

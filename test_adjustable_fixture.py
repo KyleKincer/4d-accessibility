@@ -69,9 +69,14 @@ def main():
         assert condition, name
 
     def state():
-        try:
-            value = json.loads(status.read_text(encoding="utf-8-sig"))
-        except (OSError, ValueError):
+        # 4D rewrites the status file in place; retry a read that lands mid-write.
+        for _ in range(20):
+            try:
+                value = json.loads(status.read_text(encoding="utf-8-sig"))
+                break
+            except (OSError, ValueError):
+                time.sleep(0.1)
+        else:
             return {}
         assert not any(
             value.get(k) for k in ["error", "bridgeError", "bridgeFailure"]
@@ -172,7 +177,9 @@ def main():
         )
         check(discovery["unsupported"] == [{"object": "UnconfiguredProgress", "type": 27, "reason": "adjustmentCallbackRequired"}], "unconfigured interactive progress is readable and explicitly reports the missing controller")
         check(state()["invalidAdjustment"] == {"ok": False, "error": "invalidControlAdjustment"}, "invalid adjustment callback is rejected before startup")
-        check(named("UnconfiguredProgress").read("AXValue") == 5 and not named("UnconfiguredProgress").actions(), "unconfigured progress exposes its value without promising an unreliable action")
+        # macOS 26 offers Scroll to Visible on revealable controls; it adjusts nothing.
+        check(named("UnconfiguredProgress").read("AXValue") == 5 and not set(named("UnconfiguredProgress").actions()) - {"AXScrollToVisible"},
+              "unconfigured progress exposes its value without promising an unreliable action")
         check(named("Progress").read("AXOrientation") == "AXHorizontalOrientation" and named("Vertical").read("AXOrientation") == "AXVerticalOrientation", "progress publishes actual horizontal and vertical orientation")
         check(named("DateRuler").read("AXValue") == ready["rulerDateText"] and named("DateProgress").read("AXValueDescription") == ready["progressDateText"], "date sliders describe the actual date")
         check(named("ReadOnlyDateProgress").read("AXRole") == "AXProgressIndicator" and named("ReadOnlyDateProgress").read("AXValueDescription") == ready["progressDateText"] and named("ReadOnlyDateProgress").read("AXMaxValue") == 29, "read-only date progress exposes its date and actual range")
@@ -197,7 +204,7 @@ def main():
                 name + " has its native accessibility role",
             )
             check(
-                set(element.actions()) == {"AXIncrement", "AXDecrement"}
+                set(element.actions()) - {"AXScrollToVisible"} == {"AXIncrement", "AXDecrement"}
                 and not element.is_settable("AXValue"),
                 name + " advertises its real adjustment actions",
             )
