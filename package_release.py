@@ -173,12 +173,23 @@ def main():
             dmg = dist / f"4d-accessibility-{version}-macos.dmg"
             run("hdiutil", "create", "-ov", "-format", "UDZO", "-volname", "4D Accessibility", "-srcfolder", kit, dmg)
             run("codesign", "--timestamp", "--keychain", args.keychain, "--sign", identity, dmg)
+            # Submit every download first, so Apple notarizes them together, then wait for each.
+            # A slow notary queue can take longer than a single default wait.
+            notary = ["--keychain-profile", args.notary_profile, "--keychain", str(args.keychain), "--output-format", "json"]
+            submissions = {}
             for path in [full, component_zip, dmg]:
-                result = subprocess.run(["xcrun", "notarytool", "submit", str(path), "--keychain-profile", args.notary_profile,
-                                         "--keychain", str(args.keychain), "--wait", "--timeout", "20m", "--output-format", "json"], check=True, capture_output=True, text=True)
-                response = json.loads(result.stdout)
-                if response.get("status") != "Accepted":
-                    raise RuntimeError(f"Notarization rejected {path.name}: {response.get('id')}")
+                result = subprocess.run(["xcrun", "notarytool", "submit", str(path), *notary], capture_output=True, text=True)
+                if result.returncode:
+                    raise RuntimeError(f"Notarization submission failed for {path.name}: {result.stdout.strip()} {result.stderr.strip()}")
+                submissions[path] = json.loads(result.stdout)["id"]
+                print(f"Submitted {path.name} for notarization: {submissions[path]}", flush=True)
+            for path, submission in submissions.items():
+                result = subprocess.run(["xcrun", "notarytool", "wait", submission, "--timeout", "45m", *notary], capture_output=True, text=True)
+                response = json.loads(result.stdout) if result.stdout.strip().startswith("{") else {}
+                if result.returncode or response.get("status") != "Accepted":
+                    raise RuntimeError(f"Notarization of {path.name} ({submission}) ended {response.get('status') or 'without a status'}: "
+                                       f"{response.get('message', '')} {result.stderr.strip()}")
+                print(f"Notarized {path.name}", flush=True)
             run("xcrun", "stapler", "staple", dmg)
             run("xcrun", "stapler", "validate", dmg)
             outputs.append(dmg)
