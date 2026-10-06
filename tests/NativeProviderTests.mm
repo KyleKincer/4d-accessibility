@@ -458,6 +458,65 @@ static void SplitterTest(void) {
     Check(![Exchange(window, 9043, 1, session, snapshot)[@"ok"] boolValue], "a splitter without an orientation is rejected");
     [window close]; Pump();
 }
+// Like 4D's picture popup palette: mouse-down runs a menu of one item whose
+// view draws every cell, and the item's tag is the chosen cell.
+@interface AXBPicturePaletteTestView : NSView
+@property(nonatomic) NSInteger picked;
+@property(nonatomic) NSUInteger opened;
+@end
+@implementation AXBPicturePaletteTestView
+- (BOOL)isFlipped { return YES; }
+- (void)mouseDown:(NSEvent *)event {
+    self.opened++;
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:@""];
+    NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(pick:) keyEquivalent:@""];
+    item.target = self;
+    item.view = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 96, 32)];
+    [menu addItem:item];
+    [menu popUpMenuPositioningItem:nil atLocation:[self convertPoint:event.locationInWindow fromView:nil] inView:self];
+}
+- (void)pick:(NSMenuItem *)item { self.picked = item.tag; }
+@end
+static void PicturePopupTest(void) {
+    NSWindow *window = Window(@"AXB picture popup");
+    AXBPicturePaletteTestView *canvas = [[AXBPicturePaletteTestView alloc] initWithFrame:window.contentView.bounds];
+    [window.contentView addSubview:canvas];
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9044);
+    NSDictionary *popup = @{@"id": @"color", @"role": @"popup", @"label": @"Color", @"value": @"Blue", @"enabled": @YES, @"visible": @YES,
+        @"choices": @[@"Blue", @"Purple", @"Violet"], @"choice": @1, @"frame": @[@20, @20, @32, @32]};
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Pictures", @"enabled": @YES, @"nodes": @[popup]} mutableCopy];
+    Check([Exchange(window, 9044, 1, session, snapshot)[@"ok"] boolValue], "a picture popup with choices is accepted"); Pump();
+    AXBNode *node = Provider(window).accessibilityChildren.firstObject;
+    Check([[node accessibilityRole] isEqual:NSAccessibilityPopUpButtonRole] && [[node accessibilityValue] isEqual:@"Blue"] &&
+          [node isAccessibilitySelectorAllowed:@selector(accessibilityPerformShowMenu)], "a picture popup is a popup button showing its chosen cell");
+    Check(![node queue:@"choose" value:@0] && ![node queue:@"choose" value:@4] && ![node queue:@"choose" value:@1.5], "only one of its cells can be chosen");
+    // Pressing it offers the labeled cells in a native menu; choosing one asks the host for that cell.
+    AXBWindowView *owner = node.owner;
+    __block NSArray *titles = nil;
+    id observer = [NSNotificationCenter.defaultCenter addObserverForName:NSMenuDidBeginTrackingNotification object:nil queue:nil usingBlock:^(NSNotification *notification) {
+        NSMenu *menu = notification.object;
+        if (menu != owner.choiceMenu) return;
+        titles = [menu.itemArray valueForKey:@"title"];
+        CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{ [menu performActionForItemAtIndex:2]; [menu cancelTracking]; });
+        CFRunLoopWakeUp(CFRunLoopGetMain());
+    }];
+    Check([node accessibilityPerformPress], "pressing a picture popup offers its choices"); Pump(); Pump();
+    [NSNotificationCenter.defaultCenter removeObserver:observer];
+    Check([titles isEqual:@[@"Blue", @"Purple", @"Violet"]] && !owner.choiceMenu, "the choice menu lists every cell's label and closes after a choice");
+    NSDictionary *action = Exchange(window, 9044, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"choose"] && [action[@"value"] isEqual:@3], "the chosen cell reaches the host");
+    Check(![Exchange(window, 9044, 1, session, snapshot, nil, nil, @{@"action": action[@"id"], @"point": @[@36, @36], @"choice": @2})[@"ok"] boolValue],
+          "native input for a different cell is rejected");
+    NSDictionary *input = @{@"action": action[@"id"], @"point": @[@36, @36], @"choice": @3};
+    Exchange(window, 9044, 1, session, snapshot, nil, nil, input); Pump(); Pump();
+    Check(canvas.opened == 1 && canvas.picked == 3, "the control's own click opens its palette and the plugin chooses that cell");
+    Check([Exchange(window, 9044, 1, session, snapshot, nil, nil, input)[@"controlInputResult"][@"accepted"] boolValue], "the palette choice has an exact acknowledgement");
+    Exchange(window, 9044, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"Choice confirmed"}); Pump();
+    NSMutableDictionary *invalid = [popup mutableCopy]; invalid[@"choice"] = @4; snapshot[@"nodes"] = @[invalid]; snapshot[@"revision"] = @2;
+    Check(![Exchange(window, 9044, 1, session, snapshot)[@"ok"] boolValue], "a chosen cell outside its choices is rejected");
+    [window close]; Pump();
+}
 static void SelectionInputTest(void) {
     NSWindow *window = Window(@"AXB native row selection");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -1428,6 +1487,7 @@ int main(void) {
         OutlineDisclosureTest();
         SingleSelectionRowTest();
         SplitterTest();
+        PicturePopupTest();
         NativeTabLayoutTest();
         TabSemanticsTest();
         SessionLifetimeTest();

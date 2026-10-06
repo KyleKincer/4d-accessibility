@@ -298,7 +298,10 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     [super accessibilityPerformAction:action];
 }
 #pragma clang diagnostic pop
-- (BOOL)accessibilityPerformPress { return [self queue:[self.data[@"combo"] boolValue] ? @"showMenu" : @"press" value:nil]; }
+- (BOOL)accessibilityPerformPress {
+    if (self.data[@"choices"]) return [self.owner showChoicesFor:self];
+    return [self queue:[self.data[@"combo"] boolValue] ? @"showMenu" : @"press" value:nil];
+}
 - (BOOL)accessibilityPerformIncrement { return [self queue:@"increment" value:nil]; }
 - (BOOL)accessibilityPerformDecrement { return [self queue:@"decrement" value:nil]; }
 // VoiceOver moves a splitter by writing the position it wants; 4D still limits it.
@@ -307,6 +310,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 }
 - (BOOL)accessibilityPerformShowMenu {
     if (!self.isAccessibilityElement || !self.isAccessibilityEnabled) return NO;
+    if (self.data[@"choices"]) return [self.owner showChoicesFor:self];
     [self.owner refreshComboPopup];
     return self.isAccessibilityExpanded || [self queue:@"showMenu" value:nil];
 }
@@ -325,7 +329,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     if (selector == @selector(setAccessibilityValue:)) return (([self.data[@"role"] isEqual:@"textfield"] && (!self.data[@"editable"] || [self.data[@"editable"] boolValue])) ||
         ([self.data[@"role"] isEqual:@"splitter"] && [self.data[@"adjustable"] boolValue])) && self.isAccessibilityEnabled;
     if (selector == @selector(accessibilityPerformPress)) return ([@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:self.data[@"role"]] || [self.data[@"combo"] boolValue]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
-    if (selector == @selector(accessibilityPerformShowMenu)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
+    if (selector == @selector(accessibilityPerformShowMenu)) return ([self.data[@"combo"] boolValue] || self.data[@"choices"]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformConfirm)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformCancel)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(isAccessibilityExpanded)) return [self.data[@"combo"] boolValue] && self.isAccessibilityElement;
@@ -812,6 +816,69 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     menu.accessibilityParent = origin;
     [self.session noteMenuForControlInput:request[@"id"]];
 }
+// 4D's picture popup palette is a menu of one unlabeled picture, with no
+// keyboard navigation. Offer the control's labeled cells in a menu of our own;
+// a choice then runs through 4D's palette and the control's own handler.
+- (BOOL)showChoicesFor:(AXBNode *)node {
+    NSArray *choices = node.data[@"choices"];
+    if (!NSThread.isMainThread || self.choiceMenu || !node.isAccessibilityElement || !node.isAccessibilityEnabled || !self.window.isKeyWindow) return NO;
+    NSMenu *menu = [[NSMenu alloc] initWithTitle:node.data[@"label"] ?: @""];
+    menu.autoenablesItems = NO;
+    NSMenuItem *selected = nil;
+    for (NSUInteger index = 0; index < choices.count; index++) {
+        NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:choices[index] action:@selector(chooseFromMenu:) keyEquivalent:@""];
+        item.target = self;
+        item.tag = (NSInteger)index + 1;
+        if (item.tag == [node.data[@"choice"] integerValue]) {
+            item.state = NSControlStateValueOn;
+            selected = item;
+        }
+        [menu addItem:item];
+    }
+    self.choiceMenu = menu;
+    self.choiceNode = node;
+    NSArray *f = node.data[@"frame"];
+    NSRect frame = NSMakeRect([f[0] doubleValue], [f[1] doubleValue], [f[2] doubleValue], [f[3] doubleValue]);
+    __weak AXBWindowView *weakSelf = self;
+    // Answer the press first; the menu runs its own tracking loop. A popup
+    // button's cell opens it over the control with the current cell highlighted.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        AXBWindowView *view = weakSelf;
+        if (!view || view.choiceMenu != menu) return;
+        NSPopUpButtonCell *cell = [[NSPopUpButtonCell alloc] initTextCell:@"" pullsDown:NO];
+        cell.autoenablesItems = NO;
+        cell.menu = menu;
+        [cell selectItem:selected];
+        [cell performClickWithFrame:frame inView:view];
+        if (view.choiceMenu == menu) view.choiceMenu = nil;
+    });
+    return YES;
+}
+- (void)chooseFromMenu:(NSMenuItem *)item {
+    AXBNode *node = self.choiceNode;
+    NSInteger choice = item.tag;
+    if (item.menu != self.choiceMenu) return;
+    // No action is accepted while a menu tracks; ask once it has closed.
+    dispatch_async(dispatch_get_main_queue(), ^{ if (node.live) (void)[node queue:@"choose" value:@(choice)]; });
+}
+- (BOOL)choosePictureCell:(NSMenu *)menu {
+    NSDictionary *request = self.pictureChoice, *activity = self.session.activity;
+    if (!request) return NO;
+    self.pictureChoice = nil;
+    NSMenuItem *item = menu.numberOfItems == 1 ? menu.itemArray.firstObject : nil;
+    if (Now() > [request[@"deadline"] doubleValue] || ![activity[@"busy"] boolValue] || ![activity[@"id"] isEqual:request[@"id"]] ||
+        !NSApp.isActive || menu == NSApp.mainMenu || menu.supermenu || !item.view) return NO;
+    NSInteger choice = [request[@"choice"] integerValue];
+    // Releasing over a cell sets the item's tag to that cell and performs the
+    // item; do the same once the menu is tracking.
+    CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopCommonModes, ^{
+        item.tag = choice;
+        [menu performActionForItemAtIndex:0];
+        [menu cancelTracking];
+    });
+    CFRunLoopWakeUp(CFRunLoopGetMain());
+    return YES;
+}
 - (void)restorePopupMenu {
     if (self.adoptedMenu && AXBGridElementBelongsToView(self.adoptedMenu.accessibilityParent, self))
         self.adoptedMenu.accessibilityParent = self.menuNativeParent;
@@ -1120,6 +1187,9 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     [self restoreNativeFocus];
     [self restorePopupMenu];
     self.popupRequest = nil;
+    self.pictureChoice = nil;
+    [self.choiceMenu cancelTracking];
+    self.choiceMenu = nil;
     [self.nativeRoot restore];
     [self.session invalidate];
     for (AXBNode *node in self.nodes) [node invalidate];
@@ -1183,7 +1253,7 @@ static void ScheduleRefresh(AXBSession *session, void *nativeWindow) {
                     (void)notification; [weakView restoreNativeFocus]; [weakView restorePopupMenu]; weakView.popupRequest = nil;
                 }],
                 [NSNotificationCenter.defaultCenter addObserverForName:NSMenuDidBeginTrackingNotification object:nil queue:nil usingBlock:^(NSNotification *notification) {
-                    if (!weakView.window.isKeyWindow) return;
+                    if (!weakView.window.isKeyWindow || [weakView choosePictureCell:notification.object]) return;
                     [weakView adoptPopupMenu:notification.object];
                     [weakView restoreNativeFocus];
                     id menu = notification.object;
@@ -1283,7 +1353,8 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 }
                 BOOL button = [data[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:data[@"role"]];
-                if (button) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
+                BOOL choose = [data[@"operation"] isEqual:@"choose"];
+                if (button || choose) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 NSPoint point = [view convertPoint:local toView:nil];
                 NSPoint screen = [view.window convertPointToScreen:point];
                 if (!NSPointInRect(screen, [target accessibilityFrame]) || DeepestFormHit(view, screen) != target) return;
@@ -1302,6 +1373,16 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     windowNumber:view.window.windowNumber context:nil eventNumber:0 clickCount:1 pressure:1];
                 NSEvent *up = [NSEvent mouseEventWithType:NSEventTypeLeftMouseUp location:point modifierFlags:flags timestamp:Now()
                     windowNumber:view.window.windowNumber context:nil eventNumber:0 clickCount:1 pressure:0];
+                if (choose) {
+                    // 4D runs its palette menu inside mouse-down; the menu
+                    // receives no release, and the plugin chooses the cell.
+                    view.pictureChoice = @{@"id": controlInput[@"action"], @"choice": controlInput[@"choice"], @"deadline": @(Now() + 2)};
+                    [session finishControlInput:controlInput accepted:YES];
+                    [NSApp sendEvent:down];
+                    [NSApp postEvent:up atStart:NO];
+                    accepted = YES;
+                    return;
+                }
                 // Mouse-down may enter AppKit's tracking loop. Queue its matching
                 // release first, then synchronously dispatch to this exact window.
                 // This keeps the control's normal focus behavior and On Clicked handler.
