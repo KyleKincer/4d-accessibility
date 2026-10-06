@@ -1,6 +1,6 @@
-# Read-only grouped listboxes
+# Grouped listboxes
 
-The 0.23.0 development adapter maps native array listbox hierarchies to the outline provider. This gate covers reading text/date groups and their disclosed leaves. Disclosure, selection, reveal, editing and actual Symphony hierarchy workflows remain separate work. The stable Symphony runtime pin remains 0.22.1.
+The 0.23.0 development adapter maps native array listbox hierarchies to the outline provider. This gate covers reading text/date groups and their disclosed leaves, and selecting a leaf from the keyboard through the list box's own events. Disclosure, reveal, editing and actual Symphony hierarchy workflows remain separate work. The stable Symphony runtime pin remains 0.22.1.
 
 Use the ordinary parent lifecycle area and supply a hidden column with unique, nonempty text or integer row keys. Keys must remain attached to the same backing rows through every application insertion, deletion and sort. Configure the existing listbox:
 
@@ -8,7 +8,7 @@ Use the ordinary parent lifecycle area and supply a hidden column with unique, n
 $options.grids:=New object("Grouped"; New object("kind"; "outline"; "keyColumn"; "RowKey"; "label"; "Grouped items"))
 ```
 
-Keep the original hierarchy arrays, form objects, handlers and visible geometry. The adapter reads them in the owning form. It does not evaluate a value Formula for a virtual group, change selection or invoke a business handler. A one-pointer hierarchy preserves the native blank first-column leaf value; its group caption occupies the complete logical row.
+Keep the original hierarchy arrays, form objects, handlers and visible geometry. The adapter reads them in the owning form. It does not evaluate a value Formula for a virtual group or invoke a business handler. Selecting a leaf uses the list box's own keyboard handling and events; a group row is unselectable. A one-pointer hierarchy preserves the native blank first-column leaf value; its group caption occupies the complete logical row.
 
 Native geometry determines group membership and current disclosure. Group identity includes the parent, level, exact typed value and exact member-key set. Repeated captions can therefore have different identities. Date tokens use full year/month/day components even when the native short caption shows less information. A membership or parent change retires the affected identities. Collapsed nested groups leave the published tree; reopening requires fresh descendant references.
 

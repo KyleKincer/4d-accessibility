@@ -495,9 +495,20 @@ End if
 $descriptor.actions:=New object("select"; (LISTBOX Get property(*; $name; lk selection mode)>0) & Not($binding.noSelection=True); "reveal"; True; "edit"; True)
 If ($grouped)
  $descriptor.outline:=$outline.outline
- $descriptor.selectionKnown:=False
- OB REMOVE($descriptor; "selected")
- $descriptor.actions:=New object("select"; False; "reveal"; False; "edit"; False; "disclose"; $state.setExpanded#Null)
+ // A leaf's selection is its backing row's selection element. A group row has no
+ // element of its own, so groups are unselectable and never reported selected.
+ // Leaves are selected from the keyboard, one at a time, through 4D's own events.
+ For each ($key; $rows)
+  If ($outline.outline[$key].kind="group")
+   $descriptor.unselectable.push($key)
+  Else
+   If ($binding.selected[$positions[$key]-1])
+    $descriptor.selected.push($key)
+   End if
+  End if
+ End for each
+ $descriptor.selectionMode:="single"
+ $descriptor.actions:=New object("select"; ($selectionMode#lk none) & Not($binding.noSelection=True); "reveal"; False; "edit"; False; "disclose"; $state.setExpanded#Null)
 End if
 // Cell position alone survives loss of focus. The root resolves this table's
 // exact live instance before adopting its non-text cell position.

@@ -127,6 +127,10 @@ class VoiceOver:
             if self.accepted_quickstart:
                 return bool(voiceover_pids) and self.owned_applications[self.voiceover_pid].alive() and self.pids("VoiceOver") == voiceover_pids
             if not quickstart:
+                # Once its welcome has been dismissed, VoiceOver starts without Quickstart.
+                if voiceover_pids and self.owned_applications[self.voiceover_pid].alive():
+                    self.voiceover_seen = getattr(self, "voiceover_seen", None) or time.monotonic()
+                    return time.monotonic() - self.voiceover_seen >= 3 and not self.pids("VoiceOver Quickstart")
                 return False
             for pid in quickstart:
                 pending = ax.application(pid).read("AXWindows") or []

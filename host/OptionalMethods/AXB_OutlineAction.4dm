@@ -1,5 +1,6 @@
-// Disclosure requires explicit application intent. No editor, selection,
-// scrolling, header activation or object handler is synthesized here.
+// Disclosure requires explicit application intent. No editor, scrolling, header
+// activation or object handler is synthesized here. A leaf is selected from the
+// keyboard, as a user would, so the list box's own events run.
 #DECLARE($operation : Text; $options : Object; $state : Object; $request : Object) -> $result : Object
 var $action; $target; $data; $callback; $focus : Object
 var $focusPointer : Pointer
@@ -14,6 +15,9 @@ If (($request.action=Null) || (Value type($request.action)#Is object))
  return
 End if
 $action:=$request.action
+If (($action.operation="gridSelect") && ($action.node=$options.id) && OBJECT Get enabled(*; $options.objectName))
+ return AXB_OutlineSelect(New object("state"; $state; "options"; $options; "action"; $action; "start"; True))
+End if
 If (($action.node#$options.id) || Not(OBJECT Get enabled(*; $options.objectName)) || ($options.setExpanded=Null) || (New collection($options.setExpanded).indexOf($state.setExpanded)#0))
  return
 End if
