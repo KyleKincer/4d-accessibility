@@ -71,7 +71,7 @@ def main():
 
         ax.wait_for(lambda: state().get("diagnostics", {}).get("ready") and len(issues()) == 4, "Nested diagnostics missing")
         report["initial"] = state()["diagnostics"]
-        expected = {((), "UnsupportedTab", "providerPending"), ((), "Missing", "missingLabel"), (("Details",), "Missing", "missingLabel"), (("Details", "Inner"), "Missing", "missingLabel")}
+        expected = {((), "UnsupportedWeb", "providerPending"), ((), "Missing", "missingLabel"), (("Details",), "Missing", "missingLabel"), (("Details", "Inner"), "Missing", "missingLabel")}
         check({(tuple(i["path"]), i["object"], i["reason"]) for i in issues()} == expected, "one root report identifies unsupported controls and exact repeated child paths")
         check(state()["diagnostics"] == state()["afterMutation"], "mutating a returned report cannot change bridge state")
         check("private" not in json.dumps(state()["diagnostics"]), "coverage metadata contains no editor or business values")
@@ -79,7 +79,7 @@ def main():
         press("Toggle details")
         ax.wait_for(lambda: len(issues()) == 2, "Hidden child diagnostics were retained")
         check(all(not issue["path"] for issue in issues()), "hidden descendants retire from the report")
-        press("Toggle tabs")
+        press("Toggle web area")
         ax.wait_for(lambda: len(issues()) == 1, "Hidden unsupported control remained in report")
         check(issues()[0]["reason"] == "missingLabel", "hidden unsupported control no longer appears as a coverage gap")
         press("Toggle details")
