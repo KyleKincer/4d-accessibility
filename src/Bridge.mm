@@ -1474,9 +1474,33 @@ void AXBDetach(NSString *sessionID, NSInteger processID) {
     if (NSThread.isMainThread) cleanup(); else dispatch_async(dispatch_get_main_queue(), cleanup);
 }
 
+// 4D shows each help tip in a new borderless window: level 16, ignoring the
+// mouse, never key or main, whose content view is the tip's text field. AppKit
+// publishes it as an untitled window, so VoiceOver announces a new window for
+// every tip under the pointer it moves. The bridge already publishes the tip as
+// the control's help, so the tip window leaves the accessibility tree.
+BOOL AXBIsHelpTipWindow(NSWindow *window) {
+    return window.level == 16 && window.ignoresMouseEvents && !window.canBecomeKeyWindow && !window.canBecomeMainWindow &&
+        window.styleMask == NSWindowStyleMaskBorderless && [window.contentView isKindOfClass:NSTextField.class];
+}
+static id helpTipObserver;
+static void QuietHelpTips(void) {
+    if (helpTipObserver) return;
+    helpTipObserver = [NSNotificationCenter.defaultCenter addObserverForName:NSWindowDidUpdateNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+        NSWindow *window = note.object;
+        if (![window isKindOfClass:NSWindow.class] || !AXBIsHelpTipWindow(window) || !window.isAccessibilityElement) return;
+        // Hiding only the window would promote its text field in its place.
+        NSTextField *field = (NSTextField *)window.contentView;
+        field.accessibilityElement = NO;
+        field.cell.accessibilityElement = NO;
+        window.accessibilityElement = NO;
+    }];
+}
+
 void AXBInitialize(void) {
     Init();
     AXBLayoutInitialize();
+    if (NSThread.isMainThread) QuietHelpTips(); else dispatch_async(dispatch_get_main_queue(), ^{ QuietHelpTips(); });
     // Standard 4D message windows have no application form method to integrate. Install
     // now, on 4D's calling thread: a startup method's first message can be drawn inside a
     // modal loop that never drains the main queue, so a deferred install would miss it.
@@ -1497,6 +1521,11 @@ void AXBShutdown(void) {
     }
     // Unload must wait until every AppKit object and queued refresh has gone.
     // No monitor is held, and cleanup never calls 4D or waits for the form.
-    dispatch_block_t cleanup = ^{ for (AXBWindowView *v in views.allValues) [v invalidate]; [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); };
+    dispatch_block_t cleanup = ^{
+        for (AXBWindowView *v in views.allValues) [v invalidate];
+        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown();
+        if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
+        helpTipObserver = nil;
+    };
     if (NSThread.isMainThread) cleanup(); else dispatch_sync(dispatch_get_main_queue(), cleanup);
 }
