@@ -1,3 +1,13 @@
+# 0.28.0, quieter help tips and the Request caret
+
+4D shows each help tip in a new borderless window, which macOS published as an untitled window. VoiceOver moves the pointer with its cursor, so it announced "4D has new window" for nearly every control it reached, sometimes instead of that control. The plugin now removes help tip windows and their text from the accessibility tree; each control already carries its help tip as its label or help. This made the picture-controls VoiceOver run pass only half its attempts on 0.27.0; it now passes in every mode.
+
+The `Request` field's selection is now 4D's own caret, read from its editor, so Left/Right and mouse moves are reported. Writing the answer replaced it only because 4D starts with the answer selected; after a caret move, the new answer was inserted mid-text. A write now goes to the end of the answer and deletes it first. VoiceOver does not yet speak the characters a caret move passes in that field. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md).
+
+A multiple selection the user extends in a hierarchical list with Shift and an arrow key is published in full, and is now covered by acceptance. Extending a selection through accessibility stays unavailable, because 4D needs the physical modifier key. The message window's empty title element is AppKit's own, which any untitled window publishes.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.27.0, picture popup menus, editable pictures and two regression fixes
 
 Picture popup menus are published as popups whose value is the chosen cell. Name the cells with `controls.<name>.cells`, as for a button grid. 4D's own palette is a menu holding one unlabeled picture, with no keyboard navigation. Pressing the popup through accessibility therefore opens a native menu of the cell labels, with the current cell checked and highlighted. A choice opens 4D's palette with the control's own click, and the plugin selects that cell there. 4D then sets the value and runs the control's own On Clicked. Mouse use is unchanged.
