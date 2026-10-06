@@ -2,6 +2,7 @@
 #DECLARE($options : Object) -> $result : Object
 var $view; $metadata : Object
 var $key; $name : Text
+var $cellLabel : Variant
 $result:=New object("ok"; False; "error"; "invalidOptions")
 If (($options=Null) | (Value type($options)#Is object))
  return
@@ -55,6 +56,17 @@ If ($options.controls#Null)
    If (($metadata.layer#Int($metadata.layer)) | (Abs($metadata.layer)>32767))
     return New object("ok"; False; "error"; "invalidControlLayer")
    End if
+  End if
+  // Labels for a button grid's cells, in 4D's row-by-row cell order.
+  If (OB Is defined($metadata; "cells"))
+   If (($metadata.cells=Null) || (Value type($metadata.cells)#Is collection) || ($metadata.cells.length<1) || ($metadata.cells.length>256))
+    return New object("ok"; False; "error"; "invalidControlCells")
+   End if
+   For each ($cellLabel; $metadata.cells)
+    If ((Value type($cellLabel)#Is text) || ($cellLabel="") || (Length($cellLabel)>512))
+     return New object("ok"; False; "error"; "invalidControlCells")
+    End if
+   End for each
   End if
   If (OB Is defined($metadata; "adjust"))
    If (($metadata.adjust=Null) || (Value type($metadata.adjust)#Is object))

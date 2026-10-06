@@ -101,6 +101,16 @@ python3 test_hlist_fixture.py --server /path/to/4D\ Server.app --run --voiceover
 
 Add `--compiled` or `--intel` for the other modes. [Hierarchical lists](tests/HIERARCHICAL-LISTS.md) describes what each run checks.
 
+For button grids and other picture-based controls, with 4D desktop and a licensed `--server` compiler:
+
+```sh
+python3 test_picture_fixture.py --server /path/to/4D\ Server.app --baseline
+python3 test_picture_fixture.py --server /path/to/4D\ Server.app --run
+python3 test_picture_fixture.py --server /path/to/4D\ Server.app --run --voiceover
+```
+
+Add `--compiled` or `--intel` for the other modes. [Picture-based controls](tests/PICTURE-CONTROLS.md) describes what each run checks.
+
 For VoiceOver test-session cleanup:
 
 ```sh

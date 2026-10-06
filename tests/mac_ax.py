@@ -273,8 +273,11 @@ def system():
     return Element(create())
 
 
-def capture_window(pid, destination, *, include_shadow=True):
-    """Capture only the frontmost onscreen window belonging to the fixture PID."""
+def capture_window(pid, destination, *, include_shadow=True, title=None):
+    """Capture only the frontmost onscreen window belonging to the fixture PID.
+
+    With a title, capture that window, so a tooltip or other small window the
+    pointer happens to raise cannot stand in for it."""
     graphics = c.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
     window_list = signature(graphics, "CGWindowListCopyWindowInfo", c.c_void_p, c.c_uint32, c.c_uint32)
     dictionary_value = signature(CF, "CFDictionaryGetValue", c.c_void_p, c.c_void_p, c.c_void_p)
@@ -293,7 +296,7 @@ def capture_window(pid, destination, *, include_shadow=True):
     try:
         for index in range(array_count(windows)):
             window = array_value(windows, index)
-            if property_value(window, "kCGWindowOwnerPID") == pid:
+            if property_value(window, "kCGWindowOwnerPID") == pid and (title is None or property_value(window, "kCGWindowName") == title):
                 number = int(property_value(window, "kCGWindowNumber"))
                 subprocess.run(["/usr/sbin/screencapture", "-x", *([] if include_shadow else ["-o"]), "-l", str(number), str(destination)], check=True, timeout=10)
                 return
