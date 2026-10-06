@@ -5,7 +5,8 @@ Prepares the picture-controls fixture with --server. Button grids are published 
 cell buttons, labeled from configuration or numbered, and each press must run the grid's own
 On Clicked with that cell's value. A picture button advances its state; a spinner is a progress
 indicator; a picture popup menu is a popup whose choices the plugin offers in a menu of its own,
-each chosen through 4D's palette and the control's own On Clicked; a splitter is a splitter. --baseline records the same
+each chosen through 4D's palette and the control's own On Clicked; an editable picture offers
+4D's standard edit actions; a splitter is a splitter. The test saves and restores the clipboard. --baseline records the same
 window without any plugin, component or helpers; a later --run then requires an unchanged form.
 """
 import argparse
@@ -51,6 +52,20 @@ def content_changed_pixels(first, second):
     return changed
 
 
+def edit_actions(element):
+    """An element's custom actions by name; AX lists each as Name:/Target:/Selector: lines."""
+    return {action.split("\n")[0][len("Name:"):]: action for action in element.actions() if action.startswith("Name:")}
+
+
+def pasteboard(operation):
+    """Save or restore the whole general pasteboard around a run that pastes and copies."""
+    tool = BUILD / "pasteboard"
+    source = ROOT / "tests/Pasteboard.swift"
+    if not tool.exists() or tool.stat().st_mtime < source.stat().st_mtime:
+        subprocess.run(["/usr/bin/xcrun", "swiftc", str(source), "-o", str(tool)], check=True, timeout=120)
+    subprocess.run([str(tool), operation, str(BUILD / "pasteboard-before-picture-test.plist")], check=True, timeout=20)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--server", type=Path, required=True, help="4D Server.app used only as the compiler")
@@ -68,6 +83,7 @@ def main():
     if not (args.run or args.baseline):
         return
     ax.require_test_input()
+    pasteboard("save")
     vo = heard = None
     if args.voiceover:
         import voiceover_session as vo
@@ -109,6 +125,7 @@ def main():
             ax.capture_window(process.pid, PIXELS / f"baseline-{architecture}.png", include_shadow=False, title=TITLE)
         finally:
             stop()
+            pasteboard("restore")
         print("Recorded the plugin-free picture controls window")
         return
 
@@ -150,6 +167,16 @@ def main():
                 return found[-1]
             time.sleep(0.2)
         return None
+
+    def reach(predicate, steps=12):
+        """Move VoiceOver's cursor right, then left, until it speaks a matching phrase; return that step's mark."""
+        for direction in ("right", "left"):
+            for _ in range(steps):
+                front(); mark = heard.mark(); vo.key(direction, vo.VO)
+                time.sleep(1.5)
+                if any(predicate(ph) for _, ph in heard.since(mark)):
+                    return mark
+        return mark
 
     def phrase_until(predicate, since, timeout=20):
         limit = time.time() + timeout
@@ -210,11 +237,7 @@ def main():
             check(found and found[-1]["value"] == 2, "VO-Space presses the cell through the grid's own On Clicked")
             # Leave the grid, find the color menu, and choose its last cell from the keyboard.
             front(); vo.key("up", vo.VO + ("shift",))
-            for _ in range(10):
-                front(); mark = heard.mark(); vo.key("right", vo.VO)
-                time.sleep(1.5)
-                if any("Color pop up button" in ph for _, ph in heard.since(mark)):
-                    break
+            mark = reach(lambda ph: "Color pop up button" in ph)
             # Never press with the cursor anywhere else: Done would close the form.
             check(any("Blue" in ph and "Color pop up button" in ph for _, ph in heard.since(mark)), "VoiceOver reads the picture popup as a labeled popup with its chosen cell")
             front(); mark = heard.mark(); vo.key("space", vo.VO)
@@ -227,6 +250,34 @@ def main():
                 time.sleep(0.2)
             found = [e for e in events()[since:] if e["object"] == "Color" and e["event"] == ON_CLICKED]
             check(found and found[-1]["value"] == 3, "Return chooses the cell through the control's own On Clicked")
+            # The editable picture announces its actions; its only one, Paste, is VO-Space.
+            mark = reach(lambda ph: "Photo" in ph)
+            check(phrase_until(lambda ph: "Photo: No picture" in ph, mark), "VoiceOver reads the empty editable picture")
+            check(phrase_until(lambda ph: "To Paste, press Control-Option-Space" in ph, mark), "VoiceOver offers Paste as its action")
+            since = len(events()); front(); vo.key("space", vo.VO)
+            limit = time.time() + 10
+            while time.time() < limit and not any(e["object"] == "Photo" for e in events()[since:]):
+                time.sleep(0.2)
+            found = [e for e in events()[since:] if e["object"] == "Photo"]
+            check(found and found[0]["event"] == 45 and found[0]["value"] > 0, "VO-Space pastes through the field's own After Edit")
+            # With every edit offered, VoiceOver names its action menu; choose Clear there.
+            front(); vo.key("left", vo.VO); time.sleep(1.5)
+            mark = reach(lambda ph: ph.startswith("Photo image"))
+            check(phrase_until(lambda ph: "To Cut, Copy, Paste, and Clear, press Control-Option-Command-Space" in ph, mark),
+                  "VoiceOver offers every edit through its action menu")
+            front(); mark = heard.mark(); vo.key("space", vo.VO + ("cmd",)); time.sleep(1.5)
+            for _ in range(6):
+                if any(ph.startswith("Clear") for _, ph in heard.since(mark)):
+                    break
+                front(); mark = heard.mark(); vo.key("down"); time.sleep(1)
+            # Return only once VoiceOver has said Clear; another item would edit differently.
+            check(any(ph.startswith("Clear") for _, ph in heard.since(mark)), "the action menu reaches Clear by arrow key")
+            since = len(events()); front(); vo.key("return")
+            limit = time.time() + 10
+            while time.time() < limit and not any(e["object"] == "Photo" for e in events()[since:]):
+                time.sleep(0.2)
+            found = [e for e in events()[since:] if e["object"] == "Photo"]
+            check(found and found[0]["event"] == 45 and found[0]["value"] == 0, "choosing Clear empties it through the same After Edit")
             run = [ph for _, ph in heard.since(0)]
             report["speech"] = run[next((i for i, ph in enumerate(run) if "AX bridge picture controls" in ph), len(run)):]
         else:
@@ -261,6 +312,36 @@ def main():
             check(ax.wait_for(lambda: published()["Color"]["value"] == "Violet", "Chosen value", timeout=10), "the popup then shows the chosen cell")
             focused = ax.application(process.pid).read("AXFocusedUIElement")
             check(not focused or focused.read("AXRole") != "AXMenu", "4D's palette closes after the choice")
+            # An editable picture offers 4D's standard edit actions, run through the focused picture.
+            def edit(name, expect_event=True):
+                ax.wait_for(lambda: root().read("AXHelp") not in ("Action queued", "Waiting for the application to complete the action"), "Bridge idle", timeout=10)
+                since = len(events())
+                if ax.application(process.pid).read("AXFrontmost") is not True:
+                    raise RuntimeError("The fixture lost the foreground; refusing to edit")
+                element = published()["Photo"]["element"]
+                assert element.perform(edit_actions(element)[name]) == 0
+                limit = time.time() + (10 if expect_event else 2)
+                while time.time() < limit:
+                    found = [e for e in events()[since:] if e["object"] == "Photo"]
+                    if found:
+                        return found
+                    time.sleep(0.2)
+                return []
+            photo = published()["Photo"]
+            check(photo["role"] == "AXImage" and photo["label"] == "Photo: No picture", "an empty editable picture is an image that says it has no picture")
+            check(set(edit_actions(photo["element"])) == {"Paste"}, "an empty editable picture offers only Paste")
+            found = edit("Paste")
+            check(found and found[0]["event"] == 45 and found[0]["value"] > 0, "Paste puts the clipboard picture in through the field's own After Edit")
+            ax.wait_for(lambda: published()["Photo"]["label"] == "Photo", "Pasted picture not published", timeout=10)
+            check(set(edit_actions(published()["Photo"]["element"])) == {"Cut", "Copy", "Paste", "Clear"}, "a picture with content offers every edit")
+            check(edit("Copy", expect_event=False) == [], "Copy changes nothing in the form")
+            found = edit("Clear")
+            check(found and found[0]["event"] == 45 and found[0]["value"] == 0, "Clear empties it through the same After Edit")
+            ax.wait_for(lambda: published()["Photo"]["label"] == "Photo: No picture", "Cleared picture not published", timeout=10)
+            edit("Paste")
+            ax.wait_for(lambda: "Cut" in edit_actions(published()["Photo"]["element"]), "Second paste not published", timeout=10)
+            found = edit("Cut")
+            check(found and found[-1]["event"] == 45 and found[-1]["value"] == 0, "Cut removes it through the same After Edit")
         report["passed"] = True
     finally:
         if heard:
@@ -268,6 +349,7 @@ def main():
         if vo:
             vo.stop()
         stop()
+        pasteboard("restore")
         name = "picture-" + architecture + ("-compiled" if args.compiled else "") + ("-voiceover" if args.voiceover else "") + ".json"
         (BUILD / name).write_text(json.dumps(report, indent=2) + "\n")
     print(f"PASS: {len(report['checks'])} picture control checks ({architecture}, {report['mode']}{', VoiceOver' if args.voiceover else ''})")

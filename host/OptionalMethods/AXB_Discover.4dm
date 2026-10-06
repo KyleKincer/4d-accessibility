@@ -15,6 +15,7 @@ var $windowLeft; $windowTop; $windowRight; $windowBottom : Integer
 var $node; $other; $metadata; $popup; $styledText; $tabs; $cells; $choices : Object
 var $value : Variant
 var $protected : Boolean
+var $picture : Picture
 ARRAY TEXT($names; 0)
 ARRAY TEXT($entry; 0)
 ARRAY POINTER($pointers; 0)
@@ -122,9 +123,6 @@ For ($i; 1; Size of array($names))
     If (Not(($metadata#Null) && ($metadata.decorative=True)))
      $role:="image"
      $label:=OBJECT Get help tip(*; $name)
-     If (($type=Object type picture input) && OBJECT Get enterable(*; $name))
-      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "pictureEditingPending"))
-     End if
     End if
    : ($type=Object type ruler)
     $parts:=Split string(OBJECT Get format(*; $name); ";")
@@ -335,6 +333,19 @@ For ($i; 1; Size of array($names))
      $node.label:=$metadata.label
      $node.explicitLabel:=True
     End if
+    If (($role="image") && ($type=Object type picture input) && OBJECT Get enterable(*; $name))
+     // 4D's standard edit actions, offered as accessibility actions. An empty
+     // picture can only be pasted into.
+     $picture:=OBJECT Get value($name)
+     $node.pictureActions:=New collection("paste")
+     If (Picture size($picture)>0)
+      $node.pictureActions:=New collection("cut"; "copy"; "paste"; "clear")
+     Else
+      If ($node.value="")
+       $node.value:="No picture"
+      End if
+     End if
+    End if
     $result.nodes.push($node)
    End if
   End if
@@ -362,7 +373,7 @@ For each ($node; $result.nodes)
     End if
    End if
   End for each
-  If (($node.label="") && ($node.role="image") && ($node.value#""))
+  If (($node.label="") && ($node.role="image") && ($node.value#"") && ($node.pictureActions=Null))
    $node.label:=$node.value
    $node.value:=""
   End if
