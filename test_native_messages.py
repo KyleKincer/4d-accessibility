@@ -125,9 +125,9 @@ def main():
         vo.start()
         heard.start()
     process = subprocess.Popen(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    if vo:
-        # Keys reach whatever is frontmost; never post one into another application.
-        vo.set_guard(vo.guard_frontmost(process.pid, ax))
+    import voiceover_session as keys
+    # Keys reach whatever is frontmost; never post one into another application.
+    keys.set_guard(keys.guard_frontmost(process.pid, ax))
     # Only speech during the fixture's own run is recorded; other applications are not.
     spoken = [heard.mark() if heard else 0, None]
 
@@ -245,6 +245,14 @@ def main():
         check(isinstance(focused, ax.Element) and focused.read("AXIdentifier") == "axb/message/box" and nodes["box"].read("AXFocused") is True,
               "the Request field is the application's focused element")
         check(nodes["box"].read("AXSelectedTextRange") is not None, "the Request field reports its selection")
+        if not args.voiceover:
+            # The arrow keys move 4D's own caret; the published selection follows it.
+            front(); keys.key("right")
+            ax.wait_for(lambda: tuple(nodes["box"].read("AXSelectedTextRange")) == (11, 0), "Caret did not reach the end", timeout=5)
+            check(True, "the Right arrow moves the published caret to the end of the answer")
+            front(); keys.key("left"); keys.key("left")
+            ax.wait_for(lambda: tuple(nodes["box"].read("AXSelectedTextRange")) == (9, 0), "Caret did not move back", timeout=5)
+            check(True, "the Left arrow moves it back one character at a time")
         if args.voiceover:
             check("Open orders" in phrase_until(lambda p: "Open orders" in p, 0), "VoiceOver reads the Request field")
             typing = heard.mark()
@@ -257,6 +265,11 @@ def main():
             echo = [p for _, p in heard.since(typing)]
             report["typingEcho"] = echo
             check(any(p.replace(" ", "") and set(p.replace(" ", "")) <= set("Lateshipments") for p in echo), "VoiceOver echoes the typed characters")
+            # The published caret follows the arrow keys under VoiceOver too. VoiceOver does
+            # not yet speak these moves; that remains open (MESSAGES.md).
+            front(); vo.key("left"); vo.key("left")
+            ax.wait_for(lambda: tuple(nodes["box"].read("AXSelectedTextRange")) == (12, 0), "Caret did not follow the arrow keys", timeout=5)
+            check(True, "under VoiceOver the published caret follows the Left arrow")
             since = heard.mark(); vo.key("right", vo.VO); vo.key("right", vo.VO)
             check(phrase_until(lambda p: p.startswith("Save button"), since), "VoiceOver reaches the Request default button")
             vo.key("space", vo.VO)

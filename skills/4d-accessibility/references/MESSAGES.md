@@ -12,7 +12,7 @@ With the native plugin installed, it publishes them without any host change. It 
 - the Request answer as an editable text field, which starts focused, including when empty;
 - the buttons by their drawn titles, cancel before default. Without a Request field, focus starts on the default button.
 
-A press posts an ordinary click at the button's center, so 4D sets `OK` exactly as for the mouse. 4D discards input queued before its modal loop starts, just after the window is drawn, so a press or value write is held until the window has been published for half a second. An automation client may therefore press as soon as the elements appear. Writing the field's value selects the answer, then types each character into 4D's own editor. Line breaks are rejected because they would end entry. Typing, from the keyboard or through AX, is announced as text edits, so VoiceOver echoes characters and words.
+A press posts an ordinary click at the button's center, so 4D sets `OK` exactly as for the mouse. 4D discards input queued before its modal loop starts, just after the window is drawn, so a press or value write is held until the window has been published for half a second. An automation client may therefore press as soon as the elements appear. The field's selection is 4D's own caret, read from its editor, so Left/Right and mouse moves are reported. Writing the field's value replaces the whole answer, then types each character into 4D's own editor. If the caret has moved, it first goes to the end of the answer and deletes it, as a keyboard user would. Line breaks are rejected because they would end entry. Typing, from the keyboard or through AX, is announced as text edits, so VoiceOver echoes characters and words.
 
 Recognition is strict. A window is published only if every object in its form is a known message object and both `main` and `ok` are present. Any other window is left untouched. A window that already has a bridge session is also left untouched.
 
@@ -21,7 +21,7 @@ Recognition is strict. A window is published only if every object in its form is
 Remaining scope:
 
 - 4D Server and remote clients;
-- caret moves inside the field (the caret is inferred from edits);
+- VoiceOver speech for caret moves: the published caret follows 4D's, but VoiceOver does not yet read the characters a Left/Right move passes;
 - long, wrapped and localized messages;
 - other built-in windows.
 
