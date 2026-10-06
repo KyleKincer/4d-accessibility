@@ -102,7 +102,7 @@ def main():
             ax.wait_for(lambda: ax.application(process.pid).read("AXFrontmost") is True, "4D did not come to the front", timeout=15)
             time.sleep(3)
             PIXELS.mkdir(parents=True, exist_ok=True)
-            ax.capture_window(process.pid, PIXELS / f"baseline-{architecture}.png", include_shadow=False)
+            ax.capture_window(process.pid, PIXELS / f"baseline-{architecture}.png", include_shadow=False, title=TITLE)
         finally:
             stop()
         print("Recorded the plugin-free splitter window")
@@ -164,7 +164,7 @@ def main():
             front()
             ax.wait_for(lambda: ax.application(process.pid).read("AXFrontmost") is True, "4D did not come to the front", timeout=15)
             time.sleep(1.5)
-            ax.capture_window(process.pid, PIXELS / f"bridge-{architecture}.png", include_shadow=False)
+            ax.capture_window(process.pid, PIXELS / f"bridge-{architecture}.png", include_shadow=False, title=TITLE)
             changed = content_changed_pixels(reference, PIXELS / f"bridge-{architecture}.png")
             report["changedPixels"] = changed
             check(changed == 0, "the form is pixel-identical to the plugin-free form")

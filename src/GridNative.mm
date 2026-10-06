@@ -475,6 +475,8 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     if (![self.table.grid.descriptor[@"actions"][@"select"] boolValue] || (selected && !self.isAccessibilitySelected && !AXBGridRowAllowsSelection(self.table.grid.descriptor, self.key))) return;
     NSMutableArray *keys = [self.table.grid.descriptor[@"selected"] mutableCopy];
     [keys removeObject:self.key]; if (selected) [keys addObject:self.key];
+    // Selecting a row of a single-selection grid replaces its selection.
+    if (selected && [self.table.grid.descriptor[@"selectionMode"] isEqual:@"single"]) keys = [@[self.key] mutableCopy];
     (void)[self.table queue:@"gridSelect" value:keys];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {

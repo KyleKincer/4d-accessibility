@@ -11,7 +11,7 @@ The working source is an implementation checkpoint. Build both packages and inst
 | Previously exercised in isolated live fixtures; rerun in your host | Ordinary inputs/buttons, checkboxes/radios, typed dropdowns and hierarchical popup menus, editable combos, automatic page subforms with scrolling and reveal on macOS 26, semantic groups, described images, numeric/date/time progress, rulers and steppers, and all logical rows and columns of flat native array, collection, entity-selection and AreaList grids. AreaList text editing is limited to BMP text; further cell types remain open. Editable progress uses the shared-controller mapping below; other tested controls retain their existing editors and handlers. See [validation scope](VALIDATION.md) for the evidence boundaries and required reruns. |
 | Previously exercised native cell controls; rerun in your host | Boolean checkbox/popup and numeric mixed-state cells, including repeated child grids and VoiceOver. See [validation scope](VALIDATION.md). |
 | Current source | Tabs, ordinary styled fields and flat classic-selection grids pass their scoped gates. Compound generated focus adds initial-event, restart and replacement checks in 0.21.1. Check [current status](STATUS.md) and install matching packages. |
-| Still required | Dials, editable pictures, hierarchical lists and further grid layouts/cell types, AreaList supplementary Unicode and protected editing, IME and exact text geometry, further assistive-technology testing, standard-action dropdown menus, `AXScrollToVisible` before macOS 26, root forms larger than their window, expanded compiled desktop coverage, client/server delivery, and complete application workflows. |
+| Still required | Dials, editable pictures, hierarchical-list editing and multiple selection, further grid layouts/cell types, AreaList supplementary Unicode and protected editing, IME and exact text geometry, further assistive-technology testing, standard-action dropdown menus, `AXScrollToVisible` before macOS 26, root forms larger than their window, expanded compiled desktop coverage, client/server delivery, and complete application workflows. |
 
 The [full accessibility requirements](REQUIREMENTS.md) define completion. Resolve every unsupported control before calling its screen accessible.
 
@@ -93,7 +93,7 @@ Every automatic form requires the full automatic-control capability set, even if
 | `incompatibleComponent`, `incompatibleNativePlugin`, `areaLifecycleUnavailable`, `nativeButtonInputUnavailable`, `scrollableControlsUnavailable`, `adjustableControlsUnavailable`, `checkboxStatesUnavailable`, `formOwnershipUnavailable`, `rootDataOwnershipUnavailable`, `sessionLifecycleUnavailable`, `comboControlsUnavailable`, `nativeInputConfirmationUnavailable`, `controlSemanticsUnavailable`, `logicalGridsUnavailable`, `gridRowStatesUnavailable`, `gridControlsUnavailable`, `gridHeadersUnavailable`, `automaticControlsUnavailable` | Rebuild both packages and reinstall helpers from one source commit. |
 | `too many active sessions` | 64 bridge windows are already open. Normal form behavior continues; close other bridge windows and reopen this form. |
 | `window already has another session`, `plugin stopped` | Check for competing low-level registration. Requests during database shutdown are rejected; the next plugin initialization enables new sessions without reviving old ones. Use one lifecycle owner per window. |
-| `invalidLabel`, `invalidControls`, `invalidControlMetadata`, `invalidControlAdjustment`, `invalidChildren`, `invalidGrids`, or another invalid option | Correct the configuration. Manual start requires a label; the area supplies its default. Each `controls` entry must be an object; `adjust` must be a Formula. |
+| `invalidLabel`, `invalidControls`, `invalidControlMetadata`, `invalidControlAdjustment`, `invalidControlCells`, `invalidChildren`, `invalidGrids`, or another invalid option | Correct the configuration. Manual start requires a label; the area supplies its default. Each `controls` entry must be an object; `adjust` must be a Formula. |
 | `noFormContext` | A manual start/restart must run in the root form context, with its actual `Form` object. |
 
 The current native plugin advertises `sessions 2`; its component advertises `sessionAllocation: 1`. A `sessionLifecycleUnavailable` result means these packages do not match the installed helpers. Application code does not allocate or exchange native IDs.
@@ -224,7 +224,7 @@ $coverage:=AXB_Form("diagnostics"; New object)
 
 This is an optional debugging/verification call, not another lifecycle hook. Do not ship a new diagnostics call just to inspect the report. It returns `ready: false` until the first snapshot, then `ready: true`, the snapshot `revision`, `nodeCount` and an `issues` collection. Each issue names the form object's `object`, its nested subform `path`, and a `reason`. Grid issues can also identify a `column` object name. An empty path means the root. For example, `{path: ["ShippingAddress"], object: "Phone", reason: "missingLabel"}` identifies that input in that particular child.
 
-`missingLabel` needs a meaningful label. `providerPending` means an unhandled object type is omitted from automatic discovery. This includes hierarchical lists, unconfigured grids, plugin areas and web areas. Tabs also report this in signed 0.19.7 and 0.20.0 kits; 0.21.0 provides the [validated tab adapter](TABS.md). Accept an existing native provider only after verifying its complete tree and actions. Controls without a usable provider remain unfinished bridge work; do not dismiss their diagnostic. A verified usable web provider needs no extra adapter. Other reasons identify unsupported editing, ambiguous groups or an unavailable configured grid. `gridLoading` is temporary while the grid's readiness formula is false. A correctly configured grid is not reported as an unsupported ordinary control.
+`missingLabel` needs a meaningful label. `providerPending` means an unhandled object type is omitted from automatic discovery. This includes unconfigured grids, plugin areas and web areas; hierarchical lists are discovered automatically from the matching kit. Tabs also report this in signed 0.19.7 and 0.20.0 kits; 0.21.0 provides the [validated tab adapter](TABS.md). Accept an existing native provider only after verifying its complete tree and actions. Controls without a usable provider remain unfinished bridge work; do not dismiss their diagnostic. A verified usable web provider needs no extra adapter. Other reasons identify unsupported editing, ambiguous groups or an unavailable configured grid. `gridLoading` is temporary while the grid's readiness formula is false. A correctly configured grid is not reported as an unsupported ordinary control.
 
 | Coverage reason | Required action |
 | --- | --- |
@@ -270,6 +270,14 @@ $options.controls.Remarks:=New object("label"; "Remarks"; "multiline"; True)
 ```
 
 Declare only automatic fields that actually accept Return as a line break. A field explicitly set to **No** stays single-line regardless.
+
+### Name button-grid cells
+
+A button grid is published as a group of cell buttons. Its pictures carry no text, so name each cell in 4D's row-by-row order; otherwise the cells are numbered and the grid reports `missingLabel`. A press clicks the cell, running the grid's own On Clicked. See [picture-based controls](../../../tests/PICTURE-CONTROLS.md).
+
+```4d
+$options.controls.Align:=New object("cells"; New collection("Left"; "Center"; "Right"))
+```
 
 ### Splitters
 

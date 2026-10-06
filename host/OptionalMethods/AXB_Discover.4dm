@@ -12,7 +12,7 @@ var $parts; $labels : Collection
 var $valueType : Integer
 var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end : Integer
 var $windowLeft; $windowTop; $windowRight; $windowBottom : Integer
-var $node; $other; $metadata; $popup; $styledText; $tabs : Object
+var $node; $other; $metadata; $popup; $styledText; $tabs; $cells : Object
 var $value : Variant
 var $protected : Boolean
 ARRAY TEXT($names; 0)
@@ -106,6 +106,13 @@ For ($i; 1; Size of array($names))
     If (Not($tabs.ok))
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; $tabs.error))
     End if
+   : ($type=Object type button grid)
+    $cells:=AXB_ButtonGrid($name; $metadata)
+    $result.nodes:=$result.nodes.concat($cells.nodes)
+    $result.unsupported:=$result.unsupported.concat($cells.unsupported)
+   : ($type=Object type picture popup menu)
+    // Its palette is drawn by 4D and opens where the current picture lies.
+    $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "picturePopupPending"))
    : ($type=Object type groupbox)
     $role:="group"
     $label:=OBJECT Get title(*; $name)

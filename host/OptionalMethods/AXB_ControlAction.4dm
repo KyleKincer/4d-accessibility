@@ -97,7 +97,8 @@ Case of
   $result:=New object("status"; "pending"; "confirm"; Formula(AXB_ControlKey($1)); "data"; New object("objectName"; $target.objectName; "operation"; "press"; "role"; $target.role; "previousValue"; $target.value))
   return
  : (($action.operation="press") & (New collection("button"; "checkbox"; "radio"; "popup"; "tab").indexOf($target.role)>=0))
-  If ($target.role="tab")
+  // A tab or a button-grid cell is one part of its object; press its own frame.
+  If (($target.role="tab") | ($target.cell#Null))
    $left:=$target.frame[0]
    $top:=$target.frame[1]
    $right:=$left+$target.frame[2]
