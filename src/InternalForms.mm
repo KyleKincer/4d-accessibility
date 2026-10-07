@@ -239,12 +239,22 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     return children;
 }
 - (NSString *)textForLayer:(CALayer *)layer { return layer ? Joined(AXBDrawnTextForLayer(layer) ?: @[]) : @""; }
+// The part of a rectangle (in the form view's layer) that the layer's ancestors show: a subform
+// clips the objects of its own form to its bounds, as the form does to the window.
+static NSRect Visible(NSRect rect, CALayer *layer, CALayer *form) {
+    for (CALayer *ancestor = layer.superlayer; ancestor && ancestor != form; ancestor = ancestor.superlayer)
+        rect = NSIntersectionRect(rect, [ancestor convertRect:ancestor.bounds toLayer:form]);
+    return NSIntersectionRect(rect, form.bounds);
+}
 - (NSRect)screenFrameForLayer:(CALayer *)layer inset:(CGFloat)inset {
     NSView *view = self.formView;
     if (!view.window || !layer) return NSZeroRect;
+    // The object within its layer's margin, then the part of it that is shown.
     NSRect inView = [layer.superlayer convertRect:layer.frame toLayer:view.layer];
-    if (view.layer.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
     if (inset > 0 && NSWidth(inView) > 2 * inset && NSHeight(inView) > 2 * inset) inView = NSInsetRect(inView, inset, inset);
+    inView = Visible(inView, layer, view.layer);
+    if (NSIsEmptyRect(inView)) return NSZeroRect;
+    if (view.layer.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
     return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
 }
 - (NSRect)screenFrameForArea:(NSRect)area inLayer:(CALayer *)layer {
@@ -254,7 +264,8 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     CALayer *form = self.formView.layer;
     NSView *view = self.formView;
     if (!view.window || !form || !layer) return NSZeroRect;
-    NSRect inView = [layer convertRect:area toLayer:form];
+    NSRect inView = Visible([layer convertRect:area toLayer:form], layer, form);
+    if (NSIsEmptyRect(inView)) return NSZeroRect;
     if (form.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
     return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
 }
@@ -309,6 +320,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         if (!strongSelf || !target.layer || target.layer.hidden || !current.isVisible) return;
         CALayer *press = target.pressLayer;
         NSRect frame = press ? [strongSelf screenFrameForLayer:press inset:target.pressInset] : [target screenFrame];
+        if (NSIsEmptyRect(frame)) return; // Nothing of it is shown to click.
         PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], target.clicks);
     }];
     return YES;
@@ -324,6 +336,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         NSWindow *current = strongSelf.formView.window;
         if (!strongSelf || !target || target.hidden || !current.isVisible) return;
         NSRect frame = [strongSelf screenFrameForArea:area inLayer:target];
+        if (NSIsEmptyRect(frame)) return;
         PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))]);
     }];
     return YES;
@@ -338,6 +351,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         AXBInternalFormElement *field = weakElement;
         if (!current.isVisible || !current.isKeyWindow || !field.layer) return;
         NSRect frame = [field screenFrame];
+        if (NSIsEmptyRect(frame)) return;
         PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMaxX(frame) - MIN(4, NSWidth(frame) / 4), NSMidY(frame))]);
     }];
     return YES;
@@ -374,6 +388,8 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             // Another field: click inside it near its end, as the mouse focuses it, then go to
             // its end and delete its text, so its own events run as for the keyboard.
             NSRect frame = [field screenFrame];
+            // Without a visible part to click, the keys would reach another field.
+            if (NSIsEmptyRect(frame)) return;
             NSPoint end = NSMakePoint(NSMaxX(frame) - MIN(4, NSWidth(frame) / 4), NSMidY(frame));
             PostClick(current, [current convertPointFromScreen:end]);
             for (NSUInteger i = 0; i < length; i++) PostKey(current, right, NSEventModifierFlagFunction | NSEventModifierFlagNumericPad, 124);

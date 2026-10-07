@@ -41,7 +41,7 @@ def main():
     report["sourceSHA256"] = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in SOURCES}
     binary, ocr = output / "NativeOutlineFixture", output / "ReadScreen"
     subprocess.run(["xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
-                    *[str(ROOT / name) for name in COMPILE], "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary)], check=True)
+                    *[str(ROOT / name) for name in COMPILE], "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-lz", "-o", str(binary)], check=True)
     report["binarySHA256"] = hashlib.sha256(binary.read_bytes()).hexdigest()
     save()
     if not args.run:

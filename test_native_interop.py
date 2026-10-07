@@ -25,7 +25,7 @@ def main():
         "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror",
         "-I", str(root / "src"), str(root / "tests/NativeInteropFixture.mm"),
         str(root / "src/Session.mm"), str(root / "src/Grid.mm"), str(root / "src/Bridge.mm"), str(root / "src/GridNative.mm"), str(root / "src/NativeLayout.mm"), str(root / "src/DrawnText.mm"), str(root / "src/InternalForms.mm"), str(root / "src/InternalTable.mm"), str(root / "src/MessageDialogs.mm"), str(root / "src/ProgressWindows.mm"), str(root / "src/QueryEditor.mm"), str(root / "src/QuickReport.mm"), str(root / "src/GenericForms.mm"),
-        "-framework", "Cocoa", "-framework", "WebKit", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary),
+        "-framework", "Cocoa", "-framework", "WebKit", "-framework", "CoreText", "-framework", "QuartzCore", "-lz", "-o", str(binary),
     ], check=True)
     if not args.run:
         print("Built native interoperability fixture; use --run on an unlocked desktop.")

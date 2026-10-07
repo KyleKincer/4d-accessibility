@@ -2,10 +2,14 @@
 #import "InternalForms.h"
 #import "DrawnText.h"
 #include <vector>
+#include <zlib.h>
 
 // The project's forms, by name ("Name" or "table/Name"): each object's type, title, help tip,
 // placeholder, enterability and size, as its definition states them.
 static NSDictionary<NSString *, NSDictionary<NSString *, NSDictionary *> *> *Forms;
+// Components' forms, by name, for the subforms that show them (such as 4D Widgets' pickers).
+// They never match a window.
+static NSDictionary<NSString *, NSDictionary<NSString *, NSDictionary *> *> *ComponentForms;
 // The forms that hold each object name, to match a window's objects quickly.
 static NSDictionary<NSString *, NSArray<NSString *> *> *FormsByObject;
 static NSMapTable<NSWindow *, AXBInternalFormOverlay *> *Overlays;
@@ -57,6 +61,92 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
     return objects;
 }
 
+// The form definitions inside a component's archive (a .4DZ, which is a zip): each entry
+// Project/Sources/Forms/<name>/form.4DForm, read from its central directory and inflated.
+static NSDictionary<NSString *, NSData *> *ArchivedForms(NSURL *archive) {
+    NSData *zip = [NSData dataWithContentsOfURL:archive options:NSDataReadingMappedIfSafe error:nil];
+    const uint8_t *bytes = (const uint8_t *)zip.bytes;
+    NSUInteger length = zip.length;
+    auto u16 = [&](NSUInteger at) -> uint32_t { return at + 2 <= length ? (uint32_t)(bytes[at] | bytes[at + 1] << 8) : 0; };
+    auto u32 = [&](NSUInteger at) -> uint32_t { return at + 4 <= length ? (uint32_t)(bytes[at] | bytes[at + 1] << 8 | bytes[at + 2] << 16 | (uint32_t)bytes[at + 3] << 24) : 0; };
+    NSMutableDictionary *forms = [NSMutableDictionary new];
+    if (length < 22) return forms;
+    // The end of central directory record, within the last 64 KB.
+    NSUInteger end = NSNotFound;
+    for (NSUInteger at = length - 22; at + 65557 >= length && at > 0; at--) if (u32(at) == 0x06054b50) { end = at; break; }
+    if (end == NSNotFound) return forms;
+    NSUInteger count = u16(end + 10), at = u32(end + 16);
+    NSString *prefix = @"Project/Sources/Forms/", *suffix = @"/form.4DForm";
+    for (NSUInteger i = 0; i < count && at + 46 <= length && u32(at) == 0x02014b50; i++) {
+        uint32_t method = u16(at + 10), compressed = u32(at + 20), size = u32(at + 24), local = u32(at + 42);
+        NSUInteger nameLength = u16(at + 28), extra = u16(at + 30), comment = u16(at + 32);
+        NSString *name = at + 46 + nameLength <= length ? [[NSString alloc] initWithBytes:bytes + at + 46 length:nameLength encoding:NSUTF8StringEncoding] : nil;
+        at += 46 + nameLength + extra + comment;
+        if (![name hasPrefix:prefix] || ![name hasSuffix:suffix] || size > 4 * 1024 * 1024) continue;
+        NSString *form = [name substringWithRange:NSMakeRange(prefix.length, name.length - prefix.length - suffix.length)];
+        if ([form containsString:@"/"] || local + 30 > length || u32(local) != 0x04034b50) continue;
+        NSUInteger data = local + 30 + u16(local + 26) + u16(local + 28);
+        if (data + compressed > length) continue;
+        if (method == 0) { forms[form] = [zip subdataWithRange:NSMakeRange(data, compressed)]; continue; }
+        if (method != 8) continue;
+        NSMutableData *out = [NSMutableData dataWithLength:size];
+        z_stream stream = {};
+        stream.next_in = (Bytef *)(bytes + data); stream.avail_in = compressed;
+        stream.next_out = (Bytef *)out.mutableBytes; stream.avail_out = size;
+        if (inflateInit2(&stream, -MAX_WBITS) != Z_OK) continue;
+        int status = inflate(&stream, Z_FINISH);
+        inflateEnd(&stream);
+        if (status == Z_STREAM_END && stream.total_out == size) forms[form] = out;
+    }
+    return forms;
+}
+
+// Every component's forms: the project's own components and those 4D includes.
+static NSDictionary *LoadComponentForms(NSURL *sources) {
+    NSMutableDictionary *forms = [NSMutableDictionary new];
+    NSFileManager *files = NSFileManager.defaultManager;
+    NSURL *root = [[sources URLByDeletingLastPathComponent] URLByDeletingLastPathComponent];
+    NSArray *folders = @[[root URLByAppendingPathComponent:@"Components"], [NSBundle.mainBundle.bundleURL URLByAppendingPathComponent:@"Contents/Components"]];
+    for (NSURL *folder in folders)
+        for (NSURL *component in [files contentsOfDirectoryAtURL:folder includingPropertiesForKeys:nil options:0 error:nil] ?: @[]) {
+            if (![component.pathExtension isEqual:@"4dbase"]) continue;
+            NSURL *loose = [component URLByAppendingPathComponent:@"Project/Sources/Forms"];
+            for (NSURL *form in [files contentsOfDirectoryAtURL:loose includingPropertiesForKeys:nil options:0 error:nil] ?: @[]) {
+                NSDictionary *definition = ReadDefinition([form URLByAppendingPathComponent:@"form.4DForm"]);
+                if (definition && !forms[form.lastPathComponent]) forms[form.lastPathComponent] = ObjectsOf(definition);
+            }
+            for (NSURL *archive in [files contentsOfDirectoryAtURL:component includingPropertiesForKeys:nil options:0 error:nil] ?: @[]) {
+                if (![archive.pathExtension.lowercaseString isEqual:@"4dz"]) continue;
+                [ArchivedForms(archive) enumerateKeysAndObjectsUsingBlock:^(NSString *name, NSData *data, BOOL *stop) {
+                    (void)stop;
+                    if (data.length >= 3 && !memcmp(data.bytes, "\xEF\xBB\xBF", 3)) data = [data subdataWithRange:NSMakeRange(3, data.length - 3)];
+                    id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+                    if ([json isKindOfClass:NSDictionary.class] && !forms[name]) forms[name] = ObjectsOf(json);
+                }];
+            }
+        }
+    // 4D Widgets set these from their methods, so their definitions do not name them.
+    NSDictionary *hints = @{
+        @"SearchPicker": @{@"SearchText_Mac": @{@"tooltip": @"Search", @"placeholder": @"Search"}, @"SearchText_Win": @{@"tooltip": @"Search", @"placeholder": @"Search"},
+                           @"CloseButton_Mac": @{@"tooltip": @"Clear search"}, @"CloseButton_Win": @{@"tooltip": @"Clear search"}},
+        @"DateButton": @{@"bTinyCalendar": @{@"tooltip": @"Choose date"}},
+        @"DateEntry": @{@"bTinyCalendar": @{@"tooltip": @"Choose date"}, @"bUp": @{@"tooltip": @"Increase"}, @"bDown": @{@"tooltip": @"Decrease"}}};
+    [hints enumerateKeysAndObjectsUsingBlock:^(NSString *form, NSDictionary *objects, BOOL *stop) {
+        (void)stop;
+        NSMutableDictionary *described = [forms[form] mutableCopy];
+        if (!described) return;
+        [objects enumerateKeysAndObjectsUsingBlock:^(NSString *name, NSDictionary *hint, BOOL *inner) {
+            (void)inner;
+            if (!described[name]) return;
+            NSMutableDictionary *info = [described[name] mutableCopy];
+            [info addEntriesFromDictionary:hint];
+            described[name] = info;
+        }];
+        forms[form] = described;
+    }];
+    return forms;
+}
+
 // Index every form definition under a project's Sources folder.
 static void LoadIndex(NSURL *sources, void (^done)(NSDictionary *, NSDictionary *)) {
     NSMutableDictionary *forms = [NSMutableDictionary new];
@@ -80,6 +170,7 @@ static void LoadIndex(NSURL *sources, void (^done)(NSDictionary *, NSDictionary 
             [byObject[name] addObject:form];
         }
     }];
+    ComponentForms = LoadComponentForms(sources);
     done(forms, byObject);
 }
 
@@ -405,7 +496,8 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         if ([type isEqual:@"subform"]) {
             // A page subform shows a project form of its own: its objects take its place.
             CALayer *context = AXBInternalSubformContext(layer);
-            NSDictionary *inner = [info[@"detailForm"] isKindOfClass:NSString.class] && !info[@"listForm"] ? Forms[info[@"detailForm"]] : nil;
+            NSString *detail = [info[@"detailForm"] isKindOfClass:NSString.class] && !info[@"listForm"] ? info[@"detailForm"] : nil;
+            NSDictionary *inner = detail ? (Forms[detail] ?: ComponentForms[detail]) : nil;
             if (context && inner && depth < 3)
                 [entries addObjectsFromArray:FormEntries(context, inner, [NSString stringWithFormat:@"%@%@/", prefix, layer.name], depth + 1)];
             continue;
@@ -586,7 +678,18 @@ void AXBGenericFormsShutdown(void) {
     if (CloseObserver) [NSNotificationCenter.defaultCenter removeObserver:CloseObserver];
     KeyObserver = CloseObserver = nil;
     for (NSWindow *window in Overlays.keyEnumerator.allObjects) RemoveOverlay(window, [Overlays objectForKey:window]);
-    Overlays = nil; Matches = nil; Forms = nil; FormsByObject = nil; States = nil;
+    Overlays = nil; Matches = nil; Forms = nil; FormsByObject = nil; States = nil; ComponentForms = nil;
+}
+
+NSDictionary<NSString *, NSDictionary *> *AXBGenericFormsArchivedFormsForTesting(NSString *path) {
+    NSMutableDictionary *forms = [NSMutableDictionary new];
+    [ArchivedForms([NSURL fileURLWithPath:path]) enumerateKeysAndObjectsUsingBlock:^(NSString *name, NSData *data, BOOL *stop) {
+        (void)stop;
+        if (data.length >= 3 && !memcmp(data.bytes, "\xEF\xBB\xBF", 3)) data = [data subdataWithRange:NSMakeRange(3, data.length - 3)];
+        id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        if ([json isKindOfClass:NSDictionary.class]) forms[name] = ObjectsOf(json);
+    }];
+    return forms;
 }
 
 void AXBGenericFormsEnableForTesting(NSDictionary<NSString *, NSDictionary *> *definitions) {
