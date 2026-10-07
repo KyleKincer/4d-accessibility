@@ -33,7 +33,7 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
             (void)inner;
             if (![object isKindOfClass:NSDictionary.class]) return;
             NSMutableDictionary *info = [@{@"page": @(number)} mutableCopy];
-            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight"])
+            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight", @"detailForm", @"listForm"])
                 if (object[key] && ![object[key] isKindOfClass:NSDictionary.class] && ![object[key] isKindOfClass:NSArray.class]) info[key] = object[key];
             // A list box's columns: their titles and widths, as defined.
             if ([object[@"columns"] isKindOfClass:NSArray.class]) {
@@ -374,7 +374,7 @@ static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect obj
     return @{@"columns": columns, @"rows": rows, @"header": [NSValue valueWithRect:header]};
 }
 
-static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString *, NSDictionary *> *objects) {
+static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString *, NSDictionary *> *objects, NSString *prefix, NSUInteger depth) {
     NSMutableArray<CALayer *> *layers = [NSMutableArray new];
     for (CALayer *layer in form.sublayers)
         if (layer.name && objects[layer.name] && !layer.hidden && NSIntersectsRect(layer.frame, form.bounds)) [layers addObject:layer];
@@ -400,9 +400,16 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         NSString *title = Plain(drawn) ?: Plain(info[@"text"]);
         NSString *help = Plain(info[@"tooltip"]);
         NSRect area = ObjectArea(layer, info);
-        NSMutableDictionary *entry = [@{@"key": layer.name, @"layer": layer} mutableCopy];
+        NSMutableDictionary *entry = [@{@"key": [prefix stringByAppendingString:layer.name], @"layer": layer} mutableCopy];
         if (!NSEqualRects(area, layer.bounds)) entry[@"area"] = [NSValue valueWithRect:area];
-        if ([@[@"button", @"pictureButton"] containsObject:type]) {
+        if ([type isEqual:@"subform"]) {
+            // A page subform shows a project form of its own: its objects take its place.
+            CALayer *context = AXBInternalSubformContext(layer);
+            NSDictionary *inner = [info[@"detailForm"] isKindOfClass:NSString.class] && !info[@"listForm"] ? Forms[info[@"detailForm"]] : nil;
+            if (context && inner && depth < 3)
+                [entries addObjectsFromArray:FormEntries(context, inner, [NSString stringWithFormat:@"%@%@/", prefix, layer.name], depth + 1)];
+            continue;
+        } else if ([@[@"button", @"pictureButton"] containsObject:type]) {
             if (!title && !help) continue; // An unlabelled button cannot be named.
             entry[@"role"] = NSAccessibilityButtonRole;
             if (!Plain(drawn)) entry[@"label"] = title ?: help;
@@ -486,7 +493,7 @@ BOOL AXBGenericFormsRefreshWindow(NSWindow *window) {
         [Matches setObject:match forKey:window];
     }
     NSDictionary *objects = [match[@"form"] length] ? Forms[match[@"form"]] : nil;
-    NSArray *entries = objects ? FormEntries(form, objects) : nil;
+    NSArray *entries = objects ? FormEntries(form, objects, @"", 0) : nil;
     if (!entries.count) { RemoveOverlay(window, overlay); return NO; }
     BOOL created = NO;
     if (!overlay || overlay.formView != view) {
