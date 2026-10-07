@@ -7,6 +7,7 @@
 #import "DrawnText.h"
 #import "MessageDialogs.h"
 #import "ProgressWindows.h"
+#import "QueryEditor.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <cstdio>
@@ -867,6 +868,109 @@ static void ProgressWindowsTest(void) {
     Check(!AXBProgressRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without progress forms is left untouched");
     [window close]; Pump();
 }
+static id QueryElement(NSView *form, NSString *key) {
+    return ProgressElement(form, [@"axb/query/" stringByAppendingString:key]);
+}
+// One criterion line: a subform whose form context holds the line form's objects.
+static CALayer *QueryLine(CALayer *window, NSString *name, NSRect frame, NSString *field, NSString *comparison, NSString *value, BOOL conjunction) {
+    CALayer *subform = MessageLayer(window, name, frame, nil);
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = subform.bounds;
+    [subform addSublayer:context];
+    if (conjunction) MessageLayer(context, @"operator", NSMakeRect(-10, 6, 90, 39), @[@"And"]);
+    MessageLayer(context, @"target", NSMakeRect(65, -4, 264, 48), @[field]);
+    MessageLayer(context, @"b.field", NSMakeRect(304, 13, 28, 28), nil);
+    MessageLayer(context, @"popup.0", NSMakeRect(322, 7, 188, 39), @[comparison]);
+    MessageLayer(context, @"box.1", NSMakeRect(495, -3, 308, 46), @[value]);
+    MessageLayer(context, @"old_value", NSMakeRect(-10, -75, 182, 48), @[@"0"]);
+    MessageLayer(context, @"delete", NSMakeRect(780, 13, 28, 28), nil);
+    MessageLayer(context, @"add", NSMakeRect(799, 13, 28, 28), nil);
+    return context;
+}
+static void QueryEditorTest(void) {
+    // 4D's Query editor is a form of its internal runtime component, drawn as named layers.
+    AXBQueryEditorEnableForTesting();
+    NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(200, 300, 840, 160) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
+    window.releasedWhenClosed = NO; window.title = @"AXB Query editor";
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    MessageLayer(context, @"top.button.action", NSMakeRect(-6, 133, 50, 35), nil);
+    MessageLayer(context, @"top.button.destination", NSMakeRect(33, 133, 190, 35), @[@"Create new selection"]);
+    MessageLayer(context, @"Text", NSMakeRect(14, 103, 66, 16), @[@"Find:"]);
+    MessageLayer(context, @"Text1", NSMakeRect(984, -110, 551, 96), @[@"A note left in the form"]);
+    CALayer *second = QueryLine(context, @"queryLine2", NSMakeRect(10, 50, 822, 36), @"[Orders]Amount", @"is strictly greater than", @"Number", YES).superlayer;
+    CALayer *first = QueryLine(context, @"queryLine1", NSMakeRect(10, 86, 822, 36), @"[Orders]Customer", @"starts with", @"Customer 3", NO);
+    MessageLayer(context, @"bottom.b.cancel", NSMakeRect(635, 15, 90, 30), @[@"Cancel"]);
+    MessageLayer(context, @"bottom.b.query", NSMakeRect(735, 15, 90, 30), @[@"Query"]);
+    Check(AXBQueryEditorRefreshWindow(window), "a window holding the Query editor's form is published");
+    NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
+    NSArray *expected = @[@"axb/query/options", @"axb/query/destination", @"axb/query/line1/target", @"axb/query/line1/popup.0", @"axb/query/line1/box.1",
+        @"axb/query/line1/delete", @"axb/query/line1/add", @"axb/query/line2/operator", @"axb/query/line2/target", @"axb/query/line2/popup.0",
+        @"axb/query/line2/box.1", @"axb/query/line2/delete", @"axb/query/line2/add", @"axb/query/cancel", @"axb/query/query"];
+    Check([keys isEqual:expected], "each criterion is published top to bottom between the editor's top buttons and Cancel and Query; notes and copies are not");
+    id field = QueryElement(form, @"line1/target"), comparison = QueryElement(form, @"line1/popup.0"), value = QueryElement(form, @"line1/box.1");
+    Check([[field accessibilityRole] isEqual:NSAccessibilityPopUpButtonRole] && [[field accessibilityLabel] isEqual:@"Field"] &&
+          [[field accessibilityValue] isEqual:@"[Orders]Customer"], "a criterion's field is a pop-up button showing the field");
+    Check([[comparison accessibilityLabel] isEqual:@"Comparison"] && [[comparison accessibilityValue] isEqual:@"starts with"] &&
+          [comparison isAccessibilitySelectorAllowed:@selector(accessibilityPerformShowMenu)], "its comparison is a pop-up button that opens 4D's menu");
+    Check([[value accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[value accessibilityValue] isEqual:@"Customer 3"] &&
+          [value isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)] && [value isAccessibilitySelectorAllowed:@selector(setAccessibilityFocused:)],
+          "its value is an editable text field");
+    id empty = QueryElement(form, @"line2/box.1");
+    Check([[empty accessibilityValue] isEqual:@""] && [[empty accessibilityPlaceholderValue] isEqual:@"Number"], "an empty value's drawn placeholder is its placeholder, not its value");
+    Check([[QueryElement(form, @"line2/operator") accessibilityValue] isEqual:@"And"] && [[QueryElement(form, @"line1/add") accessibilityLabel] isEqual:@"Add line"] &&
+          [[QueryElement(form, @"options") accessibilityLabel] isEqual:@"Query options"], "the conjunction and the icon buttons are labelled");
+    // Pressing the field clicks its arrow, which opens the field list.
+    CALayer *arrow = nil;
+    for (CALayer *layer in first.sublayers) if ([layer.name isEqual:@"b.field"]) arrow = layer;
+    NSRect arrowFrame = [arrow.superlayer convertRect:NSInsetRect(arrow.frame, 5, 5) toLayer:form.layer];
+    NSPoint expectedPoint = [form convertPoint:NSMakePoint(NSMidX(arrowFrame), NSMidY(arrowFrame)) toView:nil];
+    Check([field accessibilityPerformPress], "pressing the field is accepted");
+    NSEvent *down = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(down && fabs(down.locationInWindow.x - expectedPoint.x) < 2 && fabs(down.locationInWindow.y - expectedPoint.y) < 2,
+          "the press is an ordinary click on the field's arrow");
+    // The field list: one layer drawn with every item.
+    // 4D opens it just below the field it chooses for.
+    NSRect fieldFrame = [field accessibilityFrame];
+    NSWindow *chooser = [[NSWindow alloc] initWithContentRect:NSMakeRect(NSMinX(fieldFrame) + 10, NSMinY(fieldFrame) - 241, 231, 241) styleMask:NSWindowStyleMaskBorderless
+                                                      backing:NSBackingStoreBuffered defer:NO];
+    chooser.releasedWhenClosed = NO;
+    [chooser orderFront:nil]; Pump();
+    NSView *listForm = [[NSView alloc] initWithFrame:chooser.contentView.bounds];
+    listForm.wantsLayer = YES;
+    [chooser.contentView addSubview:listForm];
+    CALayer *listContext = [CALayer layer]; listContext.name = @"formContext"; listContext.frame = listForm.layer.bounds;
+    [listForm.layer addSublayer:listContext];
+    CALayer *list = MessageLayer(listContext, @"table.list", NSMakeRect(-5, -4, 240, 250), @[@"[Orders]", @"Amount", @"Customer", @"id"]);
+    AXBDrawnTextRecordOriginsForTesting(list, @[[NSValue valueWithPoint:NSMakePoint(39, 18.5)], [NSValue valueWithPoint:NSMakePoint(54, 36.5)],
+        [NSValue valueWithPoint:NSMakePoint(54, 54.5)], [NSValue valueWithPoint:NSMakePoint(54, 72.5)]]);
+    MessageLayer(listContext, @"b.done", NSMakeRect(381, 184, 77, 32), @[@"Return"]);
+    Check(AXBQueryEditorRefreshWindow(chooser), "the field list is published");
+    NSArray *rows = ProgressChildren(listForm);
+    Check([[rows valueForKey:@"accessibilityLabel"] isEqual:(@[@"[Orders]", @"Amount", @"Customer", @"id"])] &&
+          [[rows.firstObject accessibilityRole] isEqual:NSAccessibilityButtonRole], "each item of the list is a button, in the list's order");
+    NSRect top = [rows[0] accessibilityFrame], next = [rows[1] accessibilityFrame];
+    Check(fabs(NSHeight(top) - 18) < 0.5 && fabs(NSMinY(top) - NSMaxY(next)) < 0.5 && NSMinY(top) > NSMinY(next),
+          "each item covers its own line, one line height apart, the first at the top");
+    Check(NSApp.accessibilityApplicationFocusedUIElement == rows[2], "the list starts on the field the criterion shows");
+    NSPoint rowCenter = [chooser convertPointFromScreen:NSMakePoint(NSMidX([rows[1] accessibilityFrame]), NSMidY([rows[1] accessibilityFrame]))];
+    Check([rows[1] accessibilityPerformPress], "pressing an item is accepted");
+    down = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(down && down.window == chooser && fabs(down.locationInWindow.y - rowCenter.y) < 2, "the press is an ordinary click on that item's line");
+    [chooser close]; Pump();
+    Check(NSApp.accessibilityApplicationFocusedUIElement != rows[2], "closing the list releases its focus");
+    [second removeFromSuperlayer];
+    AXBQueryEditorRefreshWindow(window);
+    Check(!QueryElement(form, @"line2/operator") && QueryElement(form, @"line1/target") == field, "a removed criterion leaves the tree; the others keep their elements");
+    [first.superlayer removeFromSuperlayer];
+    Check(!AXBQueryEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without criteria is left untouched");
+    [window close]; Pump();
+}
 static AXBWindowView *BridgeView(NSWindow *window) {
     NSMutableArray<NSView *> *pending = [NSMutableArray arrayWithObject:window.contentView];
     while (pending.count) {
@@ -1651,6 +1755,7 @@ int main(void) {
         ButtonMenuTest();
         MessageDialogsTest();
         ProgressWindowsTest();
+        QueryEditorTest();
         FocusAfterLayoutTest();
         ParkedControlsTest();
         SelectionInputTest();

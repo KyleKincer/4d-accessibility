@@ -13,7 +13,3 @@ void AXBMessagesShutdown(void);
 BOOL AXBMessagesRefreshWindow(NSWindow *window);
 // Test support: enable the provider without 4D's drawing images.
 void AXBMessagesEnableForTesting(void);
-// Shared with the other internal 4D forms: the view whose layer holds a form's
-// formContext layer, or nil when an integrated form owns the window; and that layer.
-NSView *AXBInternalFormView(NSWindow *window);
-CALayer *AXBInternalFormContext(NSView *view);
