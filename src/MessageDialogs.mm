@@ -170,21 +170,21 @@ static NSString *Joined(NSArray<NSString *> *texts) {
 }
 @end
 
-static CALayer *FormContext(NSView *view) {
+CALayer *AXBInternalFormContext(NSView *view) {
     for (CALayer *layer in view.layer.sublayers) if ([layer.name isEqual:@"formContext"]) return layer;
     return nil;
 }
 
 static NSMapTable<NSWindow *, AXBMessageView *> *Overlays;
 
-static NSView *MessageFormView(NSWindow *window) {
+NSView *AXBInternalFormView(NSWindow *window) {
     NSMutableArray<NSView *> *pending = window.contentView ? [NSMutableArray arrayWithObject:window.contentView] : [NSMutableArray new];
     NSView *form = nil;
     NSUInteger visited = 0;
     while (pending.count && visited++ < 64) {
         NSView *view = pending.firstObject; [pending removeObjectAtIndex:0];
         if ([view isKindOfClass:AXBWindowView.class]) return nil; // An integrated form owns its window.
-        if (!form && FormContext(view)) form = view;
+        if (!form && AXBInternalFormContext(view)) form = view;
         [pending addObjectsFromArray:view.subviews];
     }
     return pending.count ? nil : form; // Too many views to rule out an integrated form.
@@ -304,7 +304,7 @@ static const NSTimeInterval SettleInterval = 0.5;
 }
 - (BOOL)update {
     NSView *view = self.formView;
-    CALayer *form = FormContext(view);
+    CALayer *form = AXBInternalFormContext(view);
     if (!view.window || !form) return NO;
     NSMutableDictionary<NSString *, CALayer *> *layers = [NSMutableDictionary new];
     for (CALayer *layer in form.sublayers) {
@@ -362,7 +362,7 @@ static const NSTimeInterval SettleInterval = 0.5;
 BOOL AXBMessagesRefreshWindow(NSWindow *window) {
     if (!window || !Overlays) return NO;
     AXBMessageView *overlay = [Overlays objectForKey:window];
-    NSView *view = MessageFormView(window);
+    NSView *view = AXBInternalFormView(window);
     if (!view) {
         RemoveOverlay(window, overlay);
         return NO;
@@ -372,7 +372,7 @@ BOOL AXBMessagesRefreshWindow(NSWindow *window) {
         RemoveOverlay(window, overlay);
         overlay = [[AXBMessageView alloc] initWithFrame:view.bounds];
         overlay.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
-        overlay.formView = view; overlay.formLayer = FormContext(view);
+        overlay.formView = view; overlay.formLayer = AXBInternalFormContext(view);
         overlay.elements = [NSMutableDictionary new]; overlay.order = @[];
         overlay.publishedAt = NSProcessInfo.processInfo.systemUptime;
         created = YES;
@@ -405,8 +405,8 @@ static NSWindow *WindowForLayer(CALayer *layer) {
     CALayer *form = layer.superlayer;
     for (NSWindow *window in Overlays.keyEnumerator.allObjects) if ([Overlays objectForKey:window].formLayer == form) return window;
     for (NSWindow *window in NSApp.windows) {
-        NSView *view = window.isVisible ? MessageFormView(window) : nil;
-        if (view && FormContext(view) == form) return window;
+        NSView *view = window.isVisible ? AXBInternalFormView(window) : nil;
+        if (view && AXBInternalFormContext(view) == form) return window;
     }
     return nil;
 }
@@ -428,7 +428,7 @@ void AXBMessagesInitialize(void) {
     if (Overlays) return;
     if (!AXBDrawnTextInitialize()) return;
     Overlays = [NSMapTable weakToStrongObjectsMapTable];
-    AXBDrawnTextSetObserver(MessageNames(), ^(CALayer *layer) {
+    AXBDrawnTextSetObserver(@"messages", MessageNames(), ^(CALayer *layer) {
         if (![layer.superlayer.name isEqual:@"formContext"]) return;
         NSWindow *window = WindowForLayer(layer);
         if (window) AXBMessagesRefreshWindow(window);
@@ -438,7 +438,7 @@ void AXBMessagesInitialize(void) {
 
 void AXBMessagesShutdown(void) {
     if (!Overlays) return;
-    AXBDrawnTextSetObserver(nil, nil);
+    AXBDrawnTextSetObserver(@"messages", nil, nil);
     if (KeyObserver) [NSNotificationCenter.defaultCenter removeObserver:KeyObserver];
     if (CloseObserver) [NSNotificationCenter.defaultCenter removeObserver:CloseObserver];
     if (UpdateObserver) [NSNotificationCenter.defaultCenter removeObserver:UpdateObserver];
