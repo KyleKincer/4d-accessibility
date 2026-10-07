@@ -1,3 +1,18 @@
+# 0.31.0, tab controls, column titles and keyboard focus in forms without a bridge area
+
+Forms without a bridge area are described more fully, still by the native plugin alone:
+- **List box column titles** are the ones 4D draws. 4D's GUI framework draws them with HIToolbox, which the plugin now observes in 4D's own images. A column the application renamed, hid or resized keeps its drawn title, and the titles follow the application's run-time column changes. Two titles drawn side by side split a column whose separator was not found.
+- **Tab controls** are published as a radio button per tab, named by the label 4D draws in its segment. The chosen tab is the segment macOS draws lighter. A press is an ordinary click, so the tab control's own action, such as going to a page, runs.
+- **Keyboard focus** follows 4D's, so VoiceOver follows Tab and Shift-Tab. 4D's form view is the window's text-input client, and the first rectangle of its selection is where its focus is: the caret in a field, a list box's top left corner. That finds focus even where a form hides its focus ring, as many applications do on list boxes. macOS's focus ring, drawn into the focused control's own layer, is also read on fields, drop-down lists, list boxes, checkboxes and radio buttons. Buttons have neither, so focus on a button is not reported.
+
+[Forms without a bridge area](tests/GENERIC-FORMS.md); [acceptance](validation/generic-forms-development.json).
+
+On Symphony's unintegrated Manufacturers window, the plugin alone publishes all three list boxes' drawn column titles and both tab controls. Pressing a tab of its column filter changes the list's columns, and the published titles follow. Tab moves the focused element from list box to list box, and VoiceOver follows.
+
+For developers: `AXBDrawnTextForLayer` and `AXBDrawnTextOriginsForLayer` are unchanged and leave HIToolbox's themed text out. `AXBDrawnTextWithThemedForLayer`, `AXBDrawnTextOriginsWithThemedForLayer` and `AXBDrawnTextThemedBoxesForLayer` include it. Internal-form entries accept `focused`.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.30.0, forms without a bridge area, and the Quick Report editor
 
 An application form without a bridge area is now described by the native plugin alone, with no host change. The plugin indexes the open project's form definitions, and those of its components and of 4D's own, such as 4D Widgets. It matches each window to its form by the objects 4D draws, and publishes, in reading order:
