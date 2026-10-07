@@ -4,6 +4,7 @@
 #include "Area.h"
 #include "Limits.h"
 #import "NativeLayout.h"
+#import "GenericForms.h"
 #include <vector>
 
 static NSString *TextParameter(PA_PluginParameters parameters, short index, NSUInteger limit) {
@@ -17,6 +18,14 @@ static void ReturnText(PA_PluginParameters parameters, NSString *value) {
     std::vector<PA_Unichar> chars(value.length + 1, 0);
     [value getCharacters:chars.data() range:NSMakeRange(0, value.length)];
     PA_ReturnString(parameters, chars.data());
+}
+// The open project's file, to read its form definitions.
+static NSString *StructurePath(void) {
+    PA_Unistring path = PA_GetStructureFullPath();
+    PA_long32 length = PA_GetUnistringLength(&path);
+    NSString *result = length > 0 ? [[NSString alloc] initWithCharacters:PA_GetUnistring(&path) length:length] : nil;
+    PA_DisposeUnistring(&path);
+    return result;
 }
 @interface AXBFocusRequest : NSObject
 @property(nonatomic) void *nativeWindow;
@@ -38,7 +47,7 @@ static void ReadNativeFocus(void *parameter) {
 extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
     @autoreleasepool {
         switch (selector) {
-            case kInitPlugin:
+            case kInitPlugin: AXBInitialize(); AXBGenericFormsInitialize(StructurePath()); break;
             case kServerInitPlugin: AXBInitialize(); break;
             case kDeinitPlugin:
             case kServerDeinitPlugin: AXBAreaShutdown();

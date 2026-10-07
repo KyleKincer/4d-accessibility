@@ -9,6 +9,7 @@
 #import "ProgressWindows.h"
 #import "QueryEditor.h"
 #import "QuickReport.h"
+#import "GenericForms.h"
 #import <objc/runtime.h>
 
 static NSMutableDictionary<NSString *, AXBSession *> *sessions;
@@ -1532,7 +1533,7 @@ void AXBShutdown(void) {
     // No monitor is held, and cleanup never calls 4D or waits for the form.
     dispatch_block_t cleanup = ^{
         for (AXBWindowView *v in views.allValues) [v invalidate];
-        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown();
+        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBGenericFormsShutdown();
         if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
         helpTipObserver = nil;
     };
