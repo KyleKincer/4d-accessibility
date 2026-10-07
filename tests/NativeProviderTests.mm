@@ -1062,6 +1062,7 @@ static void GenericFormsTest(void) {
         @"btnUnnamed": @{@"type": @"button", @"width": @24, @"height": @24},
         @"btnSave": @{@"type": @"button", @"text": @"Save", @"width": @90, @"height": @24},
         @"line": @{@"type": @"line"},
+        @"tabPages": @{@"type": @"tab", @"width": @200, @"height": @24},
         @"listOrders": @{@"type": @"listbox", @"width": @262, @"height": @96, @"columns": @[@{@"header": @{@"text": @"Customer"}, @"width": @160},
                                                                                          @{@"header": @{@"text": @"Amount"}, @"width": @80}]}}}]};
     NSMutableDictionary *withSubform = [definition mutableCopy];
@@ -1163,6 +1164,31 @@ static void GenericFormsTest(void) {
           [cells isEqual:(@[@[@"Ada", @"2019", @"10"]])], "two titles drawn side by side in one column are two columns");
     AXBDrawnTextRecordThemedForTesting(list, nil);
     [list removeFromSuperlayer];
+    // A tab control: HIToolbox draws each label in its segment's box, and the chosen segment lighter.
+    CALayer *tabs = MessageLayer(context, @"tabPages", NSMakeRect(190, 60, 200, 24), @[@"Details", @"Notes"]);
+    CGColorSpaceRef gray = CGColorSpaceCreateDeviceGray();
+    CGContextRef paint = CGBitmapContextCreate(NULL, 200, 24, 8, 0, gray, kCGImageAlphaNone);
+    CGContextSetGrayFillColor(paint, 0.86, 1); CGContextFillRect(paint, CGRectMake(0, 0, 200, 24));
+    CGContextSetGrayFillColor(paint, 1, 1); CGContextFillRect(paint, CGRectMake(0, 0, 100, 24));
+    CGImageRef track = CGBitmapContextCreateImage(paint);
+    tabs.contents = (__bridge id)track;
+    CGImageRelease(track); CGContextRelease(paint); CGColorSpaceRelease(gray);
+    AXBDrawnTextRecordForTesting(tabs, @[@"Details", @"Notes"]);
+    AXBDrawnTextRecordOriginsForTesting(tabs, @[[NSValue valueWithPoint:NSMakePoint(0, 12)], [NSValue valueWithPoint:NSMakePoint(100, 12)]]);
+    AXBDrawnTextRecordThemedBoxesForTesting(tabs, @{@0: [NSValue valueWithRect:NSMakeRect(0, 0, 100, 24)], @1: [NSValue valueWithRect:NSMakeRect(100, 0, 100, 24)]});
+    AXBGenericFormsRefreshWindow(window);
+    id details = ProgressElement(form, @"axb/form/tabPages/Details"), notes = ProgressElement(form, @"axb/form/tabPages/Notes");
+    NSRect notesFrame = [notes accessibilityFrame];
+    NSRect segment = [window convertRectToScreen:[form convertRect:NSMakeRect(290, 60, 100, 24) toView:nil]];
+    Check([[details accessibilityRole] isEqual:NSAccessibilityRadioButtonRole] && [[details accessibilityLabel] isEqual:@"Details"] &&
+          [[details accessibilityValue] isEqual:@1] && [[notes accessibilityValue] isEqual:@0] && NSEqualRects(NSIntegralRect(notesFrame), NSIntegralRect(segment)),
+          "a tab control's tabs are radio buttons named by their drawn labels, each its segment, the lighter one chosen");
+    [notes accessibilityPerformPress];
+    click = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    center = [window convertPointFromScreen:NSMakePoint(NSMidX(segment), NSMidY(segment))];
+    Check(click && fabs(click.locationInWindow.x - center.x) < 2 && fabs(click.locationInWindow.y - center.y) < 2, "pressing a tab is an ordinary click on its segment");
+    [tabs removeFromSuperlayer];
     AXBDrawnTextRecordForTesting(input, @[@"Ada Lovelace"]);
     AXBGenericFormsRefreshWindow(window);
     Check(ProgressElement(form, @"axb/form/inputName") == field && [[field accessibilityValue] isEqual:@"Ada Lovelace"], "a redrawn value updates the same element");

@@ -69,7 +69,11 @@ def main():
     logged = {'method': 'ObjectMethods/Event.4dm', 'events': ['onClick']}
     # The form renames a column when it loads, so only the title 4D draws names it.
     form = {'windowTitle': TITLE, 'width': 420, 'height': 420, 'destination': 'detailScreen', 'method': 'method.4dm', 'events': ['onLoad'],
-            'pages': [None, {'objects': {
+            # Page 0, shown on every page: a tab control that goes to its pages, and Done.
+            'pages': [{'objects': {
+        'tabPages': {'type': 'tab', 'labels': ['Details', 'Notes'], 'action': 'gotoPage', 'left': 20, 'top': 380, 'width': 200, 'height': 24},
+        'btnDone': {'type': 'button', 'text': 'Done', 'action': 'accept', 'left': 310, 'top': 380, 'width': 90, 'height': 24},
+    }}, {'objects': {
         'title': {'type': 'text', 'text': 'Customer details', 'left': 20, 'top': 16, 'width': 300, 'height': 18},
         'labelName': {'type': 'text', 'text': 'Name:', 'left': 20, 'top': 50, 'width': 60, 'height': 17},
         'inputName': {'type': 'input', 'dataSource': 'Form.name', 'left': 90, 'top': 48, 'width': 200, 'height': 18, 'placeholder': 'Full name'},
@@ -82,7 +86,6 @@ def main():
         'btnSave': {'type': 'button', 'text': 'Save', 'left': 20, 'top': 220, 'width': 90, 'height': 24, **logged},
         'btnHelp': {'type': 'button', 'style': 'custom', 'tooltip': 'Help', 'left': 120, 'top': 220, 'width': 24, 'height': 24, **logged},
         'btnUnnamed': {'type': 'button', 'style': 'custom', 'left': 150, 'top': 220, 'width': 24, 'height': 24},
-        'btnDone': {'type': 'button', 'text': 'Done', 'action': 'accept', 'left': 310, 'top': 380, 'width': 90, 'height': 24},
         'search': {'type': 'subform', 'detailForm': 'SearchBox', 'dataSource': 'Form.search', 'left': 300, 'top': 12, 'width': 110, 'height': 26},
         'widgetSearch': {'type': 'subform', 'detailForm': 'SearchPicker', 'dataSource': 'Form.query', 'left': 300, 'top': 176, 'width': 110, 'height': 30},
         'labelOrders': {'type': 'text', 'text': 'Orders', 'left': 20, 'top': 256, 'width': 120, 'height': 17},
@@ -91,6 +94,8 @@ def main():
                        'events': ['onSelectionChange'], 'columns': [
                            {'name': 'colCustomer', 'dataSource': 'This.customer', 'width': 160, 'header': {'name': 'headCustomer', 'text': 'Customer'}},
                            {'name': 'colAmount', 'dataSource': 'This.amount', 'width': 80, 'header': {'name': 'headAmount', 'text': 'Amount'}}]},
+    }}, {'objects': {
+        'labelNotes': {'type': 'text', 'text': 'Order notes', 'left': 20, 'top': 50, 'width': 200, 'height': 17},
     }}]}
     # A page subform's own form: a search field and its Go button, whose method records it.
     search = {'width': 110, 'height': 26, 'destination': 'detailScreen', 'pages': [None, {'objects': {

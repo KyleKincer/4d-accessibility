@@ -177,7 +177,7 @@ def main():
         order = list(published())
         report["published"] = order
         check(order == ["title", "search/inputSearch", "search/btnGo", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier", "widgetSearch/SearchText_Mac",
-                        "btnSave", "btnHelp", "labelOrders", "listOrders", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
+                        "btnSave", "btnHelp", "labelOrders", "listOrders", "tabPages/Details", "tabPages/Notes", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
         name, city = element("inputName"), element("inputCity")
         check(name.read("AXRole") == "AXTextField" and name.read("AXDescription") == "Name" and name.read("AXValue") == "" and
               name.read("AXPlaceholderValue") == "Full name" and city.read("AXDescription") == "City" and city.read("AXValue") == "Lyon",
@@ -228,6 +228,10 @@ def main():
             ax.wait_for(saved, "Save's record", timeout=10)
             values = saved()[-1]
             check(values["name"] == "Ada" and values["active"] is True, "VO-Space runs Save, which reads the form's values")
+            check(vo_to(lambda ph: "Notes" in ph and "radio" in ph), "VoiceOver reads a tab by its drawn label")
+            front(); vo.key("space", vo.VO)
+            ax.wait_for(lambda: element("labelNotes") is not None and element("inputName") is None, "The Notes page", timeout=10)
+            check(element("tabPages/Notes").read("AXValue") is True, "VO-Space on a tab shows its page, and the tab is chosen")
         else:
             assert name.set_text("Ada Lovelace") == 0
             ax.wait_for(lambda: element("inputName").read("AXValue") == "Ada Lovelace", "The written name", timeout=10)
@@ -273,6 +277,14 @@ def main():
             values = saved()[-1]
             check(values == {"name": "Ada Lovelace", "city": "Paris", "active": True, "retail": 0, "wholesale": 1, "tier": 1, "query": "Ada"},
                   "pressing Save runs its method, which reads every value set through accessibility")
+            check(element("tabPages/Details").read("AXRole") == "AXRadioButton" and element("tabPages/Details").read("AXValue") is True and
+                  element("tabPages/Notes").read("AXValue") is False, "a tab control's tabs are radio buttons named by their drawn labels; the current page's is chosen")
+            assert element("tabPages/Notes").perform("AXPress") == 0
+            ax.wait_for(lambda: element("labelNotes") is not None and element("inputName") is None and element("tabPages/Notes").read("AXValue") is True,
+                        "The Notes page", timeout=10)
+            check(True, "pressing a tab shows its page through the tab control's own action, and the tab is chosen")
+            assert element("tabPages/Details").perform("AXPress") == 0
+            ax.wait_for(lambda: element("inputName") is not None and element("labelNotes") is None, "The Details page", timeout=10)
             check(all(e["runId"] == run_id and e["compiled"] == args.compiled for e in events()), "every event belongs to this run")
             assert element("btnDone").perform("AXPress") == 0
             process.wait(20)

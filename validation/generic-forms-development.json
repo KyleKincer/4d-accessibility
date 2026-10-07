@@ -1,21 +1,21 @@
 {
  "passed": true,
  "date": "2026-10-07",
- "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, and list boxes as tables of their visible rows with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order and operated with ordinary clicks and keys; by AX and by VoiceOver",
- "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a page subform and 4D Widgets' search picker)",
- "pluginSHA256": "6e213efa9bebf770c9fb0e9e5cc8eb40c00f2efcd915ad3a6a588ef72b64829a",
+ "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order and operated with ordinary clicks and keys; by AX and by VoiceOver",
+ "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a tab control going to two pages, a page subform and 4D Widgets' search picker)",
+ "pluginSHA256": "e3810a7a796b3c2df29bb36ca92aa2dba0fa41c44fca58d339fdb6949c2e8290",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
  },
  "runs": {
-  "arm64-compiled-voiceover": 16,
-  "arm64-compiled": 16,
-  "arm64-voiceover": 16,
-  "arm64": 16,
-  "x86_64-compiled-voiceover": 16,
-  "x86_64-compiled": 16,
-  "x86_64": 16
+  "arm64-compiled-voiceover": 18,
+  "arm64-compiled": 18,
+  "arm64-voiceover": 18,
+  "arm64": 18,
+  "x86_64-compiled-voiceover": 18,
+  "x86_64-compiled": 18,
+  "x86_64": 18
  },
  "checks": [
   "the form is pixel-identical to the plugin-free form",
@@ -32,6 +32,8 @@
   "a page subform's own objects are published in its place, and operated within it",
   "4D Widgets' search picker, from 4D's own component, is a text field labelled Search",
   "pressing Save runs its method, which reads every value set through accessibility",
+  "a tab control's tabs are radio buttons named by their drawn labels; the current page's is chosen",
+  "pressing a tab shows its page through the tab control's own action, and the tab is chosen",
   "every event belongs to this run",
   "Done closes the form through its standard action",
   "VoiceOver reaches the form",
@@ -44,7 +46,9 @@
   "interacting with it reads the first row's cell with its column title",
   "VO-Down moves to the next row",
   "the row VoiceOver reaches is selected once, through the list box's own handling",
-  "VO-Space runs Save, which reads the form's values"
+  "VO-Space runs Save, which reads the form's values",
+  "VoiceOver reads a tab by its drawn label",
+  "VO-Space on a tab shows its page, and the tab is chosen"
  ],
  "voiceOverSpeech": [
   "4D AX bridge generic form window Customer details has keyboard focus",
