@@ -1052,7 +1052,9 @@ static void GenericFormsTest(void) {
         @"btnHelp": @{@"type": @"button", @"tooltip": @"Help", @"width": @24, @"height": @24},
         @"btnUnnamed": @{@"type": @"button", @"width": @24, @"height": @24},
         @"btnSave": @{@"type": @"button", @"text": @"Save", @"width": @90, @"height": @24},
-        @"line": @{@"type": @"line"}}}]};
+        @"line": @{@"type": @"line"},
+        @"listOrders": @{@"type": @"listbox", @"width": @262, @"height": @96, @"columns": @[@{@"header": @{@"text": @"Customer"}, @"width": @160},
+                                                                                         @{@"header": @{@"text": @"Amount"}, @"width": @80}]}}}]};
     AXBGenericFormsEnableForTesting(@{@"Customer": definition, @"Other": @{@"pages": @[@{@"objects": @{@"btnSave": @{@"type": @"button"}}}]}});
     NSWindow *window = Window(@"AXB generic form");
     [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
@@ -1086,6 +1088,30 @@ static void GenericFormsTest(void) {
     Check([[active accessibilityRole] isEqual:NSAccessibilityCheckBoxRole] && [active accessibilityValue] == nil,
           "a checkbox whose state is drawn in a custom style reports no value");
     Check([[ProgressElement(form, @"axb/form/btnHelp") accessibilityLabel] isEqual:@"Help"], "an untitled button is labelled by its help tip");
+    // A list box: its cells drawn in one layer, rebuilt into rows by baseline and columns by span.
+    CALayer *list = MessageLayer(context, @"listOrders", NSMakeRect(250, top - 40 - 96 - 10, 282, 116), @[@"Ada", @"10", @"Grace", @"20"]);
+    AXBDrawnTextRecordOriginsForTesting(list, @[[NSValue valueWithPoint:NSMakePoint(13, 42)], [NSValue valueWithPoint:NSMakePoint(173, 42)],
+        [NSValue valueWithPoint:NSMakePoint(13, 62)], [NSValue valueWithPoint:NSMakePoint(173, 62)]]);
+    AXBGenericFormsRefreshWindow(window);
+    id table = ProgressElement(form, @"axb/form/listOrders");
+    NSArray *rows = [table accessibilityRows];
+    NSMutableArray *cells = [NSMutableArray new];
+    for (id row in rows) [cells addObject:[[row accessibilityChildren] valueForKey:@"accessibilityValue"]];
+    Check([[table accessibilityRole] isEqual:NSAccessibilityTableRole] && [[[table accessibilityColumnHeaderUIElements] valueForKey:@"accessibilityValue"] isEqual:(@[@"Customer", @"Amount"])] &&
+          [cells isEqual:(@[@[@"Ada", @"10"], @[@"Grace", @"20"]])], "a list box is a table of its visible rows, with each text in its column and the column titles");
+    id grace = rows[1];
+    NSRect second = [grace accessibilityFrame], firstRow = [rows[0] accessibilityFrame];
+    Check(fabs(NSHeight(second) - 20) < 0.5 && fabs(NSMinY(firstRow) - NSMaxY(second)) < 0.5 && [[[grace accessibilityChildren][0] accessibilityChildren].firstObject accessibilityValue],
+          "each row covers its own line, and each cell holds its text");
+    [table setAccessibilitySelectedRows:@[grace]];
+    NSEvent *click = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSPoint center = [window convertPointFromScreen:NSMakePoint(NSMidX(second), NSMidY(second))];
+    Check(click && fabs(click.locationInWindow.y - center.y) < 2, "selecting a row is an ordinary click on it");
+    [table setAccessibilitySelectedRows:@[grace]];
+    Check([NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:0.8] inMode:NSDefaultRunLoopMode dequeue:YES] == nil,
+          "asking again for the row just asked for does not click it again");
+    [list removeFromSuperlayer];
     AXBDrawnTextRecordForTesting(input, @[@"Ada Lovelace"]);
     AXBGenericFormsRefreshWindow(window);
     Check(ProgressElement(form, @"axb/form/inputName") == field && [[field accessibilityValue] isEqual:@"Ada Lovelace"], "a redrawn value updates the same element");

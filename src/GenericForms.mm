@@ -32,8 +32,20 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
             (void)inner;
             if (![object isKindOfClass:NSDictionary.class]) return;
             NSMutableDictionary *info = [@{@"page": @(number)} mutableCopy];
-            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style"])
+            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight"])
                 if (object[key] && ![object[key] isKindOfClass:NSDictionary.class] && ![object[key] isKindOfClass:NSArray.class]) info[key] = object[key];
+            // A list box's columns: their titles and widths, as defined.
+            if ([object[@"columns"] isKindOfClass:NSArray.class]) {
+                NSMutableArray *columns = [NSMutableArray new];
+                for (NSDictionary *column in object[@"columns"]) {
+                    if (![column isKindOfClass:NSDictionary.class]) continue;
+                    NSDictionary *header = [column[@"header"] isKindOfClass:NSDictionary.class] ? column[@"header"] : nil;
+                    [columns addObject:@{@"header": [header[@"text"] isKindOfClass:NSString.class] ? header[@"text"] : @"",
+                                         @"width": [column[@"width"] isKindOfClass:NSNumber.class] ? column[@"width"] : @80,
+                                         @"hidden": @([column[@"visibility"] isEqual:@"hidden"])}];
+                }
+                info[@"columns"] = columns;
+            }
             objects[name] = info;
         }];
     }];
@@ -118,7 +130,10 @@ static NSNumber *DrawnState(CALayer *layer, CGFloat inset) {
     return state;
 }
 
-static NSNumber *ReadDrawnState(CALayer *layer, CGFloat inset) {
+// Whether most of a region of the layer's image (in points from its top left) is filled with a
+// saturated color, as macOS fills an on checkbox or a selected row with the accent color. Nil
+// when the accent color is a gray or the image cannot be read.
+static NSNumber *AccentFilled(CALayer *layer, CGRect region) {
     NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
     if (!accent || accent.saturationComponent < 0.3) return nil;
     id contents = layer.contents;
@@ -126,8 +141,7 @@ static NSNumber *ReadDrawnState(CALayer *layer, CGFloat inset) {
     CGImageRef image = (__bridge CGImageRef)contents;
     CGFloat height = NSHeight(layer.bounds), scale = height > 0 ? CGImageGetHeight(image) / height : 0;
     if (scale <= 0) return nil;
-    // The box sits at the object's leading edge, centered vertically: sample its inner square.
-    CGRect box = CGRectMake((inset + 3) * scale, (height / 2 - 4) * scale, 9 * scale, 8 * scale);
+    CGRect box = CGRectMake(region.origin.x * scale, region.origin.y * scale, region.size.width * scale, region.size.height * scale);
     CGImageRef part = CGImageCreateWithImageInRect(image, box);
     if (!part) return nil;
     size_t width = CGImageGetWidth(part), rows = CGImageGetHeight(part);
@@ -146,6 +160,79 @@ static NSNumber *ReadDrawnState(CALayer *layer, CGFloat inset) {
         if (bytes[i * 4 + 3] > 128 && high > 60 && (high - low) / high > 0.35) colored++;
     }
     return @(colored * 4 > width * rows);
+}
+
+// The box sits at the object's leading edge, centered vertically: sample its inner square.
+static NSNumber *ReadDrawnState(CALayer *layer, CGFloat inset) {
+    return AccentFilled(layer, CGRectMake(inset + 3, NSHeight(layer.bounds) / 2 - 4, 9, 8));
+}
+
+// A list box's visible rows, rebuilt from where 4D draws each cell's text: a row per
+// baseline, each text in the column whose span holds it. Rows are selected with the mouse;
+// a selected row is filled with the accent color behind its first column's text.
+static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect object) {
+    NSArray *defined = info[@"columns"] ?: @[];
+    NSMutableArray *columns = [NSMutableArray new];
+    CGFloat x = NSMinX(object) + 1;
+    for (NSDictionary *column in defined) {
+        if ([column[@"hidden"] boolValue]) continue;
+        CGFloat width = [column[@"width"] doubleValue];
+        [columns addObject:@{@"header": column[@"header"] ?: @"", @"x": @(x), @"width": @(width)}];
+        x += width;
+    }
+    NSArray<NSString *> *texts = AXBDrawnTextForLayer(layer);
+    NSArray<NSValue *> *origins = AXBDrawnTextOriginsForLayer(layer);
+    NSMutableArray *rows = [NSMutableArray new];
+    if (!columns.count || !texts.count || origins.count != texts.count) return @{@"columns": columns, @"rows": rows};
+    // Group the texts by baseline, top to bottom.
+    NSMutableDictionary<NSNumber *, NSMutableArray *> *lines = [NSMutableDictionary new];
+    [texts enumerateObjectsUsingBlock:^(NSString *text, NSUInteger index, BOOL *stop) {
+        (void)stop;
+        NSPoint origin = origins[index].pointValue;
+        if (isnan(origin.y)) return;
+        NSNumber *key = @(round(origin.y * 2) / 2);
+        if (!lines[key]) lines[key] = [NSMutableArray new];
+        [lines[key] addObject:@{@"text": text, @"x": @(origin.x)}];
+    }];
+    NSArray<NSNumber *> *baselines = [lines.allKeys sortedArrayUsingSelector:@selector(compare:)];
+    CGFloat height = 0;
+    for (NSUInteger i = 1; i < baselines.count; i++) {
+        CGFloat step = baselines[i].doubleValue - baselines[i - 1].doubleValue;
+        if (step > 6 && (!height || step < height)) height = step;
+    }
+    if (!height) height = 18;
+    CGFloat bounds = NSHeight(layer.bounds), top = bounds - NSMaxY(object);
+    NSSet *titles = [NSSet setWithArray:[columns valueForKey:@"header"]];
+    for (NSNumber *baseline in baselines) {
+        NSMutableArray *cells = [NSMutableArray new];
+        for (NSUInteger c = 0; c < columns.count; c++) [cells addObject:[NSMutableArray new]];
+        NSUInteger placed = 0;
+        for (NSDictionary *item in lines[baseline]) {
+            CGFloat at = [item[@"x"] doubleValue];
+            for (NSUInteger c = 0; c < columns.count; c++) {
+                CGFloat start = [columns[c][@"x"] doubleValue], width = [columns[c][@"width"] doubleValue];
+                if (at >= start - 2 && at < start + width - 2) { [cells[c] addObject:item[@"text"]]; placed++; break; }
+            }
+        }
+        NSMutableArray *values = [NSMutableArray new];
+        for (NSArray *parts in cells)
+            [values addObject:[[parts componentsJoinedByString:@" "] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet]];
+        // The header row's titles are drawn in the same image.
+        BOOL header = placed && [[NSSet setWithArray:[values filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]]] isSubsetOfSet:titles];
+        if (!placed || header) continue;
+        CGFloat line = baseline.doubleValue;
+        if (line < top) continue;
+        NSRect area = NSMakeRect(NSMinX(object), bounds - line - height / 4, NSWidth(object), height);
+        NSMutableDictionary *row = [@{@"cells": values, @"area": [NSValue valueWithRect:area]} mutableCopy];
+        CGFloat first = [columns[0][@"x"] doubleValue];
+        NSNumber *selected = AccentFilled(layer, CGRectMake(first + 1, line - height * 0.6, 4, height * 0.4));
+        if (selected) row[@"selected"] = selected;
+        [rows addObject:row];
+    }
+    // The titles' band: from the object's top to its first row.
+    CGFloat first = rows.count ? NSMaxY([rows.firstObject[@"area"] rectValue]) : NSMaxY(object) - 20;
+    NSRect header = NSMakeRect(NSMinX(object), first, NSWidth(object), MAX(NSMaxY(object) - first, 0));
+    return @{@"columns": columns, @"rows": rows, @"header": [NSValue valueWithRect:header]};
 }
 
 static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString *, NSDictionary *> *objects) {
@@ -194,6 +281,11 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             entry[@"role"] = NSAccessibilityStaticTextRole;
             entry[@"text"] = title;
             [captions addObject:@{@"layer": layer, @"text": title}];
+        } else if ([type isEqual:@"listbox"]) {
+            entry[@"role"] = NSAccessibilityTableRole;
+            entry[@"table"] = ListboxModel(layer, info, area);
+            entry[@"caption"] = @YES;
+            if (help) entry[@"label"] = help;
         } else if ([type isEqual:@"dropdown"]) {
             entry[@"role"] = NSAccessibilityPopUpButtonRole;
             if (help) entry[@"label"] = help;
