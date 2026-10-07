@@ -1,3 +1,17 @@
+# 0.29.0, the Query editor, progress windows and button menus
+
+4D's Query editor, which `QUERY([Table])` opens, is published by the native plugin alone, with no host change. Without it, macOS published only the window's title. Each criterion is published as its conjunction, field, comparison and value, followed by Remove line and Add line. The destination, the options and the Query and Cancel buttons are published too. Presses are ordinary clicks, so the comparison, conjunction and destination open 4D's own native menus. Values are typed into 4D's own fields, and focusing a value field gives it 4D's keyboard focus. The Field pop-up opens 4D's field list, whose items are published as buttons, and VoiceOver starts on the current field. [Query editor](tests/QUERY-EDITOR.md); [acceptance](validation/query-editor-development.json).
+
+The Progress component's windows (`Progress New` and its commands) are published by the plugin alone too. Each progress is an indicator labelled by its title and valued in percent, with no value while indeterminate, followed by its message and its Stop button. A press on Stop reaches `Progress Stopped`. [Progress windows](tests/PROGRESS-WINDOWS.md); [acceptance](validation/progress-windows-development.json).
+
+Buttons with pop-up menus offer Show Menu beside Press. Show Menu clicks a linked button, or a separated button's arrow, so the button's own On Alternative Click shows its native menu, which stays open to be chosen from. The regular and toolbar styles draw no separate arrow; their separated menus report `buttonMenuArrowPending`. [Button menus](tests/BUTTON-MENUS.md); [acceptance](validation/button-menus-development.json).
+
+A button in a classic list subform's row is a button cell, pressed with an ordinary click at its own row, so 4D makes that row's record current and runs the button's handler. A grouped list box's leaf can be selected through accessibility, using 4D's own keyboard handling; group rows are not selectable.
+
+For developers: standard messages and the Query editor share one internal-form overlay, and DrawnText records where each string is drawn.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.28.0, quieter help tips and the Request caret
 
 4D shows each help tip in a new borderless window, which macOS published as an untitled window. VoiceOver moves the pointer with its cursor, so it announced "4D has new window" for nearly every control it reached, sometimes instead of that control. The plugin now removes help tip windows and their text from the accessibility tree; each control already carries its help tip as its label or help. This made the picture-controls VoiceOver run pass only half its attempts on 0.27.0; it now passes in every mode.
