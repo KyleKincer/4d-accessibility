@@ -21,3 +21,11 @@
 "Commands" = "Commands";
 "Remove line" = "Remove line";
 "Add line" = "Add line";
+"Report column" = "Report column";
+"Search fields" = "Search fields";
+"Field options" = "Field options";
+"Add field" = "Add field";
+"Add all fields" = "Add all fields";
+"Remove column" = "Remove column";
+"Remove all columns" = "Remove all columns";
+"Close" = "Close";
