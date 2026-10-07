@@ -1192,6 +1192,25 @@ static void GenericFormsTest(void) {
     AXBDrawnTextRecordForTesting(input, @[@"Ada Lovelace"]);
     AXBGenericFormsRefreshWindow(window);
     Check(ProgressElement(form, @"axb/form/inputName") == field && [[field accessibilityValue] isEqual:@"Ada Lovelace"], "a redrawn value updates the same element");
+    // 4D draws its keyboard focus ring, translucent in the accent color, in the field's margin.
+    NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+    if (accent.saturationComponent >= 0.3) {
+        CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+        CGContextRef paint = CGBitmapContextCreate(NULL, 233, 51, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
+        CGContextSetRGBFillColor(paint, accent.redComponent, accent.greenComponent, accent.blueComponent, 0.5);
+        CGContextFillRect(paint, CGRectMake(6, 51 - 10, 208, 4)); // just above the field, from the image's bottom
+        CGImageRef ring = CGBitmapContextCreateImage(paint);
+        input.contents = (__bridge id)ring;
+        CGImageRelease(ring); CGContextRelease(paint); CGColorSpaceRelease(rgb);
+        AXBDrawnTextRecordForTesting(input, @[@"Ada Lovelace"]);
+        NSApp.accessibilityApplicationFocusedUIElement = nil;
+        AXBGenericFormsRefreshWindow(window);
+        Check(NSApp.accessibilityApplicationFocusedUIElement == field && [field isAccessibilityFocused],
+              "the field 4D draws with its focus ring becomes the application's focused element");
+        input.contents = nil;
+        AXBGenericFormsRefreshWindow(window);
+        Check(NSApp.accessibilityApplicationFocusedUIElement == field, "a redraw without the ring leaves the focused element until another object gains it");
+    }
     // A form with a bridge session is the bridge's.
     NSView *bridge = [[AXBWindowView alloc] initWithFrame:NSMakeRect(0, 0, 10, 10)];
     [window.contentView addSubview:bridge];

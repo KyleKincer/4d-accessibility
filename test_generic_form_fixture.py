@@ -151,12 +151,22 @@ def main():
         return vo._osa('tell application "VoiceOver" to get text under cursor of vo cursor')
 
     def vo_to(predicate, limit=20):
-        for _ in range(limit):
-            front(); vo.key("right", vo.VO)
-            time.sleep(0.4)
-            text = cursor()
-            if predicate(text):
-                return text
+        # VoiceOver starts on 4D's focused object: check where it is, then move right, then back
+        # left from the end.
+        text = cursor()
+        if predicate(text):
+            return text
+        for direction in ("right", "left"):
+            repeated = 0
+            for _ in range(limit):
+                front(); vo.key(direction, vo.VO)
+                time.sleep(0.4)
+                previous, text = text, cursor()
+                if predicate(text):
+                    return text
+                repeated = repeated + 1 if text == previous else 0
+                if repeated >= 2:
+                    break
         raise AssertionError("VoiceOver did not reach the expected element")
 
     def saved():
@@ -205,6 +215,8 @@ def main():
             front(); vo.type_text("Ada")
             ax.wait_for(lambda: element("inputName").read("AXValue") == "Ada", "The typed name", timeout=10)
             check(True, "keys typed at the field enter it in 4D's own field")
+            front(); mark = heard.mark(); vo.key("tab")
+            check(phrase_until(lambda ph: "City" in ph, mark), "VoiceOver follows 4D's focus to the next field when Tab moves it")
             check(vo_to(lambda ph: "Active" in ph and "checkbox" in ph and "unchecked" in ph), "VoiceOver reads the checkbox and its state")
             front(); mark = heard.mark(); vo.key("space", vo.VO)
             ax.wait_for(lambda: element("checkActive").read("AXValue") is True, "Checked", timeout=10)
@@ -233,6 +245,18 @@ def main():
             ax.wait_for(lambda: element("labelNotes") is not None and element("inputName") is None, "The Notes page", timeout=10)
             check(element("tabPages/Notes").read("AXValue") is True, "VO-Space on a tab shows its page, and the tab is chosen")
         else:
+            # 4D's keyboard focus, drawn as its focus ring, is the application's focused element.
+            focused = lambda: (ax.application(process.pid).read("AXFocusedUIElement") or name).read("AXIdentifier")
+            ax.wait_for(lambda: focused() == "axb/form/inputName", "The focused Name field", timeout=10)
+            import voiceover_session as keys
+            keys.set_guard(keys.guard_frontmost(process.pid, ax))
+            front(); keys.key("tab")
+            ax.wait_for(lambda: focused() == "axb/form/inputCity", "City focused by Tab", timeout=10)
+            front(); keys.key("tab")
+            ax.wait_for(lambda: focused() == "axb/form/checkActive", "The checkbox focused by Tab", timeout=10)
+            front(); keys.key("tab", ("shift",))
+            ax.wait_for(lambda: focused() == "axb/form/inputCity", "City focused by Shift-Tab", timeout=10)
+            check(True, "Tab and Shift-Tab move the application's focused element with 4D's focus ring")
             assert name.set_text("Ada Lovelace") == 0
             ax.wait_for(lambda: element("inputName").read("AXValue") == "Ada Lovelace", "The written name", timeout=10)
             assert element("inputCity").set_text("Paris") == 0
