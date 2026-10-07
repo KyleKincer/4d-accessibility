@@ -48,6 +48,7 @@ Complex forms return their existing provider configuration from one optional app
 
 | Your form | Integration |
 | --- | --- |
+| Any form, before integration | The native plugin alone publishes a form without a bridge area from the project's form definition: its buttons, captions, inputs, checkboxes, radio buttons and drop-downs. Integrate the form for its complete description. [Forms without a bridge area](tests/GENERIC-FORMS.md). |
 | Ordinary controls, repeated or nested page subforms | Add an area to the root. Configure child labels under `children`. Invalidate a child before replacing its form or data binding. [Example](skills/4d-accessibility/references/examples/AUTOMATIC-FORM.md). |
 | Array, collection or entity-selection list boxes | Add a `grids` entry with stable row identity and loading state. Existing native editors and cell controls handle supported editing. [Native grids](skills/4d-accessibility/references/GRIDS.md#add-a-native-array-list-box-without-replacing-discovery). |
 | Text/date array hierarchies | The 0.24.0 development adapter reads native groups and accepts one application Formula for targeted disclosure. A leaf row is selected from the keyboard through the list box's own events; reveal and editing remain pending. [Grouped configuration](skills/4d-accessibility/references/GRIDS.md#read-a-grouped-array-listbox). |
