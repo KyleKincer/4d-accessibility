@@ -23,6 +23,8 @@
 //   press     another object's layer that a press or Show Menu clicks, with pressInset
 //   clicks    @2 for an object that a double click operates, such as adding a list's item
 //   checked   for a radio button or checkbox: whether it is chosen; absent when unknown
+//   focused   @YES for the object 4D draws with its keyboard focus ring, which becomes the
+//             application's focused element when it moves, as AppKit reports a Tab
 // An entry without drawn text is published only when it has a fixed label or is a text field.
 
 @class AXBInternalFormOverlay;
@@ -35,6 +37,7 @@
 @property(nonatomic, copy) NSString *publishedText;
 @property(nonatomic) BOOL editable;
 @property(nonatomic) BOOL caret;
+@property(nonatomic) BOOL keyboardFocused;
 @property(nonatomic) CGFloat inset;
 @property(nonatomic) NSRect area;
 @property(nonatomic, copy) NSString *text;

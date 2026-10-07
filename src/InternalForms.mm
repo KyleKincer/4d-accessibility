@@ -341,6 +341,15 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
     }];
     return YES;
 }
+// 4D moved its keyboard focus, for example with Tab: the newly focused object becomes the
+// application's focused element, and assistive technologies are told, as AppKit does.
+- (void)noteFocus:(BOOL)focused ofElement:(AXBInternalFormElement *)element {
+    if (element.keyboardFocused == focused) return;
+    element.keyboardFocused = focused;
+    if (!focused || !self.formView.window.isKeyWindow || NSApp.accessibilityApplicationFocusedUIElement == element) return;
+    NSApp.accessibilityApplicationFocusedUIElement = element;
+    NSAccessibilityPostNotification(element, NSAccessibilityFocusedUIElementChangedNotification);
+}
 - (BOOL)focusField:(AXBInternalFormElement *)element {
     NSWindow *window = self.formView.window;
     if (!window.isVisible || !window.isKeyWindow || !element.layer) return NO;
@@ -437,6 +446,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             element.publishedText = text;
             element.selection = NSMakeRange(0, text.length);
             self.elements[key] = element;
+            [self noteFocus:[entry[@"focused"] boolValue] ofElement:element];
             if (table) [(AXBInternalTable *)element updateWithModel:entry[@"table"]];
             changed = YES;
             continue;
@@ -454,6 +464,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             element.checked = [entry[@"checked"] boolValue];
             NSAccessibilityPostNotification(element, NSAccessibilityValueChangedNotification);
         }
+        [self noteFocus:[entry[@"focused"] boolValue] ofElement:element];
         if (!(label == element.label || [label isEqual:element.label])) {
             element.label = label;
             NSAccessibilityPostNotification(element, NSAccessibilityTitleChangedNotification);

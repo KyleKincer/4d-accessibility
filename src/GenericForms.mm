@@ -229,7 +229,15 @@ static NSNumber *DrawnState(CALayer *layer, CGFloat inset) {
 // Whether most of a region of the layer's image (in points from its top left) is filled with a
 // saturated color, as macOS fills an on checkbox or a selected row with the accent color. Nil
 // when the accent color is a gray or the image cannot be read.
+static NSNumber *AccentShare(CALayer *layer, CGRect region, int opacity);
 static NSNumber *AccentFilled(CALayer *layer, CGRect region) {
+    NSNumber *share = AccentShare(layer, region, 128);
+    return share ? @(share.doubleValue > 0.25) : nil;
+}
+
+// The share of a region's pixels drawn in a saturated color at least this opaque; nil when the
+// accent color is a gray or the image cannot be read.
+static NSNumber *AccentShare(CALayer *layer, CGRect region, int opacity) {
     NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
     if (!accent || accent.saturationComponent < 0.3) return nil;
     id contents = layer.contents;
@@ -253,9 +261,20 @@ static NSNumber *AccentFilled(CALayer *layer, CGRect region) {
     NSUInteger colored = 0;
     for (size_t i = 0; i < width * rows; i++) {
         double r = bytes[i * 4], g = bytes[i * 4 + 1], b = bytes[i * 4 + 2], high = MAX(r, MAX(g, b)), low = MIN(r, MIN(g, b));
-        if (bytes[i * 4 + 3] > 128 && high > 60 && (high - low) / high > 0.35) colored++;
+        if (bytes[i * 4 + 3] > opacity && high > 60 && (high - low) / high > 0.35) colored++;
     }
-    return @(colored * 4 > width * rows);
+    return width * rows ? @((double)colored / (width * rows)) : nil;
+}
+
+// macOS draws the keyboard focus ring, translucent in the accent color, just outside the
+// focused control: for a field, drop-down or list box in the margin 4D leaves around it in its layer, for a
+// checkbox or radio button around its box. Sample a strip just above it; a checked box's own fill
+// starts below the strip.
+static BOOL FocusRing(CALayer *layer, NSRect area, BOOL box) {
+    CGFloat height = NSHeight(layer.bounds), top = height - NSMaxY(area);
+    CGRect strip = box ? CGRectMake(NSMinX(area) + 4, height / 2 - 10, 10, 1.5) : CGRectMake(NSMinX(area) + 8, top - 2.5, NSWidth(area) - 16, 2);
+    if (CGRectGetMinY(strip) < 0 || CGRectGetWidth(strip) < 8) return NO;
+    return AccentShare(layer, strip, 40).doubleValue > 0.5;
 }
 
 // The box sits at the object's leading edge, centered vertically: sample its inner square.
@@ -595,6 +614,7 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             if (!info[@"style"] || [info[@"style"] isEqual:@"regular"]) {
                 NSNumber *state = DrawnState(layer, NSMinX(area));
                 if (state) entry[@"checked"] = state;
+                if (FocusRing(layer, area, YES)) entry[@"focused"] = @YES;
             }
         } else if ([type isEqual:@"text"] || [type isEqual:@"groupBox"]) {
             if (!title) continue;
@@ -605,6 +625,7 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         } else if ([type isEqual:@"listbox"]) {
             entry[@"role"] = NSAccessibilityTableRole;
             entry[@"table"] = ListboxModel(layer, info, area);
+            if (FocusRing(layer, area, NO)) entry[@"focused"] = @YES;
             entry[@"caption"] = @YES;
             if (help) entry[@"label"] = help;
         } else if ([type isEqual:@"tab"]) {
@@ -612,10 +633,12 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             continue;
         } else if ([type isEqual:@"dropdown"]) {
             entry[@"role"] = NSAccessibilityPopUpButtonRole;
+            if (FocusRing(layer, area, NO)) entry[@"focused"] = @YES;
             if (help) entry[@"label"] = help;
         } else if ([type isEqual:@"input"] || [type isEqual:@"combo"]) {
             entry[@"role"] = NSAccessibilityTextFieldRole;
             entry[@"editable"] = @(![info[@"enterable"] isEqual:@NO]);
+            if (FocusRing(layer, area, NO)) entry[@"focused"] = @YES;
             if (Plain(info[@"placeholder"])) entry[@"placeholders"] = [NSSet setWithObject:Plain(info[@"placeholder"])];
             entry[@"caption"] = @YES;
             if (help) entry[@"label"] = help;
