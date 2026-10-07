@@ -20,6 +20,8 @@ static NSMutableDictionary<NSValue *, NSMutableArray<NSValue *> *> *ContextOrigi
 static NSMapTable *ImageOrigins, *LayerOrigins;
 // Which recorded texts HIToolbox drew, by index: only callers that ask for themed text see them.
 static NSMutableDictionary<NSValue *, NSMutableIndexSet *> *ContextThemed;
+// Each themed text's box, by index, in pixels from the bitmap's top left.
+static NSMutableDictionary<NSValue *, NSMutableDictionary<NSNumber *, NSValue *> *> *ContextBoxes;
 static NSMapTable *ImageThemed, *LayerThemed;
 // Each owner's observed layer names and observer.
 static NSMutableDictionary<NSString *, NSDictionary *> *Observers;
@@ -69,13 +71,13 @@ static NSString *StringOf(CFAttributedStringRef string) {
     return string ? [[(__bridge NSAttributedString *)string string] copy] : nil;
 }
 
-static void RecordDraw(CGContextRef context, NSString *text, CGPoint origin, BOOL themed = NO) {
+static void RecordDraw(CGContextRef context, NSString *text, CGPoint origin, BOOL themed = NO, CGRect box = CGRectNull) {
     if (!context || !text.length) return;
     AXBTableGuard guard;
     NSValue *key = [NSValue valueWithPointer:context];
     NSMutableArray *texts = ContextText[key];
     if (!texts) {
-        if (ContextText.count >= ContextLimit) { [ContextText removeAllObjects]; [ContextOrigins removeAllObjects]; [ContextThemed removeAllObjects]; }
+        if (ContextText.count >= ContextLimit) { [ContextText removeAllObjects]; [ContextOrigins removeAllObjects]; [ContextThemed removeAllObjects]; [ContextBoxes removeAllObjects]; }
         texts = ContextText[key] = [NSMutableArray new];
         ContextOrigins[key] = [NSMutableArray new];
     }
@@ -83,6 +85,10 @@ static void RecordDraw(CGContextRef context, NSString *text, CGPoint origin, BOO
         if (themed) {
             if (!ContextThemed[key]) ContextThemed[key] = [NSMutableIndexSet new];
             [ContextThemed[key] addIndex:texts.count];
+            if (!CGRectIsNull(box)) {
+                if (!ContextBoxes[key]) ContextBoxes[key] = [NSMutableDictionary new];
+                ContextBoxes[key][@(texts.count)] = [NSValue valueWithRect:NSRectFromCGRect(box)];
+            }
         }
         [texts addObject:text];
         [ContextOrigins[key] addObject:[NSValue valueWithPoint:NSPointFromCGPoint(origin)]];
@@ -96,6 +102,7 @@ static void ForgetContext(CGContextRef context) {
     [ContextText removeObjectForKey:[NSValue valueWithPointer:context]];
     [ContextOrigins removeObjectForKey:[NSValue valueWithPointer:context]];
     [ContextThemed removeObjectForKey:[NSValue valueWithPointer:context]];
+    [ContextBoxes removeObjectForKey:[NSValue valueWithPointer:context]];
 }
 
 static CGContextRef ObservedContextCreate(void *data, size_t width, size_t height, size_t bits, size_t row, CGColorSpaceRef space, uint32_t info) {
@@ -182,7 +189,9 @@ static OSStatus ObservedThemeText(CFTypeRef string, const CGRect *bounds, void *
     if (text.length && bounds && context) {
         NSArray *words = [text componentsSeparatedByCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
         text = [[words filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]] componentsJoinedByString:@" "];
-        RecordDraw(context, text, TopLeftPixel(context, CGPointMake(CGRectGetMinX(*bounds), CGRectGetMidY(*bounds))), YES);
+        CGPoint corner = TopLeftPixel(context, bounds->origin), opposite = TopLeftPixel(context, CGPointMake(CGRectGetMaxX(*bounds), CGRectGetMaxY(*bounds)));
+        CGRect box = CGRectStandardize(CGRectMake(corner.x, corner.y, opposite.x - corner.x, opposite.y - corner.y));
+        RecordDraw(context, text, TopLeftPixel(context, CGPointMake(CGRectGetMinX(*bounds), CGRectGetMidY(*bounds))), YES, box);
     }
     return OriginalThemeText(string, bounds, info, context, orientation);
 }
@@ -194,13 +203,16 @@ static CGImageRef ObservedImageCreate(CGContextRef context) {
         NSValue *key = [NSValue valueWithPointer:context];
         NSArray *texts = ContextText[key], *origins = ContextOrigins[key];
         NSIndexSet *themed = ContextThemed[key];
+        NSDictionary *boxes = ContextBoxes[key];
         [ContextText removeObjectForKey:key];
         [ContextOrigins removeObjectForKey:key];
         [ContextThemed removeObjectForKey:key];
+        [ContextBoxes removeObjectForKey:key];
         if (image && texts.count) {
             [ImageText setObject:texts forKey:(__bridge id)image];
             if (themed.count) [ImageThemed setObject:[themed copy] forKey:(__bridge id)image];
-            if (origins.count == texts.count) [ImageOrigins setObject:@{@"origins": origins, @"height": @(CGImageGetHeight(image))} forKey:(__bridge id)image];
+            if (origins.count == texts.count)
+                [ImageOrigins setObject:@{@"origins": origins, @"height": @(CGImageGetHeight(image)), @"boxes": [boxes copy] ?: @{}} forKey:(__bridge id)image];
         }
     }
     return image;
@@ -320,6 +332,7 @@ BOOL AXBDrawnTextInitialize(void) {
         ContextText = [NSMutableDictionary new];
         ContextOrigins = [NSMutableDictionary new];
         ContextThemed = [NSMutableDictionary new];
+        ContextBoxes = [NSMutableDictionary new];
         ImageThemed = WeakIdentityTable();
         if (!LayerThemed) LayerThemed = WeakIdentityTable();
         OriginalLineCreate = (LineCreateFn)dlsym(RTLD_DEFAULT, "CTLineCreateWithAttributedString");
@@ -406,6 +419,22 @@ NSArray<NSValue *> *AXBDrawnTextOriginsForLayer(CALayer *layer) { return Origins
 NSArray<NSString *> *AXBDrawnTextWithThemedForLayer(CALayer *layer) { return TextsOf(layer, YES); }
 NSArray<NSValue *> *AXBDrawnTextOriginsWithThemedForLayer(CALayer *layer) { return OriginsOf(layer, YES); }
 
+NSDictionary<NSNumber *, NSValue *> *AXBDrawnTextThemedBoxesForLayer(CALayer *layer) {
+    if (!layer) return nil;
+    NSDictionary *recorded;
+    { AXBTableGuard guard; recorded = [LayerOrigins objectForKey:layer]; }
+    CGFloat height = layer.bounds.size.height, pixels = [recorded[@"height"] doubleValue];
+    if (!recorded || height <= 0 || pixels <= 0) return nil;
+    CGFloat scale = pixels / height;
+    NSMutableDictionary *boxes = [NSMutableDictionary new];
+    [(NSDictionary *)recorded[@"boxes"] enumerateKeysAndObjectsUsingBlock:^(NSNumber *index, NSValue *value, BOOL *stop) {
+        (void)stop;
+        NSRect box = value.rectValue;
+        boxes[index] = [NSValue valueWithRect:NSMakeRect(NSMinX(box) / scale, NSMinY(box) / scale, NSWidth(box) / scale, NSHeight(box) / scale)];
+    }];
+    return boxes;
+}
+
 void AXBDrawnTextSetObserver(NSString *owner, NSSet<NSString *> *names, void (^observer)(CALayer *layer)) {
     AXBTableGuard guard;
     if (!Observers) Observers = [NSMutableDictionary new];
@@ -428,6 +457,18 @@ void AXBDrawnTextRecordThemedForTesting(CALayer *layer, NSIndexSet *themed) {
     if (!LayerThemed) LayerThemed = WeakIdentityTable();
     if (themed.count) [LayerThemed setObject:[themed copy] forKey:layer];
     else [LayerThemed removeObjectForKey:layer];
+}
+
+void AXBDrawnTextRecordThemedBoxesForTesting(CALayer *layer, NSDictionary<NSNumber *, NSValue *> *boxes) {
+    AXBTableGuard guard;
+    if (!LayerThemed) LayerThemed = WeakIdentityTable();
+    NSMutableIndexSet *themed = [NSMutableIndexSet new];
+    for (NSNumber *index in boxes) [themed addIndex:index.unsignedIntegerValue];
+    [LayerThemed setObject:themed forKey:layer];
+    NSMutableDictionary *recorded = [[LayerOrigins objectForKey:layer] mutableCopy];
+    if (!recorded) return;
+    recorded[@"boxes"] = [boxes copy];
+    [LayerOrigins setObject:recorded forKey:layer];
 }
 
 void AXBDrawnTextRecordOriginsForTesting(CALayer *layer, NSArray<NSValue *> *origins) {

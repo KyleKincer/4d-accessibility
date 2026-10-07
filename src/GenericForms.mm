@@ -497,6 +497,56 @@ static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect obj
     return @{@"columns": columns, @"rows": rows, @"header": [NSValue valueWithRect:header]};
 }
 
+// A tab control's tabs: 4D draws each label with HIToolbox in its segment's box. A press is an
+// ordinary click on the segment. macOS draws the chosen segment lighter than the others' track.
+static NSArray<NSDictionary *> *TabEntries(CALayer *layer, NSString *key) {
+    NSArray<NSString *> *labels = AXBDrawnTextWithThemedForLayer(layer);
+    NSDictionary<NSNumber *, NSValue *> *boxes = AXBDrawnTextThemedBoxesForLayer(layer);
+    NSMutableArray<NSDictionary *> *tabs = [NSMutableArray new];
+    for (NSNumber *index in boxes) {
+        NSString *label = index.unsignedIntegerValue < labels.count ? labels[index.unsignedIntegerValue] : nil;
+        NSRect box = boxes[index].rectValue;
+        if (label.length && NSWidth(box) >= 8 && NSHeight(box) >= 8) [tabs addObject:@{@"label": label, @"box": boxes[index]}];
+    }
+    [tabs sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) {
+        NSRect ra = [a[@"box"] rectValue], rb = [b[@"box"] rectValue];
+        if (fabs(NSMinY(ra) - NSMinY(rb)) > 4) return NSMinY(ra) < NSMinY(rb) ? NSOrderedAscending : NSOrderedDescending;
+        return NSMinX(ra) < NSMinX(rb) ? NSOrderedAscending : NSOrderedDescending;
+    }];
+    // The segment's background, just inside its leading edge, beside the centered label.
+    NSMutableArray<NSNumber *> *shades = [NSMutableArray new];
+    for (NSDictionary *tab in tabs) {
+        NSRect box = [tab[@"box"] rectValue];
+        size_t width = 0, rows = 0;
+        CGFloat density = 1;
+        NSData *strip = Luminance(layer, CGRectMake(NSMinX(box) + 2, NSMidY(box) - 2, 3, 4), &width, &rows, &density);
+        double total = 0;
+        for (NSUInteger i = 0; i < strip.length; i++) total += ((const uint8_t *)strip.bytes)[i];
+        [shades addObject:@(strip.length ? total / strip.length : -1)];
+    }
+    NSUInteger chosen = NSNotFound;
+    double best = -1, next = -1;
+    for (NSUInteger i = 0; i < shades.count; i++) {
+        double shade = shades[i].doubleValue;
+        if (shade > best) { next = best; best = shade; chosen = i; } else if (shade > next) next = shade;
+    }
+    if (tabs.count < 2 || best < 0 || next < 0 || best - next < 6) chosen = NSNotFound;
+    NSMutableArray *entries = [NSMutableArray new];
+    NSMutableSet *used = [NSMutableSet new];
+    CGFloat height = NSHeight(layer.bounds);
+    for (NSUInteger i = 0; i < tabs.count; i++) {
+        NSRect box = [tabs[i][@"box"] rectValue];
+        NSString *name = [NSString stringWithFormat:@"%@/%@", key, tabs[i][@"label"]];
+        if ([used containsObject:name]) name = [NSString stringWithFormat:@"%@/%lu", name, (unsigned long)i + 1];
+        [used addObject:name];
+        NSMutableDictionary *entry = [@{@"key": name, @"layer": layer, @"role": NSAccessibilityRadioButtonRole, @"label": tabs[i][@"label"],
+                                        @"area": [NSValue valueWithRect:NSMakeRect(NSMinX(box), height - NSMaxY(box), NSWidth(box), NSHeight(box))]} mutableCopy];
+        if (chosen != NSNotFound) entry[@"checked"] = @(i == chosen);
+        [entries addObject:entry];
+    }
+    return entries;
+}
+
 static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString *, NSDictionary *> *objects, NSString *prefix, NSUInteger depth) {
     NSMutableArray<CALayer *> *layers = [NSMutableArray new];
     for (CALayer *layer in form.sublayers)
@@ -557,6 +607,9 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             entry[@"table"] = ListboxModel(layer, info, area);
             entry[@"caption"] = @YES;
             if (help) entry[@"label"] = help;
+        } else if ([type isEqual:@"tab"]) {
+            [entries addObjectsFromArray:TabEntries(layer, [prefix stringByAppendingString:layer.name])];
+            continue;
         } else if ([type isEqual:@"dropdown"]) {
             entry[@"role"] = NSAccessibilityPopUpButtonRole;
             if (help) entry[@"label"] = help;
