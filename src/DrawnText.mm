@@ -46,7 +46,8 @@ static ContextCreateFn OriginalContextCreate;
 static ContextCreateWithDataFn OriginalContextCreateWithData;
 
 // A context that never becomes an image must not grow the tables without bound.
-static const NSUInteger ContextLimit = 512, ContextTextLimit = 64;
+// A list box draws every visible cell's text into one context.
+static const NSUInteger ContextLimit = 512, ContextTextLimit = 4096;
 
 static NSMapTable *WeakIdentityTable(void) {
     return [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPointerPersonality
