@@ -1,5 +1,6 @@
 #import "InternalForms.h"
 #import "DrawnText.h"
+#import "InternalTable.h"
 #import "BridgePrivate.h"
 #include <initializer_list>
 
@@ -80,16 +81,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     CALayer *layer = self.layer;
     if (!layer) return NSZeroRect;
     if (NSIsEmptyRect(self.area)) return [self.owner screenFrameForLayer:layer inset:self.inset];
-    // An item's area within its layer's image, from the image's bottom left; the layer can
-    // show its image flipped.
-    NSRect area = self.area;
-    if (layer.contentsAreFlipped) area.origin.y = NSHeight(layer.bounds) - NSMaxY(area);
-    CALayer *form = self.owner.formView.layer;
-    NSView *view = self.owner.formView;
-    if (!view.window || !form) return NSZeroRect;
-    NSRect inView = [layer convertRect:area toLayer:form];
-    if (form.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
-    return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
+    return [self.owner screenFrameForArea:self.area inLayer:layer];
 }
 - (NSString *)currentText {
     NSString *text = self.text ?: [self.owner textForLayer:self.layer];
@@ -255,6 +247,17 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     if (inset > 0 && NSWidth(inView) > 2 * inset && NSHeight(inView) > 2 * inset) inView = NSInsetRect(inView, inset, inset);
     return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
 }
+- (NSRect)screenFrameForArea:(NSRect)area inLayer:(CALayer *)layer {
+    // An item's area within its layer's image, from the image's bottom left; the layer can
+    // show its image flipped.
+    if (layer.contentsAreFlipped) area.origin.y = NSHeight(layer.bounds) - NSMaxY(area);
+    CALayer *form = self.formView.layer;
+    NSView *view = self.formView;
+    if (!view.window || !form || !layer) return NSZeroRect;
+    NSRect inView = [layer convertRect:area toLayer:form];
+    if (form.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
+    return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
+}
 - (void)releaseFocus {
     id focused = NSApp.accessibilityApplicationFocusedUIElement;
     if (focused && [self.elements.allValues containsObject:focused]) NSApp.accessibilityApplicationFocusedUIElement = nil;
@@ -307,6 +310,21 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         CALayer *press = target.pressLayer;
         NSRect frame = press ? [strongSelf screenFrameForLayer:press inset:target.pressInset] : [target screenFrame];
         PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], target.clicks);
+    }];
+    return YES;
+}
+- (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer {
+    NSWindow *window = self.formView.window;
+    if (!window || !layer || layer.hidden || !window.isVisible) return NO;
+    __weak AXBInternalFormOverlay *weakSelf = self;
+    __weak CALayer *weakLayer = layer;
+    [self whenSettled:^{
+        AXBInternalFormOverlay *strongSelf = weakSelf;
+        CALayer *target = weakLayer;
+        NSWindow *current = strongSelf.formView.window;
+        if (!strongSelf || !target || target.hidden || !current.isVisible) return;
+        NSRect frame = [strongSelf screenFrameForArea:area inLayer:target];
+        PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))]);
     }];
     return YES;
 }
@@ -379,7 +397,8 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         if ([entry[@"placeholders"] containsObject:text]) text = @"";
         NSRect area = entry[@"area"] ? [entry[@"area"] rectValue] : NSZeroRect;
         AXBInternalFormElement *element = self.elements[key];
-        BOOL field = [role isEqual:NSAccessibilityTextFieldRole];
+        // An empty text field or table is still one.
+        BOOL field = [role isEqual:NSAccessibilityTextFieldRole] || [role isEqual:NSAccessibilityTableRole];
         // An empty text field is still a field; other objects need text or a fixed label.
         if (!layer || layer.hidden || (!text.length && !label.length && !field)) continue;
         if (element && ![element.accessibilityRole isEqual:role]) {
@@ -388,8 +407,9 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             element = nil;
         }
         [order addObject:key];
+        BOOL table = [role isEqual:NSAccessibilityTableRole];
         if (!element) {
-            element = [AXBInternalFormElement new];
+            element = table ? [AXBInternalTable new] : [AXBInternalFormElement new];
             element.owner = self; element.layer = layer; element.key = key; element.accessibilityRole = role;
             element.label = label; element.editable = [entry[@"editable"] boolValue]; element.caret = [entry[@"caret"] boolValue];
             element.inset = [entry[@"inset"] doubleValue];
@@ -401,9 +421,11 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             element.publishedText = text;
             element.selection = NSMakeRange(0, text.length);
             self.elements[key] = element;
+            if (table) [(AXBInternalTable *)element updateWithModel:entry[@"table"]];
             changed = YES;
             continue;
         }
+        if (table) [(AXBInternalTable *)element updateWithModel:entry[@"table"]];
         // 4D can replace an object's layer while redrawing it, as a field does on each
         // keystroke. The object keeps its element, so assistive focus and echo survive.
         element.layer = layer;
@@ -423,8 +445,8 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         if (![element.publishedText isEqual:text]) {
             NSString *previous = element.publishedText;
             element.publishedText = text;
-            if (field) [element publishEditFrom:previous ?: @"" to:text];
-            else NSAccessibilityPostNotification(element, [role isEqual:NSAccessibilityButtonRole] && !label.length ? NSAccessibilityTitleChangedNotification : NSAccessibilityValueChangedNotification);
+            if ([role isEqual:NSAccessibilityTextFieldRole]) [element publishEditFrom:previous ?: @"" to:text];
+            else if (!table) NSAccessibilityPostNotification(element, [role isEqual:NSAccessibilityButtonRole] && !label.length ? NSAccessibilityTitleChangedNotification : NSAccessibilityValueChangedNotification);
         }
     }
     for (NSString *key in self.elements.allKeys) {
