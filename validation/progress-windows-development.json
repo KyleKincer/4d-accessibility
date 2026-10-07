@@ -1,0 +1,51 @@
+{
+ "passed": true,
+ "date": "2026-10-06",
+ "scope": "Windows of 4D's Progress component, published by the native plugin alone: each progress as an indicator labelled by its title and valued in percent (none while indeterminate), its message as text and its Stop button, pressed with an ordinary click so Progress Stopped reports it; by AX and by VoiceOver",
+ "fixture": "prepare_progress_fixture.py and test_progress_fixture.py (a determinate progress with a message and Stop button, and an indeterminate one, in one component window)",
+ "pluginSHA256": "4d6f5019deb61ffa1ca0248e060dad0036f907cb02cec8f09659f53a5c4edd97",
+ "environment": {
+  "4D": "20.8 build 20.102009",
+  "macOS": "26.7.1"
+ },
+ "runs": {
+  "arm64-compiled-voiceover": 10,
+  "arm64-compiled": 9,
+  "arm64-voiceover": 10,
+  "arm64": 9,
+  "x86_64-compiled-voiceover": 10,
+  "x86_64-compiled": 9,
+  "x86_64": 9
+ },
+ "checks": [
+  "the progress window is pixel-identical to the plugin-free window, apart from the indeterminate bar's animation",
+  "the determinate progress is an indicator labelled with its title, at its progress in percent",
+  "its message is published as text",
+  "its Stop button is a pressable button",
+  "the indeterminate progress is published without a value",
+  "advancing the progress updates its value and message",
+  "pressing Stop is accepted",
+  "the Stop press reaches the component, as Progress Stopped reports for this run",
+  "4D quits normally after the stopped progress",
+  "VoiceOver reads the indicator by its title and progress",
+  "VoiceOver reads the message",
+  "VoiceOver reaches the Stop button"
+ ],
+ "voiceOverReading": [
+  "4D window Importing orders 75% progress indicator has keyboard focus",
+  "Stop button",
+  "Order 8 of 10",
+  "Stop button"
+ ],
+ "regressions": {
+  "test.py": "316 checks",
+  "test_grids.py": "246 checks",
+  "native provider suite": "433 checks",
+  "test_native_messages.py": "37 checks, and 32 with VoiceOver, sharing the drawn-text observer"
+ },
+ "notCovered": [
+  "4D Server and remote clients",
+  "Localized titles and messages",
+  "4D on Windows"
+ ]
+}

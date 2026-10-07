@@ -6,6 +6,7 @@
 #import "NativeLayout.h"
 #import "DrawnText.h"
 #import "MessageDialogs.h"
+#import "ProgressWindows.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <cstdio>
@@ -747,6 +748,86 @@ static void MessageDialogsTest(void) {
     }
     CGContextRelease(bitmap); CGColorSpaceRelease(space);
     Check(clean, "a freed image's text never attaches to a later image");
+}
+static id ProgressElement(NSView *form, NSString *identifier) {
+    for (NSView *view in form.subviews)
+        for (id element in view.accessibilityChildren) if ([[element accessibilityIdentifier] isEqual:identifier]) return element;
+    return nil;
+}
+static NSArray *ProgressChildren(NSView *form) {
+    for (NSView *view in form.subviews) if (view.accessibilityChildren.count) return view.accessibilityChildren;
+    return @[];
+}
+static CALayer *Child(CALayer *context, NSString *name) {
+    for (CALayer *layer in context.sublayers) if ([layer.name isEqual:name]) return layer;
+    return nil;
+}
+// One progress of 4D's Progress component: a subform whose form context holds its objects.
+static CALayer *ProgressLayers(CALayer *window, NSRect frame, NSString *title, NSString *message, NSString *value, BOOL stop) {
+    CALayer *subform = MessageLayer(window, @"Subform1", frame, nil);
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = subform.bounds;
+    [subform addSublayer:context];
+    MessageLayer(context, @"Picture3", NSMakeRect(0, 0, 400, 68), nil);
+    MessageLayer(context, @"ThermoProgress", NSMakeRect(56, 20, 333, 23), nil);
+    MessageLayer(context, @"Message1", NSMakeRect(50, 23, 355, 48), title ? @[title] : nil);
+    MessageLayer(context, @"Message2", NSMakeRect(50, -12, 355, 44), message ? @[message] : nil);
+    MessageLayer(context, @"ProgressValue", NSMakeRect(7, -162, 211, 48), @[value]);
+    if (stop) MessageLayer(context, @"StopButton", NSMakeRect(366, 22, 28, 28), nil);
+    return context;
+}
+static void ProgressWindowsTest(void) {
+    AXBProgressEnableForTesting();
+    NSWindow *window = Window(@"AXB progress");
+    [window orderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    CALayer *first = ProgressLayers(context, NSMakeRect(0, 100, 400, 68), @"Importing orders", @"Order 3 of 10", @"0.3", YES);
+    CALayer *second = ProgressLayers(context, NSMakeRect(0, 32, 400, 68), @"Waiting for server", nil, @"-1", NO);
+    Check(AXBProgressRefreshWindow(window), "a window holding Progress component forms is published");
+    NSArray *children = ProgressChildren(form);
+    id bar = ProgressElement(form, @"axb/progress/1/progress"), message = ProgressElement(form, @"axb/progress/1/message");
+    id stop = ProgressElement(form, @"axb/progress/1/stop"), waiting = ProgressElement(form, @"axb/progress/2/progress");
+    Check(children.count == 4 && children[0] == bar && children[1] == message && children[2] == stop && children[3] == waiting,
+          "each progress is published top to bottom: indicator, message, then Stop; empty messages and absent buttons are not");
+    Check([[bar accessibilityRole] isEqual:NSAccessibilityProgressIndicatorRole] && [[bar accessibilityLabel] isEqual:@"Importing orders"] &&
+          [[bar accessibilityValue] isEqual:@30] && [[bar accessibilityMinValue] isEqual:@0] && [[bar accessibilityMaxValue] isEqual:@100],
+          "the indicator is labelled with the title and reports the stored progress as a percentage");
+    Check([[message accessibilityRole] isEqual:NSAccessibilityStaticTextRole] && [[message accessibilityValue] isEqual:@"Order 3 of 10"], "the message is static text");
+    Check([[stop accessibilityRole] isEqual:NSAccessibilityButtonRole] && [[stop accessibilityLabel] isEqual:@"Stop"] &&
+          [stop isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)] && ![bar accessibilityPerformPress], "Stop is a button; the indicator is not actionable");
+    NSRect barFrame = [bar accessibilityFrame], messageFrame = [message accessibilityFrame];
+    Check(NSMaxY(barFrame) > NSMaxY(messageFrame) && NSMinX(barFrame) <= NSMinX(messageFrame),
+          "the indicator's frame includes its title, so it reads before the message overlapping its bar");
+    Check([[waiting accessibilityLabel] isEqual:@"Waiting for server"] && [waiting accessibilityValue] == nil && [waiting accessibilityMaxValue] == nil,
+          "an indeterminate progress has no value");
+    NSRect frame = [stop accessibilityFrame];
+    NSPoint expected = [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))];
+    Check([stop accessibilityPerformPress], "a Stop press is accepted");
+    NSEvent *down = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSEvent *up = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(down && up && down.window == window && fabs(down.locationInWindow.x - expected.x) < 2 && fabs(down.locationInWindow.y - expected.y) < 2,
+          "the press is an ordinary click at the Stop button's center");
+    Posts = [NSMutableArray new];
+    AXBDrawnTextRecordForTesting(Child(first, @"ProgressValue"), @[@"0,75"]);
+    AXBDrawnTextRecordForTesting(Child(first, @"Message2"), @[@"Order 8 of 10"]);
+    AXBProgressRefreshWindow(window);
+    BOOL announced = NO;
+    for (NSDictionary *post in Posts) announced |= post[@"element"] == bar && [post[@"notification"] isEqual:NSAccessibilityValueChangedNotification];
+    Check([[bar accessibilityValue] isEqual:@75] && [[message accessibilityValue] isEqual:@"Order 8 of 10"] && announced,
+          "a redrawn progress, with either decimal separator, updates and announces its value");
+    Posts = nil;
+    [first.superlayer removeFromSuperlayer];
+    AXBProgressRefreshWindow(window);
+    Check(ProgressChildren(form).count == 1 && ProgressElement(form, @"axb/progress/1/progress") == waiting &&
+          [[waiting accessibilityLabel] isEqual:@"Waiting for server"],
+          "a finished progress leaves the tree; the others keep their elements and take its position");
+    MessageLayer(context, @"main", NSMakeRect(20, 10, 80, 30), @[@"Other"]);
+    [second.superlayer removeFromSuperlayer];
+    Check(!AXBProgressRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without progress forms is left untouched");
+    [window close]; Pump();
 }
 static AXBWindowView *BridgeView(NSWindow *window) {
     NSMutableArray<NSView *> *pending = [NSMutableArray arrayWithObject:window.contentView];
@@ -1530,6 +1611,7 @@ int main(void) {
         AdjustableTest();
         ButtonInputTest();
         MessageDialogsTest();
+        ProgressWindowsTest();
         FocusAfterLayoutTest();
         ParkedControlsTest();
         SelectionInputTest();

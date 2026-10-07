@@ -15,7 +15,8 @@
 static os_unfair_lock TableLock = OS_UNFAIR_LOCK_INIT;
 static NSMapTable *LineText, *SetterText, *FrameText, *ImageText, *LayerText;
 static NSMutableDictionary<NSValue *, NSMutableArray<NSString *> *> *ContextText;
-static void (^Observer)(CALayer *);
+// Each owner's observed layer names and observer.
+static NSMutableDictionary<NSString *, NSDictionary *> *Observers;
 static NSSet<NSString *> *ObservedNames;
 static BOOL Installed, Available;
 
@@ -150,17 +151,15 @@ static CGImageRef ObservedImageCreate(CGContextRef context) {
 static void RecordContents(CALayer *layer, id contents) {
     NSString *name = layer.name;
     NSSet *names;
-    void (^observer)(CALayer *);
     BOOL changed = NO;
     {
         AXBTableGuard guard;
         names = ObservedNames;
-        observer = Observer;
         NSArray *texts = contents ? [ImageText objectForKey:contents] : nil;
         if (texts) { [LayerText setObject:texts forKey:layer]; changed = YES; }
         else if (name && [names containsObject:name] && [LayerText objectForKey:layer]) { [LayerText removeObjectForKey:layer]; changed = YES; }
     }
-    if (!changed || !observer || !name || ![names containsObject:name]) return;
+    if (!changed || !name || ![names containsObject:name]) return;
     // 4D's own modal loops do not drain the main dispatch queue. Schedule the observer in
     // every mode the main run loop knows, including 4D's own.
     __weak CALayer *weakLayer = layer;
@@ -169,9 +168,10 @@ static void RecordContents(CALayer *layer, id contents) {
     if (!modes) return;
     CFRunLoopPerformBlock(main, modes, ^{
         CALayer *strong = weakLayer;
-        void (^current)(CALayer *);
-        { AXBTableGuard guard; current = Observer; }
-        if (strong && current) current(strong);
+        NSArray *current;
+        { AXBTableGuard guard; current = Observers.allValues; }
+        for (NSDictionary *entry in current)
+            if (strong && [entry[@"names"] containsObject:strong.name]) ((void (^)(CALayer *))entry[@"observer"])(strong);
     });
     CFRelease(modes);
     CFRunLoopWakeUp(main);
@@ -295,10 +295,14 @@ NSArray<NSString *> *AXBDrawnTextForLayer(CALayer *layer) {
     return [[LayerText objectForKey:layer] copy];
 }
 
-void AXBDrawnTextSetObserver(NSSet<NSString *> *names, void (^observer)(CALayer *layer)) {
+void AXBDrawnTextSetObserver(NSString *owner, NSSet<NSString *> *names, void (^observer)(CALayer *layer)) {
     AXBTableGuard guard;
-    ObservedNames = [names copy];
-    Observer = [observer copy];
+    if (!Observers) Observers = [NSMutableDictionary new];
+    if (observer && names) Observers[owner] = @{@"names": [names copy], @"observer": [observer copy]};
+    else [Observers removeObjectForKey:owner];
+    NSMutableSet *all = [NSMutableSet new];
+    for (NSDictionary *entry in Observers.allValues) [all unionSet:entry[@"names"]];
+    ObservedNames = all;
 }
 
 void AXBDrawnTextRecordForTesting(CALayer *layer, NSArray<NSString *> *texts) {

@@ -58,6 +58,7 @@ Complex forms return their existing provider configuration from one optional app
 | AreaList Pro grids | Add stable row keys, record scope, loading readiness and descriptions for custom columns. Configure repeated grids within their owning child. [AreaList grids](skills/4d-accessibility/references/AREALIST-GRIDS.md). |
 | JSON-generated forms | Add `AXB_AreaForm` at the shared builder; the original method, events and data stay in place. [Generated forms](skills/4d-accessibility/references/examples/DYNAMIC-FORM.md). |
 | Built-in `ALERT`, `CONFIRM` and `Request` | The native plugin publishes the message, Request field and buttons, unchanged in appearance. No host change is needed. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
+| 4D's Progress component windows | The native plugin publishes each progress as an indicator labelled by its title, with its message and Stop button. No host change is needed. [Progress windows](tests/PROGRESS-WINDOWS.md). |
 | Existing application alert and confirmation forms | Add the area and labels. Preserve returned choices and validation. [Message dialogs](skills/4d-accessibility/references/MESSAGES.md). |
 | Custom controls or existing native/web content | Preserve a usable native provider. Use the explicit provider contract for application-specific controls; account for every interactive element. [Extension contract](skills/4d-accessibility/references/FORM-SUPPORT.md). |
 
