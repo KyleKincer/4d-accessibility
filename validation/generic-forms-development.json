@@ -1,9 +1,9 @@
 {
  "passed": true,
  "date": "2026-10-07",
- "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, and list boxes as tables of their visible rows, and page subforms' own forms, including components' such as 4D Widgets', published in reading order and operated with ordinary clicks and keys; by AX and by VoiceOver",
- "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box, a page subform and 4D Widgets' search picker)",
- "pluginSHA256": "daff2ac5a81f051ccda46d4baf5caf5e8ed67f2e0c2bdc7369bf14e5b257d1a4",
+ "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, and list boxes as tables of their visible rows with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order and operated with ordinary clicks and keys; by AX and by VoiceOver",
+ "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a page subform and 4D Widgets' search picker)",
+ "pluginSHA256": "6e213efa9bebf770c9fb0e9e5cc8eb40c00f2efcd915ad3a6a588ef72b64829a",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
@@ -23,7 +23,7 @@
   "inputs are labelled by their captions, with their values and placeholders",
   "the checkbox and radio buttons are published with their drawn states",
   "the drop-down shows its value; an untitled button is labelled by its help tip",
-  "a list box is a table labelled by its caption, with its column titles and its visible rows' cells",
+  "a list box is a table labelled by its caption, with the column titles 4D draws, one renamed at load, and its visible rows' cells",
   "writing an input's value types it into 4D's own field",
   "pressing the checkbox runs its On Clicked and checks it",
   "pressing a radio button chooses it and clears the other",

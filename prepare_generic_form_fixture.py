@@ -67,7 +67,9 @@ def main():
     (sources / 'DatabaseMethods').mkdir()
     (sources / 'DatabaseMethods/onStartup.4dm').write_text(STARTUP)
     logged = {'method': 'ObjectMethods/Event.4dm', 'events': ['onClick']}
-    form = {'windowTitle': TITLE, 'width': 420, 'height': 420, 'destination': 'detailScreen', 'pages': [None, {'objects': {
+    # The form renames a column when it loads, so only the title 4D draws names it.
+    form = {'windowTitle': TITLE, 'width': 420, 'height': 420, 'destination': 'detailScreen', 'method': 'method.4dm', 'events': ['onLoad'],
+            'pages': [None, {'objects': {
         'title': {'type': 'text', 'text': 'Customer details', 'left': 20, 'top': 16, 'width': 300, 'height': 18},
         'labelName': {'type': 'text', 'text': 'Name:', 'left': 20, 'top': 50, 'width': 60, 'height': 17},
         'inputName': {'type': 'input', 'dataSource': 'Form.name', 'left': 90, 'top': 48, 'width': 200, 'height': 18, 'placeholder': 'Full name'},
@@ -109,6 +111,7 @@ $file.setText($previous+JSON Stringify(New object("runId"; JSON Parse(File("/RES
     form_path = sources / 'Forms/Customer'
     (form_path / 'ObjectMethods').mkdir(parents=True)
     (form_path / 'ObjectMethods/Event.4dm').write_text(EVENT)
+    (form_path / 'method.4dm').write_text('If (Form event code=On Load)\n OBJECT SET TITLE(*; "headAmount"; "Total")\nEnd if\n')
     (form_path / 'form.4DForm').write_text(json.dumps(form, indent=2) + '\n')
     (FIXTURE / 'Resources/launch.json').write_text(json.dumps({'runId': uuid.uuid4().hex}) + '\n')
     before = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob('*') if p.is_file()}

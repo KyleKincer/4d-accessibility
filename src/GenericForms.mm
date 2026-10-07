@@ -390,8 +390,9 @@ static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect obj
             x += width;
         }
     }
-    NSArray<NSString *> *texts = AXBDrawnTextForLayer(layer);
-    NSArray<NSValue *> *origins = AXBDrawnTextOriginsForLayer(layer);
+    // 4D's GUI framework draws the column titles with HIToolbox, in the same image as the cells.
+    NSArray<NSString *> *texts = AXBDrawnTextWithThemedForLayer(layer);
+    NSArray<NSValue *> *origins = AXBDrawnTextOriginsWithThemedForLayer(layer);
     NSMutableArray *rows = [NSMutableArray new];
     if (!columns.count || !texts.count || origins.count != texts.count) return @{@"columns": columns, @"rows": rows};
     // Group the texts by baseline, top to bottom.
@@ -412,24 +413,55 @@ static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect obj
     }
     if (!height) height = 18;
     CGFloat bounds = NSHeight(layer.bounds), top = bounds - NSMaxY(object);
-    // The titles AppKit draws in the header band name the columns that hold them.
+    // The titles drawn in the header band name the columns that hold them.
     NSMutableArray *named = [NSMutableArray new];
     for (NSDictionary *column in columns) [named addObject:[column mutableCopy]];
+    // Each column's titles, by baseline: a title wrapped over two lines is two texts in one column.
+    NSMutableArray<NSMutableArray<NSDictionary *> *> *drawn = [NSMutableArray new];
+    for (NSUInteger c = 0; c < named.count; c++) [drawn addObject:[NSMutableArray new]];
     BOOL drawnTitles = NO;
     for (NSNumber *baseline in baselines) {
         if (band <= 0 || baseline.doubleValue < top || baseline.doubleValue > top + band) continue;
         for (NSDictionary *item in lines[baseline]) {
             CGFloat at = [item[@"x"] doubleValue];
-            for (NSMutableDictionary *column in named) {
-                CGFloat start = [column[@"x"] doubleValue], width = [column[@"width"] doubleValue];
+            for (NSUInteger c = 0; c < named.count; c++) {
+                CGFloat start = [named[c][@"x"] doubleValue], width = [named[c][@"width"] doubleValue];
                 if (at < start - 2 || at >= start + width - 2) continue;
                 NSString *text = [item[@"text"] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-                if (!drawnTitles) for (NSMutableDictionary *other in named) other[@"header"] = @"";
+                if (text.length) [drawn[c] addObject:@{@"text": text, @"x": @(at), @"baseline": baseline}];
                 drawnTitles = YES;
-                column[@"header"] = [column[@"header"] length] ? [NSString stringWithFormat:@"%@ %@", column[@"header"], text] : text;
                 break;
             }
         }
+    }
+    if (drawnTitles) {
+        NSMutableArray *split = [NSMutableArray new];
+        for (NSUInteger c = 0; c < named.count; c++) {
+            // Two titles side by side on one line are two columns whose separator was not found:
+            // each title starts its own column, just inside its left edge.
+            NSMutableArray<NSNumber *> *starts = [NSMutableArray arrayWithObject:named[c][@"x"]];
+            NSMutableDictionary<NSNumber *, NSMutableArray *> *byLine = [NSMutableDictionary new];
+            for (NSDictionary *item in drawn[c]) {
+                if (!byLine[item[@"baseline"]]) byLine[item[@"baseline"]] = [NSMutableArray new];
+                [byLine[item[@"baseline"]] addObject:item[@"x"]];
+            }
+            NSArray<NSNumber *> *widest = nil;
+            for (NSArray *xs in byLine.allValues) if (xs.count > widest.count) widest = [xs sortedArrayUsingSelector:@selector(compare:)];
+            for (NSUInteger i = 1; i < widest.count; i++)
+                if (widest[i].doubleValue - widest[i - 1].doubleValue >= 12 && widest[i].doubleValue - 3 > starts.lastObject.doubleValue + 8)
+                    [starts addObject:@(widest[i].doubleValue - 3)];
+            CGFloat end = [named[c][@"x"] doubleValue] + [named[c][@"width"] doubleValue];
+            for (NSUInteger i = 0; i < starts.count; i++) {
+                CGFloat from = starts[i].doubleValue, to = i + 1 < starts.count ? starts[i + 1].doubleValue : end;
+                NSMutableArray *parts = [NSMutableArray new];
+                for (NSDictionary *item in drawn[c]) {
+                    CGFloat at = [item[@"x"] doubleValue];
+                    if ((i == 0 || at >= from - 2) && (i + 1 == starts.count || at < to - 2)) [parts addObject:item[@"text"]];
+                }
+                [split addObject:[@{@"header": [parts componentsJoinedByString:@" "], @"x": @(from), @"width": @(to - from)} mutableCopy]];
+            }
+        }
+        named = split;
     }
     columns = named;
     NSSet *titles = [NSSet setWithArray:[columns valueForKey:@"header"]];
