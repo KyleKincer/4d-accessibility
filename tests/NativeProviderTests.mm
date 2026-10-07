@@ -1043,6 +1043,15 @@ static void QuickReportTest(void) {
     Check(!AXBQuickReportRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the report area is left untouched");
     [window close]; Pump();
 }
+static void ComponentArchiveTest(void) {
+    // A component's forms are read from its archive, deflated or stored; other entries are not forms.
+    NSString *path = NSProcessInfo.processInfo.environment[@"AXB_TEST_COMPONENT_ARCHIVE"];
+    if (!path) return;
+    NSDictionary *forms = AXBGenericFormsArchivedFormsForTesting(path);
+    Check([[forms.allKeys sortedArrayUsingSelector:@selector(compare:)] isEqual:(@[@"Picker", @"Plain"])] &&
+          [forms[@"Picker"][@"go"][@"text"] isEqual:@"Go"] && [forms[@"Plain"][@"note"][@"type"] isEqual:@"text"],
+          "a component archive's form definitions are read, deflated or stored, and nothing else");
+}
 static void GenericFormsTest(void) {
     // An application form with no bridge session, described by its definition and drawn layers.
     NSDictionary *definition = @{@"pages": @[[NSNull null], @{@"objects": @{
@@ -1928,6 +1937,7 @@ int main(void) {
         QueryEditorTest();
         QuickReportTest();
         GenericFormsTest();
+        ComponentArchiveTest();
         FocusAfterLayoutTest();
         ParkedControlsTest();
         SelectionInputTest();
