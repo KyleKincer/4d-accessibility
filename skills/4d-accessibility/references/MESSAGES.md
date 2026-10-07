@@ -23,7 +23,7 @@ Remaining scope:
 - 4D Server and remote clients;
 - VoiceOver speech for caret moves: the published caret follows 4D's, but VoiceOver does not yet read the characters a Left/Right move passes;
 - long, wrapped and localized messages;
-- other built-in windows. The Progress component's windows are covered separately: [Progress windows](../../../tests/PROGRESS-WINDOWS.md).
+- other built-in windows. The Progress component's windows and the Query editor are covered separately: [Progress windows](../../../tests/PROGRESS-WINDOWS.md), [Query editor](../../../tests/QUERY-EDITOR.md).
 
 The window also publishes an empty title text element. That is AppKit's own: any window with an empty title publishes one, so the plugin leaves it in place. Continue to integrate application dialog forms as below; those integrations do not depend on this recognition.
 

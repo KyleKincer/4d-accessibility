@@ -1,0 +1,395 @@
+#import "InternalForms.h"
+#import "DrawnText.h"
+#import "BridgePrivate.h"
+#include <initializer_list>
+
+static NSString *Joined(NSArray<NSString *> *texts) {
+    NSMutableArray *parts = [NSMutableArray new];
+    for (NSString *text in texts) {
+        NSString *trimmed = [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        if (trimmed.length && ![parts containsObject:trimmed]) [parts addObject:trimmed];
+    }
+    return [parts componentsJoinedByString:@" "];
+}
+
+CALayer *AXBInternalFormChild(CALayer *context, NSString *name) {
+    for (CALayer *layer in context.sublayers) if ([layer.name isEqual:name]) return layer;
+    return nil;
+}
+
+CALayer *AXBInternalFormContext(NSView *view) {
+    for (CALayer *layer in view.layer.sublayers) if ([layer.name isEqual:@"formContext"]) return layer;
+    return nil;
+}
+
+NSView *AXBInternalFormView(NSWindow *window) {
+    NSMutableArray<NSView *> *pending = window.contentView ? [NSMutableArray arrayWithObject:window.contentView] : [NSMutableArray new];
+    NSView *form = nil;
+    NSUInteger visited = 0;
+    while (pending.count && visited++ < 64) {
+        NSView *view = pending.firstObject; [pending removeObjectAtIndex:0];
+        if ([view isKindOfClass:AXBWindowView.class]) return nil; // An integrated form owns its window.
+        if (!form && AXBInternalFormContext(view)) form = view;
+        [pending addObjectsFromArray:view.subviews];
+    }
+    return pending.count ? nil : form; // Too many views to rule out an integrated form.
+}
+
+CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChild(subform, @"formContext"); }
+
+@implementation AXBInternalFormElement
+- (BOOL)isButton { return [self.accessibilityRole isEqual:NSAccessibilityButtonRole]; }
+- (BOOL)isPopup { return [self.accessibilityRole isEqual:NSAccessibilityPopUpButtonRole]; }
+- (BOOL)isField { return [self.accessibilityRole isEqual:NSAccessibilityTextFieldRole]; }
+- (NSRect)screenFrame {
+    CALayer *layer = self.layer;
+    if (!layer) return NSZeroRect;
+    if (NSIsEmptyRect(self.area)) return [self.owner screenFrameForLayer:layer inset:self.inset];
+    // An item's area within its layer's image, from the image's bottom left; the layer can
+    // show its image flipped.
+    NSRect area = self.area;
+    if (layer.contentsAreFlipped) area.origin.y = NSHeight(layer.bounds) - NSMaxY(area);
+    CALayer *form = self.owner.formView.layer;
+    NSView *view = self.owner.formView;
+    if (!view.window || !form) return NSZeroRect;
+    NSRect inView = [layer convertRect:area toLayer:form];
+    if (form.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
+    return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
+}
+- (NSString *)currentText {
+    NSString *text = self.text ?: [self.owner textForLayer:self.layer];
+    // An empty field draws its placeholder instead of a value.
+    return [self.placeholders containsObject:text] ? @"" : text;
+}
+- (NSString *)accessibilityPlaceholderValue {
+    NSString *text = self.text ?: [self.owner textForLayer:self.layer];
+    return [self.placeholders containsObject:text] ? text : nil;
+}
+- (NSRect)accessibilityFrame { return [self screenFrame]; }
+- (id)accessibilityParent { return self.owner; }
+- (NSString *)accessibilityIdentifier { return [self.owner.identifierPrefix stringByAppendingString:self.key]; }
+- (BOOL)isAccessibilityElement { return self.layer != nil && !self.layer.hidden; }
+- (BOOL)isAccessibilityEnabled { return YES; }
+- (NSString *)accessibilityLabel {
+    if (self.isButton) return self.label.length ? self.label : [self currentText];
+    return self.label;
+}
+- (id)accessibilityValue {
+    if (self.isButton) return nil;
+    return [self currentText] ?: @"";
+}
+- (BOOL)accessibilityPerformPress {
+    if (!self.isButton && !self.isPopup) return NO;
+    return [self.owner clickElement:self];
+}
+- (BOOL)accessibilityPerformShowMenu { return self.isPopup && [self.owner clickElement:self]; }
+- (void)setAccessibilityValue:(id)value {
+    if (self.isField && self.editable && [value isKindOfClass:NSString.class]) (void)[self.owner replaceText:value inElement:self];
+}
+- (NSInteger)accessibilityNumberOfCharacters { return (NSInteger)[self.accessibilityValue length]; }
+- (NSRange)accessibilitySelectedTextRange { return self.isField ? [self clampedSelection] : NSMakeRange(0, 0); }
+- (NSArray<NSValue *> *)accessibilitySelectedTextRanges { return self.isField ? @[[NSValue valueWithRange:[self clampedSelection]]] : nil; }
+- (NSString *)accessibilitySelectedText {
+    NSString *value = self.accessibilityValue;
+    return self.isField ? [value substringWithRange:[self clampedSelection]] : nil;
+}
+- (BOOL)isAccessibilityFocused { return NSApp.accessibilityApplicationFocusedUIElement == self && self.owner.window.isKeyWindow; }
+// Focusing a field gives it 4D's keyboard focus with an ordinary click at its end, so the
+// keys a user then types reach it, as after clicking it with the mouse.
+- (void)setAccessibilityFocused:(BOOL)focused {
+    if (!focused || !self.isField || !self.editable || self.caret) return;
+    if (![self.owner focusField:self]) return;
+    NSApp.accessibilityApplicationFocusedUIElement = self;
+    NSAccessibilityPostNotification(self, NSAccessibilityFocusedUIElementChangedNotification);
+}
+// 4D's single-line fields.
+- (NSRange)accessibilityVisibleCharacterRange { return NSMakeRange(0, [self.accessibilityValue length]); }
+- (NSInteger)accessibilityInsertionPointLineNumber { return 0; }
+- (NSInteger)accessibilityLineForIndex:(NSInteger)index { return index >= 0 && (NSUInteger)index <= [self.accessibilityValue length] ? 0 : NSNotFound; }
+- (NSRange)accessibilityRangeForLine:(NSInteger)line { return line == 0 ? NSMakeRange(0, [self.accessibilityValue length]) : NSMakeRange(NSNotFound, 0); }
+- (NSString *)accessibilityStringForRange:(NSRange)range {
+    NSString *value = self.accessibilityValue;
+    return range.location <= value.length && range.length <= value.length - range.location ? [value substringWithRange:range] : nil;
+}
+// The text is plain: one style run, and composed characters for each index.
+- (NSRange)accessibilityStyleRangeForIndex:(NSInteger)index {
+    NSUInteger length = [self.accessibilityValue length];
+    return index >= 0 && (NSUInteger)index <= length ? NSMakeRange(0, length) : NSMakeRange(NSNotFound, 0);
+}
+- (NSRange)accessibilityRangeForIndex:(NSInteger)index {
+    NSString *value = self.accessibilityValue;
+    return index >= 0 && (NSUInteger)index < value.length ? [value rangeOfComposedCharacterSequenceAtIndex:(NSUInteger)index] : NSMakeRange(NSNotFound, 0);
+}
+// 4D's editor reports where each character lies, as AppKit fields do.
+- (NSRect)accessibilityFrameForRange:(NSRange)range {
+    NSResponder *responder = self.owner.window.firstResponder;
+    NSUInteger length = [self.accessibilityValue length];
+    if (!self.caret || ![responder conformsToProtocol:@protocol(NSTextInputClient)] ||
+        range.location > length || range.length > length - range.location) return NSZeroRect;
+    NSRange actual = NSMakeRange(NSNotFound, 0);
+    return [(id<NSTextInputClient>)responder firstRectForCharacterRange:range actualRange:&actual];
+}
+- (NSAttributedString *)accessibilityAttributedStringForRange:(NSRange)range {
+    NSString *text = [self accessibilityStringForRange:range];
+    return text ? [[NSAttributedString alloc] initWithString:text] : nil;
+}
+// 4D's editor for the focused field is the window's text-input client. Its selection
+// is the actual caret, including moves by the arrow keys.
+- (BOOL)nativeSelection:(NSRange *)range {
+    NSResponder *responder = self.owner.window.firstResponder;
+    if (!self.caret || ![responder conformsToProtocol:@protocol(NSTextInputClient)]) return NO;
+    id<NSTextInputClient> client = (id<NSTextInputClient>)responder;
+    NSRange selected = client.selectedRange;
+    NSUInteger length = [self.accessibilityValue length];
+    if (client.hasMarkedText || selected.location == NSNotFound || selected.location > length || selected.length > length - selected.location) return NO;
+    *range = selected;
+    return YES;
+}
+- (NSRange)clampedSelection {
+    NSRange native;
+    if ([self nativeSelection:&native]) return native;
+    NSUInteger length = [self.accessibilityValue length];
+    NSUInteger location = MIN(self.selection.location, length);
+    return NSMakeRange(location, MIN(self.selection.length, length - location));
+}
+- (void)noticeCaret {
+    NSRange native;
+    if (![self nativeSelection:&native] || NSEqualRanges(native, self.announcedSelection)) return;
+    self.announcedSelection = native;
+    // An AppKit field announces a caret move with this notification alone.
+    NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
+}
+// Announce an edit as typing, the way AppKit and WebKit fields describe it, so
+// VoiceOver echoes the characters. The caret follows the end of the changed text.
+- (void)publishEditFrom:(NSString *)previous to:(NSString *)text {
+    NSUInteger prefix = 0, suffix = 0;
+    while (prefix < previous.length && prefix < text.length && [previous characterAtIndex:prefix] == [text characterAtIndex:prefix]) prefix++;
+    while (suffix < previous.length - prefix && suffix < text.length - prefix &&
+           [previous characterAtIndex:previous.length - 1 - suffix] == [text characterAtIndex:text.length - 1 - suffix]) suffix++;
+    NSString *inserted = [text substringWithRange:NSMakeRange(prefix, text.length - prefix - suffix)];
+    NSString *removed = [previous substringWithRange:NSMakeRange(prefix, previous.length - prefix - suffix)];
+    self.selection = NSMakeRange(prefix + inserted.length, 0);
+    NSRange native;
+    self.announcedSelection = [self nativeSelection:&native] ? native : self.selection;
+    NSMutableArray *changes = [NSMutableArray new];
+    if (removed.length) [changes addObject:@{@"AXTextEditType": @1, @"AXTextChangeValue": removed}];
+    if (inserted.length) [changes addObject:@{@"AXTextEditType": @3, @"AXTextChangeValue": inserted}];
+    NSAccessibilityPostNotificationWithUserInfo(self, NSAccessibilityValueChangedNotification,
+                                                @{@"AXTextStateChangeType": @1, @"AXTextChangeValues": changes, @"AXTextChangeElement": self});
+    NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
+}
+- (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (selector == @selector(accessibilityPerformPress)) return self.isButton || self.isPopup;
+    if (selector == @selector(accessibilityPerformShowMenu)) return self.isPopup;
+    if (selector == @selector(setAccessibilityValue:)) return self.isField && self.editable && self.isAccessibilityElement;
+    if (selector == @selector(setAccessibilityFocused:)) return self.isField && self.editable && !self.caret && self.isAccessibilityElement;
+    return [super isAccessibilitySelectorAllowed:selector];
+}
+@end
+
+@implementation AXBInternalFormOverlay
+- (instancetype)initWithFormView:(NSView *)view prefix:(NSString *)prefix {
+    if (!(self = [super initWithFrame:view.bounds])) return nil;
+    self.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
+    _formView = view;
+    for (CALayer *layer in view.layer.sublayers) if ([layer.name isEqual:@"formContext"]) _formLayer = layer;
+    _identifierPrefix = [prefix copy];
+    _elements = [NSMutableDictionary new];
+    _order = @[];
+    _publishedAt = NSProcessInfo.processInfo.systemUptime;
+    return self;
+}
+- (NSView *)hitTest:(NSPoint)point { (void)point; return nil; }
+- (BOOL)isAccessibilityElement { return NO; }
+- (NSArray *)accessibilityChildren {
+    NSMutableArray *children = [NSMutableArray new];
+    for (NSString *key in self.order) {
+        AXBInternalFormElement *element = self.elements[key];
+        if (element.isAccessibilityElement) [children addObject:element];
+    }
+    return children;
+}
+- (NSString *)textForLayer:(CALayer *)layer { return layer ? Joined(AXBDrawnTextForLayer(layer) ?: @[]) : @""; }
+- (NSRect)screenFrameForLayer:(CALayer *)layer inset:(CGFloat)inset {
+    NSView *view = self.formView;
+    if (!view.window || !layer) return NSZeroRect;
+    NSRect inView = [layer.superlayer convertRect:layer.frame toLayer:view.layer];
+    if (view.layer.geometryFlipped != view.isFlipped) inView.origin.y = NSHeight(view.bounds) - NSMaxY(inView);
+    if (inset > 0 && NSWidth(inView) > 2 * inset && NSHeight(inView) > 2 * inset) inView = NSInsetRect(inView, inset, inset);
+    return [view.window convertRectToScreen:[view convertRect:inView toView:nil]];
+}
+- (void)releaseFocus {
+    id focused = NSApp.accessibilityApplicationFocusedUIElement;
+    if (focused && [self.elements.allValues containsObject:focused]) NSApp.accessibilityApplicationFocusedUIElement = nil;
+}
+// 4D discards input that arrives before its modal loop has started, shortly after the
+// window is drawn: an immediate press was lost in half of the trials, one 250 ms later
+// in none. Hold input until the window has been published for twice that long, then
+// deliver it through every run-loop mode, including 4D's own.
+static const NSTimeInterval SettleInterval = 0.5;
+- (void)whenSettled:(dispatch_block_t)block {
+    NSTimeInterval wait = self.publishedAt + SettleInterval - NSProcessInfo.processInfo.systemUptime;
+    if (wait <= 0) { block(); return; }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(wait * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+        CFRunLoopRef main = CFRunLoopGetMain();
+        CFArrayRef modes = CFRunLoopCopyAllModes(main);
+        if (!modes) return;
+        CFRunLoopPerformBlock(main, modes, block);
+        CFRelease(modes);
+        CFRunLoopWakeUp(main);
+    });
+}
+static void PostClick(NSWindow *window, NSPoint point) {
+    // An ordinary click, queued so 4D's own loop handles it exactly as for the mouse.
+    NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+    for (NSEventType type : {NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp}) {
+        NSEvent *event = [NSEvent mouseEventWithType:type location:point modifierFlags:0 timestamp:now windowNumber:window.windowNumber
+                                             context:nil eventNumber:0 clickCount:1 pressure:type == NSEventTypeLeftMouseDown ? 1.0 : 0.0];
+        if (event) [NSApp postEvent:event atStart:NO];
+    }
+}
+static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags flags, unsigned short code) {
+    NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+    for (NSEventType type : {NSEventTypeKeyDown, NSEventTypeKeyUp}) {
+        NSEvent *event = [NSEvent keyEventWithType:type location:NSZeroPoint modifierFlags:flags timestamp:now windowNumber:window.windowNumber
+                                           context:nil characters:characters charactersIgnoringModifiers:characters isARepeat:NO keyCode:code];
+        if (event) [NSApp postEvent:event atStart:NO];
+    }
+}
+- (BOOL)clickElement:(AXBInternalFormElement *)element {
+    NSWindow *window = self.formView.window;
+    if (!window || !element.layer || element.layer.hidden || !window.isVisible) return NO;
+    __weak AXBInternalFormOverlay *weakSelf = self;
+    __weak AXBInternalFormElement *weakElement = element;
+    [self whenSettled:^{
+        AXBInternalFormOverlay *strongSelf = weakSelf;
+        AXBInternalFormElement *target = weakElement;
+        NSWindow *current = strongSelf.formView.window;
+        if (!strongSelf || !target.layer || target.layer.hidden || !current.isVisible) return;
+        CALayer *press = target.pressLayer;
+        NSRect frame = press ? [strongSelf screenFrameForLayer:press inset:target.pressInset] : [target screenFrame];
+        PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))]);
+    }];
+    return YES;
+}
+- (BOOL)focusField:(AXBInternalFormElement *)element {
+    NSWindow *window = self.formView.window;
+    if (!window.isVisible || !window.isKeyWindow || !element.layer) return NO;
+    __weak NSWindow *weakWindow = window;
+    __weak AXBInternalFormElement *weakElement = element;
+    [self whenSettled:^{
+        NSWindow *current = weakWindow;
+        AXBInternalFormElement *field = weakElement;
+        if (!current.isVisible || !current.isKeyWindow || !field.layer) return;
+        NSRect frame = [field screenFrame];
+        PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMaxX(frame) - MIN(4, NSWidth(frame) / 4), NSMidY(frame))]);
+    }];
+    return YES;
+}
+- (BOOL)replaceText:(NSString *)text inElement:(AXBInternalFormElement *)element {
+    NSWindow *window = self.formView.window;
+    if (!window.isVisible || !window.isKeyWindow || !element.layer) return NO;
+    // Type each character as an ordinary key event so 4D's own editor applies it.
+    // Line breaks would end entry.
+    for (NSUInteger i = 0; i < text.length; i++)
+        if ([NSCharacterSet.controlCharacterSet characterIsMember:[text characterAtIndex:i]]) return NO;
+    NSString *answer = [text copy];
+    __weak NSWindow *weakWindow = window;
+    __weak AXBInternalFormOverlay *weakSelf = self;
+    __weak AXBInternalFormElement *weakElement = element;
+    [self whenSettled:^{
+        NSWindow *current = weakWindow;
+        AXBInternalFormOverlay *strongSelf = weakSelf;
+        AXBInternalFormElement *field = weakElement;
+        if (!current.isVisible || !current.isKeyWindow || !strongSelf || !field.layer) return;
+        NSUInteger length = [field.accessibilityValue length];
+        NSString *right = [NSString stringWithFormat:@"%C", (unichar)NSRightArrowFunctionKey];
+        NSRange selected;
+        if (field.caret) {
+            // The focused field: replace the whole text. 4D starts with it selected; after a
+            // caret move, go to its end with the Right arrow and delete it, as a keyboard user would.
+            if (![field nativeSelection:&selected]) PostKey(current, @"a", NSEventModifierFlagCommand, 0);
+            else if (selected.location != 0 || selected.length != length) {
+                NSUInteger moves = (selected.length ? 1 : 0) + length - NSMaxRange(selected);
+                for (NSUInteger i = 0; i < moves; i++) PostKey(current, right, NSEventModifierFlagFunction | NSEventModifierFlagNumericPad, 124);
+                for (NSUInteger i = 0; i < length; i++) PostKey(current, @"\x7f", 0, 51);
+            }
+        } else {
+            // Another field: click inside it near its end, as the mouse focuses it, then go to
+            // its end and delete its text, so its own events run as for the keyboard.
+            NSRect frame = [field screenFrame];
+            NSPoint end = NSMakePoint(NSMaxX(frame) - MIN(4, NSWidth(frame) / 4), NSMidY(frame));
+            PostClick(current, [current convertPointFromScreen:end]);
+            for (NSUInteger i = 0; i < length; i++) PostKey(current, right, NSEventModifierFlagFunction | NSEventModifierFlagNumericPad, 124);
+            for (NSUInteger i = 0; i < length; i++) PostKey(current, @"\x7f", 0, 51);
+        }
+        [answer enumerateSubstringsInRange:NSMakeRange(0, answer.length) options:NSStringEnumerationByComposedCharacterSequences
+                                usingBlock:^(NSString *character, NSRange r1, NSRange r2, BOOL *stop) { (void)r1; (void)r2; (void)stop; PostKey(current, character, 0, 0); }];
+        if (field.caret && !answer.length) PostKey(current, @"\x7f", 0, 51);
+    }];
+    return YES;
+}
+- (BOOL)updateWithEntries:(NSArray<NSDictionary *> *)entries {
+    NSView *view = self.formView;
+    if (!view.window) return NO;
+    BOOL changed = NO;
+    NSMutableArray *order = [NSMutableArray new];
+    for (NSDictionary *entry in entries) {
+        NSString *key = entry[@"key"], *role = entry[@"role"], *label = entry[@"label"];
+        CALayer *layer = entry[@"layer"];
+        NSString *text = entry[@"text"] ?: (layer ? [self textForLayer:layer] : nil);
+        if ([entry[@"placeholders"] containsObject:text]) text = @"";
+        NSRect area = entry[@"area"] ? [entry[@"area"] rectValue] : NSZeroRect;
+        AXBInternalFormElement *element = self.elements[key];
+        BOOL field = [role isEqual:NSAccessibilityTextFieldRole];
+        // An empty text field is still a field; other objects need text or a fixed label.
+        if (!layer || layer.hidden || (!text.length && !label.length && !field)) continue;
+        if (element && ![element.accessibilityRole isEqual:role]) {
+            [self.elements removeObjectForKey:key];
+            NSAccessibilityPostNotification(element, NSAccessibilityUIElementDestroyedNotification);
+            element = nil;
+        }
+        [order addObject:key];
+        if (!element) {
+            element = [AXBInternalFormElement new];
+            element.owner = self; element.layer = layer; element.key = key; element.accessibilityRole = role;
+            element.label = label; element.editable = [entry[@"editable"] boolValue]; element.caret = [entry[@"caret"] boolValue];
+            element.inset = [entry[@"inset"] doubleValue];
+            element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
+            element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
+            element.publishedText = text;
+            element.selection = NSMakeRange(0, text.length);
+            self.elements[key] = element;
+            changed = YES;
+            continue;
+        }
+        // 4D can replace an object's layer while redrawing it, as a field does on each
+        // keystroke. The object keeps its element, so assistive focus and echo survive.
+        element.layer = layer;
+        element.editable = [entry[@"editable"] boolValue];
+        element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
+        element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
+        if (!(label == element.label || [label isEqual:element.label])) {
+            element.label = label;
+            NSAccessibilityPostNotification(element, NSAccessibilityTitleChangedNotification);
+        }
+        if (![element.publishedText isEqual:text]) {
+            NSString *previous = element.publishedText;
+            element.publishedText = text;
+            if (field) [element publishEditFrom:previous ?: @"" to:text];
+            else NSAccessibilityPostNotification(element, [role isEqual:NSAccessibilityButtonRole] && !label.length ? NSAccessibilityTitleChangedNotification : NSAccessibilityValueChangedNotification);
+        }
+    }
+    for (NSString *key in self.elements.allKeys) {
+        if ([order containsObject:key]) continue;
+        AXBInternalFormElement *element = self.elements[key];
+        if (NSApp.accessibilityApplicationFocusedUIElement == element) NSApp.accessibilityApplicationFocusedUIElement = nil;
+        [self.elements removeObjectForKey:key];
+        NSAccessibilityPostNotification(element, NSAccessibilityUIElementDestroyedNotification);
+        changed = YES;
+    }
+    if (![order isEqual:self.order]) { self.order = order; changed = YES; }
+    if (changed) NSAccessibilityPostNotification(view.window, NSAccessibilityLayoutChangedNotification);
+    return self.order.count > 0;
+}
+@end
