@@ -6,6 +6,7 @@
 #include "Limits.h"
 #import "NativeLayout.h"
 #import "MessageDialogs.h"
+#import "ProgressWindows.h"
 #import <objc/runtime.h>
 
 static NSMutableDictionary<NSString *, AXBSession *> *sessions;
@@ -1501,10 +1502,11 @@ void AXBInitialize(void) {
     Init();
     AXBLayoutInitialize();
     if (NSThread.isMainThread) QuietHelpTips(); else dispatch_async(dispatch_get_main_queue(), ^{ QuietHelpTips(); });
-    // Standard 4D message windows have no application form method to integrate. Install
+    // Standard 4D message and Progress component windows have no application form method to integrate. Install
     // now, on 4D's calling thread: a startup method's first message can be drawn inside a
     // modal loop that never drains the main queue, so a deferred install would miss it.
     AXBMessagesInitialize();
+    AXBProgressInitialize();
     // 4D can close and reopen a database while this bundle remains loaded.
     // Shutdown has retired old sessions and completed native-view cleanup.
     @synchronized(registryLock) { stopped = NO; }
@@ -1523,7 +1525,7 @@ void AXBShutdown(void) {
     // No monitor is held, and cleanup never calls 4D or waits for the form.
     dispatch_block_t cleanup = ^{
         for (AXBWindowView *v in views.allValues) [v invalidate];
-        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown();
+        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown();
         if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
         helpTipObserver = nil;
     };
