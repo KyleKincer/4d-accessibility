@@ -10,7 +10,7 @@
 // An entry is a dictionary:
 //   key       identifier suffix, unique within the form (required)
 //   layer     the object's CALayer (required)
-//   role      NSAccessibilityButtonRole, PopUpButtonRole, TextFieldRole or StaticTextRole
+//   role      NSAccessibilityButtonRole, RadioButtonRole, PopUpButtonRole, TextFieldRole or StaticTextRole
 //   label     a fixed label; a button without one is labelled by its drawn text
 //   editable  @YES for a text field whose value can be written
 //   caret     @YES for the field that holds 4D's keyboard focus and caret
@@ -20,6 +20,8 @@
 //   text      the element's own text, for such an item, instead of the layer's
 //   placeholders  NSSet of texts that a text field draws only while it is empty
 //   press     another object's layer that a press or Show Menu clicks, with pressInset
+//   clicks    @2 for an object that a double click operates, such as adding a list's item
+//   checked   for NSAccessibilityRadioButtonRole: whether it is the chosen one
 // An entry without drawn text is published only when it has a fixed label or is a text field.
 
 @class AXBInternalFormOverlay;
@@ -38,6 +40,8 @@
 @property(nonatomic, copy) NSSet<NSString *> *placeholders;
 @property(nonatomic, weak) CALayer *pressLayer;
 @property(nonatomic) CGFloat pressInset;
+@property(nonatomic) NSInteger clicks;
+@property(nonatomic) BOOL checked;
 - (NSRect)screenFrame;
 - (NSString *)currentText;
 // The caret inferred from edits, used only when 4D's editor cannot report it.
@@ -75,5 +79,10 @@
 NSView *AXBInternalFormView(NSWindow *window);
 CALayer *AXBInternalFormContext(NSView *view);
 CALayer *AXBInternalFormChild(CALayer *context, NSString *name);
+// The items of a list 4D draws as a whole into one layer, such as a hierarchical list:
+// one entry per drawn line, found from where its text is drawn, with keys under the
+// prefix and the given role, and each item's drawn x as originX. Returns nil when the
+// item positions are unknown.
+NSArray<NSDictionary *> *AXBInternalListItems(CALayer *list, NSString *prefix, NSString *role);
 // The form context inside a subform layer, or nil.
 CALayer *AXBInternalSubformContext(CALayer *subform);

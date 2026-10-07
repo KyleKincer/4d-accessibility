@@ -131,37 +131,7 @@ static NSArray<NSDictionary *> *QueryEntries(CALayer *form) {
 static NSArray<NSDictionary *> *ChooserEntries(CALayer *form) {
     CALayer *list = AXBInternalFormChild(form, @"table.list");
     if (!list || !AXBInternalFormChild(form, @"b.done") || AXBInternalFormChild(form, @"bottom.b.query")) return nil;
-    NSArray<NSString *> *texts = AXBDrawnTextForLayer(list);
-    NSArray<NSValue *> *origins = AXBDrawnTextOriginsForLayer(list);
-    if (!texts.count || origins.count != texts.count) return nil;
-    // The line height is the smallest step between baselines; a single item uses a usual one.
-    NSMutableArray<NSNumber *> *baselines = [NSMutableArray new];
-    for (NSValue *origin in origins) if (!isnan(origin.pointValue.y)) [baselines addObject:@(origin.pointValue.y)];
-    [baselines sortUsingSelector:@selector(compare:)];
-    CGFloat height = 0;
-    for (NSUInteger i = 1; i < baselines.count; i++) {
-        CGFloat step = baselines[i].doubleValue - baselines[i - 1].doubleValue;
-        if (step > 4 && (!height || step < height)) height = step;
-    }
-    if (!height) height = 18;
-    NSMutableArray *entries = [NSMutableArray new];
-    NSCountedSet *seen = [NSCountedSet new];
-    [texts enumerateObjectsUsingBlock:^(NSString *text, NSUInteger index, BOOL *stop) {
-        (void)stop;
-        NSPoint origin = origins[index].pointValue;
-        NSString *label = [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-        if (isnan(origin.y) || !label.length) return;
-        // The baseline, measured from the image's top, sits about a quarter of a line above
-        // the line's bottom; the area is measured from the image's bottom.
-        NSRect area = NSMakeRect(0, NSHeight(list.bounds) - origin.y - height / 4, NSWidth(list.bounds), height);
-        if (NSMaxY(area) <= 0 || NSMinY(area) >= NSHeight(list.bounds)) return;
-        [seen addObject:label];
-        NSString *key = [seen countForObject:label] > 1 ? [NSString stringWithFormat:@"item/%@/%lu", label, (unsigned long)[seen countForObject:label]] : [@"item/" stringByAppendingString:label];
-        NSMutableDictionary *entry = Entry(key, list, NSAccessibilityButtonRole, nil, 0);
-        entry[@"text"] = label;
-        entry[@"area"] = [NSValue valueWithRect:area];
-        [entries addObject:entry];
-    }];
+    NSArray *entries = AXBInternalListItems(list, @"item/", NSAccessibilityButtonRole);
     return entries.count ? entries : nil;
 }
 

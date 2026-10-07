@@ -35,10 +35,43 @@ NSView *AXBInternalFormView(NSWindow *window) {
     return pending.count ? nil : form; // Too many views to rule out an integrated form.
 }
 
+NSArray<NSDictionary *> *AXBInternalListItems(CALayer *list, NSString *prefix, NSString *role) {
+    NSArray<NSString *> *texts = AXBDrawnTextForLayer(list);
+    NSArray<NSValue *> *origins = AXBDrawnTextOriginsForLayer(list);
+    if (!texts.count || origins.count != texts.count) return nil;
+    // The line height is the smallest step between baselines; a single item uses a usual one.
+    NSMutableArray<NSNumber *> *baselines = [NSMutableArray new];
+    for (NSValue *origin in origins) if (!isnan(origin.pointValue.y)) [baselines addObject:@(origin.pointValue.y)];
+    [baselines sortUsingSelector:@selector(compare:)];
+    CGFloat height = 0;
+    for (NSUInteger i = 1; i < baselines.count; i++) {
+        CGFloat step = baselines[i].doubleValue - baselines[i - 1].doubleValue;
+        if (step > 4 && (!height || step < height)) height = step;
+    }
+    if (!height) height = 18;
+    NSMutableArray *entries = [NSMutableArray new];
+    NSCountedSet *seen = [NSCountedSet new];
+    [texts enumerateObjectsUsingBlock:^(NSString *text, NSUInteger index, BOOL *stop) {
+        (void)stop;
+        NSPoint origin = origins[index].pointValue;
+        NSString *label = [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        if (isnan(origin.y) || !label.length) return;
+        // The baseline, measured from the image's top, sits about a quarter of a line above
+        // the line's bottom; the area is measured from the image's bottom.
+        NSRect area = NSMakeRect(0, NSHeight(list.bounds) - origin.y - height / 4, NSWidth(list.bounds), height);
+        if (NSMaxY(area) <= 0 || NSMinY(area) >= NSHeight(list.bounds)) return;
+        [seen addObject:label];
+        NSString *key = [seen countForObject:label] > 1 ? [NSString stringWithFormat:@"%@%@/%lu", prefix, label, (unsigned long)[seen countForObject:label]] : [prefix stringByAppendingString:label];
+        [entries addObject:[@{@"key": key, @"layer": list, @"role": role, @"text": label, @"area": [NSValue valueWithRect:area], @"originX": @(origin.x)} mutableCopy]];
+    }];
+    return entries;
+}
+
 CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChild(subform, @"formContext"); }
 
 @implementation AXBInternalFormElement
-- (BOOL)isButton { return [self.accessibilityRole isEqual:NSAccessibilityButtonRole]; }
+- (BOOL)isButton { return [self.accessibilityRole isEqual:NSAccessibilityButtonRole] || [self.accessibilityRole isEqual:NSAccessibilityRadioButtonRole]; }
+- (BOOL)isRadio { return [self.accessibilityRole isEqual:NSAccessibilityRadioButtonRole]; }
 - (BOOL)isPopup { return [self.accessibilityRole isEqual:NSAccessibilityPopUpButtonRole]; }
 - (BOOL)isField { return [self.accessibilityRole isEqual:NSAccessibilityTextFieldRole]; }
 - (NSRect)screenFrame {
@@ -75,6 +108,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     return self.label;
 }
 - (id)accessibilityValue {
+    if (self.isRadio) return @(self.checked);
     if (self.isButton) return nil;
     return [self currentText] ?: @"";
 }
@@ -239,14 +273,15 @@ static const NSTimeInterval SettleInterval = 0.5;
         CFRunLoopWakeUp(main);
     });
 }
-static void PostClick(NSWindow *window, NSPoint point) {
-    // An ordinary click, queued so 4D's own loop handles it exactly as for the mouse.
+static void PostClick(NSWindow *window, NSPoint point, NSInteger clicks = 1) {
+    // An ordinary click, or double click, queued so 4D's own loop handles it exactly as for the mouse.
     NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
-    for (NSEventType type : {NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp}) {
-        NSEvent *event = [NSEvent mouseEventWithType:type location:point modifierFlags:0 timestamp:now windowNumber:window.windowNumber
-                                             context:nil eventNumber:0 clickCount:1 pressure:type == NSEventTypeLeftMouseDown ? 1.0 : 0.0];
-        if (event) [NSApp postEvent:event atStart:NO];
-    }
+    for (NSInteger count = 1; count <= MAX(clicks, 1); count++)
+        for (NSEventType type : {NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp}) {
+            NSEvent *event = [NSEvent mouseEventWithType:type location:point modifierFlags:0 timestamp:now windowNumber:window.windowNumber
+                                                 context:nil eventNumber:0 clickCount:count pressure:type == NSEventTypeLeftMouseDown ? 1.0 : 0.0];
+            if (event) [NSApp postEvent:event atStart:NO];
+        }
 }
 static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags flags, unsigned short code) {
     NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
@@ -268,7 +303,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         if (!strongSelf || !target.layer || target.layer.hidden || !current.isVisible) return;
         CALayer *press = target.pressLayer;
         NSRect frame = press ? [strongSelf screenFrameForLayer:press inset:target.pressInset] : [target screenFrame];
-        PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))]);
+        PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], target.clicks);
     }];
     return YES;
 }
@@ -357,6 +392,8 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             element.inset = [entry[@"inset"] doubleValue];
             element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
             element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
+            element.clicks = [entry[@"clicks"] integerValue];
+            element.checked = [entry[@"checked"] boolValue];
             element.publishedText = text;
             element.selection = NSMakeRange(0, text.length);
             self.elements[key] = element;
@@ -369,6 +406,11 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         element.editable = [entry[@"editable"] boolValue];
         element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
         element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
+        element.clicks = [entry[@"clicks"] integerValue];
+        if (element.checked != [entry[@"checked"] boolValue]) {
+            element.checked = [entry[@"checked"] boolValue];
+            NSAccessibilityPostNotification(element, NSAccessibilityValueChangedNotification);
+        }
         if (!(label == element.label || [label isEqual:element.label])) {
             element.label = label;
             NSAccessibilityPostNotification(element, NSAccessibilityTitleChangedNotification);

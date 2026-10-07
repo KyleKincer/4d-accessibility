@@ -23,7 +23,7 @@ def main():
     binary = ROOT / "build/NativeGridFixture"
     subprocess.run([
         "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
-        *[str(ROOT / path) for path in ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/InternalForms.mm", "src/MessageDialogs.mm", "src/ProgressWindows.mm", "src/QueryEditor.mm", "tests/NativeGridFixture.mm"]],
+        *[str(ROOT / path) for path in ["src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/InternalForms.mm", "src/MessageDialogs.mm", "src/ProgressWindows.mm", "src/QueryEditor.mm", "src/QuickReport.mm", "tests/NativeGridFixture.mm"]],
         "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary),
     ], check=True)
     if not args.run:

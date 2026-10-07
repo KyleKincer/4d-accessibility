@@ -55,7 +55,7 @@ def main():
     subprocess.run(["xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-I", str(ROOT / "src"),
                     str(ROOT / "tests/FocusReplacementFixture.mm"), str(ROOT / "src/Session.mm"), str(ROOT / "src/Grid.mm"),
                     str(ROOT / "src/Bridge.mm"), str(ROOT / "src/GridNative.mm"), str(ROOT / "src/NativeLayout.mm"),
-                    str(ROOT / "src/DrawnText.mm"), str(ROOT / "src/InternalForms.mm"), str(ROOT / "src/MessageDialogs.mm"), str(ROOT / "src/ProgressWindows.mm"), str(ROOT / "src/QueryEditor.mm"),
+                    str(ROOT / "src/DrawnText.mm"), str(ROOT / "src/InternalForms.mm"), str(ROOT / "src/MessageDialogs.mm"), str(ROOT / "src/ProgressWindows.mm"), str(ROOT / "src/QueryEditor.mm"), str(ROOT / "src/QuickReport.mm"),
                     "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(BINARY)], check=True)
     print("Built focus replacement fixture")
     if not args.run:

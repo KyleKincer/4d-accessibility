@@ -8,6 +8,7 @@
 #import "MessageDialogs.h"
 #import "ProgressWindows.h"
 #import "QueryEditor.h"
+#import "QuickReport.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <cstdio>
@@ -971,6 +972,76 @@ static void QueryEditorTest(void) {
     Check(!AXBQueryEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without criteria is left untouched");
     [window close]; Pump();
 }
+static CALayer *ReportSubform(CALayer *parent, NSString *name, NSRect frame) {
+    CALayer *subform = MessageLayer(parent, name, frame, nil);
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = subform.bounds;
+    [subform addSublayer:context];
+    return context;
+}
+static void QuickReportTest(void) {
+    // 4D's Quick Report editor: a toolbar, the report area, a status line, and its panels and sheet.
+    AXBQuickReportEnableForTesting();
+    NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 200, 1060, 498) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
+    window.releasedWhenClosed = NO; window.title = @"AXB Quick Report";
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    MessageLayer(context, @"status.records", NSMakeRect(5, 2, 1048, 15), @[@"Number of records: 5"]);
+    CALayer *report = ReportSubform(context, @"myQR", NSMakeRect(0, 20, 1060, 386));
+    CALayer *area = MessageLayer(report, @"nqr", NSMakeRect(-5, -5, 1070, 396), @[@"Customer", @"Amount", @"Title", @"Format", @"Grand Total"]);
+    AXBDrawnTextRecordOriginsForTesting(area, @[[NSValue valueWithPoint:NSMakePoint(90, 22)], [NSValue valueWithPoint:NSMakePoint(220, 22)],
+        [NSValue valueWithPoint:NSMakePoint(6, 22)], [NSValue valueWithPoint:NSMakePoint(6, 52)], [NSValue valueWithPoint:NSMakePoint(6, 82)]]);
+    MessageLayer(context, @"plus.line", NSMakeRect(77, 20, 2, 386), nil).hidden = YES;
+    for (NSArray *button in @[@[@"toolbar.opened.new", @"New", @11], @[@"toolbar.opened.destination", @"Destination", @210], @[@"toolbar.opened.run", @"Execute", @358],
+                              @[@"toolbar.opened.fields", @"Fields", @976]])
+        MessageLayer(context, button[0], NSMakeRect([button[2] doubleValue], 415, 64, 61), @[button[1]]);
+    CALayer *panel = ReportSubform(context, @"tool.destination", NSMakeRect(0, 303, 1060, 103));
+    MessageLayer(panel, @"Text", NSMakeRect(10, 69, 164, 23), @[@"Destination"]);
+    MessageLayer(panel, @"file", NSMakeRect(170, 16, 69, 76), @[@"File"]);
+    MessageLayer(panel, @"printer", NSMakeRect(243, 16, 69, 76), @[@"Print"]);
+    MessageLayer(panel, @"html", NSMakeRect(316, 16, 69, 76), @[@"HTML"]);
+    MessageLayer(panel, @"select", NSMakeRect(244, 17, 67, 74), nil);
+    MessageLayer(panel, @"close", NSMakeRect(1035, 78, 30, 30), nil);
+    MessageLayer(panel, @"left", NSMakeRect(0, -93, 83, 44), @[@"0"]);
+    Check(AXBQuickReportRefreshWindow(window), "a window holding the Quick Report editor's form is published");
+    id run = ProgressElement(form, @"axb/report/run"), file = ProgressElement(form, @"axb/report/destination/file"), print = ProgressElement(form, @"axb/report/destination/printer");
+    Check([[run accessibilityRole] isEqual:NSAccessibilityButtonRole] && [[run accessibilityLabel] isEqual:@"Execute"], "toolbar buttons are published by their drawn titles");
+    Check([[file accessibilityRole] isEqual:NSAccessibilityRadioButtonRole] && [[file accessibilityValue] isEqual:@NO] && [[print accessibilityValue] isEqual:@YES],
+          "the destinations are radio buttons; the framed one is chosen");
+    Check([[ProgressElement(form, @"axb/report/destination/close") accessibilityLabel] isEqual:@"Close"] && !ProgressElement(form, @"axb/report/destination/left"),
+          "the panel's Close is labelled and its objects parked outside it are not published");
+    id customer = ProgressElement(form, @"axb/report/column/Customer");
+    Check([[customer accessibilityValue] isEqual:@"Customer"] && [[customer accessibilityLabel] isEqual:@"Report column"] &&
+          ProgressElement(form, @"axb/report/column/Amount") && !ProgressElement(form, @"axb/report/column/Title"),
+          "the report's columns are read from its area; the row titles are not columns");
+    Check([[ProgressElement(form, @"axb/report/status") accessibilityValue] isEqual:@"Number of records: 5"], "the record count is published");
+    // The Fields sheet is modal: only it is published while it is open.
+    CALayer *sheet = ReportSubform(context, @"settings.dial", NSMakeRect(260, 25, 540, 448));
+    CALayer *fields = MessageLayer(sheet, @"field.list", NSMakeRect(6, 68, 249, 330), @[@"id", @"Customer"]);
+    AXBDrawnTextRecordOriginsForTesting(fields, @[[NSValue valueWithPoint:NSMakePoint(24, 20)], [NSValue valueWithPoint:NSMakePoint(24, 38)]]);
+    MessageLayer(sheet, @"b.remove.one", NSMakeRect(253, 270, 34, 40), nil);
+    MessageLayer(sheet, @"ok", NSMakeRect(451, 34, 85, 32), @[@"OK"]);
+    AXBQuickReportRefreshWindow(window);
+    NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
+    Check([keys isEqual:(@[@"axb/report/sheet/field/id", @"axb/report/sheet/field/Customer", @"axb/report/sheet/b.remove.one", @"axb/report/sheet/ok"])],
+          "while the Fields sheet is open, only its fields and buttons are published");
+    id field = ProgressElement(form, @"axb/report/sheet/field/Customer");
+    Check([[ProgressElement(form, @"axb/report/sheet/b.remove.one") accessibilityLabel] isEqual:@"Remove column"], "the sheet's arrow buttons are labelled");
+    Check([field accessibilityPerformPress], "pressing an available field is accepted");
+    NSEvent *first = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSEvent *second = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(first.clickCount == 1 && second.clickCount == 2 && NSEqualPoints(first.locationInWindow, second.locationInWindow),
+          "the press is an ordinary double click on that field's line, which adds it");
+    [sheet.superlayer removeFromSuperlayer];
+    [report.superlayer removeFromSuperlayer];
+    Check(!AXBQuickReportRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the report area is left untouched");
+    [window close]; Pump();
+}
 static AXBWindowView *BridgeView(NSWindow *window) {
     NSMutableArray<NSView *> *pending = [NSMutableArray arrayWithObject:window.contentView];
     while (pending.count) {
@@ -1756,6 +1827,7 @@ int main(void) {
         MessageDialogsTest();
         ProgressWindowsTest();
         QueryEditorTest();
+        QuickReportTest();
         FocusAfterLayoutTest();
         ParkedControlsTest();
         SelectionInputTest();

@@ -1,0 +1,69 @@
+{
+ "passed": true,
+ "date": "2026-10-07",
+ "scope": "4D's Quick Report editor (QR REPORT with the editor), published by the native plugin alone from its form's layers: the toolbar, its Destination and Options panels, the report's columns read-only, the record count, and the Fields sheet whose available fields are added by pressing and whose columns are selected and removed; a columnar report built through accessibility and executed to HTML through macOS's Save dialog; by AX and by VoiceOver",
+ "fixture": "prepare_quick_report_fixture.py and test_quick_report_fixture.py (Orders table with five records)",
+ "pluginSHA256": "8ad264822bdf2db0115770aea6dfe920f1feb5778a5262387799c93ae6ccb537",
+ "environment": {
+  "4D": "20.8 build 20.102009",
+  "macOS": "26.7.1"
+ },
+ "runs": {
+  "arm64-compiled-voiceover": 10,
+  "arm64-compiled": 10,
+  "arm64-voiceover": 10,
+  "arm64": 10,
+  "x86_64-compiled-voiceover": 10,
+  "x86_64-compiled": 10,
+  "x86_64": 10
+ },
+ "checks": [
+  "the Quick Report editor is pixel-identical to the plugin-free editor",
+  "the toolbar's buttons are published by their titles",
+  "the record count is published, and a new report has no columns",
+  "the Fields sheet publishes the available fields and the buttons that move them",
+  "pressing an available field adds it to the report's columns",
+  "a column pressed, then Remove column, leaves the report",
+  "OK returns to the editor, which publishes the report's columns",
+  "the destinations are radio buttons, Print chosen",
+  "pressing HTML chooses it",
+  "Execute writes the report the columns describe, with every record",
+  "VoiceOver reaches the Quick Report editor",
+  "VoiceOver reaches the Fields button",
+  "VoiceOver reads the available fields",
+  "VO-Space on a field adds it to the report's columns",
+  "VoiceOver reaches OK",
+  "OK makes the chosen field the report's column",
+  "VoiceOver reaches Destination",
+  "VoiceOver reads the destinations as radio buttons, Print selected"
+ ],
+ "voiceOverSpeech": [
+  "Clear button",
+  "Header button",
+  "Options button",
+  "Fields button",
+  "Revert button",
+  "Footer button",
+  "Destination",
+  "Close button",
+  "Send your report to...",
+  "Customer Report column",
+  "File radio button",
+  "Print selected radio button"
+ ],
+ "regressions": {
+  "test.py": "316 checks",
+  "test_grids.py": "246 checks",
+  "native provider suite": "473 checks",
+  "test_query_editor_fixture.py": "14 checks, and 13 with VoiceOver, on the shared list items; one VoiceOver run heard no speech at all and two reruns passed",
+  "test_native_messages.py": "37 checks"
+ },
+ "notCovered": [
+  "The report's cells, header and footer",
+  "Reporting which column is selected in the Fields sheet",
+  "Each destination's options",
+  "Executing to a file or the printer",
+  "4D Server and remote clients",
+  "4D on Windows"
+ ]
+}
