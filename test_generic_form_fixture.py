@@ -57,6 +57,7 @@ def main():
         return
     ax.require_test_input()
     run_id = json.loads((FIXTURE / "Resources/launch.json").read_text())["runId"]
+    plugin = None if args.baseline else sha(FIXTURE / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")
     vo = heard = None
     if args.voiceover:
         import voiceover_session as vo
@@ -128,7 +129,7 @@ def main():
         return
 
     report = {"passed": False, "mode": "compiled" if args.compiled else "interpreted", "architecture": architecture, "voiceover": args.voiceover,
-              "checks": [], "pluginSHA256": sha(FIXTURE / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge")}
+              "checks": [], "pluginSHA256": plugin}
 
     def check(condition, description):
         assert condition, description
@@ -144,12 +145,18 @@ def main():
             time.sleep(0.1)
         raise AssertionError("VoiceOver did not say the expected phrase; heard " + repr([p for _, p in heard.since(since)][-5:]))
 
+    def cursor():
+        """What VoiceOver's cursor is on. A hint can be spoken after the next move, so the last
+        phrase does not always describe the cursor."""
+        return vo._osa('tell application "VoiceOver" to get text under cursor of vo cursor')
+
     def vo_to(predicate, limit=20):
         for _ in range(limit):
-            front(); mark = heard.mark(); vo.key("right", vo.VO)
-            phrase = phrase_until(lambda ph: ph.strip() != "", mark)
-            if predicate(phrase):
-                return phrase
+            front(); vo.key("right", vo.VO)
+            time.sleep(0.4)
+            text = cursor()
+            if predicate(text):
+                return text
         raise AssertionError("VoiceOver did not reach the expected element")
 
     def saved():
@@ -170,7 +177,7 @@ def main():
         order = list(published())
         report["published"] = order
         check(order == ["title", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier",
-                        "btnSave", "btnHelp", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
+                        "btnSave", "btnHelp", "labelOrders", "listOrders", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
         name, city = element("inputName"), element("inputCity")
         check(name.read("AXRole") == "AXTextField" and name.read("AXDescription") == "Name" and name.read("AXValue") == "" and
               name.read("AXPlaceholderValue") == "Full name" and city.read("AXDescription") == "City" and city.read("AXValue") == "Lyon",
@@ -180,6 +187,17 @@ def main():
               "the checkbox and radio buttons are published with their drawn states")
         check(element("dropdownTier").read("AXRole") == "AXPopUpButton" and element("dropdownTier").read("AXValue") == "Gold" and
               element("btnHelp").read("AXDescription") == "Help", "the drop-down shows its value; an untitled button is labelled by its help tip")
+        table = element("listOrders")
+
+        def rows():
+            return [[cell.read("AXValue") for cell in row.read("AXChildren") or []] for row in element("listOrders").read("AXRows") or []]
+
+        def selected():
+            return [row.read("AXSelected") for row in element("listOrders").read("AXRows") or []]
+        check(table.read("AXRole") == "AXTable" and table.read("AXDescription") == "Orders" and
+              [h.read("AXValue") for h in table.read("AXColumnHeaderUIElements") or []] == ["Customer", "Amount"] and
+              rows() == [["Ada", "10"], ["Grace", "20"], ["Linus", "30"], ["Margaret", "40"]] and not any(selected()),
+              "a list box is a table labelled by its caption, with its column titles and its visible rows' cells")
         if args.voiceover:
             check(phrase_until(lambda ph: TITLE in ph, 0, 40), "VoiceOver reaches the form")
             check(vo_to(lambda ph: "Name" in ph and "edit text" in ph), "VoiceOver reads the Name field by its caption")
@@ -192,6 +210,20 @@ def main():
             ax.wait_for(lambda: element("checkActive").read("AXValue") is True, "Checked", timeout=10)
             check(True, "VO-Space checks the checkbox through its own handling")
             check(vo_to(lambda ph: "Save" in ph and "button" in ph), "VoiceOver reaches Save")
+            check(vo_to(lambda ph: "Orders" in ph and "table" in ph), "VoiceOver reads the list box as a table labelled by its caption")
+            time.sleep(2)  # let VoiceOver finish the table's announcement before interacting
+            front(); mark = heard.mark(); vo.key("down", vo.VO + ("shift",))
+            check(phrase_until(lambda ph: "Ada" in ph and "Customer" in ph, mark), "interacting with it reads the first row's cell with its column title")
+            count = len(events())
+            front(); mark = heard.mark(); vo.key("down", vo.VO)
+            check(phrase_until(lambda ph: "Grace" in ph, mark), "VO-Down moves to the next row")
+            # VoiceOver selects the row its cursor reaches, as in AppKit's tables.
+            ax.wait_for(lambda: [e["position"] for e in events()[count:] if e["object"] == "listOrders"][-1:] == [2], "Row 2 selected", timeout=10)
+            check([e["position"] for e in events()[count:] if e["object"] == "listOrders"].count(2) == 1,
+                  "the row VoiceOver reaches is selected once, through the list box's own handling")
+            front(); mark = heard.mark(); vo.key("up", vo.VO + ("shift",))
+            phrase_until(lambda ph: ph.strip() != "", mark)
+            front(); mark = heard.mark(); vo.key("left", vo.VO); vo.key("left", vo.VO); vo.key("left", vo.VO)
             front(); vo.key("space", vo.VO)
             ax.wait_for(saved, "Save's record", timeout=10)
             values = saved()[-1]
@@ -218,6 +250,11 @@ def main():
             assert silver.perform("AXPress") == 0
             ax.wait_for(lambda: element("dropdownTier").read("AXValue") == "Silver", "Silver", timeout=10)
             check(True, "the drop-down opens 4D's native menu, and choosing an item changes its value")
+            count = len(events())
+            assert element("listOrders").read("AXRows")[2].perform("AXPress") == 0
+            ax.wait_for(lambda: selected() == [False, False, True, False], "Row 3 selected", timeout=10)
+            check([e["position"] for e in events()[count:] if e["object"] == "listOrders"] == [3],
+                  "pressing a row selects it through the list box's own handling, and the table reports it selected")
             assert element("btnHelp").perform("AXPress") == 0
             ax.wait_for(lambda: any(e["object"] == "btnHelp" for e in events()), "Help's event", timeout=10)
             assert element("btnSave").perform("AXPress") == 0

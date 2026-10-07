@@ -17,7 +17,7 @@ import uuid
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT / "tests"))
 CASES = ("offscreen-delayed", "onscreen-delayed", "offscreen-immediate", "fast-update", "leave", "leave-after-load", "inspection")
-COMPILE = ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/InternalForms.mm", "src/MessageDialogs.mm", "src/ProgressWindows.mm", "src/QueryEditor.mm", "src/QuickReport.mm", "src/GenericForms.mm", "tests/NativeOutlineFixture.mm")
+COMPILE = ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/InternalForms.mm", "src/InternalTable.mm", "src/MessageDialogs.mm", "src/ProgressWindows.mm", "src/QueryEditor.mm", "src/QuickReport.mm", "src/GenericForms.mm", "tests/NativeOutlineFixture.mm")
 SOURCES = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "src").glob("*") if p.is_file()) + [
     "tests/NativeOutlineFixture.mm", "tests/mac_ax.py", "tests/voiceover.py", "tests/ReadScreen.swift", "test_outline_value_speech.py"]
 TITLE = "AXB native outline fixture"

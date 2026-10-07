@@ -19,6 +19,7 @@
 //             from its bottom left, for one item of an object drawn as a whole
 //   text      the element's own text, for such an item, instead of the layer's
 //   placeholders  NSSet of texts that a text field draws only while it is empty
+//   table     for NSAccessibilityTableRole: the model AXBInternalTable describes
 //   press     another object's layer that a press or Show Menu clicks, with pressInset
 //   clicks    @2 for an object that a double click operates, such as adding a list's item
 //   checked   for a radio button or checkbox: whether it is chosen; absent when unknown
@@ -68,6 +69,9 @@
 - (BOOL)updateWithEntries:(NSArray<NSDictionary *> *)entries;
 - (void)releaseFocus;
 - (NSRect)screenFrameForLayer:(CALayer *)layer inset:(CGFloat)inset;
+// An area of a layer's image, from its bottom left, on screen; and an ordinary click at its center.
+- (NSRect)screenFrameForArea:(NSRect)area inLayer:(CALayer *)layer;
+- (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer;
 - (NSString *)textForLayer:(CALayer *)layer;
 - (void)whenSettled:(dispatch_block_t)block;
 - (BOOL)clickElement:(AXBInternalFormElement *)element;
