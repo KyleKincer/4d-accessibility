@@ -200,7 +200,7 @@ def main():
     subprocess.run([
         "xcrun", "clang++", "-std=c++17", "-fobjc-arc", "-Wall", "-Wextra", "-Werror", "-g", "-I", str(ROOT / "src"),
         *[str(ROOT / name) for name in ("src/Session.mm", "src/Grid.mm", "src/Bridge.mm", "src/GridNative.mm", "src/NativeLayout.mm", "src/DrawnText.mm", "src/InternalForms.mm", "src/InternalTable.mm", "src/MessageDialogs.mm", "src/ProgressWindows.mm", "src/QueryEditor.mm", "src/QuickReport.mm", "src/GenericForms.mm", "tests/NativeGridFixture.mm")],
-        "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-o", str(binary),
+        "-framework", "Cocoa", "-framework", "CoreText", "-framework", "QuartzCore", "-lz", "-o", str(binary),
     ], check=True)
     if not args.run:
         print("Built the deferred-value fixture; use --run to verify actual VoiceOver speech.")

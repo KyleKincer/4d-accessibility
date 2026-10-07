@@ -24,6 +24,7 @@ $data.tier:=New object("values"; New collection("Gold"; "Silver"; "Bronze"); "in
 $data.orders:=New collection(New object("customer"; "Ada"; "amount"; 10); New object("customer"; "Grace"; "amount"; 20); New object("customer"; "Linus"; "amount"; 30); New object("customer"; "Margaret"; "amount"; 40))
 $data.position:=0
 $data.search:=New object("text"; "")
+$data.query:=""
 File("/RESOURCES/events.jsonl").delete()
 $window:=Open form window("Customer"; Plain form window)
 DIALOG("Customer"; $data)
@@ -36,7 +37,7 @@ var $previous : Text
 var $entry : Object
 $entry:=New object("runId"; Form.config.runId; "compiled"; Is compiled mode; "object"; OBJECT Get name(Object current); "event"; Form event code; "position"; Form.position)
 If (Form event code=On Clicked)
- $entry.values:=New object("name"; Form.name; "city"; Form.city; "active"; Form.active; "retail"; Form.retail; "wholesale"; Form.wholesale; "tier"; Form.tier.index)
+ $entry.values:=New object("name"; Form.name; "city"; Form.city; "active"; Form.active; "retail"; Form.retail; "wholesale"; Form.wholesale; "tier"; Form.tier.index; "query"; Form.query)
 End if
 $file:=File("/RESOURCES/events.jsonl")
 If ($file.exists)
@@ -81,6 +82,7 @@ def main():
         'btnUnnamed': {'type': 'button', 'style': 'custom', 'left': 150, 'top': 220, 'width': 24, 'height': 24},
         'btnDone': {'type': 'button', 'text': 'Done', 'action': 'accept', 'left': 310, 'top': 380, 'width': 90, 'height': 24},
         'search': {'type': 'subform', 'detailForm': 'SearchBox', 'dataSource': 'Form.search', 'left': 300, 'top': 12, 'width': 110, 'height': 26},
+        'widgetSearch': {'type': 'subform', 'detailForm': 'SearchPicker', 'dataSource': 'Form.query', 'left': 300, 'top': 176, 'width': 110, 'height': 30},
         'labelOrders': {'type': 'text', 'text': 'Orders', 'left': 20, 'top': 256, 'width': 120, 'height': 17},
         'listOrders': {'type': 'listbox', 'listboxType': 'collection', 'dataSource': 'Form.orders', 'currentItemPositionSource': 'Form.position',
                        'selectionMode': 'single', 'left': 20, 'top': 276, 'width': 262, 'height': 96, 'method': 'ObjectMethods/Event.4dm',
@@ -118,8 +120,10 @@ $file.setText($previous+JSON Stringify(New object("runId"; JSON Parse(File("/RES
         compiled = run_utility(server / 'Contents/MacOS' / info['CFBundleExecutable'], driver,
             '$options:=New object("targets"; New collection("arm64_macOS_lib"; "x86_64_generic"); "typeInference"; "none")\n'
             f'$options.plugins:=Folder({literal(FIXTURE / "Plugins")})\n' +
-            ('$options.components:=New collection\n' if args.no_bridge else
-                f'$options.components:=New collection(File({literal(FIXTURE / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ")}))\n') +
+            # 4D Widgets, which 4D includes, provides the search picker subform.
+            (f'$options.components:=New collection(File({literal(server / "Contents/Components/4D Widgets.4dbase/4D Widgets.4DZ")}))\n' if args.no_bridge else
+                f'$options.components:=New collection(File({literal(server / "Contents/Components/4D Widgets.4dbase/4D Widgets.4DZ")}); '
+                f'File({literal(FIXTURE / "Components/AccessibilityBridge.4dbase/AccessibilityBridge.4DZ")}))\n') +
             f'$result:=Compile project(File({literal(project)}); $options)', 120)
     changed = [name for name, digest in before.items() if sha(FIXTURE / name) != digest]
     passed = compiled.get('success') is True and not compiled.get('errors') and not changed

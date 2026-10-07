@@ -15,3 +15,5 @@ void AXBGenericFormsShutdown(void);
 BOOL AXBGenericFormsRefreshWindow(NSWindow *window);
 // Test support: index these form definitions, by form name, instead of a project's.
 void AXBGenericFormsEnableForTesting(NSDictionary<NSString *, NSDictionary *> *forms);
+// Test support: the form definitions inside a component archive, described by name.
+NSDictionary<NSString *, NSDictionary *> *AXBGenericFormsArchivedFormsForTesting(NSString *path);

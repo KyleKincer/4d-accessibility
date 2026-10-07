@@ -176,7 +176,7 @@ def main():
                 check(changed == 0, "the form is pixel-identical to the plugin-free form")
         order = list(published())
         report["published"] = order
-        check(order == ["title", "search/inputSearch", "search/btnGo", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier",
+        check(order == ["title", "search/inputSearch", "search/btnGo", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier", "widgetSearch/SearchText_Mac",
                         "btnSave", "btnHelp", "labelOrders", "listOrders", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
         name, city = element("inputName"), element("inputCity")
         check(name.read("AXRole") == "AXTextField" and name.read("AXDescription") == "Name" and name.read("AXValue") == "" and
@@ -261,12 +261,17 @@ def main():
             ax.wait_for(lambda: any(e["object"] == "btnGo" for e in events()), "Go's event", timeout=10)
             check(next(e for e in events() if e["object"] == "btnGo")["text"] == "Ada",
                   "a page subform's own objects are published in its place, and operated within it")
+            widget = element("widgetSearch/SearchText_Mac")
+            check(widget.read("AXRole") == "AXTextField" and widget.read("AXDescription") == "Search",
+                  "4D Widgets' search picker, from 4D's own component, is a text field labelled Search")
+            assert widget.set_text("Ada") == 0
+            ax.wait_for(lambda: element("widgetSearch/SearchText_Mac").read("AXValue") == "Ada", "The widget's text", timeout=10)
             assert element("btnHelp").perform("AXPress") == 0
             ax.wait_for(lambda: any(e["object"] == "btnHelp" for e in events()), "Help's event", timeout=10)
             assert element("btnSave").perform("AXPress") == 0
             ax.wait_for(saved, "Save's record", timeout=10)
             values = saved()[-1]
-            check(values == {"name": "Ada Lovelace", "city": "Paris", "active": True, "retail": 0, "wholesale": 1, "tier": 1},
+            check(values == {"name": "Ada Lovelace", "city": "Paris", "active": True, "retail": 0, "wholesale": 1, "tier": 1, "query": "Ada"},
                   "pressing Save runs its method, which reads every value set through accessibility")
             check(all(e["runId"] == run_id and e["compiled"] == args.compiled for e in events()), "every event belongs to this run")
             assert element("btnDone").perform("AXPress") == 0
