@@ -195,9 +195,9 @@ def main():
         def selected():
             return [row.read("AXSelected") for row in element("listOrders").read("AXRows") or []]
         check(table.read("AXRole") == "AXTable" and table.read("AXDescription") == "Orders" and
-              [h.read("AXValue") for h in table.read("AXColumnHeaderUIElements") or []] == ["Customer", "Amount"] and
+              [h.read("AXValue") for h in table.read("AXColumnHeaderUIElements") or []] == ["Customer", "Total"] and
               rows() == [["Ada", "10"], ["Grace", "20"], ["Linus", "30"], ["Margaret", "40"]] and not any(selected()),
-              "a list box is a table labelled by its caption, with its column titles and its visible rows' cells")
+              "a list box is a table labelled by its caption, with the column titles 4D draws, one renamed at load, and its visible rows' cells")
         if args.voiceover:
             check(phrase_until(lambda ph: TITLE in ph, 0, 40), "VoiceOver reaches the form")
             check(vo_to(lambda ph: "Name" in ph and "edit text" in ph), "VoiceOver reads the Name field by its caption")

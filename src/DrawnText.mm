@@ -18,6 +18,9 @@ static NSMutableDictionary<NSValue *, NSMutableArray<NSString *> *> *ContextText
 // Where each recorded text was drawn, in pixels from the bitmap's top left.
 static NSMutableDictionary<NSValue *, NSMutableArray<NSValue *> *> *ContextOrigins;
 static NSMapTable *ImageOrigins, *LayerOrigins;
+// Which recorded texts HIToolbox drew, by index: only callers that ask for themed text see them.
+static NSMutableDictionary<NSValue *, NSMutableIndexSet *> *ContextThemed;
+static NSMapTable *ImageThemed, *LayerThemed;
 // Each owner's observed layer names and observer.
 static NSMutableDictionary<NSString *, NSDictionary *> *Observers;
 static NSSet<NSString *> *ObservedNames;
@@ -66,17 +69,21 @@ static NSString *StringOf(CFAttributedStringRef string) {
     return string ? [[(__bridge NSAttributedString *)string string] copy] : nil;
 }
 
-static void RecordDraw(CGContextRef context, NSString *text, CGPoint origin) {
+static void RecordDraw(CGContextRef context, NSString *text, CGPoint origin, BOOL themed = NO) {
     if (!context || !text.length) return;
     AXBTableGuard guard;
     NSValue *key = [NSValue valueWithPointer:context];
     NSMutableArray *texts = ContextText[key];
     if (!texts) {
-        if (ContextText.count >= ContextLimit) { [ContextText removeAllObjects]; [ContextOrigins removeAllObjects]; }
+        if (ContextText.count >= ContextLimit) { [ContextText removeAllObjects]; [ContextOrigins removeAllObjects]; [ContextThemed removeAllObjects]; }
         texts = ContextText[key] = [NSMutableArray new];
         ContextOrigins[key] = [NSMutableArray new];
     }
     if (texts.count < ContextTextLimit) {
+        if (themed) {
+            if (!ContextThemed[key]) ContextThemed[key] = [NSMutableIndexSet new];
+            [ContextThemed[key] addIndex:texts.count];
+        }
         [texts addObject:text];
         [ContextOrigins[key] addObject:[NSValue valueWithPoint:NSPointFromCGPoint(origin)]];
     }
@@ -88,6 +95,7 @@ static void ForgetContext(CGContextRef context) {
     AXBTableGuard guard;
     [ContextText removeObjectForKey:[NSValue valueWithPointer:context]];
     [ContextOrigins removeObjectForKey:[NSValue valueWithPointer:context]];
+    [ContextThemed removeObjectForKey:[NSValue valueWithPointer:context]];
 }
 
 static CGContextRef ObservedContextCreate(void *data, size_t width, size_t height, size_t bits, size_t row, CGColorSpaceRef space, uint32_t info) {
@@ -161,16 +169,37 @@ static void ObservedFrameDraw(CTFrameRef frame, CGContextRef context) {
     OriginalFrameDraw(frame, context);
 }
 
+// 4D and its GUI framework draw themed text, such as list box column titles, tab labels and
+// buttons' titles, with HIToolbox. Its box is the text's bounds; a title wrapped over two lines
+// reads as one.
+typedef OSStatus (*ThemeTextFn)(CFTypeRef, const CGRect *, void *, CGContextRef, uint32_t);
+static ThemeTextFn OriginalThemeText;
+
+static OSStatus ObservedThemeText(CFTypeRef string, const CGRect *bounds, void *info, CGContextRef context, uint32_t orientation) {
+    NSString *text = nil;
+    if (string && CFGetTypeID(string) == CFStringGetTypeID()) text = [(__bridge NSString *)string copy];
+    else if (string && CFGetTypeID(string) == CFAttributedStringGetTypeID()) text = StringOf((CFAttributedStringRef)string);
+    if (text.length && bounds && context) {
+        NSArray *words = [text componentsSeparatedByCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+        text = [[words filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]] componentsJoinedByString:@" "];
+        RecordDraw(context, text, TopLeftPixel(context, CGPointMake(CGRectGetMinX(*bounds), CGRectGetMidY(*bounds))), YES);
+    }
+    return OriginalThemeText(string, bounds, info, context, orientation);
+}
+
 static CGImageRef ObservedImageCreate(CGContextRef context) {
     CGImageRef image = OriginalImageCreate(context);
     if (context) {
         AXBTableGuard guard;
         NSValue *key = [NSValue valueWithPointer:context];
         NSArray *texts = ContextText[key], *origins = ContextOrigins[key];
+        NSIndexSet *themed = ContextThemed[key];
         [ContextText removeObjectForKey:key];
         [ContextOrigins removeObjectForKey:key];
+        [ContextThemed removeObjectForKey:key];
         if (image && texts.count) {
             [ImageText setObject:texts forKey:(__bridge id)image];
+            if (themed.count) [ImageThemed setObject:[themed copy] forKey:(__bridge id)image];
             if (origins.count == texts.count) [ImageOrigins setObject:@{@"origins": origins, @"height": @(CGImageGetHeight(image))} forKey:(__bridge id)image];
         }
     }
@@ -191,10 +220,13 @@ static void RecordContents(CALayer *layer, id contents) {
             [LayerText setObject:texts forKey:layer];
             NSDictionary *origins = [ImageOrigins objectForKey:contents];
             if (origins) [LayerOrigins setObject:origins forKey:layer]; else [LayerOrigins removeObjectForKey:layer];
+            NSIndexSet *themed = [ImageThemed objectForKey:contents];
+            if (themed) [LayerThemed setObject:themed forKey:layer]; else [LayerThemed removeObjectForKey:layer];
             changed = YES;
         } else if (name && [names containsObject:name] && [LayerText objectForKey:layer]) {
             [LayerText removeObjectForKey:layer];
             [LayerOrigins removeObjectForKey:layer];
+            [LayerThemed removeObjectForKey:layer];
             changed = YES;
         }
     }
@@ -287,6 +319,9 @@ BOOL AXBDrawnTextInitialize(void) {
         if (!LayerOrigins) LayerOrigins = WeakIdentityTable();
         ContextText = [NSMutableDictionary new];
         ContextOrigins = [NSMutableDictionary new];
+        ContextThemed = [NSMutableDictionary new];
+        ImageThemed = WeakIdentityTable();
+        if (!LayerThemed) LayerThemed = WeakIdentityTable();
         OriginalLineCreate = (LineCreateFn)dlsym(RTLD_DEFAULT, "CTLineCreateWithAttributedString");
         OriginalLineDraw = (LineDrawFn)dlsym(RTLD_DEFAULT, "CTLineDraw");
         OriginalSetterCreate = (SetterCreateFn)dlsym(RTLD_DEFAULT, "CTFramesetterCreateWithAttributedString");
@@ -297,11 +332,15 @@ BOOL AXBDrawnTextInitialize(void) {
         OriginalContextCreateWithData = (ContextCreateWithDataFn)dlsym(RTLD_DEFAULT, "CGBitmapContextCreateWithData");
         if (!OriginalLineCreate || !OriginalLineDraw || !OriginalSetterCreate || !OriginalFrameCreate || !OriginalFrameDraw || !OriginalImageCreate ||
             !OriginalContextCreate || !OriginalContextCreateWithData) return;
+        OriginalThemeText = (ThemeTextFn)dlsym(RTLD_DEFAULT, "HIThemeDrawTextBox");
         const struct AXBRebinding rebindings[] = {
             {"CTLineCreateWithAttributedString", (void *)ObservedLineCreate}, {"CTLineDraw", (void *)ObservedLineDraw},
             {"CTFramesetterCreateWithAttributedString", (void *)ObservedSetterCreate}, {"CTFramesetterCreateFrame", (void *)ObservedFrameCreate},
             {"CTFrameDraw", (void *)ObservedFrameDraw}, {"CGBitmapContextCreateImage", (void *)ObservedImageCreate},
-            {"CGBitmapContextCreate", (void *)ObservedContextCreate}, {"CGBitmapContextCreateWithData", (void *)ObservedContextCreateWithData}};
+            {"CGBitmapContextCreate", (void *)ObservedContextCreate}, {"CGBitmapContextCreateWithData", (void *)ObservedContextCreateWithData},
+            {"HIThemeDrawTextBox", (void *)ObservedThemeText}};
+        // HIToolbox's text is observed only where it exists.
+        size_t observed = sizeof(rebindings) / sizeof(rebindings[0]) - (OriginalThemeText ? 0 : 1);
         // Only the host application's own images: its executable and embedded frameworks.
         NSString *host = [NSBundle.mainBundle.bundlePath stringByAppendingString:@"/"];
         Dl_info own = {};
@@ -312,7 +351,7 @@ BOOL AXBDrawnTextInitialize(void) {
             if (!name || host.length < 2 || strncmp(name, host.fileSystemRepresentation, strlen(host.fileSystemRepresentation))) continue;
             if (own.dli_fname && !strcmp(name, own.dli_fname)) continue;
             replaced += RebindImage((const struct mach_header_64 *)_dyld_get_image_header(i), _dyld_get_image_vmaddr_slide(i),
-                                    rebindings, sizeof(rebindings) / sizeof(rebindings[0]));
+                                    rebindings, observed);
         }
         Method method = class_getInstanceMethod(CALayer.class, @selector(setContents:));
         if (replaced && method) {
@@ -331,27 +370,41 @@ BOOL AXBDrawnTextInitialize(void) {
 
 BOOL AXBDrawnTextAvailable(void) { return Available; }
 
-NSArray<NSString *> *AXBDrawnTextForLayer(CALayer *layer) {
-    if (!layer) return nil;
-    AXBTableGuard guard;
-    return [[LayerText objectForKey:layer] copy];
+static NSArray *WithoutThemed(NSArray *items, NSIndexSet *themed, BOOL include) {
+    if (!items || include || !themed.count) return [items copy];
+    NSMutableIndexSet *kept = [NSMutableIndexSet indexSetWithIndexesInRange:NSMakeRange(0, items.count)];
+    [kept removeIndexes:themed];
+    return [items objectsAtIndexes:kept];
 }
 
-NSArray<NSValue *> *AXBDrawnTextOriginsForLayer(CALayer *layer) {
+static NSArray<NSString *> *TextsOf(CALayer *layer, BOOL themed) {
+    if (!layer) return nil;
+    AXBTableGuard guard;
+    NSArray *texts = WithoutThemed([LayerText objectForKey:layer], [LayerThemed objectForKey:layer], themed);
+    return texts.count || themed ? texts : nil;
+}
+
+static NSArray<NSValue *> *OriginsOf(CALayer *layer, BOOL themed) {
     if (!layer) return nil;
     NSDictionary *recorded;
-    { AXBTableGuard guard; recorded = [LayerOrigins objectForKey:layer]; }
+    NSIndexSet *marks;
+    { AXBTableGuard guard; recorded = [LayerOrigins objectForKey:layer]; marks = [LayerThemed objectForKey:layer]; }
     CGFloat height = layer.bounds.size.height, pixels = [recorded[@"height"] doubleValue];
     if (!recorded || height <= 0 || pixels <= 0) return nil;
     // The image fills the layer: pixels from its top left, scaled to the layer's points.
     CGFloat scale = pixels / height;
     NSMutableArray *origins = [NSMutableArray new];
-    for (NSValue *value in recorded[@"origins"]) {
+    for (NSValue *value in WithoutThemed(recorded[@"origins"], marks, themed)) {
         NSPoint point = value.pointValue;
         [origins addObject:[NSValue valueWithPoint:NSMakePoint(point.x / scale, point.y / scale)]];
     }
     return origins;
 }
+
+NSArray<NSString *> *AXBDrawnTextForLayer(CALayer *layer) { return TextsOf(layer, NO); }
+NSArray<NSValue *> *AXBDrawnTextOriginsForLayer(CALayer *layer) { return OriginsOf(layer, NO); }
+NSArray<NSString *> *AXBDrawnTextWithThemedForLayer(CALayer *layer) { return TextsOf(layer, YES); }
+NSArray<NSValue *> *AXBDrawnTextOriginsWithThemedForLayer(CALayer *layer) { return OriginsOf(layer, YES); }
 
 void AXBDrawnTextSetObserver(NSString *owner, NSSet<NSString *> *names, void (^observer)(CALayer *layer)) {
     AXBTableGuard guard;
@@ -368,6 +421,13 @@ void AXBDrawnTextRecordForTesting(CALayer *layer, NSArray<NSString *> *texts) {
     if (!LayerText) LayerText = WeakIdentityTable();
     if (texts) [LayerText setObject:[texts copy] forKey:layer];
     else [LayerText removeObjectForKey:layer];
+}
+
+void AXBDrawnTextRecordThemedForTesting(CALayer *layer, NSIndexSet *themed) {
+    AXBTableGuard guard;
+    if (!LayerThemed) LayerThemed = WeakIdentityTable();
+    if (themed.count) [LayerThemed setObject:[themed copy] forKey:layer];
+    else [LayerThemed removeObjectForKey:layer];
 }
 
 void AXBDrawnTextRecordOriginsForTesting(CALayer *layer, NSArray<NSValue *> *origins) {

@@ -1136,6 +1136,32 @@ static void GenericFormsTest(void) {
     [table setAccessibilitySelectedRows:@[grace]];
     Check([NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:0.8] inMode:NSDefaultRunLoopMode dequeue:YES] == nil,
           "asking again for the row just asked for does not click it again");
+    // Titles 4D draws with HIToolbox name the columns, even ones the application renamed; other
+    // readers of the layer's text do not see them.
+    AXBDrawnTextRecordForTesting(list, @[@"Client", @"Total", @"Ada", @"10"]);
+    AXBDrawnTextRecordOriginsForTesting(list, @[[NSValue valueWithPoint:NSMakePoint(13, 21)], [NSValue valueWithPoint:NSMakePoint(173, 21)],
+        [NSValue valueWithPoint:NSMakePoint(13, 42)], [NSValue valueWithPoint:NSMakePoint(173, 42)]]);
+    AXBDrawnTextRecordThemedForTesting(list, [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 2)]);
+    AXBGenericFormsRefreshWindow(window);
+    table = ProgressElement(form, @"axb/form/listOrders");
+    cells = [NSMutableArray new];
+    for (id row in [table accessibilityRows]) [cells addObject:[[row accessibilityChildren] valueForKey:@"accessibilityValue"]];
+    Check([[[table accessibilityColumnHeaderUIElements] valueForKey:@"accessibilityValue"] isEqual:(@[@"Client", @"Total"])] && [cells isEqual:(@[@[@"Ada", @"10"]])] &&
+          [AXBDrawnTextForLayer(list) isEqual:(@[@"Ada", @"10"])] && [AXBDrawnTextWithThemedForLayer(list) count] == 4 && [AXBDrawnTextOriginsForLayer(list) count] == 2,
+          "column titles drawn by HIToolbox name the columns; only callers asking for themed text see them");
+    // Two titles side by side in what looked like one column: its separator was not found.
+    AXBDrawnTextRecordForTesting(list, @[@"Client", @"Since", @"Total", @"Ada", @"2019", @"10"]);
+    AXBDrawnTextRecordOriginsForTesting(list, @[[NSValue valueWithPoint:NSMakePoint(13, 21)], [NSValue valueWithPoint:NSMakePoint(90, 21)],
+        [NSValue valueWithPoint:NSMakePoint(173, 21)], [NSValue valueWithPoint:NSMakePoint(13, 42)], [NSValue valueWithPoint:NSMakePoint(92, 42)],
+        [NSValue valueWithPoint:NSMakePoint(173, 42)]]);
+    AXBDrawnTextRecordThemedForTesting(list, [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 3)]);
+    AXBGenericFormsRefreshWindow(window);
+    table = ProgressElement(form, @"axb/form/listOrders");
+    cells = [NSMutableArray new];
+    for (id row in [table accessibilityRows]) [cells addObject:[[row accessibilityChildren] valueForKey:@"accessibilityValue"]];
+    Check([[[table accessibilityColumnHeaderUIElements] valueForKey:@"accessibilityValue"] isEqual:(@[@"Client", @"Since", @"Total"])] &&
+          [cells isEqual:(@[@[@"Ada", @"2019", @"10"]])], "two titles drawn side by side in one column are two columns");
+    AXBDrawnTextRecordThemedForTesting(list, nil);
     [list removeFromSuperlayer];
     AXBDrawnTextRecordForTesting(input, @[@"Ada Lovelace"]);
     AXBGenericFormsRefreshWindow(window);

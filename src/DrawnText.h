@@ -6,8 +6,8 @@
 //
 // 4D renders each form object into a bitmap on a background thread and installs the
 // image as the contents of a CALayer named after the object. This module observes the
-// CoreText calls made by 4D's own images and follows the drawn text through the bitmap
-// image to the layer. It never changes what is drawn.
+// CoreText and HIToolbox text calls made by 4D's own images and follows the drawn text
+// through the bitmap image to the layer. It never changes what is drawn.
 
 // Install the observation once. Returns NO when no 4D image imports the observed calls.
 BOOL AXBDrawnTextInitialize(void);
@@ -15,8 +15,15 @@ BOOL AXBDrawnTextAvailable(void);
 // The strings most recently drawn into this layer's contents, in drawing order, or nil.
 NSArray<NSString *> *AXBDrawnTextForLayer(CALayer *layer);
 // Where each of those strings was drawn, in the same order: the baseline origin of its
-// (first) line, in the layer's points from the top left of its image; nil if unknown.
+// (first) line, or for themed text the left of its box at its middle, in the layer's points
+// from the top left of its image; nil if unknown.
 NSArray<NSValue *> *AXBDrawnTextOriginsForLayer(CALayer *layer);
+// The same with the text HIToolbox draws, such as list box column titles and tab labels,
+// in drawing order among the rest. The calls above leave it out.
+NSArray<NSString *> *AXBDrawnTextWithThemedForLayer(CALayer *layer);
+NSArray<NSValue *> *AXBDrawnTextOriginsWithThemedForLayer(CALayer *layer);
+// Test support: mark which of a synthetic layer's recorded texts HIToolbox drew.
+void AXBDrawnTextRecordThemedForTesting(CALayer *layer, NSIndexSet *themed);
 // Called on the main thread after a layer with one of these names receives new
 // drawn text, or contents without text that clear its previous text. Each owner
 // has one observer; a nil observer removes that owner's.
