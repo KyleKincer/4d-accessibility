@@ -22,8 +22,13 @@ NSArray<NSValue *> *AXBDrawnTextOriginsForLayer(CALayer *layer);
 // in drawing order among the rest. The calls above leave it out.
 NSArray<NSString *> *AXBDrawnTextWithThemedForLayer(CALayer *layer);
 NSArray<NSValue *> *AXBDrawnTextOriginsWithThemedForLayer(CALayer *layer);
+// The box of each themed text, keyed by its index in those calls' arrays, in the layer's
+// points from the top left of its image; nil if unknown. A tab's label box is its segment.
+NSDictionary<NSNumber *, NSValue *> *AXBDrawnTextThemedBoxesForLayer(CALayer *layer);
 // Test support: mark which of a synthetic layer's recorded texts HIToolbox drew.
 void AXBDrawnTextRecordThemedForTesting(CALayer *layer, NSIndexSet *themed);
+// Test support: mark themed texts with their boxes; record the layer's origins first.
+void AXBDrawnTextRecordThemedBoxesForTesting(CALayer *layer, NSDictionary<NSNumber *, NSValue *> *boxes);
 // Called on the main thread after a layer with one of these names receives new
 // drawn text, or contents without text that clear its previous text. Each owner
 // has one observer; a nil observer removes that owner's.
