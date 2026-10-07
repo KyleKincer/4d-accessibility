@@ -70,7 +70,9 @@ NSArray<NSDictionary *> *AXBInternalListItems(CALayer *list, NSString *prefix, N
 CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChild(subform, @"formContext"); }
 
 @implementation AXBInternalFormElement
-- (BOOL)isButton { return [self.accessibilityRole isEqual:NSAccessibilityButtonRole] || [self.accessibilityRole isEqual:NSAccessibilityRadioButtonRole]; }
+- (BOOL)isButton {
+    return [@[NSAccessibilityButtonRole, NSAccessibilityRadioButtonRole, NSAccessibilityCheckBoxRole] containsObject:self.accessibilityRole];
+}
 - (BOOL)isRadio { return [self.accessibilityRole isEqual:NSAccessibilityRadioButtonRole]; }
 - (BOOL)isPopup { return [self.accessibilityRole isEqual:NSAccessibilityPopUpButtonRole]; }
 - (BOOL)isField { return [self.accessibilityRole isEqual:NSAccessibilityTextFieldRole]; }
@@ -108,7 +110,8 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     return self.label;
 }
 - (id)accessibilityValue {
-    if (self.isRadio) return @(self.checked);
+    // A state 4D draws only as an image is not known; such a control reports no value.
+    if (self.isRadio || [self.accessibilityRole isEqual:NSAccessibilityCheckBoxRole]) return self.stateUnknown ? nil : @(self.checked);
     if (self.isButton) return nil;
     return [self currentText] ?: @"";
 }
@@ -394,6 +397,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
             element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
             element.clicks = [entry[@"clicks"] integerValue];
             element.checked = [entry[@"checked"] boolValue];
+            element.stateUnknown = entry[@"checked"] == nil;
             element.publishedText = text;
             element.selection = NSMakeRange(0, text.length);
             self.elements[key] = element;
@@ -407,6 +411,7 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
         element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
         element.clicks = [entry[@"clicks"] integerValue];
+        element.stateUnknown = entry[@"checked"] == nil;
         if (element.checked != [entry[@"checked"] boolValue]) {
             element.checked = [entry[@"checked"] boolValue];
             NSAccessibilityPostNotification(element, NSAccessibilityValueChangedNotification);

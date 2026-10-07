@@ -9,6 +9,7 @@
 #import "ProgressWindows.h"
 #import "QueryEditor.h"
 #import "QuickReport.h"
+#import "GenericForms.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <cstdio>
@@ -1042,6 +1043,62 @@ static void QuickReportTest(void) {
     Check(!AXBQuickReportRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the report area is left untouched");
     [window close]; Pump();
 }
+static void GenericFormsTest(void) {
+    // An application form with no bridge session, described by its definition and drawn layers.
+    NSDictionary *definition = @{@"pages": @[[NSNull null], @{@"objects": @{
+        @"labelName": @{@"type": @"text", @"text": @"Name:", @"width": @60, @"height": @17},
+        @"inputName": @{@"type": @"input", @"placeholder": @"Full name", @"width": @200, @"height": @18},
+        @"checkActive": @{@"type": @"checkbox", @"text": @"Active", @"style": @"custom", @"width": @120, @"height": @20},
+        @"btnHelp": @{@"type": @"button", @"tooltip": @"Help", @"width": @24, @"height": @24},
+        @"btnUnnamed": @{@"type": @"button", @"width": @24, @"height": @24},
+        @"btnSave": @{@"type": @"button", @"text": @"Save", @"width": @90, @"height": @24},
+        @"line": @{@"type": @"line"}}}]};
+    AXBGenericFormsEnableForTesting(@{@"Customer": definition, @"Other": @{@"pages": @[@{@"objects": @{@"btnSave": @{@"type": @"button"}}}]}});
+    NSWindow *window = Window(@"AXB generic form");
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    CGFloat top = NSHeight(form.bounds);
+    // Layers as 4D draws them: an input's margin is 10 points leading and top, 23 trailing and bottom.
+    MessageLayer(context, @"labelName", NSMakeRect(20, top - 50 - 17, 60, 17), @[@"Name:"]);
+    CALayer *input = MessageLayer(context, @"inputName", NSMakeRect(80, top - 48 - 18 - 23, 233, 51), @[@"Ada"]);
+    MessageLayer(context, @"checkActive", NSMakeRect(17, top - 112 - 22, 125, 24), @[@"Active"]);
+    MessageLayer(context, @"btnSave", NSMakeRect(15, top - 150 - 29, 100, 34), @[@"Save"]);
+    MessageLayer(context, @"btnHelp", NSMakeRect(115, top - 150 - 29, 34, 34), nil);
+    MessageLayer(context, @"btnUnnamed", NSMakeRect(145, top - 150 - 29, 34, 34), nil);
+    MessageLayer(context, @"line", NSMakeRect(0, 10, 400, 1), nil);
+    Check(AXBGenericFormsRefreshWindow(window), "a window whose objects match one form of the project is published");
+    NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
+    Check([keys isEqual:(@[@"axb/form/labelName", @"axb/form/inputName", @"axb/form/checkActive", @"axb/form/btnSave", @"axb/form/btnHelp"])],
+          "its labelled objects are published in reading order; decorations and an unlabelled button are not");
+    id field = ProgressElement(form, @"axb/form/inputName");
+    Check([[field accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[field accessibilityLabel] isEqual:@"Name"] &&
+          [[field accessibilityValue] isEqual:@"Ada"] && [field isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)],
+          "an input is an editable text field labelled by its caption");
+    NSRect frame = [field accessibilityFrame];
+    NSRect expected = [window convertRectToScreen:[form convertRect:NSMakeRect(90, top - 48 - 18, 200, 18) toView:nil]];
+    Check(fabs(NSMinX(frame) - NSMinX(expected)) < 0.5 && fabs(NSMinY(frame) - NSMinY(expected)) < 0.5 && fabs(NSWidth(frame) - 200) < 0.5,
+          "its frame is the object's own, within the layer's uneven margin");
+    id active = ProgressElement(form, @"axb/form/checkActive");
+    Check([[active accessibilityRole] isEqual:NSAccessibilityCheckBoxRole] && [active accessibilityValue] == nil,
+          "a checkbox whose state is drawn in a custom style reports no value");
+    Check([[ProgressElement(form, @"axb/form/btnHelp") accessibilityLabel] isEqual:@"Help"], "an untitled button is labelled by its help tip");
+    AXBDrawnTextRecordForTesting(input, @[@"Ada Lovelace"]);
+    AXBGenericFormsRefreshWindow(window);
+    Check(ProgressElement(form, @"axb/form/inputName") == field && [[field accessibilityValue] isEqual:@"Ada Lovelace"], "a redrawn value updates the same element");
+    // A form with a bridge session is the bridge's.
+    NSView *bridge = [[AXBWindowView alloc] initWithFrame:NSMakeRect(0, 0, 10, 10)];
+    [window.contentView addSubview:bridge];
+    Check(!AXBGenericFormsRefreshWindow(window) && ProgressChildren(form).count == 0, "a window with a bridge session is left to it");
+    [bridge removeFromSuperview];
+    Check(AXBGenericFormsRefreshWindow(window), "the form is published again once the session has gone");
+    for (CALayer *layer in [context.sublayers copy]) if (![layer.name isEqual:@"btnSave"]) [layer removeFromSuperlayer];
+    Check(!AXBGenericFormsRefreshWindow(window) && ProgressChildren(form).count == 0, "too few objects to identify a form leave the window untouched");
+    [window close]; Pump();
+}
 static AXBWindowView *BridgeView(NSWindow *window) {
     NSMutableArray<NSView *> *pending = [NSMutableArray arrayWithObject:window.contentView];
     while (pending.count) {
@@ -1828,6 +1885,7 @@ int main(void) {
         ProgressWindowsTest();
         QueryEditorTest();
         QuickReportTest();
+        GenericFormsTest();
         FocusAfterLayoutTest();
         ParkedControlsTest();
         SelectionInputTest();

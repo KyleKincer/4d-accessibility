@@ -1,0 +1,66 @@
+{
+ "passed": true,
+ "date": "2026-10-07",
+ "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, and drop-down lists published in reading order and operated with ordinary clicks and keys; by AX and by VoiceOver",
+ "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area)",
+ "pluginSHA256": "ddfb727d709791394f47879ae0ddd6c00591298a5c427f05e9ddbc6ef7c98299",
+ "environment": {
+  "4D": "20.8 build 20.102009",
+  "macOS": "26.7.1"
+ },
+ "runs": {
+  "arm64-compiled-voiceover": 11,
+  "arm64-compiled": 12,
+  "arm64-voiceover": 11,
+  "arm64": 12,
+  "x86_64-compiled-voiceover": 11,
+  "x86_64-compiled": 12,
+  "x86_64": 12
+ },
+ "checks": [
+  "the form is pixel-identical to the plugin-free form",
+  "the form's labelled objects are published in reading order; an unlabelled button is not",
+  "inputs are labelled by their captions, with their values and placeholders",
+  "the checkbox and radio buttons are published with their drawn states",
+  "the drop-down shows its value; an untitled button is labelled by its help tip",
+  "writing an input's value types it into 4D's own field",
+  "pressing the checkbox runs its On Clicked and checks it",
+  "pressing a radio button chooses it and clears the other",
+  "the drop-down opens 4D's native menu, and choosing an item changes its value",
+  "pressing Save runs its method, which reads every value set through accessibility",
+  "every event belongs to this run",
+  "Done closes the form through its standard action",
+  "VoiceOver reaches the form",
+  "VoiceOver reads the Name field by its caption",
+  "keys typed at the field enter it in 4D's own field",
+  "VoiceOver reads the checkbox and its state",
+  "VO-Space checks the checkbox through its own handling",
+  "VoiceOver reaches Save",
+  "VO-Space runs Save, which reads the form's values"
+ ],
+ "voiceOverSpeech": [
+  "4D AX bridge generic form window Customer details has keyboard focus",
+  "Name Full name edit text",
+  "Active unchecked checkbox",
+  "checked",
+  "Retail selected radio button",
+  "Gold Tier pop up button",
+  "Save button"
+ ],
+ "symphonyProbe": "With the plugin alone, Symphony's unintegrated Manufacturers window (TableForms/46/ManufacturerAbbv_Browser) was matched among 1993 indexed forms and its buttons and captions published; not an acceptance record",
+ "regressions": {
+  "test.py": "316 checks",
+  "test_grids.py": "246 checks",
+  "native provider suite": "483 checks",
+  "integrated fixtures, which keep the bridge's description": "test_splitter_fixture.py 9 checks, test_picture_fixture.py 29 checks",
+  "plugin-only windows": "test_native_messages.py 37, test_query_editor_fixture.py 14, test_quick_report_fixture.py 10 checks"
+ },
+ "notCovered": [
+  "List boxes, tab controls, subforms, pictures, hierarchical lists, web and plugin areas",
+  "Picture buttons, group boxes and combo boxes (implemented without acceptance)",
+  "Reporting the keyboard focus 4D gives a field",
+  "Symphony workflow acceptance",
+  "4D Server and remote clients",
+  "4D on Windows"
+ ]
+}
