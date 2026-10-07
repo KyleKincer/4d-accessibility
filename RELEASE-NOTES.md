@@ -1,3 +1,25 @@
+# 0.30.0, forms without a bridge area, and the Quick Report editor
+
+An application form without a bridge area is now described by the native plugin alone, with no host change. The plugin indexes the open project's form definitions, and those of its components and of 4D's own, such as 4D Widgets. It matches each window to its form by the objects 4D draws, and publishes, in reading order:
+- buttons;
+- captions;
+- inputs labelled by their captions;
+- checkboxes and radio buttons, whose states are read from what 4D draws;
+- drop-down lists;
+- the visible rows of list boxes, as tables;
+- page subforms' own forms.
+
+Presses are ordinary clicks, and values are typed into 4D's own fields. A list box's columns are found as 4D draws them, since an application can hide and resize them at run time. A column title is kept only where the drawn width matches the definition, so no column is misnamed. An integrated form keeps the bridge's complete description. [Forms without a bridge area](tests/GENERIC-FORMS.md); [acceptance](validation/generic-forms-development.json).
+
+On Symphony's unintegrated Manufacturers window, the plugin alone published its buttons, its list boxes as tables and its search field. Writing in the search field through accessibility filtered the list through the application's own search.
+
+4D's Quick Report editor (`QR REPORT` with the editor) is published by the plugin alone: its toolbar, its Destination and Options panels, the report's columns and the Fields sheet. A columnar report can be built and executed through accessibility. [Quick Report editor](tests/QUICK-REPORT.md); [acceptance](validation/quick-report-development.json).
+
+For developers: DrawnText keeps up to 4096 strings per drawing, and every published frame is the part its subforms and form show.
+
+Upgrade the plugin, component and host helpers together.
+
+
 # 0.29.0, the Query editor, progress windows and button menus
 
 4D's Query editor, which `QUERY([Table])` opens, is published by the native plugin alone, with no host change. Without it, macOS published only the window's title. Each criterion is published as its conjunction, field, comparison and value, followed by Remove line and Add line. The destination, the options and the Query and Cancel buttons are published too. Presses are ordinary clicks, so the comparison, conjunction and destination open 4D's own native menus. Values are typed into 4D's own fields, and focusing a value field gives it 4D's keyboard focus. The Field pop-up opens 4D's field list, whose items are published as buttons, and VoiceOver starts on the current field. [Query editor](tests/QUERY-EDITOR.md); [acceptance](validation/query-editor-development.json).
