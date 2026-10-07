@@ -1,0 +1,64 @@
+{
+ "passed": true,
+ "date": "2026-10-07",
+ "scope": "Buttons with pop-up menus, discovered from item 11 of OBJECT Get format: Show Menu beside Press, clicking a linked button or a separated button's drawn arrow so the button's own On Alternative Click shows its native menu, which stays open to be chosen from or dismissed; by AX and by VoiceOver",
+ "fixture": "prepare_button_menu_fixture.py and test_button_menu_fixture.py (bevel linked Export, custom separated Search with its own On Clicked, regular separated Plain)",
+ "pluginSHA256": "a2a826af449ee294575454e019bd223ab11ac2c57292144e484b739fff7c7885",
+ "environment": {
+  "4D": "20.8 build 20.102009",
+  "macOS": "26.7.1"
+ },
+ "runs": {
+  "arm64-compiled-voiceover": 12,
+  "arm64-compiled": 15,
+  "arm64-voiceover": 12,
+  "arm64": 15,
+  "x86_64-compiled-voiceover": 12,
+  "x86_64-compiled": 15,
+  "x86_64": 15
+ },
+ "checks": [
+  "a button with a linked menu offers Show Menu",
+  "a separated menu whose arrow is drawn offers Show Menu beside Press",
+  "a separated menu without a drawn arrow offers only Press",
+  "the form is pixel-identical to the plugin-free form",
+  "Show Menu is accepted",
+  "Show Menu runs the button's On Alternative Click once, and its menu stays open",
+  "a menu item is pressed through accessibility",
+  "the method receives the chosen item and the menu closes",
+  "the bridge reports the dispatch",
+  "the separated menu without a drawn arrow is reported as unsupported",
+  "Show Menu on a separated button is accepted",
+  "the open menu can be dismissed",
+  "a separated button's arrow runs On Alternative Click; dismissing returns no choice",
+  "pressing the separated button is accepted",
+  "pressing a separated button runs its On Clicked, not its menu",
+  "VoiceOver reaches the form",
+  "VoiceOver reads the Export button",
+  "VO-Space opens the linked button's own menu",
+  "VoiceOver reads the menu's items",
+  "Return chooses the item, and the button's On Alternative Click receives it",
+  "VoiceOver moves to the separated Search button",
+  "VoiceOver's actions menu offers Show menu",
+  "VoiceOver reads the separated button's menu",
+  "choosing from it reaches the separated button's On Alternative Click, not its On Clicked"
+ ],
+ "voiceOverActionsMenu": [
+  "Actions menu 2 items",
+  "press",
+  "show menu"
+ ],
+ "regressions": {
+  "test.py": "316 checks",
+  "test_grids.py": "246 checks",
+  "native provider suite": "444 checks",
+  "test_picture_fixture.py": "29 checks, and 25 with VoiceOver",
+  "test_combo_fixture.py": "passed",
+  "test_dropdown_fixture.py": "passed",
+  "test_selection_fixture.py": "34 checks"
+ },
+ "notCovered": [
+  "Separated menus on the regular and toolbar styles, which open only with a long click (reported as buttonMenuArrowPending)",
+  "4D on Windows"
+ ]
+}

@@ -226,6 +226,22 @@ For ($i; 1; Size of array($names))
      $node.choices:=$choices.choices
      $node.choice:=$choices.choice
     End if
+    If (($role="button") & (New collection(Object type push button; Object type 3D button).indexOf($type)>=0))
+     // A button with a pop-up menu (item 11 of its format). Any click on a linked
+     // button runs its On Alternative Click; a separated one's runs from the arrow
+     // that the bevel, custom and rounded bevel styles draw at its corner.
+     $parts:=Split string(OBJECT Get format(*; $name); ";")
+     If ($parts.length>=11)
+      Case of
+       : (Num($parts[10])=1)
+        $node.menu:="linked"
+       : ((Num($parts[10])=2) & (New collection(4; 8; 9).indexOf(Num($parts[6]))>=0))
+        $node.menu:="separated"
+       : (Num($parts[10])=2)
+        $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "buttonMenuArrowPending"))
+      End case
+     End if
+    End if
     If (New collection("group"; "image"; "progress"; "splitter").indexOf($role)>=0)
      $node.focusable:=False
     End if

@@ -188,6 +188,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 floor([n[@"choice"] doubleValue]) != [n[@"choice"] doubleValue]) return @"invalid choices";
             for (id choice in choices) if (!Text(choice, 512) || ![choice length]) return @"invalid choices";
         }
+        // A button's own pop-up menu: opened by any click on a linked button, or on a separated one's arrow.
+        if (n[@"menu"] && (![n[@"role"] isEqual:@"button"] || ![@[@"linked", @"separated"] containsObject:n[@"menu"]])) return @"invalid button menu";
         if (n[@"pictureActions"]) {
             // An editable picture's standard edit actions.
             NSArray *actions = n[@"pictureActions"];
@@ -351,7 +353,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     for (NSDictionary *node in snapshot[@"nodes"]) if ([node[@"id"] isEqual:_pending[@"node"]]) {
         if (![node[@"enabled"] boolValue] || ![node[@"visible"] boolValue]) return nil;
         BOOL choose = [_pending[@"operation"] isEqual:@"choose"] && node[@"choices"] && [input[@"choice"] isEqual:_pending[@"value"]];
-        if (([_pending[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:node[@"role"]]) || choose) {
+        BOOL menu = [_pending[@"operation"] isEqual:@"showMenu"] && node[@"menu"];
+        if (([_pending[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:node[@"role"]]) || choose || menu) {
             NSArray *point = input[@"point"], *frame = node[@"frame"];
             if (!point) return nil;
             double x = [point[0] doubleValue], y = [point[1] doubleValue];
@@ -645,6 +648,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         NSDictionary *gridValue = nil;
         if ([operation isEqual:@"press"]) {
             if (![@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:role]) return NO;
+        } else if ([operation isEqual:@"showMenu"] && node[@"menu"]) {
+            if (value) return NO;
         } else if ([@[@"showMenu", @"confirm", @"dismissMenu"] containsObject:operation]) {
             if (![node[@"combo"] boolValue]) return NO;
         } else if ([@[@"increment", @"decrement"] containsObject:operation]) {

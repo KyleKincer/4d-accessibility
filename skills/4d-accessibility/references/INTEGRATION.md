@@ -235,6 +235,7 @@ This is an optional debugging/verification call, not another lifecycle hook. Do 
 | `popupValueTypePending` | The popup can open, but its selected value needs a supported reader. |
 | `adjustmentCallbackRequired` | Map the editable progress bar to its existing shared controller using [`controls.<name>.adjust`](#map-editable-progress-bars-to-a-controller). |
 | `adjustableValueTypePending`, `progressValueTypePending` | This control variant needs further bridge implementation. |
+| `buttonMenuArrowPending` | A regular or toolbar button's separated pop-up menu opens only with a long click. Its Press still works; use a linked menu, or a bevel, custom or rounded bevel style, to offer Show Menu. [Button menus](../../../tests/BUTTON-MENUS.md). |
 | `gridLoading` | Wait for the configured loader; if it persists, check readiness and loaded-record identity. |
 | `gridUnavailable` | Read the table label first. A classic-selection grid can be loading or retrying a failed read; see [classic grid feedback](GRIDS.md#use-a-classic-current-or-named-selection). Otherwise correct the configuration or implement its unsupported layout. A table asking for a displayed-value description needs `columns.<objectName>.value`, or `decorative` for content with no meaning or action. |
 | `gridCellEditingPending` | In a native list box, an enterable column has a description or is marked decorative. Custom editor support is still required. Remove `decorative` from interactive content. The issue names the column. |

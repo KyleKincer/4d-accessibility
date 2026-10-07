@@ -18,7 +18,7 @@ _graphics.CGEventKeyboardSetUnicodeString.argtypes = (c.c_void_p, c.c_ulong, c.P
 _foundation.CFRelease.argtypes = (c.c_void_p,)
 
 CODES = {"right": 124, "left": 123, "down": 125, "up": 126, "space": 49, "return": 36, "escape": 53, "tab": 48, "delete": 51, "backslash": 42,
-         "home": 115, "end": 119}
+         "home": 115, "end": 119, "m": 46}
 MODIFIERS = {"ctrl": (59, 1 << 18), "option": (58, 1 << 19), "shift": (56, 1 << 17), "cmd": (55, 1 << 20)}
 VO = ("ctrl", "option")
 _guard = None
