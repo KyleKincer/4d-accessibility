@@ -269,10 +269,12 @@ static NSNumber *AccentShare(CALayer *layer, CGRect region, int opacity) {
 // macOS draws the keyboard focus ring, translucent in the accent color, just outside the
 // focused control: for a field, drop-down or list box in the margin 4D leaves around it in its layer, for a
 // checkbox or radio button around its box. Sample a strip just above it; a checked box's own fill
-// starts below the strip.
-static BOOL FocusRing(CALayer *layer, NSRect area, BOOL box) {
+// starts below the strip. A drop-down's bezel is inset in its object, so its ring is lower.
+typedef NS_ENUM(NSInteger, AXBRingKind) { AXBRingField, AXBRingBox, AXBRingDropDown };
+static BOOL FocusRing(CALayer *layer, NSRect area, AXBRingKind kind) {
     CGFloat height = NSHeight(layer.bounds), top = height - NSMaxY(area);
-    CGRect strip = box ? CGRectMake(NSMinX(area) + 4, height / 2 - 10, 10, 1.5) : CGRectMake(NSMinX(area) + 8, top - 2.5, NSWidth(area) - 16, 2);
+    CGRect strip = kind == AXBRingBox ? CGRectMake(NSMinX(area) + 4, height / 2 - 10, 10, 1.5)
+                                      : CGRectMake(NSMinX(area) + 8, top - (kind == AXBRingDropDown ? 1 : 2.5), NSWidth(area) - 16, 2);
     if (CGRectGetMinY(strip) < 0 || CGRectGetWidth(strip) < 8) return NO;
     return AccentShare(layer, strip, 40).doubleValue > 0.5;
 }
@@ -614,7 +616,7 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             if (!info[@"style"] || [info[@"style"] isEqual:@"regular"]) {
                 NSNumber *state = DrawnState(layer, NSMinX(area));
                 if (state) entry[@"checked"] = state;
-                if (FocusRing(layer, area, YES)) entry[@"focused"] = @YES;
+                if (FocusRing(layer, area, AXBRingBox)) entry[@"focused"] = @YES;
             }
         } else if ([type isEqual:@"text"] || [type isEqual:@"groupBox"]) {
             if (!title) continue;
@@ -625,7 +627,7 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         } else if ([type isEqual:@"listbox"]) {
             entry[@"role"] = NSAccessibilityTableRole;
             entry[@"table"] = ListboxModel(layer, info, area);
-            if (FocusRing(layer, area, NO)) entry[@"focused"] = @YES;
+            if (FocusRing(layer, area, AXBRingField)) entry[@"focused"] = @YES;
             entry[@"caption"] = @YES;
             if (help) entry[@"label"] = help;
         } else if ([type isEqual:@"tab"]) {
@@ -633,12 +635,12 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             continue;
         } else if ([type isEqual:@"dropdown"]) {
             entry[@"role"] = NSAccessibilityPopUpButtonRole;
-            if (FocusRing(layer, area, NO)) entry[@"focused"] = @YES;
+            if (FocusRing(layer, area, AXBRingDropDown)) entry[@"focused"] = @YES;
             if (help) entry[@"label"] = help;
         } else if ([type isEqual:@"input"] || [type isEqual:@"combo"]) {
             entry[@"role"] = NSAccessibilityTextFieldRole;
             entry[@"editable"] = @(![info[@"enterable"] isEqual:@NO]);
-            if (FocusRing(layer, area, NO)) entry[@"focused"] = @YES;
+            if (FocusRing(layer, area, AXBRingField)) entry[@"focused"] = @YES;
             if (Plain(info[@"placeholder"])) entry[@"placeholders"] = [NSSet setWithObject:Plain(info[@"placeholder"])];
             entry[@"caption"] = @YES;
             if (help) entry[@"label"] = help;
@@ -666,6 +668,31 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         if (best) entry[@"label"] = [best stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@": "]];
     }
     return entries;
+}
+
+// 4D's form view is the window's text-input client, and the first rectangle of its selection is
+// where its keyboard focus is: the caret in a field, the top left corner of another control. It
+// finds focus that no ring shows, as on a list box whose form hides its ring.
+static void MarkCaretFocus(NSArray<NSMutableDictionary *> *entries, AXBInternalFormOverlay *overlay, NSWindow *window) {
+    if (!window.isKeyWindow || ![window.firstResponder conformsToProtocol:@protocol(NSTextInputClient)]) return;
+    id<NSTextInputClient> client = (id<NSTextInputClient>)window.firstResponder;
+    NSRange selected = client.selectedRange;
+    if (selected.location == NSNotFound || client.hasMarkedText) return;
+    NSPoint point = [client firstRectForCharacterRange:NSMakeRange(selected.location, 0) actualRange:NULL].origin;
+    // Without a focused control, the rectangle is at the form's own top left corner.
+    NSView *form = overlay.formView;
+    NSRect bounds = [window convertRectToScreen:[form convertRect:form.bounds toView:nil]];
+    if (fabs(point.x - NSMinX(bounds)) < 1.5 && fabs(point.y - NSMaxY(bounds)) < 1.5) return;
+    NSMutableDictionary *found = nil;
+    for (NSMutableDictionary *entry in entries) {
+        if ([entry[@"role"] isEqual:NSAccessibilityStaticTextRole]) continue;
+        NSRect frame = entry[@"area"] ? [overlay screenFrameForArea:[entry[@"area"] rectValue] inLayer:entry[@"layer"]]
+                                      : [overlay screenFrameForLayer:entry[@"layer"] inset:[entry[@"inset"] doubleValue]];
+        if (!NSIsEmptyRect(frame) && NSPointInRect(point, NSInsetRect(frame, -2, -2))) { found = entry; break; }
+    }
+    if (!found) return;
+    for (NSMutableDictionary *entry in entries) [entry removeObjectForKey:@"focused"];
+    found[@"focused"] = @YES;
 }
 
 static void RemoveOverlay(NSWindow *window, AXBInternalFormOverlay *overlay) {
@@ -701,7 +728,7 @@ BOOL AXBGenericFormsRefreshWindow(NSWindow *window) {
         [Matches setObject:match forKey:window];
         overlay = [[AXBInternalFormOverlay alloc] initWithFormView:view prefix:@"axb/form/"];
         created = YES;
-    }
+    } else MarkCaretFocus(entries, overlay, window);
     if (![overlay updateWithEntries:entries]) { RemoveOverlay(window, overlay); return NO; }
     if (created) {
         [view addSubview:overlay];

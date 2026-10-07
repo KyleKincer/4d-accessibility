@@ -3,7 +3,7 @@
  "date": "2026-10-07",
  "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus as the focused element and operated with ordinary clicks and keys; by AX and by VoiceOver",
  "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a tab control going to two pages, a page subform and 4D Widgets' search picker)",
- "pluginSHA256": "fffa07d1afcfc3645dd85b152d9e3f1169ba2b898dd029d7b0d8e954d5bb2d86",
+ "pluginSHA256": "4a4e438cae855307e5665352659a25aa3ed1b632ddd3f03828990509e867605f",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
@@ -24,7 +24,7 @@
   "the checkbox and radio buttons are published with their drawn states",
   "the drop-down shows its value; an untitled button is labelled by its help tip",
   "a list box is a table labelled by its caption, with the column titles 4D draws, one renamed at load, and its visible rows' cells",
-  "Tab and Shift-Tab move the application's focused element with 4D's focus ring",
+  "Tab and Shift-Tab move the application's focused element with 4D's focus, through fields, checkboxes, radio buttons and a drop-down",
   "writing an input's value types it into 4D's own field",
   "pressing the checkbox runs its On Clicked and checks it",
   "pressing a radio button chooses it and clears the other",

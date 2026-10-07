@@ -256,7 +256,10 @@ def main():
             ax.wait_for(lambda: focused() == "axb/form/checkActive", "The checkbox focused by Tab", timeout=10)
             front(); keys.key("tab", ("shift",))
             ax.wait_for(lambda: focused() == "axb/form/inputCity", "City focused by Shift-Tab", timeout=10)
-            check(True, "Tab and Shift-Tab move the application's focused element with 4D's focus ring")
+            for _ in range(4):
+                front(); keys.key("tab")
+            ax.wait_for(lambda: focused() == "axb/form/dropdownTier", "The drop-down focused by Tab", timeout=10)
+            check(True, "Tab and Shift-Tab move the application's focused element with 4D's focus, through fields, checkboxes, radio buttons and a drop-down")
             assert name.set_text("Ada Lovelace") == 0
             ax.wait_for(lambda: element("inputName").read("AXValue") == "Ada Lovelace", "The written name", timeout=10)
             assert element("inputCity").set_text("Paris") == 0

@@ -1052,6 +1052,26 @@ static void ComponentArchiveTest(void) {
           [forms[@"Picker"][@"go"][@"text"] isEqual:@"Go"] && [forms[@"Plain"][@"note"][@"type"] isEqual:@"text"],
           "a component archive's form definitions are read, deflated or stored, and nothing else");
 }
+// 4D's form view as the window's text-input client: its selection's first rectangle is where
+// its keyboard focus is.
+@interface AXBTestTextClient : NSView <NSTextInputClient>
+@property(nonatomic) NSRect caret;
+@end
+@implementation AXBTestTextClient
+- (BOOL)acceptsFirstResponder { return YES; }
+- (void)insertText:(id)string replacementRange:(NSRange)range { (void)string; (void)range; }
+- (void)doCommandBySelector:(SEL)selector { (void)selector; }
+- (void)setMarkedText:(id)string selectedRange:(NSRange)selected replacementRange:(NSRange)range { (void)string; (void)selected; (void)range; }
+- (void)unmarkText {}
+- (NSRange)selectedRange { return NSMakeRange(0, 0); }
+- (NSRange)markedRange { return NSMakeRange(NSNotFound, 0); }
+- (BOOL)hasMarkedText { return NO; }
+- (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)range actualRange:(NSRangePointer)actual { (void)range; (void)actual; return nil; }
+- (NSArray<NSAttributedStringKey> *)validAttributesForMarkedText { return @[]; }
+- (NSRect)firstRectForCharacterRange:(NSRange)range actualRange:(NSRangePointer)actual { (void)range; (void)actual; return self.caret; }
+- (NSUInteger)characterIndexForPoint:(NSPoint)point { (void)point; return 0; }
+@end
+
 static void GenericFormsTest(void) {
     // An application form with no bridge session, described by its definition and drawn layers.
     NSDictionary *definition = @{@"pages": @[[NSNull null], @{@"objects": @{
@@ -1194,6 +1214,27 @@ static void GenericFormsTest(void) {
     Check(ProgressElement(form, @"axb/form/inputName") == field && [[field accessibilityValue] isEqual:@"Ada Lovelace"], "a redrawn value updates the same element");
     // 4D draws its keyboard focus ring, translucent in the accent color, in the field's margin.
     NSColor *accent = [NSColor.controlAccentColor colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+    // A list box whose form hides its focus ring: 4D's text-input client places its focus at the
+    // list box's top left corner.
+    CALayer *focusList = MessageLayer(context, @"listOrders", NSMakeRect(110, 20, 272, 106), @[]);
+    AXBTestTextClient *client = [[AXBTestTextClient alloc] initWithFrame:NSMakeRect(0, 0, 1, 1)];
+    [form addSubview:client];
+    [window makeFirstResponder:client];
+    AXBGenericFormsRefreshWindow(window);
+    id listElement = ProgressElement(form, @"axb/form/listOrders");
+    NSRect listFrame = [listElement accessibilityFrame];
+    client.caret = NSMakeRect(NSMinX(listFrame), NSMaxY(listFrame), 1, 0);
+    NSApp.accessibilityApplicationFocusedUIElement = nil;
+    AXBGenericFormsRefreshWindow(window);
+    Check(listElement && NSApp.accessibilityApplicationFocusedUIElement == listElement, "the object at 4D's text-input focus becomes the focused element, without a ring");
+    NSRect formFrame = [window convertRectToScreen:[form convertRect:form.bounds toView:nil]];
+    client.caret = NSMakeRect(NSMinX(formFrame), NSMaxY(formFrame), 1, 0);
+    AXBGenericFormsRefreshWindow(window);
+    Check(NSApp.accessibilityApplicationFocusedUIElement == listElement, "focus at the form's own corner, on a control without a caret, changes nothing");
+    [window makeFirstResponder:nil];
+    [client removeFromSuperview];
+    [focusList removeFromSuperlayer];
+    AXBGenericFormsRefreshWindow(window);
     if (accent.saturationComponent >= 0.3) {
         CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
         CGContextRef paint = CGBitmapContextCreate(NULL, 233, 51, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
