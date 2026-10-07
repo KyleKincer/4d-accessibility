@@ -3,7 +3,7 @@
  "date": "2026-10-07",
  "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, and list boxes as tables of their visible rows, published in reading order and operated with ordinary clicks and keys; by AX and by VoiceOver",
  "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box)",
- "pluginSHA256": "7a3736abf33fa3d2f86ca721db483a4b9f9abda809ec4a1632a9ea1189d2a1a6",
+ "pluginSHA256": "33dd8014bad5846ef366667697fd6af04da775398e6e74aa7278566ec71ae4f6",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
@@ -53,7 +53,7 @@
   "Gold Tier pop up button",
   "Save button"
  ],
- "symphonyProbe": "With the plugin alone, Symphony's unintegrated Manufacturers window (TableForms/46/ManufacturerAbbv_Browser) was matched among 1993 indexed forms and its buttons and captions published; not an acceptance record",
+ "symphonyProbe": "With the plugin alone, Symphony's unintegrated Manufacturers window (TableForms/46/ManufacturerAbbv_Browser) was matched among 1993 indexed forms. Its buttons and captions, and its three list boxes as tables, were published. The main list box, whose columns the application hides and resizes at run time, showed all 21 visible rows with each cell in its drawn column; five column titles matched their defined widths and three resized columns were left unnamed. Not an acceptance record.",
  "regressions": {
   "test.py": "316 checks",
   "test_grids.py": "246 checks",

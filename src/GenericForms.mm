@@ -1,6 +1,7 @@
 #import "GenericForms.h"
 #import "InternalForms.h"
 #import "DrawnText.h"
+#include <vector>
 
 // The project's forms, by name ("Name" or "table/Name"): each object's type, title, help tip,
 // placeholder, enterability and size, as its definition states them.
@@ -40,8 +41,12 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
                 for (NSDictionary *column in object[@"columns"]) {
                     if (![column isKindOfClass:NSDictionary.class]) continue;
                     NSDictionary *header = [column[@"header"] isKindOfClass:NSDictionary.class] ? column[@"header"] : nil;
-                    [columns addObject:@{@"header": [header[@"text"] isKindOfClass:NSString.class] ? header[@"text"] : @"",
-                                         @"width": [column[@"width"] isKindOfClass:NSNumber.class] ? column[@"width"] : @80,
+                    // A title's "\\" is 4D's line break.
+                    NSString *title = [header[@"text"] isKindOfClass:NSString.class] ? [header[@"text"] stringByReplacingOccurrencesOfString:@"\\" withString:@" "] : @"";
+                    [columns addObject:@{@"header": title,
+                                         // A column without a width is drawn at its minimum width.
+                                         @"width": [column[@"width"] isKindOfClass:NSNumber.class] ? column[@"width"] :
+                                                   [column[@"minWidth"] isKindOfClass:NSNumber.class] ? column[@"minWidth"] : @80,
                                          @"hidden": @([column[@"visibility"] isEqual:@"hidden"])}];
                 }
                 info[@"columns"] = columns;
@@ -167,18 +172,132 @@ static NSNumber *ReadDrawnState(CALayer *layer, CGFloat inset) {
     return AccentFilled(layer, CGRectMake(inset + 3, NSHeight(layer.bounds) / 2 - 4, 9, 8));
 }
 
+// The luminance of a region of the layer's image, in points from its top left, at the image's
+// pixel density: one byte per pixel, row by row. Nil when the image cannot be read.
+static NSData *Luminance(CALayer *layer, CGRect region, size_t *width, size_t *rows, CGFloat *density) {
+    id contents = layer.contents;
+    if (!contents || CFGetTypeID((__bridge CFTypeRef)contents) != CGImageGetTypeID()) return nil;
+    CGImageRef image = (__bridge CGImageRef)contents;
+    CGFloat height = NSHeight(layer.bounds), scale = height > 0 ? CGImageGetHeight(image) / height : 0;
+    if (scale <= 0) return nil;
+    CGImageRef part = CGImageCreateWithImageInRect(image, CGRectMake(region.origin.x * scale, region.origin.y * scale, region.size.width * scale, region.size.height * scale));
+    if (!part) return nil;
+    size_t w = CGImageGetWidth(part), h = CGImageGetHeight(part);
+    NSMutableData *pixels = [NSMutableData dataWithLength:w * h * 4];
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixels.mutableBytes, w, h, 8, w * 4, space, kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(space);
+    if (!context) { CGImageRelease(part); return nil; }
+    CGContextDrawImage(context, CGRectMake(0, 0, w, h), part);
+    CGContextRelease(context);
+    CGImageRelease(part);
+    NSMutableData *luminance = [NSMutableData dataWithLength:w * h];
+    const uint8_t *rgba = (const uint8_t *)pixels.bytes;
+    uint8_t *out = (uint8_t *)luminance.mutableBytes;
+    for (size_t i = 0; i < w * h; i++) out[i] = (uint8_t)((rgba[i * 4] * 299 + rgba[i * 4 + 1] * 587 + rgba[i * 4 + 2] * 114) / 1000);
+    *width = w; *rows = h; *density = scale;
+    return luminance;
+}
+
+// The x of each separator line 4D draws between the visible columns' titles, in the layer's
+// points: a one or two pixel line, unlike the header on both sides of it, through the band.
+static NSArray<NSNumber *> *HeaderSeparators(CALayer *layer, NSRect object, CGFloat header) {
+    CGFloat top = NSHeight(layer.bounds) - NSMaxY(object);
+    size_t width = 0, rows = 0;
+    CGFloat density = 1;
+    NSData *strip = Luminance(layer, CGRectMake(NSMinX(object), top + header * 0.3, NSWidth(object), MAX(header * 0.4, 2)), &width, &rows, &density);
+    if (!strip || width < 12 || !rows) return @[];
+    const uint8_t *pixels = (const uint8_t *)strip.bytes;
+    NSMutableArray<NSNumber *> *lines = [NSMutableArray new];
+    size_t gap = (size_t)MAX(3, round(3 * density));
+    NSInteger run = -1;
+    for (size_t x = gap; x + gap < width; x++) {
+        BOOL line = YES;
+        for (size_t y = 0; y < rows && line; y++) {
+            const uint8_t *row = pixels + y * width;
+            int left = row[x - gap], right = row[x + gap], here = row[x];
+            line = abs(left - right) < 8 && abs(here - (left + right) / 2) > 12;
+        }
+        if (line && run < 0) run = (NSInteger)x;
+        if (!line && run >= 0) {
+            // A line is at most two points wide; wider differences are content.
+            if ((CGFloat)(x - run) <= 2 * density) [lines addObject:@(NSMinX(object) + ((run + x) / 2.0) / density)];
+            run = -1;
+        }
+    }
+    return lines;
+}
+
+// Match the visible columns' widths to the defined columns in order, skipping the ones the
+// application hides; the last visible column can grow with the list box. Titles are kept
+// only when the widths agree.
+static NSArray<NSString *> *MatchTitles(NSArray<NSNumber *> *widths, NSArray<NSDictionary *> *defined) {
+    NSUInteger n = widths.count, m = defined.count;
+    if (!n || !m || n > m) return nil;
+    // cost[i][j]: best cost placing the first i visible columns among the first j defined ones.
+    std::vector<std::vector<double>> cost(n + 1, std::vector<double>(m + 1, INFINITY));
+    std::vector<std::vector<int>> pick(n + 1, std::vector<int>(m + 1, 0));
+    for (NSUInteger j = 0; j <= m; j++) cost[0][j] = 0.3 * j;
+    for (NSUInteger i = 1; i <= n; i++)
+        for (NSUInteger j = i; j <= m; j++) {
+            double skip = cost[i][j - 1] + 0.3;
+            double want = [defined[j - 1][@"width"] doubleValue], have = widths[i - 1].doubleValue;
+            double miss = want > 0 ? fabs(have - want) / want : 1;
+            if (i == n && have > want) miss = 0;
+            double take = cost[i - 1][j - 1] + MIN(miss, 1.0);
+            if (take <= skip) { cost[i][j] = take; pick[i][j] = 1; } else { cost[i][j] = skip; pick[i][j] = 0; }
+        }
+    NSUInteger best = n;
+    for (NSUInteger j = n; j <= m; j++) if (cost[n][j] < cost[n][best]) best = j;
+    if (cost[n][best] - 0.3 * (best - n) > 0.2 * n) return nil;
+    NSMutableArray *titles = [NSMutableArray arrayWithCapacity:n];
+    for (NSUInteger i = 0; i < n; i++) [titles addObject:@""];
+    // A title is kept only for a column drawn at its defined width: a resized one could be
+    // another column, and is left unnamed rather than misnamed.
+    for (NSUInteger i = n, j = best; i > 0 && j > 0;) {
+        if (pick[i][j]) {
+            if (fabs(widths[i - 1].doubleValue - [defined[j - 1][@"width"] doubleValue]) <= 3) titles[i - 1] = defined[j - 1][@"header"] ?: @"";
+            i--; j--;
+        } else j--;
+    }
+    return titles;
+}
+
 // A list box's visible rows, rebuilt from where 4D draws each cell's text: a row per
 // baseline, each text in the column whose span holds it. Rows are selected with the mouse;
 // a selected row is filled with the accent color behind its first column's text.
 static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect object) {
-    NSArray *defined = info[@"columns"] ?: @[];
+    NSMutableArray *defined = [NSMutableArray new];
+    for (NSDictionary *column in info[@"columns"] ?: @[]) if (![column[@"hidden"] boolValue]) [defined addObject:column];
     NSMutableArray *columns = [NSMutableArray new];
-    CGFloat x = NSMinX(object) + 1;
-    for (NSDictionary *column in defined) {
-        if ([column[@"hidden"] boolValue]) continue;
-        CGFloat width = [column[@"width"] doubleValue];
-        [columns addObject:@{@"header": column[@"header"] ?: @"", @"x": @(x), @"width": @(width)}];
-        x += width;
+    // The visible columns as 4D draws them: between the separators of the titles' band. An
+    // application can hide and resize columns, so the definition alone does not place them.
+    CGFloat band = [info[@"headerHeight"] doubleValue];
+    if (band <= 0 && ![info[@"showHeaders"] isEqual:@NO]) band = 22;
+    NSArray<NSNumber *> *separators = band > 0 ? HeaderSeparators(layer, object, band) : @[];
+    if (separators.count) {
+        NSMutableArray<NSNumber *> *edges = [NSMutableArray arrayWithObject:@(NSMinX(object) + 1)];
+        for (NSNumber *x in separators) if (x.doubleValue - edges.lastObject.doubleValue >= 8) [edges addObject:x];
+        CGFloat end = NSMaxX(object) - 1;
+        NSMutableArray<NSNumber *> *widths = [NSMutableArray new];
+        for (NSUInteger i = 0; i < edges.count; i++) {
+            CGFloat next = i + 1 < edges.count ? edges[i + 1].doubleValue : end;
+            if (next - edges[i].doubleValue >= 8) [widths addObject:@(next - edges[i].doubleValue)];
+        }
+        // The vertical scroll bar's corner of the header is not a column.
+        if (widths.count > 1 && widths.lastObject.doubleValue < 17 && edges.count == widths.count) { [widths removeLastObject]; [edges removeLastObject]; }
+        NSArray *titles = MatchTitles(widths, defined);
+        for (NSUInteger i = 0; i < widths.count; i++)
+            [columns addObject:@{@"header": titles ? titles[i] : @"", @"x": edges[i], @"width": widths[i]}];
+    } else {
+        CGFloat x = NSMinX(object) + 1;
+        for (NSDictionary *column in defined) {
+            // Columns scrolled out of the list box's width are not drawn.
+            if (x >= NSMaxX(object) - 2) break;
+            CGFloat width = [column[@"width"] doubleValue];
+            [columns addObject:@{@"header": column[@"header"] ?: @"", @"x": @(x), @"width": @(width)}];
+            x += width;
+        }
     }
     NSArray<NSString *> *texts = AXBDrawnTextForLayer(layer);
     NSArray<NSValue *> *origins = AXBDrawnTextOriginsForLayer(layer);
@@ -202,6 +321,26 @@ static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect obj
     }
     if (!height) height = 18;
     CGFloat bounds = NSHeight(layer.bounds), top = bounds - NSMaxY(object);
+    // The titles AppKit draws in the header band name the columns that hold them.
+    NSMutableArray *named = [NSMutableArray new];
+    for (NSDictionary *column in columns) [named addObject:[column mutableCopy]];
+    BOOL drawnTitles = NO;
+    for (NSNumber *baseline in baselines) {
+        if (band <= 0 || baseline.doubleValue < top || baseline.doubleValue > top + band) continue;
+        for (NSDictionary *item in lines[baseline]) {
+            CGFloat at = [item[@"x"] doubleValue];
+            for (NSMutableDictionary *column in named) {
+                CGFloat start = [column[@"x"] doubleValue], width = [column[@"width"] doubleValue];
+                if (at < start - 2 || at >= start + width - 2) continue;
+                NSString *text = [item[@"text"] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+                if (!drawnTitles) for (NSMutableDictionary *other in named) other[@"header"] = @"";
+                drawnTitles = YES;
+                column[@"header"] = [column[@"header"] length] ? [NSString stringWithFormat:@"%@ %@", column[@"header"], text] : text;
+                break;
+            }
+        }
+    }
+    columns = named;
     NSSet *titles = [NSSet setWithArray:[columns valueForKey:@"header"]];
     for (NSNumber *baseline in baselines) {
         NSMutableArray *cells = [NSMutableArray new];
@@ -221,7 +360,7 @@ static NSDictionary *ListboxModel(CALayer *layer, NSDictionary *info, NSRect obj
         BOOL header = placed && [[NSSet setWithArray:[values filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"length > 0"]]] isSubsetOfSet:titles];
         if (!placed || header) continue;
         CGFloat line = baseline.doubleValue;
-        if (line < top) continue;
+        if (line < top || (band > 0 && line <= top + band)) continue;
         NSRect area = NSMakeRect(NSMinX(object), bounds - line - height / 4, NSWidth(object), height);
         NSMutableDictionary *row = [@{@"cells": values, @"area": [NSValue valueWithRect:area]} mutableCopy];
         CGFloat first = [columns[0][@"x"] doubleValue];
@@ -280,7 +419,8 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             if (!title) continue;
             entry[@"role"] = NSAccessibilityStaticTextRole;
             entry[@"text"] = title;
-            [captions addObject:@{@"layer": layer, @"text": title}];
+            // Only words name a control; an arrow or a separator does not.
+            if ([title rangeOfCharacterFromSet:NSCharacterSet.alphanumericCharacterSet].location != NSNotFound) [captions addObject:@{@"layer": layer, @"text": title}];
         } else if ([type isEqual:@"listbox"]) {
             entry[@"role"] = NSAccessibilityTableRole;
             entry[@"table"] = ListboxModel(layer, info, area);
