@@ -23,6 +23,7 @@ $data:=New object("name"; ""; "city"; "Lyon"; "active"; False; "retail"; 1; "who
 $data.tier:=New object("values"; New collection("Gold"; "Silver"; "Bronze"); "index"; 0)
 $data.orders:=New collection(New object("customer"; "Ada"; "amount"; 10); New object("customer"; "Grace"; "amount"; 20); New object("customer"; "Linus"; "amount"; 30); New object("customer"; "Margaret"; "amount"; 40))
 $data.position:=0
+$data.search:=New object("text"; "")
 File("/RESOURCES/events.jsonl").delete()
 $window:=Open form window("Customer"; Plain form window)
 DIALOG("Customer"; $data)
@@ -79,6 +80,7 @@ def main():
         'btnHelp': {'type': 'button', 'style': 'custom', 'tooltip': 'Help', 'left': 120, 'top': 220, 'width': 24, 'height': 24, **logged},
         'btnUnnamed': {'type': 'button', 'style': 'custom', 'left': 150, 'top': 220, 'width': 24, 'height': 24},
         'btnDone': {'type': 'button', 'text': 'Done', 'action': 'accept', 'left': 310, 'top': 380, 'width': 90, 'height': 24},
+        'search': {'type': 'subform', 'detailForm': 'SearchBox', 'dataSource': 'Form.search', 'left': 300, 'top': 12, 'width': 110, 'height': 26},
         'labelOrders': {'type': 'text', 'text': 'Orders', 'left': 20, 'top': 256, 'width': 120, 'height': 17},
         'listOrders': {'type': 'listbox', 'listboxType': 'collection', 'dataSource': 'Form.orders', 'currentItemPositionSource': 'Form.position',
                        'selectionMode': 'single', 'left': 20, 'top': 276, 'width': 262, 'height': 96, 'method': 'ObjectMethods/Event.4dm',
@@ -86,6 +88,22 @@ def main():
                            {'name': 'colCustomer', 'dataSource': 'This.customer', 'width': 160, 'header': {'name': 'headCustomer', 'text': 'Customer'}},
                            {'name': 'colAmount', 'dataSource': 'This.amount', 'width': 80, 'header': {'name': 'headAmount', 'text': 'Amount'}}]},
     }}]}
+    # A page subform's own form: a search field and its Go button, whose method records it.
+    search = {'width': 110, 'height': 26, 'destination': 'detailScreen', 'pages': [None, {'objects': {
+        'inputSearch': {'type': 'input', 'dataSource': 'Form.text', 'placeholder': 'Search', 'left': 0, 'top': 2, 'width': 70, 'height': 20},
+        'btnGo': {'type': 'button', 'text': 'Go', 'left': 74, 'top': 0, 'width': 36, 'height': 24, 'method': 'ObjectMethods/Go.4dm', 'events': ['onClick']},
+    }}]}
+    search_path = sources / 'Forms/SearchBox'
+    (search_path / 'ObjectMethods').mkdir(parents=True)
+    (search_path / 'ObjectMethods/Go.4dm').write_text('''var $file : 4D.File
+var $previous : Text
+$file:=File("/RESOURCES/events.jsonl")
+If ($file.exists)
+ $previous:=$file.getText()
+End if
+$file.setText($previous+JSON Stringify(New object("runId"; JSON Parse(File("/RESOURCES/launch.json").getText()).runId; "compiled"; Is compiled mode; "object"; "btnGo"; "event"; Form event code; "text"; Form.text))+Char(10))
+''')
+    (search_path / 'form.4DForm').write_text(json.dumps(search, indent=2) + '\n')
     form_path = sources / 'Forms/Customer'
     (form_path / 'ObjectMethods').mkdir(parents=True)
     (form_path / 'ObjectMethods/Event.4dm').write_text(EVENT)

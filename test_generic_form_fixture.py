@@ -176,7 +176,7 @@ def main():
                 check(changed == 0, "the form is pixel-identical to the plugin-free form")
         order = list(published())
         report["published"] = order
-        check(order == ["title", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier",
+        check(order == ["title", "search/inputSearch", "search/btnGo", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier",
                         "btnSave", "btnHelp", "labelOrders", "listOrders", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
         name, city = element("inputName"), element("inputCity")
         check(name.read("AXRole") == "AXTextField" and name.read("AXDescription") == "Name" and name.read("AXValue") == "" and
@@ -255,6 +255,12 @@ def main():
             ax.wait_for(lambda: selected() == [False, False, True, False], "Row 3 selected", timeout=10)
             check([e["position"] for e in events()[count:] if e["object"] == "listOrders"] == [3],
                   "pressing a row selects it through the list box's own handling, and the table reports it selected")
+            assert element("search/inputSearch").set_text("Ada") == 0
+            ax.wait_for(lambda: element("search/inputSearch").read("AXValue") == "Ada", "The search text", timeout=10)
+            assert element("search/btnGo").perform("AXPress") == 0
+            ax.wait_for(lambda: any(e["object"] == "btnGo" for e in events()), "Go's event", timeout=10)
+            check(next(e for e in events() if e["object"] == "btnGo")["text"] == "Ada",
+                  "a page subform's own objects are published in its place, and operated within it")
             assert element("btnHelp").perform("AXPress") == 0
             ax.wait_for(lambda: any(e["object"] == "btnHelp" for e in events()), "Help's event", timeout=10)
             assert element("btnSave").perform("AXPress") == 0
