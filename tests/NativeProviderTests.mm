@@ -544,6 +544,44 @@ static void PictureEditTest(void) {
     Check(![Exchange(window, 9045, 1, session, snapshot)[@"ok"] boolValue], "picture actions on another role are rejected");
     [window close]; Pump();
 }
+static void ButtonMenuTest(void) {
+    // A button's own pop-up menu: Show Menu requests the click the host places, on the
+    // arrow of a separated menu, and the plugin delivers it as an ordinary click.
+    NSWindow *window = Window(@"AXB button menu");
+    AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
+    [window.contentView addSubview:canvas];
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSString *session = Open(window, 9046);
+    NSMutableDictionary *search = [@{@"id": @"search", @"role": @"button", @"label": @"Search", @"value": @"", @"enabled": @YES, @"visible": @YES,
+        @"menu": @"separated", @"frame": @[@20, @20, @160, @24]} mutableCopy];
+    NSDictionary *plain = @{@"id": @"plain", @"role": @"button", @"label": @"Plain", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@20, @60, @160, @24]};
+    NSMutableDictionary *snapshot = [@{@"version": @1, @"revision": @1, @"label": @"Button menus", @"enabled": @YES, @"nodes": @[search, plain]} mutableCopy];
+    Check([Exchange(window, 9046, 1, session, snapshot)[@"ok"] boolValue], "a button with a pop-up menu is accepted"); Pump();
+    AXBNode *node = Provider(window).accessibilityChildren.firstObject, *other = Provider(window).accessibilityChildren.lastObject;
+    Check([node isAccessibilitySelectorAllowed:@selector(accessibilityPerformShowMenu)] && [node isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)] &&
+          ![other isAccessibilitySelectorAllowed:@selector(accessibilityPerformShowMenu)], "only a button with a pop-up menu offers Show Menu beside Press");
+    Check(![node queue:@"showMenu" value:@"x"] && ![other queue:@"showMenu" value:nil], "Show Menu takes no value and needs the button's menu");
+    Check([node accessibilityPerformShowMenu], "Show Menu is accepted");
+    NSDictionary *action = Exchange(window, 9046, 1, session, snapshot)[@"action"];
+    Check([action[@"operation"] isEqual:@"showMenu"] && [action[@"node"] isEqual:@"search"], "Show Menu reaches the host for that button");
+    NSDictionary *outside = @{@"action": action[@"id"], @"point": @[@200, @35]};
+    Exchange(window, 9046, 1, session, snapshot, nil, nil, outside); Pump(); Pump();
+    Check(canvas.presses == 0, "a click outside the button is never delivered");
+    Exchange(window, 9046, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"rejected", @"message": @"outside"}); Pump();
+    Check([node accessibilityPerformShowMenu], "Show Menu can be requested again");
+    action = Exchange(window, 9046, 1, session, snapshot)[@"action"];
+    NSDictionary *arrow = @{@"action": action[@"id"], @"point": @[@175, @39]};
+    Exchange(window, 9046, 1, session, snapshot, nil, nil, arrow); Pump(); Pump();
+    Check(canvas.presses == 1 && canvas.releases == 1 && canvas.lastPoint.x == 175 && canvas.lastPoint.y == 39,
+          "the menu's click is one ordinary mouse pair at the arrow the host placed");
+    Check([Exchange(window, 9046, 1, session, snapshot, nil, nil, arrow)[@"controlInputResult"][@"accepted"] boolValue], "the menu's click has an exact acknowledgement");
+    Exchange(window, 9046, 1, session, snapshot, @{@"id": action[@"id"], @"status": @"completed", @"message": @"dispatched"}); Pump();
+    NSMutableDictionary *invalid = [search mutableCopy]; invalid[@"menu"] = @"dropdown"; snapshot[@"nodes"] = @[invalid, plain]; snapshot[@"revision"] = @2;
+    Check(![Exchange(window, 9046, 1, session, snapshot)[@"ok"] boolValue], "an unknown menu placement is rejected");
+    invalid[@"menu"] = @"linked"; invalid[@"role"] = @"checkbox"; invalid[@"value"] = @NO;
+    Check(![Exchange(window, 9046, 1, session, snapshot)[@"ok"] boolValue], "a menu on another role is rejected");
+    [window close]; Pump();
+}
 static void SelectionInputTest(void) {
     NSWindow *window = Window(@"AXB native row selection");
     AXBStepperTestView *canvas = [[AXBStepperTestView alloc] initWithFrame:window.contentView.bounds];
@@ -1610,6 +1648,7 @@ int main(void) {
         CheckboxFeedbackTest();
         AdjustableTest();
         ButtonInputTest();
+        ButtonMenuTest();
         MessageDialogsTest();
         ProgressWindowsTest();
         FocusAfterLayoutTest();

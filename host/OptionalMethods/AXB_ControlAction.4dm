@@ -120,6 +120,27 @@ Case of
   CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
   AXB_PollGuard.context.controlInput:=New object("action"; $action.id; "point"; New collection($x; $y); "choice"; $action.value)
   return New object("status"; "pending"; "confirm"; Formula(AXB_ControlConfirm($1)); "data"; New object("nativeButton"; True; "actionID"; $action.id; "objectName"; $target.objectName; "choice"; $action.value; "deadline"; Milliseconds+2000))
+ : (($action.operation="showMenu") & ($target.menu#Null))
+  // A button's own pop-up menu opens with an ordinary click: anywhere on a linked
+  // button, on the arrow at a separated one's corner. 4D runs the button's On
+  // Alternative Click, and the menu it shows stays open for the user.
+  OBJECT GET COORDINATES(*; $target.objectName; $left; $top; $right; $bottom)
+  If ($target.menu="separated")
+   $left:=$right-6
+   $top:=$bottom-6
+   $right:=$right-4
+   $bottom:=$bottom-4
+  End if
+  $point:=AXB_ControlPoint($target; $description; $options; New collection($left; $top; $right; $bottom))
+  If ($point.length#2)
+   $result.message:="Control is overlapped"
+   return
+  End if
+  $x:=$point[0]
+  $y:=$point[1]
+  CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
+  AXB_PollGuard.context.controlInput:=New object("action"; $action.id; "point"; New collection($x; $y))
+  return New object("status"; "pending"; "confirm"; Formula(AXB_ControlConfirm($1)); "data"; New object("nativeButton"; True; "actionID"; $action.id; "deadline"; Milliseconds+2000))
  : (($action.operation="press") & (New collection("button"; "checkbox"; "radio"; "popup"; "tab").indexOf($target.role)>=0))
   // A tab or a button-grid cell is one part of its object; press its own frame.
   If (($target.role="tab") | ($target.cell#Null))

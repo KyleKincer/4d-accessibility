@@ -323,6 +323,8 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 - (BOOL)accessibilityPerformShowMenu {
     if (!self.isAccessibilityElement || !self.isAccessibilityEnabled) return NO;
     if (self.data[@"choices"]) return [self.owner showChoicesFor:self];
+    // A button's own pop-up menu opens with its ordinary click; 4D runs On Alternative Click.
+    if (self.data[@"menu"]) return [self queue:@"showMenu" value:nil];
     [self.owner refreshComboPopup];
     return self.isAccessibilityExpanded || [self queue:@"showMenu" value:nil];
 }
@@ -341,7 +343,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     if (selector == @selector(setAccessibilityValue:)) return (([self.data[@"role"] isEqual:@"textfield"] && (!self.data[@"editable"] || [self.data[@"editable"] boolValue])) ||
         ([self.data[@"role"] isEqual:@"splitter"] && [self.data[@"adjustable"] boolValue])) && self.isAccessibilityEnabled;
     if (selector == @selector(accessibilityPerformPress)) return ([@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:self.data[@"role"]] || [self.data[@"combo"] boolValue]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
-    if (selector == @selector(accessibilityPerformShowMenu)) return ([self.data[@"combo"] boolValue] || self.data[@"choices"]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
+    if (selector == @selector(accessibilityPerformShowMenu)) return ([self.data[@"combo"] boolValue] || self.data[@"choices"] || self.data[@"menu"]) && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformConfirm)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformCancel)) return [self.data[@"combo"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(isAccessibilityExpanded)) return [self.data[@"combo"] boolValue] && self.isAccessibilityElement;
@@ -1364,7 +1366,8 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     if (![target isAccessibilityElement] || ![target isAccessibilityEnabled]) return;
                     local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 }
-                BOOL button = [data[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:data[@"role"]];
+                BOOL button = ([data[@"operation"] isEqual:@"press"] && [@[@"button", @"tab"] containsObject:data[@"role"]]) ||
+                    ([data[@"operation"] isEqual:@"showMenu"] && [data[@"role"] isEqual:@"button"]);
                 BOOL choose = [data[@"operation"] isEqual:@"choose"];
                 if (button || choose) local = NSMakePoint([controlInput[@"point"][0] doubleValue], [controlInput[@"point"][1] doubleValue]);
                 NSPoint point = [view convertPoint:local toView:nil];
