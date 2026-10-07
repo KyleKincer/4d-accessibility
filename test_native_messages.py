@@ -156,7 +156,7 @@ def main():
             return
         time.sleep(1.5)
         ax.capture_window(process.pid, captured / (phase + ".png"), include_shadow=False)
-        changed = changed_pixels(reference / (phase + ".png"), captured / (phase + ".png"))
+        changed = changed_pixels(reference / (phase + ".png"), captured / (phase + ".png"), caret=phase.startswith("request"))
         report["pixels"][phase] = changed
         check(changed == 0, phase + " window is pixel-identical to the plugin-free window")
 
@@ -397,11 +397,17 @@ def rgba(path):
                 release(value)
 
 
-def changed_pixels(first, second):
+def changed_pixels(first, second, caret=False):
+    """Changed RGBA pixels. A Request field's blinking insertion point, a one-pixel
+    column at the start of the field, may be caught in either phase and is ignored."""
     (size, a), (other, b) = rgba(first), rgba(second)
     if size != other:
         return size[0] * size[1]
-    return sum(1 for index in range(0, len(a), 4) if a[index:index + 4] != b[index:index + 4])
+    width = size[0]
+    changed = [(index // 4) % width for index in range(0, len(a), 4) if a[index:index + 4] != b[index:index + 4]]
+    if caret and changed and len(set(changed)) == 1 and 14 <= changed[0] <= 28 and len(changed) <= 24:
+        return 0
+    return len(changed)
 
 
 def compile_fixture(server_app):
