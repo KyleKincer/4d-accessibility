@@ -15,6 +15,9 @@
 static os_unfair_lock TableLock = OS_UNFAIR_LOCK_INIT;
 static NSMapTable *LineText, *SetterText, *FrameText, *ImageText, *LayerText;
 static NSMutableDictionary<NSValue *, NSMutableArray<NSString *> *> *ContextText;
+// Where each recorded text was drawn, in pixels from the bitmap's top left.
+static NSMutableDictionary<NSValue *, NSMutableArray<NSValue *> *> *ContextOrigins;
+static NSMapTable *ImageOrigins, *LayerOrigins;
 // Each owner's observed layer names and observer.
 static NSMutableDictionary<NSString *, NSDictionary *> *Observers;
 static NSSet<NSString *> *ObservedNames;
@@ -62,16 +65,20 @@ static NSString *StringOf(CFAttributedStringRef string) {
     return string ? [[(__bridge NSAttributedString *)string string] copy] : nil;
 }
 
-static void RecordDraw(CGContextRef context, NSString *text) {
+static void RecordDraw(CGContextRef context, NSString *text, CGPoint origin) {
     if (!context || !text.length) return;
     AXBTableGuard guard;
     NSValue *key = [NSValue valueWithPointer:context];
     NSMutableArray *texts = ContextText[key];
     if (!texts) {
-        if (ContextText.count >= ContextLimit) [ContextText removeAllObjects];
+        if (ContextText.count >= ContextLimit) { [ContextText removeAllObjects]; [ContextOrigins removeAllObjects]; }
         texts = ContextText[key] = [NSMutableArray new];
+        ContextOrigins[key] = [NSMutableArray new];
     }
-    if (texts.count < ContextTextLimit) [texts addObject:text];
+    if (texts.count < ContextTextLimit) {
+        [texts addObject:text];
+        [ContextOrigins[key] addObject:[NSValue valueWithPoint:NSPointFromCGPoint(origin)]];
+    }
 }
 
 // A new bitmap context can reuse a freed context's address; it starts with no text.
@@ -79,6 +86,7 @@ static void ForgetContext(CGContextRef context) {
     if (!context) return;
     AXBTableGuard guard;
     [ContextText removeObjectForKey:[NSValue valueWithPointer:context]];
+    [ContextOrigins removeObjectForKey:[NSValue valueWithPointer:context]];
 }
 
 static CGContextRef ObservedContextCreate(void *data, size_t width, size_t height, size_t bits, size_t row, CGColorSpaceRef space, uint32_t info) {
@@ -94,6 +102,15 @@ static CGContextRef ObservedContextCreateWithData(void *data, size_t width, size
     return context;
 }
 
+// A point in the context's user space, in pixels from the top left of its bitmap. A
+// bitmap context's device space can run either way; its base transform says which.
+static CGPoint TopLeftPixel(CGContextRef context, CGPoint point) {
+    CGPoint device = CGContextConvertPointToDeviceSpace(context, point);
+    CGAffineTransform base = CGAffineTransformConcat(CGAffineTransformInvert(CGContextGetCTM(context)), CGContextGetUserSpaceToDeviceSpaceTransform(context));
+    size_t height = CGBitmapContextGetHeight(context);
+    return base.d < 0 || !height ? device : CGPointMake(device.x, (CGFloat)height - device.y);
+}
+
 static CTLineRef ObservedLineCreate(CFAttributedStringRef string) {
     CTLineRef line = OriginalLineCreate(string);
     NSString *text = StringOf(string);
@@ -104,7 +121,8 @@ static CTLineRef ObservedLineCreate(CFAttributedStringRef string) {
 static void ObservedLineDraw(CTLineRef line, CGContextRef context) {
     NSString *text = nil;
     if (line) { AXBTableGuard guard; text = [LineText objectForKey:(__bridge id)line]; }
-    RecordDraw(context, text);
+    // A line is drawn at the context's text position: its baseline origin.
+    RecordDraw(context, text, text && context ? TopLeftPixel(context, CGContextGetTextPosition(context)) : CGPointZero);
     OriginalLineDraw(line, context);
 }
 
@@ -130,7 +148,15 @@ static CTFrameRef ObservedFrameCreate(CTFramesetterRef setter, CFRange range, CG
 static void ObservedFrameDraw(CTFrameRef frame, CGContextRef context) {
     NSString *text = nil;
     if (frame) { AXBTableGuard guard; text = [FrameText objectForKey:(__bridge id)frame]; }
-    RecordDraw(context, text);
+    // A frame's text starts at its first line's origin, relative to its path.
+    CGPoint origin = CGPointMake(NAN, NAN);
+    if (text && context && CFArrayGetCount(CTFrameGetLines(frame)) > 0) {
+        CGPoint first;
+        CTFrameGetLineOrigins(frame, CFRangeMake(0, 1), &first);
+        CGRect box = CGPathGetBoundingBox(CTFrameGetPath(frame));
+        origin = TopLeftPixel(context, CGPointMake(CGRectGetMinX(box) + first.x, CGRectGetMinY(box) + first.y));
+    }
+    RecordDraw(context, text, origin);
     OriginalFrameDraw(frame, context);
 }
 
@@ -139,9 +165,13 @@ static CGImageRef ObservedImageCreate(CGContextRef context) {
     if (context) {
         AXBTableGuard guard;
         NSValue *key = [NSValue valueWithPointer:context];
-        NSArray *texts = ContextText[key];
+        NSArray *texts = ContextText[key], *origins = ContextOrigins[key];
         [ContextText removeObjectForKey:key];
-        if (image && texts.count) [ImageText setObject:texts forKey:(__bridge id)image];
+        [ContextOrigins removeObjectForKey:key];
+        if (image && texts.count) {
+            [ImageText setObject:texts forKey:(__bridge id)image];
+            if (origins.count == texts.count) [ImageOrigins setObject:@{@"origins": origins, @"height": @(CGImageGetHeight(image))} forKey:(__bridge id)image];
+        }
     }
     return image;
 }
@@ -156,8 +186,16 @@ static void RecordContents(CALayer *layer, id contents) {
         AXBTableGuard guard;
         names = ObservedNames;
         NSArray *texts = contents ? [ImageText objectForKey:contents] : nil;
-        if (texts) { [LayerText setObject:texts forKey:layer]; changed = YES; }
-        else if (name && [names containsObject:name] && [LayerText objectForKey:layer]) { [LayerText removeObjectForKey:layer]; changed = YES; }
+        if (texts) {
+            [LayerText setObject:texts forKey:layer];
+            NSDictionary *origins = [ImageOrigins objectForKey:contents];
+            if (origins) [LayerOrigins setObject:origins forKey:layer]; else [LayerOrigins removeObjectForKey:layer];
+            changed = YES;
+        } else if (name && [names containsObject:name] && [LayerText objectForKey:layer]) {
+            [LayerText removeObjectForKey:layer];
+            [LayerOrigins removeObjectForKey:layer];
+            changed = YES;
+        }
     }
     if (!changed || !name || ![names containsObject:name]) return;
     // 4D's own modal loops do not drain the main dispatch queue. Schedule the observer in
@@ -243,8 +281,11 @@ BOOL AXBDrawnTextInitialize(void) {
         SetterText = WeakIdentityTable();
         FrameText = WeakIdentityTable();
         ImageText = WeakIdentityTable();
+        ImageOrigins = WeakIdentityTable();
         if (!LayerText) LayerText = WeakIdentityTable();
+        if (!LayerOrigins) LayerOrigins = WeakIdentityTable();
         ContextText = [NSMutableDictionary new];
+        ContextOrigins = [NSMutableDictionary new];
         OriginalLineCreate = (LineCreateFn)dlsym(RTLD_DEFAULT, "CTLineCreateWithAttributedString");
         OriginalLineDraw = (LineDrawFn)dlsym(RTLD_DEFAULT, "CTLineDraw");
         OriginalSetterCreate = (SetterCreateFn)dlsym(RTLD_DEFAULT, "CTFramesetterCreateWithAttributedString");
@@ -295,6 +336,22 @@ NSArray<NSString *> *AXBDrawnTextForLayer(CALayer *layer) {
     return [[LayerText objectForKey:layer] copy];
 }
 
+NSArray<NSValue *> *AXBDrawnTextOriginsForLayer(CALayer *layer) {
+    if (!layer) return nil;
+    NSDictionary *recorded;
+    { AXBTableGuard guard; recorded = [LayerOrigins objectForKey:layer]; }
+    CGFloat height = layer.bounds.size.height, pixels = [recorded[@"height"] doubleValue];
+    if (!recorded || height <= 0 || pixels <= 0) return nil;
+    // The image fills the layer: pixels from its top left, scaled to the layer's points.
+    CGFloat scale = pixels / height;
+    NSMutableArray *origins = [NSMutableArray new];
+    for (NSValue *value in recorded[@"origins"]) {
+        NSPoint point = value.pointValue;
+        [origins addObject:[NSValue valueWithPoint:NSMakePoint(point.x / scale, point.y / scale)]];
+    }
+    return origins;
+}
+
 void AXBDrawnTextSetObserver(NSString *owner, NSSet<NSString *> *names, void (^observer)(CALayer *layer)) {
     AXBTableGuard guard;
     if (!Observers) Observers = [NSMutableDictionary new];
@@ -310,6 +367,13 @@ void AXBDrawnTextRecordForTesting(CALayer *layer, NSArray<NSString *> *texts) {
     if (!LayerText) LayerText = WeakIdentityTable();
     if (texts) [LayerText setObject:[texts copy] forKey:layer];
     else [LayerText removeObjectForKey:layer];
+}
+
+void AXBDrawnTextRecordOriginsForTesting(CALayer *layer, NSArray<NSValue *> *origins) {
+    AXBTableGuard guard;
+    if (!LayerOrigins) LayerOrigins = WeakIdentityTable();
+    if (origins) [LayerOrigins setObject:@{@"origins": [origins copy], @"height": @(layer.bounds.size.height)} forKey:layer];
+    else [LayerOrigins removeObjectForKey:layer];
 }
 
 NSArray<NSString *> *AXBDrawnTextForImageForTesting(CGImageRef image) {

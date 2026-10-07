@@ -1,0 +1,80 @@
+{
+ "passed": true,
+ "date": "2026-10-07",
+ "scope": "4D's Query editor (QUERY with no criteria), published by the native plugin alone from the layers of its internal runtime form: each criterion's conjunction, field, comparison and value, the field list as buttons over its drawn lines, the line, destination and options buttons, and Query and Cancel; operated by ordinary clicks and keys; by AX and by VoiceOver",
+ "fixture": "prepare_query_editor_fixture.py and test_query_editor_fixture.py (Orders table with text, number, Boolean and date fields and five records)",
+ "pluginSHA256": "ed300bbaa669b86f11fdc8382d233e373006266a78ca303c8bee145e356d0c1d",
+ "environment": {
+  "4D": "20.8 build 20.102009",
+  "macOS": "26.7.1"
+ },
+ "runs": {
+  "arm64-compiled-voiceover": 13,
+  "arm64-compiled": 14,
+  "arm64-voiceover": 13,
+  "arm64": 14,
+  "x86_64-compiled-voiceover": 13,
+  "x86_64-compiled": 14,
+  "x86_64": 14
+ },
+ "checks": [
+  "the Query editor is pixel-identical to the plugin-free editor",
+  "a criterion is published as its field, comparison and value",
+  "its line buttons, destination and options are labelled",
+  "Query and Cancel are buttons with their titles",
+  "the field list publishes the table's fields as buttons",
+  "the field list starts on the line's current field",
+  "pressing a field in the list makes it the criterion's field",
+  "the comparison opens 4D's own menu of comparisons for a text field",
+  "writing the value types it into 4D's own field",
+  "Add line adds a criterion, joined with And",
+  "the conjunction is chosen from its menu",
+  "the second criterion is built the same way",
+  "Remove line removes only its criterion",
+  "Query runs the query the criteria describe",
+  "VoiceOver reaches the Query editor",
+  "VoiceOver reads the criterion's field as a pop-up button",
+  "VO-Space opens the field list on the current field",
+  "VO-Space on a field in the list chooses it",
+  "VoiceOver reaches the comparison",
+  "the comparison is chosen from its menu with the arrow keys and Return",
+  "VoiceOver reaches the value",
+  "keys typed at the value enter it in 4D's own field",
+  "VoiceOver reaches the Query button",
+  "VO-Space on Query runs the query the criteria describe"
+ ],
+ "conjunctionMenu": [
+  "And",
+  "Or",
+  "Except"
+ ],
+ "voiceOverSpeech": [
+  "4D Query in [Orders] dialog Query in [Orders] Query options pop up button",
+  "Create new selection Destination pop up button",
+  "[Orders]Amount Field pop up button",
+  "window Amount button Amount button",
+  "Customer button",
+  "is Comparison pop up button",
+  "menu 17 items \u2713 is",
+  "is not",
+  "Is in list",
+  "contains",
+  "does not contain",
+  "starts with"
+ ],
+ "regressions": {
+  "test.py": "316 checks",
+  "test_grids.py": "246 checks",
+  "native provider suite": "462 checks",
+  "test_native_messages.py": "37 checks interpreted, compiled and under Rosetta, and 32 with VoiceOver, on the shared internal-form overlay",
+  "test_progress_fixture.py": "9 checks, and 10 with VoiceOver"
+ },
+ "notCovered": [
+  "Formula criteria (the editor's second page)",
+  "Related tables in the field list",
+  "The Order By editor",
+  "Localized editors",
+  "4D Server and remote clients",
+  "4D on Windows"
+ ]
+}

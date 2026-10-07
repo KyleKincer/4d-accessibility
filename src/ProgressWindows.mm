@@ -1,5 +1,5 @@
 #import "ProgressWindows.h"
-#import "MessageDialogs.h"
+#import "InternalForms.h"
 #import "DrawnText.h"
 #import <QuartzCore/QuartzCore.h>
 #include <initializer_list>
