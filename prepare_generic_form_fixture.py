@@ -85,7 +85,11 @@ def main():
         'dropdownTier': {'type': 'dropdown', 'dataSource': 'Form.tier', 'tooltip': 'Tier', 'left': 20, 'top': 174, 'width': 160, 'height': 22, **logged},
         'btnSave': {'type': 'button', 'text': 'Save', 'left': 20, 'top': 220, 'width': 90, 'height': 24, **logged},
         'btnHelp': {'type': 'button', 'style': 'custom', 'tooltip': 'Help', 'left': 120, 'top': 220, 'width': 24, 'height': 24, **logged},
-        'btnUnnamed': {'type': 'button', 'style': 'custom', 'left': 150, 'top': 220, 'width': 24, 'height': 24},
+        # 4D's default name names nothing; a descriptive object name names an icon button.
+        'Button1': {'type': 'button', 'style': 'custom', 'left': 150, 'top': 220, 'width': 24, 'height': 24},
+        'btnRefreshOrders': {'type': 'button', 'style': 'custom', 'left': 180, 'top': 220, 'width': 24, 'height': 24, **logged},
+        # An invisible button, as for a keyboard shortcut, draws nothing.
+        'btnEscape': {'type': 'button', 'display': False, 'left': 396, 'top': 404, 'width': 10, 'height': 10},
         'search': {'type': 'subform', 'detailForm': 'SearchBox', 'dataSource': 'Form.search', 'left': 300, 'top': 12, 'width': 110, 'height': 26},
         'widgetSearch': {'type': 'subform', 'detailForm': 'SearchPicker', 'dataSource': 'Form.query', 'left': 300, 'top': 176, 'width': 110, 'height': 30},
         'labelOrders': {'type': 'text', 'text': 'Orders', 'left': 20, 'top': 256, 'width': 120, 'height': 17},
