@@ -221,6 +221,16 @@ def main():
             front(); mark = heard.mark(); vo.key("space", vo.VO)
             ax.wait_for(lambda: element("checkActive").read("AXValue") is True, "Checked", timeout=10)
             check(True, "VO-Space checks the checkbox through its own handling")
+            # Tab on through the radio buttons and the drop-down to Save, a button without a focus ring.
+            heard_save = None
+            for _ in range(6):
+                front(); mark = heard.mark(); vo.key("tab")
+                try:
+                    heard_save = phrase_until(lambda ph: "Save" in ph and "button" in ph, mark, 4)
+                    break
+                except AssertionError:
+                    pass  # VoiceOver read the radio buttons or the drop-down on the way
+            check(heard_save, "VoiceOver follows 4D's focus to a button when Tab moves it")
             check(vo_to(lambda ph: "Save" in ph and "button" in ph), "VoiceOver reaches Save")
             check(vo_to(lambda ph: "Orders" in ph and "table" in ph), "VoiceOver reads the list box as a table labelled by its caption")
             time.sleep(2)  # let VoiceOver finish the table's announcement before interacting
@@ -261,6 +271,11 @@ def main():
                 front(); keys.key("tab")
             ax.wait_for(lambda: focused() == "axb/form/dropdownTier", "The drop-down focused by Tab", timeout=10)
             check(True, "Tab and Shift-Tab move the application's focused element with 4D's focus, through fields, checkboxes, radio buttons and a drop-down")
+            front(); keys.key("tab")
+            ax.wait_for(lambda: focused() == "axb/form/btnSave", "Save focused by Tab", timeout=10)
+            front(); keys.key("tab")
+            ax.wait_for(lambda: focused() == "axb/form/btnHelp", "Help focused by Tab", timeout=10)
+            check(True, "Tab moves the focused element to buttons, which 4D draws without a focus ring")
             assert name.set_text("Ada Lovelace") == 0
             ax.wait_for(lambda: element("inputName").read("AXValue") == "Ada Lovelace", "The written name", timeout=10)
             assert element("inputCity").set_text("Paris") == 0

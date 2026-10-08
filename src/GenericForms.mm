@@ -1,6 +1,8 @@
 #import "GenericForms.h"
 #import "InternalForms.h"
 #import "DrawnText.h"
+#include <mach/mach.h>
+#include <objc/message.h>
 #include <vector>
 #include <zlib.h>
 
@@ -699,6 +701,48 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
     return entries;
 }
 
+// 4D's form record names the object with its keyboard focus, buttons too, which show neither a
+// ring nor a caret. The record is private to 4D: every read is checked, and a name that is not
+// one of the window's object layers is not used.
+static BOOL ReadMemory(uintptr_t address, void *into, size_t size) {
+    vm_size_t read = 0;
+    return address && vm_read_overwrite(mach_task_self(), address, size, (vm_address_t)into, &read) == KERN_SUCCESS && read == size;
+}
+
+static BOOL HasLayerNamed(CALayer *layer, NSString *name, int depth) {
+    for (CALayer *sub in layer.sublayers)
+        if ([sub.name isEqual:name] || (depth < 4 && HasLayerNamed(sub, name, depth + 1))) return YES;
+    return NO;
+}
+
+static NSString *RecordedFocus(NSWindow *window, CALayer *form) {
+    SEL record = NSSelectorFromString(@"z");
+    NSView *view = [window.contentView viewWithTag:'4DVW'];
+    if (![NSStringFromClass(view.class) isEqual:@"XMacNSView_saisierec"] || ![view respondsToSelector:record]) return nil;
+    uintptr_t saisie = (uintptr_t)((void *(*)(id, SEL))objc_msgSend)(view, record), handle = 0, object = 0, string = 0, characters = 0;
+    int32_t length = 0;
+    if (!ReadMemory(saisie + 0x260, &handle, sizeof handle) || !ReadMemory(handle, &object, sizeof object) ||
+        !ReadMemory(object + 0x28, &string, sizeof string) || !ReadMemory(string + 0x10, &characters, sizeof characters) ||
+        !ReadMemory(string + 0x18, &length, sizeof length) || length <= 0 || length > 255) return nil;
+    unichar name[255];
+    if (!ReadMemory(characters, name, length * sizeof(unichar))) return nil;
+    NSString *found = [NSString stringWithCharacters:name length:length];
+    return HasLayerNamed(form, found, 0) ? found : nil;
+}
+
+// The focused object the record names is the focused entry; a tab control's is its chosen tab.
+// Returns NO when the record names none, leaving focus to the caret and rings.
+static BOOL MarkRecordedFocus(NSArray<NSMutableDictionary *> *entries, NSWindow *window, CALayer *form) {
+    NSString *name = window.isKeyWindow ? RecordedFocus(window, form) : nil;
+    if (!name) return NO;
+    NSMutableDictionary *found = nil;
+    for (NSMutableDictionary *entry in entries)
+        if ([[entry[@"layer"] name] isEqual:name] && (!found || [entry[@"checked"] boolValue])) found = entry;
+    for (NSMutableDictionary *entry in entries) [entry removeObjectForKey:@"focused"];
+    found[@"focused"] = @YES;
+    return YES;
+}
+
 // 4D's form view is the window's text-input client, and the first rectangle of its selection is
 // where its keyboard focus is: the caret in a field, the top left corner of another control. It
 // finds focus that no ring shows, as on a list box whose form hides its ring.
@@ -757,7 +801,8 @@ BOOL AXBGenericFormsRefreshWindow(NSWindow *window) {
         [Matches setObject:match forKey:window];
         overlay = [[AXBInternalFormOverlay alloc] initWithFormView:view prefix:@"axb/form/"];
         created = YES;
-    } else MarkCaretFocus(entries, overlay, window);
+    }
+    if (!MarkRecordedFocus(entries, window, form) && !created) MarkCaretFocus(entries, overlay, window);
     if (![overlay updateWithEntries:entries]) { RemoveOverlay(window, overlay); return NO; }
     if (created) {
         [view addSubview:overlay];
