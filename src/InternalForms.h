@@ -75,6 +75,13 @@
 // An area of a layer's image, from its bottom left, on screen; and an ordinary click at its center.
 - (NSRect)screenFrameForArea:(NSRect)area inLayer:(CALayer *)layer;
 - (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer;
+// For an object that reads where the pointer is rather than where a click is, as 4D's Quick
+// Report sheet does: the pointer moves to the click and goes back once the action is over.
+// A secondary click there, as the mouse opens a context menu.
+- (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer secondary:(BOOL)secondary movingPointer:(BOOL)pointer;
+// Edit the text of an item 4D edits in place: a double click starts editing, Command-A selects
+// its text, the text is typed, and Tab ends editing, as a keyboard user would.
+- (BOOL)editText:(NSString *)text inArea:(NSRect)area ofLayer:(CALayer *)layer movingPointer:(BOOL)pointer;
 - (NSString *)textForLayer:(CALayer *)layer;
 - (void)whenSettled:(dispatch_block_t)block;
 - (BOOL)clickElement:(AXBInternalFormElement *)element;

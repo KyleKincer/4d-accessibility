@@ -992,9 +992,15 @@ static void QuickReportTest(void) {
     [form.layer addSublayer:context];
     MessageLayer(context, @"status.records", NSMakeRect(5, 2, 1048, 15), @[@"Number of records: 5"]);
     CALayer *report = ReportSubform(context, @"myQR", NSMakeRect(0, 20, 1060, 386));
-    CALayer *area = MessageLayer(report, @"nqr", NSMakeRect(-5, -5, 1070, 396), @[@"Customer", @"Amount", @"Title", @"Format", @"Grand Total"]);
-    AXBDrawnTextRecordOriginsForTesting(area, @[[NSValue valueWithPoint:NSMakePoint(90, 22)], [NSValue valueWithPoint:NSMakePoint(220, 22)],
-        [NSValue valueWithPoint:NSMakePoint(6, 22)], [NSValue valueWithPoint:NSMakePoint(6, 52)], [NSValue valueWithPoint:NSMakePoint(6, 82)]]);
+    // The sheet: each column's title in a header button HIToolbox draws, then the row titles left
+    // of the divider and the cells' texts, by baseline from the top left.
+    CALayer *area = MessageLayer(report, @"nqr", NSMakeRect(-5, -5, 1070, 396),
+                                 @[@"[Orders]Customer", @"[Orders]Amount", @"Customer", @"Amount", @"Title", @"Format", @"Grand Total", @"###,##0.00"]);
+    AXBDrawnTextRecordOriginsForTesting(area, @[[NSValue valueWithPoint:NSMakePoint(84, 19.5)], [NSValue valueWithPoint:NSMakePoint(212, 19.5)],
+        [NSValue valueWithPoint:NSMakePoint(85, 54)], [NSValue valueWithPoint:NSMakePoint(213, 54)], [NSValue valueWithPoint:NSMakePoint(7, 54)],
+        [NSValue valueWithPoint:NSMakePoint(7, 84)], [NSValue valueWithPoint:NSMakePoint(7, 114)], [NSValue valueWithPoint:NSMakePoint(213, 84)]]);
+    AXBDrawnTextRecordThemedForTesting(area, [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, 2)]);
+    AXBDrawnTextRecordThemedBoxesForTesting(area, @{@0: [NSValue valueWithRect:NSMakeRect(84, 6, 124, 27)], @1: [NSValue valueWithRect:NSMakeRect(212, 6, 124, 27)]});
     MessageLayer(context, @"plus.line", NSMakeRect(77, 20, 2, 386), nil).hidden = YES;
     for (NSArray *button in @[@[@"toolbar.opened.new", @"New", @11], @[@"toolbar.opened.destination", @"Destination", @210], @[@"toolbar.opened.run", @"Execute", @358],
                               @[@"toolbar.opened.fields", @"Fields", @976]])
@@ -1014,10 +1020,45 @@ static void QuickReportTest(void) {
           "the destinations are radio buttons; the framed one is chosen");
     Check([[ProgressElement(form, @"axb/report/destination/close") accessibilityLabel] isEqual:@"Close"] && !ProgressElement(form, @"axb/report/destination/left"),
           "the panel's Close is labelled and its objects parked outside it are not published");
-    id customer = ProgressElement(form, @"axb/report/column/Customer");
-    Check([[customer accessibilityValue] isEqual:@"Customer"] && [[customer accessibilityLabel] isEqual:@"Report column"] &&
-          ProgressElement(form, @"axb/report/column/Amount") && !ProgressElement(form, @"axb/report/column/Title"),
-          "the report's columns are read from its area; the row titles are not columns");
+    id table = ProgressElement(form, @"axb/report/table");
+    NSMutableArray *cells = [NSMutableArray new];
+    for (id row in [table accessibilityRows]) [cells addObject:[[row accessibilityChildren] valueForKey:@"accessibilityValue"]];
+    Check([[table accessibilityRole] isEqual:NSAccessibilityTableRole] && [[table accessibilityLabel] isEqual:@"Report"] &&
+          [[[table accessibilityColumnHeaderUIElements] valueForKey:@"accessibilityValue"] isEqual:(@[@"Row", @"[Orders]Customer", @"[Orders]Amount"])] &&
+          [cells isEqual:(@[@[@"Title", @"Customer", @"Amount"], @[@"Format", @"", @"###,##0.00"], @[@"Grand Total", @"", @""]])],
+          "the report's sheet is a table: its row titles, then a column per header button, and each cell's drawn text");
+    NSArray *sheetRows = [table accessibilityRows];
+    id titleRow = sheetRows[0], formatRow = sheetRows[1];
+    id title = [titleRow accessibilityChildren][0], format = [formatRow accessibilityChildren][2];
+    id header = [table accessibilityColumnHeaderUIElements][1];
+    Check(![title isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)] && [format isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)] &&
+          [format isAccessibilitySelectorAllowed:@selector(accessibilityPerformShowMenu)] && [header isAccessibilitySelectorAllowed:@selector(accessibilityPerformShowMenu)],
+          "a report column's cells can be written; every cell and column title has Show Menu");
+    // The sheet reads where the pointer is: Show Menu moves it to a secondary click on the cell,
+    // and puts it back.
+    NSPoint pointer = NSEvent.mouseLocation;
+    NSRect cellFrame = [format accessibilityFrame];
+    Check([format accessibilityPerformShowMenu], "a cell's Show Menu is accepted");
+    NSEvent *secondary = [NSApp nextEventMatchingMask:NSEventMaskRightMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSPoint moved = NSEvent.mouseLocation;
+    [NSApp nextEventMatchingMask:NSEventMaskRightMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSPoint target = [window convertPointToScreen:secondary.locationInWindow];
+    Check(secondary && NSPointInRect(target, cellFrame) && fabs(moved.x - target.x) < 1 && fabs(moved.y - target.y) < 1,
+          "Show Menu is a secondary click on the cell, with the pointer there");
+    [NSRunLoop.mainRunLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
+    Check(fabs(NSEvent.mouseLocation.x - pointer.x) < 1 && fabs(NSEvent.mouseLocation.y - pointer.y) < 1, "the pointer goes back afterwards");
+    // Writing a cell edits it in place: a double click, Command-A, the text, then Tab.
+    [format setAccessibilityValue:@"0.00"];
+    NSMutableArray *typed = [NSMutableArray new];
+    NSInteger clicks = 0;
+    for (NSEvent *event; (event = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown | NSEventMaskKeyDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5]
+                                                    inMode:NSDefaultRunLoopMode dequeue:YES]);) {
+        if (event.type == NSEventTypeLeftMouseDown) clicks = event.clickCount;
+        else [typed addObject:event.modifierFlags & NSEventModifierFlagCommand ? [@"cmd-" stringByAppendingString:event.characters] : event.characters];
+    }
+    [NSApp discardEventsMatchingMask:NSEventMaskAny beforeEvent:nil];
+    Check(clicks == 2 && [typed isEqual:(@[@"cmd-a", @"0", @".", @"0", @"0", @"\t"])], "writing a cell double-clicks it, selects its text, types the value and ends with Tab");
+    [NSRunLoop.mainRunLoop runUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
     Check([[ProgressElement(form, @"axb/report/status") accessibilityValue] isEqual:@"Number of records: 5"], "the record count is published");
     // The Fields sheet is modal: only it is published while it is open.
     CALayer *sheet = ReportSubform(context, @"settings.dial", NSMakeRect(260, 25, 540, 448));

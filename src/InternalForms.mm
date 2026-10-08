@@ -290,13 +290,15 @@ static const NSTimeInterval SettleInterval = 0.5;
         CFRunLoopWakeUp(main);
     });
 }
-static void PostClick(NSWindow *window, NSPoint point, NSInteger clicks = 1) {
-    // An ordinary click, or double click, queued so 4D's own loop handles it exactly as for the mouse.
+static void PostClick(NSWindow *window, NSPoint point, NSInteger clicks = 1, BOOL secondary = NO) {
+    // An ordinary click, double click or secondary click, queued so 4D's own loop handles it
+    // exactly as for the mouse.
     NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+    NSEventType down = secondary ? NSEventTypeRightMouseDown : NSEventTypeLeftMouseDown, up = secondary ? NSEventTypeRightMouseUp : NSEventTypeLeftMouseUp;
     for (NSInteger count = 1; count <= MAX(clicks, 1); count++)
-        for (NSEventType type : {NSEventTypeLeftMouseDown, NSEventTypeLeftMouseUp}) {
+        for (NSEventType type : {down, up}) {
             NSEvent *event = [NSEvent mouseEventWithType:type location:point modifierFlags:0 timestamp:now windowNumber:window.windowNumber
-                                                 context:nil eventNumber:0 clickCount:count pressure:type == NSEventTypeLeftMouseDown ? 1.0 : 0.0];
+                                                 context:nil eventNumber:0 clickCount:count pressure:type == down ? 1.0 : 0.0];
             if (event) [NSApp postEvent:event atStart:NO];
         }
 }
@@ -325,7 +327,9 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
     }];
     return YES;
 }
-- (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer {
+// Run a block with the window and the area's center in it, once the form has settled, while
+// the layer is still shown.
+- (BOOL)atArea:(NSRect)area inLayer:(CALayer *)layer perform:(void (^)(NSWindow *window, NSPoint point))block {
     NSWindow *window = self.formView.window;
     if (!window || !layer || layer.hidden || !window.isVisible) return NO;
     __weak AXBInternalFormOverlay *weakSelf = self;
@@ -337,9 +341,45 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         if (!strongSelf || !target || target.hidden || !current.isVisible) return;
         NSRect frame = [strongSelf screenFrameForArea:area inLayer:target];
         if (NSIsEmptyRect(frame)) return;
-        PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))]);
+        block(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))]);
     }];
     return YES;
+}
+// Move the pointer to a point of the window, and back where it was once the action is over:
+// after a moment, outside a menu's tracking.
+static void MovePointer(NSWindow *window, NSPoint point) {
+    CGFloat top = NSMaxY(NSScreen.screens.firstObject.frame);
+    NSPoint from = NSEvent.mouseLocation, to = [window convertPointToScreen:point];
+    CGWarpMouseCursorPosition(CGPointMake(to.x, top - to.y));
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        CFRunLoopPerformBlock(CFRunLoopGetMain(), kCFRunLoopDefaultMode, ^{ CGWarpMouseCursorPosition(CGPointMake(from.x, top - from.y)); });
+        CFRunLoopWakeUp(CFRunLoopGetMain());
+    });
+}
+- (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer {
+    return [self clickArea:area inLayer:layer secondary:NO movingPointer:NO];
+}
+- (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer secondary:(BOOL)secondary movingPointer:(BOOL)pointer {
+    return [self atArea:area inLayer:layer perform:^(NSWindow *window, NSPoint point) {
+        if (pointer) MovePointer(window, point);
+        PostClick(window, point, 1, secondary);
+    }];
+}
+- (BOOL)editText:(NSString *)text inArea:(NSRect)area ofLayer:(CALayer *)layer movingPointer:(BOOL)pointer {
+    // Line breaks and tabs would end or move the edit.
+    for (NSUInteger i = 0; i < text.length; i++)
+        if ([NSCharacterSet.controlCharacterSet characterIsMember:[text characterAtIndex:i]]) return NO;
+    NSString *answer = [text copy];
+    return [self atArea:area inLayer:layer perform:^(NSWindow *window, NSPoint point) {
+        if (!window.isKeyWindow) return;
+        if (pointer) MovePointer(window, point);
+        PostClick(window, point, 2);
+        PostKey(window, @"a", NSEventModifierFlagCommand, 0);
+        if (!answer.length) PostKey(window, @"\x7f", 0, 51);
+        [answer enumerateSubstringsInRange:NSMakeRange(0, answer.length) options:NSStringEnumerationByComposedCharacterSequences
+                                usingBlock:^(NSString *character, NSRange r1, NSRange r2, BOOL *stop) { (void)r1; (void)r2; (void)stop; PostKey(window, character, 0, 0); }];
+        PostKey(window, @"\t", 0, 48);
+    }];
 }
 // 4D moved its keyboard focus, for example with Tab: the newly focused object becomes the
 // application's focused element, and assistive technologies are told, as AppKit does.
