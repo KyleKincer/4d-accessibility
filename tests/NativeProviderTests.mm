@@ -9,6 +9,7 @@
 #import "ProgressWindows.h"
 #import "QueryEditor.h"
 #import "QuickReport.h"
+#import "OrderByEditor.h"
 #import "GenericForms.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
@@ -1084,6 +1085,62 @@ static void QuickReportTest(void) {
     Check(!AXBQuickReportRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the report area is left untouched");
     [window close]; Pump();
 }
+static void OrderByEditorTest(void) {
+    // 4D's Order By editor: the available fields, the ordered ones with their direction
+    // triangles, the buttons that move them, and Sort.
+    AXBOrderByEditorEnableForTesting();
+    NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 200, 580, 360) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
+    window.releasedWhenClosed = NO; window.title = @"AXB Order by";
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    MessageLayer(context, @"tFields.title", NSMakeRect(10, 324, 170, 16), @[@"Available Fields"]);
+    CALayer *fields = MessageLayer(context, @"tFields", NSMakeRect(5, 51, 268, 270), @[@"id", @"Customer"]);
+    AXBDrawnTextRecordOriginsForTesting(fields, @[[NSValue valueWithPoint:NSMakePoint(23, 18.5)], [NSValue valueWithPoint:NSMakePoint(23, 36.5)]]);
+    CALayer *ordered = MessageLayer(context, @"tSortedFields", NSMakeRect(307, 76, 268, 245), @[@"[Orders]Customer", @"[Orders]Amount"]);
+    AXBDrawnTextRecordOriginsForTesting(ordered, @[[NSValue valueWithPoint:NSMakePoint(7, 18.5)], [NSValue valueWithPoint:NSMakePoint(7, 36.5)]]);
+    MessageLayer(ordered, @"vertical_scrollbar", NSMakeRect(248, 5, 15, 235), nil);
+    // A dark list whose first line ends with a light triangle pointing down, its second up.
+    CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+    CGContextRef paint = CGBitmapContextCreate(NULL, 268, 245, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
+    CGContextSetRGBFillColor(paint, 0.15, 0.15, 0.15, 1); CGContextFillRect(paint, CGRectMake(0, 0, 268, 245));
+    CGContextSetRGBFillColor(paint, 1, 1, 1, 1);
+    for (int row = 0; row < 7; row++) {
+        CGContextFillRect(paint, CGRectMake(232 + row, 245 - 9 - row - 1, 12 - 2 * row, 1));  // down: narrows as it descends
+        CGContextFillRect(paint, CGRectMake(238 - row, 245 - 27 - row - 1, 2 * row + 1, 1));  // up: widens as it descends
+    }
+    CGImageRef image = CGBitmapContextCreateImage(paint);
+    ordered.contents = (__bridge id)image;
+    CGImageRelease(image); CGContextRelease(paint); CGColorSpaceRelease(rgb);
+    for (NSString *name in @[@"bOne", @"bRemoveOne", @"bRemoveAll"]) MessageLayer(context, name, NSMakeRect(273, 211 - 34 * [@[@"bOne", @"bRemoveOne", @"bRemoveAll"] indexOfObject:name], 34, 40), nil);
+    MessageLayer(context, @"bCancel", NSMakeRect(353, 9, 106, 32), @[@"Cancel"]);
+    MessageLayer(context, @"bOK", NSMakeRect(469, 9, 106, 32), @[@"Sort"]);
+    Check(AXBOrderByEditorRefreshWindow(window), "a window holding the Order By editor's form is published");
+    id customer = ProgressElement(form, @"axb/order/field/Customer");
+    Check([[customer accessibilityRole] isEqual:NSAccessibilityButtonRole] && [[ProgressElement(form, @"axb/order/fields.title") accessibilityValue] isEqual:@"Available Fields"],
+          "the available fields are buttons, under their caption");
+    Check([[ProgressElement(form, @"axb/order/bOne") accessibilityLabel] isEqual:@"Add field"] && [[ProgressElement(form, @"axb/order/bRemoveOne") accessibilityLabel] isEqual:@"Remove field"] &&
+          [[ProgressElement(form, @"axb/order/bRemoveAll") accessibilityLabel] isEqual:@"Remove all fields"] && [[ProgressElement(form, @"axb/order/bOK") accessibilityLabel] isEqual:@"Sort"],
+          "the arrow buttons are labelled, and Sort by its title");
+    id down = ProgressElement(form, @"axb/order/order/[Orders]Customer/descending"), up = ProgressElement(form, @"axb/order/order/[Orders]Amount/descending");
+    Check(ProgressElement(form, @"axb/order/order/[Orders]Customer") && [[down accessibilityRole] isEqual:NSAccessibilityCheckBoxRole] &&
+          [[down accessibilityLabel] isEqual:@"Descending"] && [[down accessibilityValue] isEqual:@YES] && [[up accessibilityValue] isEqual:@NO],
+          "each ordered field is followed by its direction: Descending, checked where its triangle points down");
+    NSRect triangle = [down accessibilityFrame], line = [ProgressElement(form, @"axb/order/order/[Orders]Customer") accessibilityFrame];
+    Check(NSMinX(triangle) > NSMidX(line) && NSMinY(triangle) >= NSMinY(line) - 0.5 && NSMaxY(triangle) <= NSMaxY(line) + 0.5, "the direction covers the triangle at its line's end");
+    Check([customer accessibilityPerformPress], "pressing an available field is accepted");
+    NSEvent *first = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSEvent *second = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(first.clickCount == 1 && second.clickCount == 2, "the press is a double click on the field, which orders by it");
+    [ordered removeFromSuperlayer];
+    Check(!AXBOrderByEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the ordered list is left untouched");
+    [window close]; Pump();
+}
 static void ComponentArchiveTest(void) {
     // A component's forms are read from its archive, deflated or stored; other entries are not forms.
     NSString *path = NSProcessInfo.processInfo.environment[@"AXB_TEST_COMPONENT_ARCHIVE"];
@@ -2141,6 +2198,7 @@ int main(void) {
         ProgressWindowsTest();
         QueryEditorTest();
         QuickReportTest();
+        OrderByEditorTest();
         GenericFormsTest();
         ComponentArchiveTest();
         FocusAfterLayoutTest();

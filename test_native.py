@@ -15,7 +15,7 @@ subprocess.run([
     "-include", str(root / "tests/NotificationProbe.h"),
     "-I", str(root / "src"), str(root / "tests/NativeProviderTests.mm"),
     str(root / "src/Session.mm"), str(root / "src/Grid.mm"), str(root / "src/Bridge.mm"), str(root / "src/GridNative.mm"), str(root / "src/NativeLayout.mm"),
-    str(root / "src/DrawnText.mm"), str(root / "src/InternalForms.mm"), str(root / "src/InternalTable.mm"), str(root / "src/MessageDialogs.mm"), str(root / "src/ProgressWindows.mm"), str(root / "src/QueryEditor.mm"), str(root / "src/QuickReport.mm"), str(root / "src/GenericForms.mm"), "-framework", "CoreText", "-framework", "QuartzCore", "-lz",
+    str(root / "src/DrawnText.mm"), str(root / "src/InternalForms.mm"), str(root / "src/InternalTable.mm"), str(root / "src/MessageDialogs.mm"), str(root / "src/ProgressWindows.mm"), str(root / "src/QueryEditor.mm"), str(root / "src/QuickReport.mm"), str(root / "src/OrderByEditor.mm"), str(root / "src/GenericForms.mm"), "-framework", "CoreText", "-framework", "QuartzCore", "-lz",
     "-framework", "Cocoa", "-o", str(binary),
 ], check=True)
 print("Built native provider tests; an unlocked desktop is required to run them.")
