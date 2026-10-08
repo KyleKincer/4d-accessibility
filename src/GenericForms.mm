@@ -39,7 +39,7 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
             (void)inner;
             if (![object isKindOfClass:NSDictionary.class]) return;
             NSMutableDictionary *info = [@{@"page": @(number)} mutableCopy];
-            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight", @"detailForm", @"listForm"])
+            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight", @"detailForm", @"listForm", @"display", @"picture", @"icon"])
                 if (object[key] && ![object[key] isKindOfClass:NSDictionary.class] && ![object[key] isKindOfClass:NSArray.class]) info[key] = object[key];
             // A list box's columns: their titles and widths, as defined.
             if ([object[@"columns"] isKindOfClass:NSArray.class]) {
@@ -130,7 +130,9 @@ static NSDictionary *LoadComponentForms(NSURL *sources) {
     // 4D Widgets set these from their methods, so their definitions do not name them.
     NSDictionary *hints = @{
         @"SearchPicker": @{@"SearchText_Mac": @{@"tooltip": @"Search", @"placeholder": @"Search"}, @"SearchText_Win": @{@"tooltip": @"Search", @"placeholder": @"Search"},
-                           @"CloseButton_Mac": @{@"tooltip": @"Clear search"}, @"CloseButton_Win": @{@"tooltip": @"Clear search"}},
+                           @"CloseButton_Mac": @{@"tooltip": @"Clear search"}, @"CloseButton_Win": @{@"tooltip": @"Clear search"},
+                           @"SearchButton_Mac": @{@"tooltip": @"Search options"}},
+        @"DatePicker": @{@"BtnPrevious": @{@"tooltip": @"Previous month"}, @"BtnNext": @{@"tooltip": @"Next month"}},
         @"DateButton": @{@"bTinyCalendar": @{@"tooltip": @"Choose date"}},
         @"DateEntry": @{@"bTinyCalendar": @{@"tooltip": @"Choose date"}, @"bUp": @{@"tooltip": @"Increase"}, @"bDown": @{@"tooltip": @"Decrease"}}};
     [hints enumerateKeysAndObjectsUsingBlock:^(NSString *form, NSDictionary *objects, BOOL *stop) {
@@ -200,32 +202,53 @@ static NSString *Plain(id text) {
     return trimmed.length && ![trimmed hasPrefix:@":"] && ![trimmed hasPrefix:@"<"] ? trimmed : nil;
 }
 
-// A list box's name when no caption labels it: the words of its object name, less a list prefix
-// or suffix, as "listboxManufacturers", "lb_sales_limits" or "SourceLB". 4D's default names
-// ("List Box1") and names left with fewer than three letters say nothing about the list.
-static NSString *ListName(NSString *object) {
-    static NSRegularExpression *affix, *words;
+typedef NS_ENUM(NSInteger, AXBNameKind) { AXBNameList, AXBNameButton };
+
+// A name for an object no text labels: the words of its object name, less a prefix or suffix of
+// its kind, as "listboxManufacturers", "lb_sales_limits", "SourceLB", "btnAddLine" or
+// "pbNextRecordBtn". 4D's default names ("List Box1", "Picture Button") and names left with
+// fewer than three letters, or only with words of the kind, say nothing about the object.
+static NSString *ObjectName(NSString *object, AXBNameKind kind) {
+    static NSRegularExpression *list, *button, *words;
+    static NSSet<NSString *> *generic;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
-        affix = [NSRegularExpression regularExpressionWithPattern:@"^(?i:listbox|list|lbx|lb|lst)(?:_|(?=[A-Z0-9]))|(?:_(?i:listbox|lbx|lb|lst)|(?<=[a-z0-9])(?:ListBox|Listbox|LBX|LB|Lb|Lst))$"
-                                                          options:0 error:NULL];
+        list = [NSRegularExpression regularExpressionWithPattern:@"^(?i:listbox|list|lbx|lb|lst)(?:_|(?=[A-Z0-9]))|"
+            "(?:_(?i:listbox|lbx|lb|lst)|(?<=[A-Za-z0-9])(?:ListBox|Listbox|LBX|LB|Lb|Lst))$" options:0 error:NULL];
+        button = [NSRegularExpression regularExpressionWithPattern:@"^(?:(?i:ibtn|pbtn|btn|bn|bt|pb|hb|pct|pic)(?:_|(?=[A-Z0-9]))|b(?=[A-Z][a-z]))|"
+            "(?:_(?i:button|btn|bn|icon|img|pic|picture)|(?<=[A-Za-z0-9])(?:Button|Btn|BTN|Bn|Icon|Img|Pic|Picture))$" options:0 error:NULL];
         words = [NSRegularExpression regularExpressionWithPattern:@"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|[0-9]+" options:0 error:NULL];
+        generic = [NSSet setWithArray:@[@"list", @"listbox", @"box", @"button", @"btn", @"picture", @"pict", @"invisible", @"icon", @"image", @"img", @"pic"]];
     });
     if (![object isKindOfClass:NSString.class] || [object rangeOfString:@"^[A-Za-z0-9_]+$" options:NSRegularExpressionSearch].location == NSNotFound) return nil;
+    NSRegularExpression *affix = kind == AXBNameList ? list : button;
     NSString *rest = [affix stringByReplacingMatchesInString:object options:0 range:NSMakeRange(0, object.length) withTemplate:@""];
     NSMutableArray<NSString *> *parts = [NSMutableArray new];
     NSUInteger letters = 0;
+    BOOL meaningful = NO;
     for (NSTextCheckingResult *word in [words matchesInString:rest options:0 range:NSMakeRange(0, rest.length)]) {
         NSString *part = [rest substringWithRange:word.range];
-        if ([part characterAtIndex:0] > '9') letters += part.length;
+        if ([part characterAtIndex:0] > '9') {
+            letters += part.length;
+            meaningful |= ![generic containsObject:part.lowercaseString];
+        }
         [parts addObject:part];
     }
-    if (letters < 3) return nil;
+    if (letters < 3 || !meaningful) return nil;
     NSString *name = [parts componentsJoinedByString:@" "];
     return [[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]];
 }
 
-NSString *AXBGenericFormsListNameForTesting(NSString *object) { return ListName(object); }
+// A button's picture file names it as a last resort: "/RESOURCES/Buttons/Gear_Icon.png" is Gear.
+static NSString *PictureName(id path) {
+    if (![path isKindOfClass:NSString.class]) return nil;
+    NSString *file = [[path componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"/:"]] lastObject];
+    file = [[file stringByDeletingPathExtension] componentsSeparatedByString:@"@"].firstObject;
+    return ObjectName([file stringByReplacingOccurrencesOfString:@"-" withString:@"_"], AXBNameButton);
+}
+
+NSString *AXBGenericFormsObjectNameForTesting(NSString *object, BOOL button) { return ObjectName(object, button ? AXBNameButton : AXBNameList); }
+NSString *AXBGenericFormsPictureNameForTesting(NSString *path) { return PictureName(path); }
 
 // The object's own rectangle within its layer, in the layer's points from its bottom left.
 // 4D draws an object with a margin of up to 10 points on its leading and top edges, and the
@@ -634,9 +657,12 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
                 [entries addObjectsFromArray:FormEntries(context, inner, [NSString stringWithFormat:@"%@%@/", prefix, layer.name], depth + 1)];
             continue;
         } else if ([@[@"button", @"pictureButton"] containsObject:type]) {
-            if (!title && !help) continue; // An unlabelled button cannot be named.
+            // An invisible button draws nothing; it is a shortcut or a click area over a picture.
+            if ([info[@"display"] isEqual:@NO] && !help) continue;
+            NSString *name = title ?: help ?: ObjectName(layer.name, AXBNameButton) ?: PictureName(info[@"picture"] ?: info[@"icon"]);
+            if (!name) continue; // An unlabelled button cannot be named.
             entry[@"role"] = NSAccessibilityButtonRole;
-            if (!Plain(drawn)) entry[@"label"] = title ?: help;
+            if (!Plain(drawn)) entry[@"label"] = name;
         } else if ([type isEqual:@"checkbox"] || [type isEqual:@"radio"]) {
             if (!title && !help) continue;
             entry[@"role"] = [type isEqual:@"radio"] ? NSAccessibilityRadioButtonRole : NSAccessibilityCheckBoxRole;
@@ -696,7 +722,7 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             if (gap >= -20 && gap < 120 && gap < distance) { distance = gap; best = caption[@"text"]; }
         }
         if (best) entry[@"label"] = [best stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@": "]];
-        else if ([entry[@"role"] isEqual:NSAccessibilityTableRole]) entry[@"label"] = ListName([entry[@"layer"] name]);
+        else if ([entry[@"role"] isEqual:NSAccessibilityTableRole]) entry[@"label"] = ObjectName([entry[@"layer"] name], AXBNameList);
     }
     return entries;
 }

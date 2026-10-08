@@ -186,8 +186,9 @@ def main():
                 check(changed == 0, "the form is pixel-identical to the plugin-free form")
         order = list(published())
         report["published"] = order
-        check(order == ["title", "search/inputSearch", "search/btnGo", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier", "widgetSearch/SearchText_Mac",
-                        "btnSave", "btnHelp", "labelOrders", "listOrders", "tabPages/Details", "tabPages/Notes", "btnDone"], "the form's labelled objects are published in reading order; an unlabelled button is not")
+        check(order == ["title", "search/inputSearch", "search/btnGo", "labelName", "inputName", "labelCity", "inputCity", "checkActive", "radioRetail", "radioWholesale", "dropdownTier", "widgetSearch/SearchButton_Mac", "widgetSearch/SearchText_Mac",
+                        "btnSave", "btnHelp", "btnRefreshOrders", "labelOrders", "listOrders", "tabPages/Details", "tabPages/Notes", "btnDone"],
+              "the form's labelled objects are published in reading order; a button with 4D's default name and an invisible button are not")
         name, city = element("inputName"), element("inputCity")
         check(name.read("AXRole") == "AXTextField" and name.read("AXDescription") == "Name" and name.read("AXValue") == "" and
               name.read("AXPlaceholderValue") == "Full name" and city.read("AXDescription") == "City" and city.read("AXValue") == "Lyon",
@@ -196,7 +197,8 @@ def main():
               element("radioRetail").read("AXValue") is True and element("radioWholesale").read("AXValue") is False,
               "the checkbox and radio buttons are published with their drawn states")
         check(element("dropdownTier").read("AXRole") == "AXPopUpButton" and element("dropdownTier").read("AXValue") == "Gold" and
-              element("btnHelp").read("AXDescription") == "Help", "the drop-down shows its value; an untitled button is labelled by its help tip")
+              element("btnHelp").read("AXDescription") == "Help" and element("btnRefreshOrders").read("AXDescription") == "Refresh Orders",
+              "the drop-down shows its value; an untitled button is labelled by its help tip, or else by its object name")
         table = element("listOrders")
 
         def rows():
@@ -245,7 +247,9 @@ def main():
                   "the row VoiceOver reaches is selected once, through the list box's own handling")
             front(); mark = heard.mark(); vo.key("up", vo.VO + ("shift",))
             phrase_until(lambda ph: ph.strip() != "", mark)
-            front(); mark = heard.mark(); vo.key("left", vo.VO); vo.key("left", vo.VO); vo.key("left", vo.VO)
+            # Back past the caption, Refresh Orders and Help to Save.
+            front(); mark = heard.mark(); vo.key("left", vo.VO); vo.key("left", vo.VO); vo.key("left", vo.VO); vo.key("left", vo.VO)
+            check(vo_to(lambda ph: "Save" in ph and "button" in ph), "VoiceOver returns to Save past the button named by its object name")
             front(); vo.key("space", vo.VO)
             ax.wait_for(saved, "Save's record", timeout=10)
             values = saved()[-1]
@@ -309,12 +313,15 @@ def main():
             check(next(e for e in events() if e["object"] == "btnGo")["text"] == "Ada",
                   "a page subform's own objects are published in its place, and operated within it")
             widget = element("widgetSearch/SearchText_Mac")
-            check(widget.read("AXRole") == "AXTextField" and widget.read("AXDescription") == "Search",
-                  "4D Widgets' search picker, from 4D's own component, is a text field labelled Search")
+            check(widget.read("AXRole") == "AXTextField" and widget.read("AXDescription") == "Search" and
+                  element("widgetSearch/SearchButton_Mac").read("AXDescription") == "Search options",
+                  "4D Widgets' search picker, from 4D's own component, is a text field labelled Search, beside its Search options button")
             assert widget.set_text("Ada") == 0
             ax.wait_for(lambda: element("widgetSearch/SearchText_Mac").read("AXValue") == "Ada", "The widget's text", timeout=10)
             assert element("btnHelp").perform("AXPress") == 0
             ax.wait_for(lambda: any(e["object"] == "btnHelp" for e in events()), "Help's event", timeout=10)
+            assert element("btnRefreshOrders").perform("AXPress") == 0
+            ax.wait_for(lambda: any(e["object"] == "btnRefreshOrders" for e in events()), "Refresh Orders' event", timeout=10)
             assert element("btnSave").perform("AXPress") == 0
             ax.wait_for(saved, "Save's record", timeout=10)
             values = saved()[-1]
