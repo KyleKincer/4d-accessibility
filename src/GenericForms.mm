@@ -198,6 +198,33 @@ static NSString *Plain(id text) {
     return trimmed.length && ![trimmed hasPrefix:@":"] && ![trimmed hasPrefix:@"<"] ? trimmed : nil;
 }
 
+// A list box's name when no caption labels it: the words of its object name, less a list prefix
+// or suffix, as "listboxManufacturers", "lb_sales_limits" or "SourceLB". 4D's default names
+// ("List Box1") and names left with fewer than three letters say nothing about the list.
+static NSString *ListName(NSString *object) {
+    static NSRegularExpression *affix, *words;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        affix = [NSRegularExpression regularExpressionWithPattern:@"^(?i:listbox|list|lbx|lb|lst)(?:_|(?=[A-Z0-9]))|(?:_(?i:listbox|lbx|lb|lst)|(?<=[a-z0-9])(?:ListBox|Listbox|LBX|LB|Lb|Lst))$"
+                                                          options:0 error:NULL];
+        words = [NSRegularExpression regularExpressionWithPattern:@"[A-Z]+(?![a-z])|[A-Z]?[a-z]+|[0-9]+" options:0 error:NULL];
+    });
+    if (![object isKindOfClass:NSString.class] || [object rangeOfString:@"^[A-Za-z0-9_]+$" options:NSRegularExpressionSearch].location == NSNotFound) return nil;
+    NSString *rest = [affix stringByReplacingMatchesInString:object options:0 range:NSMakeRange(0, object.length) withTemplate:@""];
+    NSMutableArray<NSString *> *parts = [NSMutableArray new];
+    NSUInteger letters = 0;
+    for (NSTextCheckingResult *word in [words matchesInString:rest options:0 range:NSMakeRange(0, rest.length)]) {
+        NSString *part = [rest substringWithRange:word.range];
+        if ([part characterAtIndex:0] > '9') letters += part.length;
+        [parts addObject:part];
+    }
+    if (letters < 3) return nil;
+    NSString *name = [parts componentsJoinedByString:@" "];
+    return [[name substringToIndex:1].uppercaseString stringByAppendingString:[name substringFromIndex:1]];
+}
+
+NSString *AXBGenericFormsListNameForTesting(NSString *object) { return ListName(object); }
+
 // The object's own rectangle within its layer, in the layer's points from its bottom left.
 // 4D draws an object with a margin of up to 10 points on its leading and top edges, and the
 // rest of the extra size on its trailing and bottom edges (an input's is wider there).
@@ -647,7 +674,8 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         } else continue;
         [entries addObject:entry];
     }
-    // An input is labelled by the caption on its left, or just above it, as it reads.
+    // An input is labelled by the caption on its left, or just above it, as it reads; a list box
+    // without one, by its object's name.
     for (NSMutableDictionary *entry in entries) {
         if (![entry[@"caption"] boolValue]) continue;
         [entry removeObjectForKey:@"caption"];
@@ -666,6 +694,7 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             if (gap >= -20 && gap < 120 && gap < distance) { distance = gap; best = caption[@"text"]; }
         }
         if (best) entry[@"label"] = [best stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@": "]];
+        else if ([entry[@"role"] isEqual:NSAccessibilityTableRole]) entry[@"label"] = ListName([entry[@"layer"] name]);
     }
     return entries;
 }
