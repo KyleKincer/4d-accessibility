@@ -1091,7 +1091,9 @@ static void GenericFormsTest(void) {
         @"inputName": @{@"type": @"input", @"placeholder": @"Full name", @"width": @200, @"height": @18},
         @"checkActive": @{@"type": @"checkbox", @"text": @"Active", @"style": @"custom", @"width": @120, @"height": @20},
         @"btnHelp": @{@"type": @"button", @"tooltip": @"Help", @"width": @24, @"height": @24},
-        @"btnUnnamed": @{@"type": @"button", @"width": @24, @"height": @24},
+        @"Button1": @{@"type": @"button", @"width": @24, @"height": @24},
+        @"pbNextRecord": @{@"type": @"pictureButton", @"picture": @"/RESOURCES/Buttons/Next.png", @"width": @24, @"height": @24},
+        @"btnEscape": @{@"type": @"button", @"display": @NO, @"width": @10, @"height": @10},
         @"btnSave": @{@"type": @"button", @"text": @"Save", @"width": @90, @"height": @24},
         @"line": @{@"type": @"line"},
         @"tabPages": @{@"type": @"tab", @"width": @200, @"height": @24},
@@ -1117,12 +1119,15 @@ static void GenericFormsTest(void) {
     MessageLayer(context, @"checkActive", NSMakeRect(17, top - 112 - 22, 125, 24), @[@"Active"]);
     MessageLayer(context, @"btnSave", NSMakeRect(15, top - 150 - 29, 100, 34), @[@"Save"]);
     MessageLayer(context, @"btnHelp", NSMakeRect(115, top - 150 - 29, 34, 34), nil);
-    MessageLayer(context, @"btnUnnamed", NSMakeRect(145, top - 150 - 29, 34, 34), nil);
+    MessageLayer(context, @"Button1", NSMakeRect(145, top - 150 - 29, 34, 34), nil);
+    MessageLayer(context, @"pbNextRecord", NSMakeRect(175, top - 150 - 29, 34, 34), nil);
+    MessageLayer(context, @"btnEscape", NSMakeRect(205, top - 150 - 29, 20, 20), nil);
     MessageLayer(context, @"line", NSMakeRect(0, 10, 400, 1), nil);
     Check(AXBGenericFormsRefreshWindow(window), "a window whose objects match one form of the project is published");
     NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
-    Check([keys isEqual:(@[@"axb/form/labelName", @"axb/form/inputName", @"axb/form/checkActive", @"axb/form/btnSave", @"axb/form/btnHelp"])],
-          "its labelled objects are published in reading order; decorations and an unlabelled button are not");
+    Check([keys isEqual:(@[@"axb/form/labelName", @"axb/form/inputName", @"axb/form/checkActive", @"axb/form/btnSave", @"axb/form/btnHelp", @"axb/form/pbNextRecord"])],
+          "its labelled objects are published in reading order; decorations, an invisible button and one with 4D's default name are not");
+    Check([[ProgressElement(form, @"axb/form/pbNextRecord") accessibilityLabel] isEqual:@"Next Record"], "a picture button without a title or help tip is named by its object name");
     id field = ProgressElement(form, @"axb/form/inputName");
     Check([[field accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[field accessibilityLabel] isEqual:@"Name"] &&
           [[field accessibilityValue] isEqual:@"Ada"] && [field isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)],
@@ -1161,8 +1166,15 @@ static void GenericFormsTest(void) {
     NSDictionary *names = @{@"listboxSalesLimitCountries": @"Sales Limit Countries", @"lb_windows_clients": @"Windows clients", @"SourceLB": @"Source",
                             @"lbRMAInfo": @"RMA Info", @"inventoryItems": @"Inventory Items", @"List Box1": [NSNull null], @"lbx2": [NSNull null], @"Bulb": @"Bulb"};
     BOOL named = YES;
-    for (NSString *name in names) named &= [names[name] isEqual:NSNull.null] ? AXBGenericFormsListNameForTesting(name) == nil : [AXBGenericFormsListNameForTesting(name) isEqual:names[name]];
+    for (NSString *name in names) named &= [names[name] isEqual:NSNull.null] ? AXBGenericFormsObjectNameForTesting(name, NO) == nil : [AXBGenericFormsObjectNameForTesting(name, NO) isEqual:names[name]];
     Check(named, "a list prefix or suffix is not part of the name, and 4D's default names name nothing");
+    NSDictionary *buttons = @{@"AddWinClientBtn": @"Add Win Client", @"btn_Stop": @"Stop", @"pbNextRecordBtn": @"Next Record", @"bGearButton": @"Gear", @"SMSBtn": @"SMS",
+                              @"hbClose": @"Close", @"btn_CopyMethod1_ToClipboard": @"Copy Method 1 To Clipboard", @"Button": [NSNull null], @"Button1": [NSNull null],
+                              @"Picture Button": [NSNull null], @"InvisibleButton": [NSNull null], @"btnOK": [NSNull null]};
+    for (NSString *name in buttons) named &= [buttons[name] isEqual:NSNull.null] ? AXBGenericFormsObjectNameForTesting(name, YES) == nil : [AXBGenericFormsObjectNameForTesting(name, YES) isEqual:buttons[name]];
+    Check(named && [AXBGenericFormsPictureNameForTesting(@"/RESOURCES/Images/library/Gear_Icon.png") isEqual:@"Gear"] &&
+          [AXBGenericFormsPictureNameForTesting(@"path:/RESOURCES/Buttons/PlusBtn@2x.png") isEqual:@"Plus"] && AXBGenericFormsPictureNameForTesting(@"/RESOURCES/b.png") == nil,
+          "a button prefix or suffix is not part of a button's name, and its picture file names it last");
     id grace = rows[1];
     NSRect second = [grace accessibilityFrame], firstRow = [rows[0] accessibilityFrame];
     Check(fabs(NSHeight(second) - 20) < 0.5 && fabs(NSMinY(firstRow) - NSMaxY(second)) < 0.5 && [[[grace accessibilityChildren][0] accessibilityChildren].firstObject accessibilityValue],
