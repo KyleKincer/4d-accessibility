@@ -1,3 +1,19 @@
+# 0.32.0, focus on buttons, and names for untitled buttons and list boxes in forms without a bridge area
+
+Forms without a bridge area are described more fully, still by the native plugin alone:
+- **Keyboard focus on buttons** is reported. 4D draws no focus ring on a button, and its text-input caret does not move there. 4D's form record names the focused object, and the plugin now reads that name, so VoiceOver follows Tab onto buttons. The record is private to 4D: every read is checked, a name that is not one of the window's objects is ignored, and the caret and focus rings still decide when the record can't be read.
+- **Untitled buttons and picture buttons** are named by the words of their object names, without a button prefix or suffix (`pbNextRecordBtn` is Next Record), or else by their picture files (`Gear_Icon.png` is Gear). Before, a button without a title or help tip was not published. 4D's default names (`Button1`, `Picture Button`) name nothing. Invisible buttons, which draw nothing and serve as keyboard shortcuts or click areas, are not published.
+- **List boxes without a caption** are named by their object names in the same way (`listboxManufacturers` is Manufacturers, `SourceLB` is Source).
+- **4D Widgets' buttons**: the search picker's magnifier is Search options, and the date picker's month buttons are Previous month and Next month.
+
+[Forms without a bridge area](tests/GENERIC-FORMS.md); [acceptance](validation/generic-forms-development.json).
+
+On Symphony's unintegrated Manufacturers window, VoiceOver reads the list as the Manufacturers table and the gear picture button as Gear. Tab onto the Add button moves the focused element there, and VoiceOver reads it.
+
+For developers: the generic forms test hook `AXBGenericFormsObjectNameForTesting` names an object as a list box or a button, and `AXBGenericFormsPictureNameForTesting` names a button by its picture file.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.31.0, tab controls, column titles and keyboard focus in forms without a bridge area
 
 Forms without a bridge area are described more fully, still by the native plugin alone:
