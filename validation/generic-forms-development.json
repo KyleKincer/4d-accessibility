@@ -1,21 +1,21 @@
 {
  "passed": true,
  "date": "2026-10-07",
- "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows, named by their caption or object name, with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus as the focused element and operated with ordinary clicks and keys; by AX and by VoiceOver",
+ "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows, named by their caption or object name, with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus, on buttons too, as the focused element and operated with ordinary clicks and keys; by AX and by VoiceOver",
  "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a tab control going to two pages, a page subform and 4D Widgets' search picker)",
- "pluginSHA256": "56ac4f35fb2d46f9c801e2b3b1ad8491d38cff520d93bb4df6a4d92457de4c35",
+ "pluginSHA256": "d624ac98305603df1ad7b85ec8375d2494bf8d30c566cf50719679c943a93e4c",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
  },
  "runs": {
-  "arm64-compiled-voiceover": 20,
-  "arm64-compiled": 20,
-  "arm64-voiceover": 20,
-  "arm64": 20,
-  "x86_64-compiled-voiceover": 20,
-  "x86_64-compiled": 20,
-  "x86_64": 20
+  "arm64-compiled-voiceover": 21,
+  "arm64-compiled": 21,
+  "arm64-voiceover": 21,
+  "arm64": 21,
+  "x86_64-compiled-voiceover": 21,
+  "x86_64-compiled": 21,
+  "x86_64": 21
  },
  "checks": [
   "the form is pixel-identical to the plugin-free form",
@@ -25,6 +25,7 @@
   "the drop-down shows its value; an untitled button is labelled by its help tip",
   "a list box is a table labelled by its caption, with the column titles 4D draws, one renamed at load, and its visible rows' cells",
   "Tab and Shift-Tab move the application's focused element with 4D's focus, through fields, checkboxes, radio buttons and a drop-down",
+  "Tab moves the focused element to buttons, which 4D draws without a focus ring",
   "writing an input's value types it into 4D's own field",
   "pressing the checkbox runs its On Clicked and checks it",
   "pressing a radio button chooses it and clears the other",
@@ -44,6 +45,7 @@
   "VoiceOver follows 4D's focus to the next field when Tab moves it",
   "VoiceOver reads the checkbox and its state",
   "VO-Space checks the checkbox through its own handling",
+  "VoiceOver follows 4D's focus to a button when Tab moves it",
   "VoiceOver reaches Save",
   "VoiceOver reads the list box as a table labelled by its caption",
   "interacting with it reads the first row's cell with its column title",

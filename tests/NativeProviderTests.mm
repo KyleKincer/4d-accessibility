@@ -1072,6 +1072,18 @@ static void ComponentArchiveTest(void) {
 - (NSUInteger)characterIndexForPoint:(NSPoint)point { (void)point; return 0; }
 @end
 
+// 4D's form view keeps its form record, whose focus handle leads to the focused object's name.
+struct AXBTestName { char reserved[0x10]; const unichar *characters; int32_t length; };
+struct AXBTestObject { char reserved[0x28]; struct AXBTestName *name; };
+struct AXBTestRecord { char reserved[0x260]; struct AXBTestObject **focus; };
+@interface XMacNSView_saisierec : NSView
+@property(nonatomic) struct AXBTestRecord *record;
+@end
+@implementation XMacNSView_saisierec
+- (NSInteger)tag { return '4DVW'; }
+- (void *)z { return self.record; }
+@end
+
 static void GenericFormsTest(void) {
     // An application form with no bridge session, described by its definition and drawn layers.
     NSDictionary *definition = @{@"pages": @[[NSNull null], @{@"objects": @{
@@ -1237,6 +1249,28 @@ static void GenericFormsTest(void) {
     client.caret = NSMakeRect(NSMinX(formFrame), NSMaxY(formFrame), 1, 0);
     AXBGenericFormsRefreshWindow(window);
     Check(NSApp.accessibilityApplicationFocusedUIElement == listElement, "focus at the form's own corner, on a control without a caret, changes nothing");
+    // A button has neither a ring nor a caret; 4D's form record names it.
+    XMacNSView_saisierec *saisie = [[XMacNSView_saisierec alloc] initWithFrame:NSMakeRect(0, 0, 1, 1)];
+    [window.contentView addSubview:saisie];
+    static const unichar save[] = {'b', 't', 'n', 'S', 'a', 'v', 'e'}, ghost[] = {'b', 't', 'n', 'G', 'h', 'o', 's', 't'};
+    struct AXBTestName name = {{0}, save, 7};
+    struct AXBTestObject object = {{0}, &name};
+    struct AXBTestObject *handle = &object;
+    struct AXBTestRecord record = {{0}, &handle};
+    saisie.record = &record;
+    AXBGenericFormsRefreshWindow(window);
+    id saveElement = ProgressElement(form, @"axb/form/btnSave");
+    Check(saveElement && NSApp.accessibilityApplicationFocusedUIElement == saveElement, "the object 4D's form record names as focused becomes the focused element");
+    name = (struct AXBTestName){{0}, ghost, 8};
+    client.caret = NSMakeRect(NSMinX(listFrame), NSMaxY(listFrame), 1, 0);
+    AXBGenericFormsRefreshWindow(window);
+    Check(NSApp.accessibilityApplicationFocusedUIElement == listElement, "a name that is none of the window's objects is not used, and the caret decides");
+    record.focus = NULL;
+    client.caret = NSMakeRect(NSMinX(formFrame), NSMaxY(formFrame), 1, 0);
+    name = (struct AXBTestName){{0}, save, 7};
+    AXBGenericFormsRefreshWindow(window);
+    Check(NSApp.accessibilityApplicationFocusedUIElement == listElement, "a record without a focused object changes nothing");
+    [saisie removeFromSuperview];
     [window makeFirstResponder:nil];
     [client removeFromSuperview];
     [focusList removeFromSuperlayer];
