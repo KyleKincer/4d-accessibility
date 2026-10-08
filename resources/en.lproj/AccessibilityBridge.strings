@@ -21,7 +21,8 @@
 "Commands" = "Commands";
 "Remove line" = "Remove line";
 "Add line" = "Add line";
-"Report column" = "Report column";
+"Report" = "Report";
+"Row" = "Row";
 "Search fields" = "Search fields";
 "Field options" = "Field options";
 "Add field" = "Add field";

@@ -100,6 +100,33 @@ def main():
     def press(key_name):
         assert element(key_name).perform("AXPress") == 0, key_name
 
+    def sheet():
+        """The report's sheet: its column titles, and each row's cells, the row's title first."""
+        table = element("table")
+        if table is None:
+            return [], []
+        headers = [header.read("AXValue") for header in table.read("AXColumnHeaderUIElements") or []]
+        return headers, [[cell.read("AXValue") for cell in row.read("AXChildren") or []] for row in table.read("AXRows") or []]
+
+    def cell(title, column):
+        table = element("table")
+        headers, rows = sheet()
+        r = next(i for i, row in enumerate(rows) if row[0] == title)
+        return table.read("AXRows")[r].read("AXChildren")[headers.index(column)]
+
+    def menu():
+        """The context menu 4D opens over the window."""
+        def walk(node, depth=0):
+            if depth > 5 or node.read("AXRole") == "AXMenuBar":
+                return None
+            if node.read("AXRole") == "AXMenu":
+                return node
+            for child in node.read("AXChildren") or []:
+                found = walk(child, depth + 1)
+                if found:
+                    return found
+        return walk(ax.application(process.pid))
+
     def columns(prefix):
         return [value.read("AXValue") if prefix == "column/" else value.read("AXDescription")
                 for name, value in published().items() if name.startswith(prefix)]
@@ -192,7 +219,7 @@ def main():
                 check(changed == 0, "the Quick Report editor is pixel-identical to the plugin-free editor")
         toolbar = [element(name).read("AXDescription") for name in ("new", "open", "save", "destination", "preview", "run", "options", "fields")]
         check(toolbar == ["New", "Open…", "Save", "Destination", "Preview", "Execute", "Options", "Fields"], "the toolbar's buttons are published by their titles")
-        check(element("status").read("AXValue") == "Number of records: 5" and not columns("column/"), "the record count is published, and a new report has no columns")
+        check(element("status").read("AXValue") == "Number of records: 5" and element("table") is None, "the record count is published, and a new report has no sheet")
         if args.voiceover:
             check(phrase_until(lambda ph: TITLE in ph, 0, 40), "VoiceOver reaches the Quick Report editor")
             check(vo_to(lambda ph: "Fields" in ph and "button" in ph), "VoiceOver reaches the Fields button")
@@ -204,8 +231,37 @@ def main():
             check(True, "VO-Space on a field adds it to the report's columns")
             check(vo_to(lambda ph: "OK" in ph and "button" in ph), "VoiceOver reaches OK")
             front(); vo.key("space", vo.VO)
-            ax.wait_for(lambda: columns("column/") == ["Customer"], "The column", timeout=10)
+            ax.wait_for(lambda: sheet()[0][1:] == ["[Orders]Customer"], "The column", timeout=10)
             check(True, "OK makes the chosen field the report's column")
+            # The report's sheet: a table to interact with, whose cells open 4D's menus.
+            front(); mark = heard.mark(); vo.key("home", vo.VO)
+            phrase_until(lambda ph: ph.strip() != "", mark)
+            check(vo_to(lambda ph: "Report" in ph and "table" in ph), "VoiceOver reads the report's sheet as a table")
+            time.sleep(2)
+            front(); mark = heard.mark(); vo.key("down", vo.VO + ("shift",))
+            check(phrase_until(lambda ph: "Title" in ph, mark), "interacting with it reads the first row's title")
+            front(); mark = heard.mark(); vo.key("right", vo.VO)
+            check(phrase_until(lambda ph: "Customer" in ph, mark), "VO-Right reads the column's title cell")
+            # The cell's Show Menu, in VoiceOver's actions menu.
+            front(); mark = heard.mark(); vo.key("space", vo.VO + ("cmd",)); time.sleep(1)
+            actions = [phrase_until(lambda ph: ph.strip() != "", mark)]
+            for _ in range(4):
+                if "show menu" in actions[-1].lower():
+                    break
+                front(); mark = heard.mark(); vo.key("down")
+                actions.append(phrase_until(lambda ph: ph.strip() != "", mark))
+            report["actionsMenu"] = actions
+            check("show menu" in actions[-1].lower(), "VoiceOver's actions menu offers the cell's Show menu")
+            front(); vo.key("return")
+            ax.wait_for(menu, "The cell's menu", timeout=10)
+            titles = [item.read("AXTitle") for item in menu().read("AXChildren") or []]
+            front(); mark = heard.mark(); vo.key("down")
+            heard_item = phrase_until(lambda ph: "Edit" in ph, mark)
+            front(); vo.key("escape")
+            ax.wait_for(lambda: menu() is None, "The menu closed", timeout=10)
+            check("Edit" in titles and heard_item, "Show menu opens 4D's menu for the cell, which VoiceOver reads")
+            front(); mark = heard.mark(); vo.key("up", vo.VO + ("shift",))
+            phrase_until(lambda ph: ph.strip() != "", mark)
             # The sheet's elements are gone; start again from the window's top.
             front(); mark = heard.mark(); vo.key("home", vo.VO)
             phrase_until(lambda ph: ph.strip() != "", mark)
@@ -231,8 +287,30 @@ def main():
             press("sheet/field/Customer")
             ax.wait_for(lambda: columns("sheet/column/") == ["[Orders]Amount", "[Orders]Customer"], "Customer added again", timeout=10)
             press("sheet/ok")
-            ax.wait_for(lambda: sorted(columns("column/")) == ["Amount", "Customer"], "The report's columns", timeout=10)
-            check(element("run") is not None, "OK returns to the editor, which publishes the report's columns")
+            ax.wait_for(lambda: sheet()[0][1:] == ["[Orders]Amount", "[Orders]Customer"], "The report's columns", timeout=10)
+            headers, rows = sheet()
+            check(element("run") is not None and element("table").read("AXRole") == "AXTable" and element("table").read("AXDescription") == "Report" and
+                  [row[0] for row in rows] == ["Title", "Format", "Grand Total"] and rows[0] == ["Title", "Amount", "Customer"] and rows[1] == ["Format", "", ""],
+                  "OK returns to the editor, whose sheet is a table: a column per field, titled as 4D draws it, and the row titles first")
+            # Edit cells in place, as with a double click and the keyboard.
+            cell("Title", "[Orders]Customer").set_string("AXValue", "Client")
+            ax.wait_for(lambda: sheet()[1][0][2] == "Client", "The renamed title", timeout=10)
+            cell("Format", "[Orders]Amount").set_string("AXValue", "###,##0.00")
+            ax.wait_for(lambda: sheet()[1][1][1] == "###,##0.00", "The format", timeout=10)
+            check(True, "writing a cell edits it in place: a column's title and its format")
+            # A header's Show Menu opens 4D's own context menu for the column.
+            assert element("table").read("AXColumnHeaderUIElements")[2].perform("AXShowMenu") == 0
+            ax.wait_for(menu, "The column's menu", timeout=10)
+            titles = [item.read("AXTitle") for item in menu().read("AXChildren") or []]
+            front(); key(53)  # Escape
+            ax.wait_for(lambda: menu() is None, "The menu closed", timeout=10)
+            check("Delete this column" in titles and "Hide this column" in titles, "a column title's Show Menu opens 4D's menu for the column")
+            assert cell("Grand Total", "[Orders]Amount").perform("AXShowMenu") == 0
+            ax.wait_for(menu, "The cell's menu", timeout=10)
+            titles = [item.read("AXTitle") for item in menu().read("AXChildren") or []]
+            front(); key(53)
+            ax.wait_for(lambda: menu() is None, "The menu closed", timeout=10)
+            check("Clear Contents" in titles, "a cell's Show Menu opens 4D's menu for the cell")
             press("destination")
             ax.wait_for(lambda: element("destination/html"), "The Destination panel", timeout=10)
             destinations = {name: value.read("AXValue") for name, value in published().items() if name.startswith("destination/") and value.read("AXRole") == "AXRadioButton"}
@@ -251,8 +329,8 @@ def main():
             ax.wait_for(output.exists, "The saved report", timeout=20)
             time.sleep(1)
             html = output.read_text(errors="replace")
-            check(all(f"Customer {i}" in html for i in range(1, 6)) and all(str(10 * i) in html for i in range(1, 6)),
-                  "Execute writes the report the columns describe, with every record")
+            check(all(f"Customer {i}" in html for i in range(1, 6)) and all(f"{10 * i}.00" in html for i in range(1, 6)) and "Client" in html,
+                  "Execute writes the report the sheet describes, with every record, the edited title and the format")
         report["passed"] = True
     finally:
         if heard:

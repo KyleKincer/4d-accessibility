@@ -41,27 +41,83 @@ static void AddToolbar(CALayer *form, NSMutableArray *entries) {
     }
 }
 
-// The report's columns, read from the titles drawn in its area: the row titles sit left of
-// the first column's divider, and each column's title spans to the next column's.
-static void AddColumns(CALayer *form, NSMutableArray *entries) {
+// The report's sheet, as a table. Its first column holds the row titles drawn left of the
+// first column's divider (Title, Format, totals and subtotals). Each report column is named by
+// the title 4D draws in its header button, and each cell holds the text drawn in its column and
+// row. As with the mouse, a press clicks a cell, Show Menu opens 4D's context menu for a cell or
+// a header, and a cell of a report column is edited in place. The sheet reads where the pointer
+// is, so the pointer moves to each of these clicks.
+static NSDictionary *SheetModel(CALayer *area, CGFloat left) {
+    NSArray<NSString *> *texts = AXBDrawnTextWithThemedForLayer(area);
+    NSArray<NSValue *> *origins = AXBDrawnTextOriginsWithThemedForLayer(area);
+    NSDictionary<NSNumber *, NSValue *> *boxes = AXBDrawnTextThemedBoxesForLayer(area);
+    if (!texts.count || origins.count != texts.count) return nil;
+    CGFloat height = NSHeight(area.bounds);
+    NSCharacterSet *blank = NSCharacterSet.whitespaceAndNewlineCharacterSet;
+    // The headers, left to right, in points from the top left.
+    NSMutableArray<NSDictionary *> *headers = [NSMutableArray new];
+    CGFloat headerTop = CGFLOAT_MAX, headerBottom = 0;
+    for (NSNumber *index in boxes) {
+        NSRect box = boxes[index].rectValue;
+        if (index.unsignedIntegerValue >= texts.count || NSMinX(box) < left - 4) continue;
+        [headers addObject:@{@"title": [texts[index.unsignedIntegerValue] stringByTrimmingCharactersInSet:blank], @"box": boxes[index]}];
+        headerTop = MIN(headerTop, NSMinY(box)); headerBottom = MAX(headerBottom, NSMaxY(box));
+    }
+    if (!headers.count) return nil;
+    [headers sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) { return [@(NSMinX([a[@"box"] rectValue])) compare:@(NSMinX([b[@"box"] rectValue]))]; }];
+    NSMutableArray *columns = [NSMutableArray arrayWithObject:@{@"header": Localized(@"Row"), @"x": @0, @"width": @(left)}];
+    [headers enumerateObjectsUsingBlock:^(NSDictionary *header, NSUInteger index, BOOL *stop) {
+        (void)stop;
+        CGFloat x = NSMinX([header[@"box"] rectValue]);
+        CGFloat next = index + 1 < headers.count ? NSMinX([headers[index + 1][@"box"] rectValue]) : NSMaxX([header[@"box"] rectValue]) + 4;
+        [columns addObject:@{@"header": header[@"title"], @"x": @(x), @"width": @(next - x)}];
+    }];
+    // The row titles, top to bottom, by baseline; the other texts are the cells.
+    NSMutableArray<NSDictionary *> *titles = [NSMutableArray new], *items = [NSMutableArray new];
+    [texts enumerateObjectsUsingBlock:^(NSString *text, NSUInteger index, BOOL *stop) {
+        (void)stop;
+        NSPoint origin = origins[index].pointValue;
+        NSString *plain = [text stringByTrimmingCharactersInSet:blank];
+        if (boxes[@(index)] || isnan(origin.y) || !plain.length || origin.y < headerBottom) return;
+        [(origin.x < left ? titles : items) addObject:@{@"text": plain, @"origin": origins[index]}];
+    }];
+    [titles sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) { return [@([a[@"origin"] pointValue].y) compare:@([b[@"origin"] pointValue].y)]; }];
+    // Rows lie edge to edge below the headers: a row starts as far above its title's baseline
+    // as the first row's does, and ends where the next one starts.
+    CGFloat offset = titles.count ? [titles[0][@"origin"] pointValue].y - headerBottom : 0;
+    NSMutableArray *rows = [NSMutableArray new];
+    [titles enumerateObjectsUsingBlock:^(NSDictionary *title, NSUInteger index, BOOL *stop) {
+        (void)stop;
+        CGFloat top = [title[@"origin"] pointValue].y - offset;
+        CGFloat bottom = index + 1 < titles.count ? [titles[index + 1][@"origin"] pointValue].y - offset
+                                                   : top + (index ? top - ([titles[index - 1][@"origin"] pointValue].y - offset) : 30);
+        NSMutableArray *cells = [NSMutableArray arrayWithObject:title[@"text"]];
+        for (NSUInteger column = 1; column < columns.count; column++) {
+            CGFloat x = [columns[column][@"x"] doubleValue], width = [columns[column][@"width"] doubleValue];
+            NSMutableArray *words = [NSMutableArray new];
+            for (NSDictionary *item in items) {
+                NSPoint origin = [item[@"origin"] pointValue];
+                if (origin.x >= x && origin.x < x + width && origin.y > top && origin.y <= bottom) [words addObject:item[@"text"]];
+            }
+            [cells addObject:[words componentsJoinedByString:@" "]];
+        }
+        [rows addObject:@{@"cells": cells, @"area": [NSValue valueWithRect:NSMakeRect(0, height - bottom, NSWidth(area.bounds), bottom - top)]}];
+    }];
+    return @{@"columns": columns, @"rows": rows, @"header": [NSValue valueWithRect:NSMakeRect(0, height - headerBottom, NSWidth(area.bounds), headerBottom - headerTop)],
+             @"cellActions": @YES, @"menus": @YES, @"pointer": @YES, @"editableColumns": [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(1, columns.count - 1)]};
+}
+
+static void AddSheet(CALayer *form, NSMutableArray *entries) {
     CALayer *report = AXBInternalSubformContext(AXBInternalFormChild(form, @"myQR") ?: [CALayer layer]);
     CALayer *area = report ? AXBInternalFormChild(report, @"nqr") : nil;
     CALayer *divider = AXBInternalFormChild(form, @"plus.line");
     if (!area) return;
     CGFloat left = divider ? [divider.superlayer convertRect:divider.frame toLayer:area].origin.x : 78;
-    NSMutableArray<NSMutableDictionary *> *columns = [NSMutableArray new];
-    for (NSMutableDictionary *item in AXBInternalListItems(area, @"column/", NSAccessibilityStaticTextRole) ?: @[])
-        if ([item[@"originX"] doubleValue] >= left) [columns addObject:item];
-    [columns sortUsingComparator:^NSComparisonResult(NSDictionary *a, NSDictionary *b) { return [a[@"originX"] compare:b[@"originX"]]; }];
-    [columns enumerateObjectsUsingBlock:^(NSMutableDictionary *column, NSUInteger index, BOOL *stop) {
-        (void)stop;
-        CGFloat x = [column[@"originX"] doubleValue] - 4;
-        CGFloat next = index + 1 < columns.count ? [columns[index + 1][@"originX"] doubleValue] - 4 : x + 120;
-        NSRect cell = [column[@"area"] rectValue];
-        column[@"area"] = [NSValue valueWithRect:NSMakeRect(x, NSMinY(cell), MAX(next - x, 8), NSHeight(cell))];
-        column[@"label"] = Localized(@"Report column");
-        [entries addObject:column];
-    }];
+    NSDictionary *model = SheetModel(area, left);
+    if (!model) return;
+    NSMutableDictionary *entry = Entry(@"table", area, NSAccessibilityTableRole, Localized(@"Report"), 0);
+    entry[@"table"] = model;
+    [entries addObject:entry];
 }
 
 // The sheet that chooses the report's columns: available fields, added with a double click
@@ -133,7 +189,7 @@ static NSArray<NSDictionary *> *ReportEntries(CALayer *form) {
     for (CALayer *layer in form.sublayers)
         if ([layer.name hasPrefix:@"tool."] && !layer.hidden && AXBInternalSubformContext(layer))
             AddPanel(AXBInternalSubformContext(layer), [layer.name substringFromIndex:5], entries);
-    AddColumns(form, entries);
+    AddSheet(form, entries);
     CALayer *status = AXBInternalFormChild(form, @"status.records");
     if (status) [entries addObject:Entry(@"status", status, NSAccessibilityStaticTextRole, nil, 0)];
     return entries;
