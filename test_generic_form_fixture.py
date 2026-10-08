@@ -244,6 +244,7 @@ def main():
             front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: element("labelNotes") is not None and element("inputName") is None, "The Notes page", timeout=10)
             check(element("tabPages/Notes").read("AXValue") is True, "VO-Space on a tab shows its page, and the tab is chosen")
+            check(vo_to(lambda ph: "Order Lines" in ph and "table" in ph), "VoiceOver reads a list box without a caption by its object's name")
         else:
             # 4D's keyboard focus, drawn as its focus ring, is the application's focused element.
             focused = lambda: (ax.application(process.pid).read("AXFocusedUIElement") or name).read("AXIdentifier")
@@ -310,6 +311,8 @@ def main():
             ax.wait_for(lambda: element("labelNotes") is not None and element("inputName") is None and element("tabPages/Notes").read("AXValue") is True,
                         "The Notes page", timeout=10)
             check(True, "pressing a tab shows its page through the tab control's own action, and the tab is chosen")
+            check(element("lbOrderLines").read("AXRole") == "AXTable" and element("lbOrderLines").read("AXDescription") == "Order Lines",
+                  "a list box without a caption is a table named by the words of its object name")
             assert element("tabPages/Details").perform("AXPress") == 0
             ax.wait_for(lambda: element("inputName") is not None and element("labelNotes") is None, "The Details page", timeout=10)
             check(all(e["runId"] == run_id and e["compiled"] == args.compiled for e in events()), "every event belongs to this run")

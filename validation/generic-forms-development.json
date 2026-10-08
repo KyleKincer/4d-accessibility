@@ -1,21 +1,21 @@
 {
  "passed": true,
  "date": "2026-10-07",
- "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus as the focused element and operated with ordinary clicks and keys; by AX and by VoiceOver",
+ "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows, named by their caption or object name, with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus as the focused element and operated with ordinary clicks and keys; by AX and by VoiceOver",
  "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a tab control going to two pages, a page subform and 4D Widgets' search picker)",
- "pluginSHA256": "4a4e438cae855307e5665352659a25aa3ed1b632ddd3f03828990509e867605f",
+ "pluginSHA256": "56ac4f35fb2d46f9c801e2b3b1ad8491d38cff520d93bb4df6a4d92457de4c35",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
  },
  "runs": {
-  "arm64-compiled-voiceover": 19,
-  "arm64-compiled": 19,
-  "arm64-voiceover": 19,
-  "arm64": 19,
-  "x86_64-compiled-voiceover": 19,
-  "x86_64-compiled": 19,
-  "x86_64": 19
+  "arm64-compiled-voiceover": 20,
+  "arm64-compiled": 20,
+  "arm64-voiceover": 20,
+  "arm64": 20,
+  "x86_64-compiled-voiceover": 20,
+  "x86_64-compiled": 20,
+  "x86_64": 20
  },
  "checks": [
   "the form is pixel-identical to the plugin-free form",
@@ -35,6 +35,7 @@
   "pressing Save runs its method, which reads every value set through accessibility",
   "a tab control's tabs are radio buttons named by their drawn labels; the current page's is chosen",
   "pressing a tab shows its page through the tab control's own action, and the tab is chosen",
+  "a list box without a caption is a table named by the words of its object name",
   "every event belongs to this run",
   "Done closes the form through its standard action",
   "VoiceOver reaches the form",
@@ -50,7 +51,8 @@
   "the row VoiceOver reaches is selected once, through the list box's own handling",
   "VO-Space runs Save, which reads the form's values",
   "VoiceOver reads a tab by its drawn label",
-  "VO-Space on a tab shows its page, and the tab is chosen"
+  "VO-Space on a tab shows its page, and the tab is chosen",
+  "VoiceOver reads a list box without a caption by its object's name"
  ],
  "voiceOverSpeech": [
   "4D AX bridge generic form window Customer details has keyboard focus",

@@ -17,3 +17,5 @@ BOOL AXBGenericFormsRefreshWindow(NSWindow *window);
 void AXBGenericFormsEnableForTesting(NSDictionary<NSString *, NSDictionary *> *forms);
 // Test support: the form definitions inside a component archive, described by name.
 NSDictionary<NSString *, NSDictionary *> *AXBGenericFormsArchivedFormsForTesting(NSString *path);
+// Test support: the name a list box without a caption takes from its object name.
+NSString *AXBGenericFormsListNameForTesting(NSString *object);
