@@ -2,6 +2,11 @@
 
 @class AXBInternalRow, AXBInternalColumn, AXBInternalCell;
 
+// A column's title; with the table's menus, Show Menu is a secondary click on it.
+@interface AXBInternalHeader : NSAccessibilityElement
+@property(nonatomic, weak) AXBInternalColumn *column;
+@end
+
 // A cell's text. VoiceOver presses it with VO-Space, which selects its row.
 @interface AXBInternalCellText : NSAccessibilityElement
 @property(nonatomic, weak) AXBInternalCell *cell;
@@ -19,6 +24,8 @@
 @property(nonatomic) NSUInteger requestedRow;
 @property(nonatomic) NSTimeInterval requestedAt;
 @property(nonatomic, strong) NSAccessibilityElement *headerGroup;
+@property(nonatomic) BOOL cellActions, menus, pointer;
+@property(nonatomic, copy) NSIndexSet *editableColumns;
 @end
 
 @interface AXBInternalColumn : NSAccessibilityElement
@@ -26,7 +33,7 @@
 @property(nonatomic) NSUInteger index;
 @property(nonatomic) CGFloat x, width;
 @property(nonatomic, copy) NSString *title;
-@property(nonatomic, strong) NSAccessibilityElement *header;
+@property(nonatomic, strong) AXBInternalHeader *header;
 @end
 
 @interface AXBInternalRow : NSAccessibilityElement
@@ -43,6 +50,8 @@
 @property(nonatomic, copy) NSString *text;
 // The cell's text, as a table's text cells hold it.
 @property(nonatomic, strong) AXBInternalCellText *content;
+// The cell's area, in the layer's points from the bottom left.
+- (NSRect)area;
 @end
 
 static NSRect TableArea(AXBInternalTable *table, NSRect area) {
@@ -67,6 +76,20 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 - (id)accessibilityHeader { return self.header; }
 @end
 
+@implementation AXBInternalHeader
+- (NSString *)accessibilityRole { return NSAccessibilityStaticTextRole; }
+- (BOOL)accessibilityPerformShowMenu {
+    AXBInternalTable *table = self.column.table;
+    NSRect header = table.headerArea;
+    return table.menus && [table.owner clickArea:NSMakeRect(self.column.x, NSMinY(header), self.column.width, NSHeight(header)) inLayer:table.layer
+                                       secondary:YES movingPointer:table.pointer];
+}
+- (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (selector == @selector(accessibilityPerformShowMenu)) return self.column.table.menus;
+    return [super isAccessibilitySelectorAllowed:selector];
+}
+@end
+
 @implementation AXBInternalCell
 - (NSString *)accessibilityRole { return NSAccessibilityCellRole; }
 - (id)accessibilityParent { return self.row; }
@@ -76,13 +99,15 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
     AXBInternalTable *table = self.row.table;
     return self.column < table.columns.count ? table.columns[self.column].title : nil;
 }
-- (NSRect)accessibilityFrame {
+- (NSRect)area {
     AXBInternalTable *table = self.row.table;
     if (self.column >= table.columns.count) return NSZeroRect;
     AXBInternalColumn *column = table.columns[self.column];
     NSRect area = self.row.area;
-    return TableArea(table, NSMakeRect(column.x, NSMinY(area), column.width, NSHeight(area)));
+    return NSMakeRect(column.x, NSMinY(area), column.width, NSHeight(area));
 }
+- (NSRect)accessibilityFrame { return TableArea(self.row.table, self.area); }
+- (BOOL)isEditable { return [self.row.table.editableColumns containsIndex:self.column]; }
 - (NSArray *)accessibilityChildren {
     if (!self.content) self.content = (AXBInternalCellText *)[NSAccessibilityElement accessibilityElementWithRole:NSAccessibilityStaticTextRole frame:NSZeroRect label:nil parent:self];
     self.content.accessibilityValue = self.text ?: @"";
@@ -92,10 +117,23 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 - (NSRange)accessibilityColumnIndexRange { return NSMakeRange(self.column, 1); }
 - (NSRange)accessibilityRowIndexRange { return NSMakeRange(self.row.index, 1); }
 - (BOOL)isAccessibilitySelected { return self.row.isAccessibilitySelected; }
-- (BOOL)accessibilityPerformPress { return [self.row accessibilityPerformPress]; }
+- (BOOL)accessibilityPerformPress {
+    AXBInternalTable *table = self.row.table;
+    return table.cellActions ? [table.owner clickArea:self.area inLayer:table.layer secondary:NO movingPointer:table.pointer] : [self.row accessibilityPerformPress];
+}
+- (BOOL)accessibilityPerformShowMenu {
+    AXBInternalTable *table = self.row.table;
+    return table.menus && [table.owner clickArea:self.area inLayer:table.layer secondary:YES movingPointer:table.pointer];
+}
+- (void)setAccessibilityValue:(id)value {
+    AXBInternalTable *table = self.row.table;
+    if (self.isEditable && [value isKindOfClass:NSString.class]) (void)[table.owner editText:value inArea:self.area ofLayer:table.layer movingPointer:table.pointer];
+}
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
-    if (selector == @selector(setAccessibilityValue:) || selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilitySelected:)) return NO;
+    if (selector == @selector(setAccessibilityValue:)) return self.isAccessibilityElement && self.isEditable;
+    if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilitySelected:)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement;
+    if (selector == @selector(accessibilityPerformShowMenu)) return self.isAccessibilityElement && self.row.table.menus;
     return [super isAccessibilitySelectorAllowed:selector];
 }
 @end
@@ -105,8 +143,10 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 - (id)accessibilityParent { return self.cell; }
 - (BOOL)isAccessibilityElement { return self.cell.isAccessibilityElement; }
 - (BOOL)accessibilityPerformPress { return [self.cell accessibilityPerformPress]; }
+- (BOOL)accessibilityPerformShowMenu { return [self.cell accessibilityPerformShowMenu]; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement;
+    if (selector == @selector(accessibilityPerformShowMenu)) return [self.cell isAccessibilitySelectorAllowed:selector];
     return [super isAccessibilitySelectorAllowed:selector];
 }
 @end
@@ -122,7 +162,10 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 - (BOOL)isAccessibilitySelected { return self.selected.boolValue; }
 // Selecting a row is an ordinary click on it, as the mouse selects it.
 - (void)setAccessibilitySelected:(BOOL)selected { if (selected) [self.table setAccessibilitySelectedRows:@[self]]; }
-- (BOOL)accessibilityPerformPress { return [self.table.owner clickArea:self.area inLayer:self.table.layer]; }
+- (BOOL)accessibilityPerformPress {
+    if (self.table.cellActions) return self.cells.count && [self.cells.firstObject accessibilityPerformPress];
+    return [self.table.owner clickArea:self.area inLayer:self.table.layer];
+}
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
     if (selector == @selector(setAccessibilitySelected:) || selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement;
     return [super isAccessibilitySelectorAllowed:selector];
@@ -195,7 +238,9 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
         if (!column) {
             column = [AXBInternalColumn new];
             column.table = self; column.index = index;
-            NSAccessibilityElement *header = [NSAccessibilityElement accessibilityElementWithRole:NSAccessibilityStaticTextRole frame:NSZeroRect label:nil parent:column];
+            AXBInternalHeader *header = [AXBInternalHeader new];
+            header.column = column;
+            header.accessibilityParent = column;
             column.header = header;
             [self.columns addObject:column];
         }
@@ -204,6 +249,10 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
         column.header.accessibilityValue = spec[@"header"] ?: @"";
     }];
     self.headerArea = model[@"header"] ? [model[@"header"] rectValue] : NSZeroRect;
+    self.cellActions = [model[@"cellActions"] boolValue];
+    self.menus = [model[@"menus"] boolValue];
+    self.pointer = [model[@"pointer"] boolValue];
+    self.editableColumns = model[@"editableColumns"];
     for (AXBInternalColumn *column in self.columns) {
         column.header.accessibilityParent = self.accessibilityHeader;
         column.header.accessibilityFrame = TableArea(self, NSMakeRect(column.x, NSMinY(self.headerArea), column.width, NSHeight(self.headerArea)));
