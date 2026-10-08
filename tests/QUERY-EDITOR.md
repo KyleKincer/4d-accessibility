@@ -28,4 +28,4 @@ python3 test_query_editor_fixture.py --server /path/to/4D\ Server.app --run --vo
 
 [Acceptance](../validation/query-editor-development.json): the AX run passes interpreted and compiled, in native ARM and Rosetta, with an unchanged window; the VoiceOver run passes interpreted and compiled on ARM and compiled under Rosetta. Standard messages, which now share the same overlay, pass interpreted, compiled and under Rosetta, and with VoiceOver.
 
-Remaining scope: the formula criteria of the editor's second page, the field list's related tables, the Order By editor, localized editors, 4D Server and remote clients, and 4D on Windows.
+Remaining scope: the formula criteria of the editor's second page, the field list's related tables, localized editors, 4D Server and remote clients, and 4D on Windows. The Order By editor is described in [its own page](ORDER-BY.md).
