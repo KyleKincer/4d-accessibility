@@ -1145,6 +1145,12 @@ static void GenericFormsTest(void) {
     for (id row in rows) [cells addObject:[[row accessibilityChildren] valueForKey:@"accessibilityValue"]];
     Check([[table accessibilityRole] isEqual:NSAccessibilityTableRole] && [[[table accessibilityColumnHeaderUIElements] valueForKey:@"accessibilityValue"] isEqual:(@[@"Customer", @"Amount"])] &&
           [cells isEqual:(@[@[@"Ada", @"10"], @[@"Grace", @"20"]])], "a list box is a table of its visible rows, with each text in its column and the column titles");
+    Check([[table accessibilityLabel] isEqual:@"Orders"], "a list box without a caption is named by the words of its object name");
+    NSDictionary *names = @{@"listboxSalesLimitCountries": @"Sales Limit Countries", @"lb_windows_clients": @"Windows clients", @"SourceLB": @"Source",
+                            @"lbRMAInfo": @"RMA Info", @"inventoryItems": @"Inventory Items", @"List Box1": [NSNull null], @"lbx2": [NSNull null], @"Bulb": @"Bulb"};
+    BOOL named = YES;
+    for (NSString *name in names) named &= [names[name] isEqual:NSNull.null] ? AXBGenericFormsListNameForTesting(name) == nil : [AXBGenericFormsListNameForTesting(name) isEqual:names[name]];
+    Check(named, "a list prefix or suffix is not part of the name, and 4D's default names name nothing");
     id grace = rows[1];
     NSRect second = [grace accessibilityFrame], firstRow = [rows[0] accessibilityFrame];
     Check(fabs(NSHeight(second) - 20) < 0.5 && fabs(NSMinY(firstRow) - NSMaxY(second)) < 0.5 && [[[grace accessibilityChildren][0] accessibilityChildren].firstObject accessibilityValue],

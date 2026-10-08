@@ -96,6 +96,9 @@ def main():
                            {'name': 'colAmount', 'dataSource': 'This.amount', 'width': 80, 'header': {'name': 'headAmount', 'text': 'Amount'}}]},
     }}, {'objects': {
         'labelNotes': {'type': 'text', 'text': 'Order notes', 'left': 20, 'top': 50, 'width': 200, 'height': 17},
+        # No caption: the list box is named by its object name.
+        'lbOrderLines': {'type': 'listbox', 'listboxType': 'collection', 'dataSource': 'Form.orders', 'left': 20, 'top': 120, 'width': 262, 'height': 96,
+                         'columns': [{'name': 'colLine', 'dataSource': 'This.customer', 'width': 240, 'header': {'name': 'headLine', 'text': 'Line'}}]},
     }}]}
     # A page subform's own form: a search field and its Go button, whose method records it.
     search = {'width': 110, 'height': 26, 'destination': 'detailScreen', 'pages': [None, {'objects': {
