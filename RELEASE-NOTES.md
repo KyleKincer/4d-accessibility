@@ -1,3 +1,13 @@
+# 0.33.0, the Quick Report sheet and the Order By editor
+
+4D's own editors are described more fully, by the native plugin alone, with no host change:
+- **The Quick Report sheet** is a table named Report. Its first column, Row, holds the row titles 4D draws: Title, Format, the totals and subtotals. Each other column is a report column, named by its header button. Pressing a cell clicks it. **Show Menu** on a cell, a row title or a column title opens 4D's own context menu, a native menu: Edit and Clear Contents, Hide this row, or New column, Duplicate, Edit the formula…, Hide and Delete this column. Writing a report column's cell edits it in place, as a keyboard user would, which sets a column's title, its format or a total's text. The sheet reads where the pointer is rather than where a click is, so the pointer moves to each of these clicks and returns once the action is over. [Quick Report editor](tests/QUICK-REPORT.md); [acceptance](validation/quick-report-development.json).
+- **The Order By editor**, which `ORDER BY([Table])` opens without criteria, is published. Its available fields are buttons that order by them, and its ordered fields are buttons that select them. Each ordered field has a **Descending** checkbox, read from the triangle 4D draws and pressed on it. The arrow buttons are labelled Add field, Remove field and Remove all fields, and Add Formula…, Modify…, Cancel and Sort are published by their titles. [Order By editor](tests/ORDER-BY.md); [acceptance](validation/order-by-development.json).
+
+For developers: the internal table model accepts `cellActions`, `menus`, `editableColumns` and `pointer`, and the internal form overlay gains `clickArea:inLayer:secondary:movingPointer:` and `editText:inArea:ofLayer:movingPointer:`.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.32.0, focus on buttons, and names for untitled buttons and list boxes in forms without a bridge area
 
 Forms without a bridge area are described more fully, still by the native plugin alone:
