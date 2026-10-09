@@ -65,12 +65,18 @@ def main():
         return next((w for w in ax.application(process.pid).read("AXWindows") or [] if w.read("AXTitle") == TITLE), None)
 
     def published():
+        """The published elements by key, in reading order, with each list's lines after it."""
         current = window()
         found = {}
-        for child in (current.read("AXChildren") if current else None) or []:
-            identifier = child.read("AXIdentifier") or ""
-            if identifier.startswith("axb/order/"):
-                found[identifier[len("axb/order/"):]] = child
+
+        def visit(children):
+            for child in children or []:
+                identifier = child.read("AXIdentifier") or ""
+                if identifier.startswith("axb/order/"):
+                    found[identifier[len("axb/order/"):]] = child
+                    if child.read("AXRole") == "AXList":
+                        visit(child.read("AXChildren"))
+        visit(current.read("AXChildren") if current else None)
         return found
 
     def element(key):
@@ -83,7 +89,7 @@ def main():
         """The ordered fields, top to bottom, each with whether it sorts descending."""
         found = published()
         return [(key[len("order/"):], found[key + "/descending"].read("AXValue") if key + "/descending" in found else None)
-                for key in found if key.startswith("order/") and not key.endswith("/descending")]
+                for key in found if key.startswith("order/") and not key.endswith("/descending") and key != "order"]
 
     def result():
         path = FIXTURE / "Resources/result.json"
@@ -169,16 +175,25 @@ def main():
               roles.get("bRemoveAll") == ("AXButton", "Remove all fields"), "the arrow buttons are labelled")
         check(roles.get("bOK") == ("AXButton", "Sort") and roles.get("bCancel") == ("AXButton", "Cancel") and roles.get("fields.title", ("", ""))[1] == "Available Fields",
               "Sort, Cancel and the lists' captions are published by their titles")
+        check(roles.get("fields") == ("AXList", "Available Fields") and roles.get("order") == ("AXList", "Ordered by Fields/Formulas") and
+              [c.read("AXIdentifier") for c in element("fields").read("AXChildren")][:2] == ["axb/order/field/id", "axb/order/field/Customer"],
+              "each list holds its lines, named by its caption")
         if args.voiceover:
             check(phrase_until(lambda ph: TITLE in ph, 0, 40), "VoiceOver reaches the Order By editor")
-            check(vo_to(lambda ph: ph.startswith("Customer") and "button" in ph), "VoiceOver reads the available fields")
+            check(vo_to(lambda ph: ph.startswith("Available Fields") and "list" in ph), "VoiceOver reads the available fields as one list")
+            front(); vo.key("down", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: ph.startswith("Customer") and "button" in ph), "VoiceOver enters it and reads the available fields")
             front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: ordered() == [("[Orders]Customer", False)], "Customer ordered", timeout=10)
             check(True, "VO-Space on a field orders by it, ascending")
+            front(); vo.key("up", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: ph.startswith("Ordered by") and "list" in ph), "VoiceOver reads the ordered fields as one list")
+            front(); vo.key("down", vo.VO + ("shift",)); time.sleep(1)
             check(vo_to(lambda ph: "Descending" in ph and "checkbox" in ph and "unchecked" in ph), "VoiceOver reads the ordered field's direction as a checkbox")
             front(); mark = heard.mark(); vo.key("space", vo.VO)
             ax.wait_for(lambda: ordered() == [("[Orders]Customer", True)], "Customer descending", timeout=10)
             check(True, "VO-Space on it reverses the direction")
+            front(); vo.key("up", vo.VO + ("shift",)); time.sleep(1)
             check(vo_to(lambda ph: "Sort" in ph and "button" in ph), "VoiceOver reaches Sort")
             front(); vo.key("space", vo.VO)
             ax.wait_for(result, "The sorted selection", timeout=20)
