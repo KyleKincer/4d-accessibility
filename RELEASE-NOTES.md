@@ -1,3 +1,10 @@
+# 0.34.1, integrated forms are not described twice while they open
+
+0.34.1 contains everything in 0.34.0 below, which was not published, and one fix:
+- **A form with the bridge's area is left to that area while it opens.** While 4D loads an integrated form, it draws the form's objects before the bridge area's view exists. A refresh of forms without a bridge area could fall in that interval and publish the window as one, until the area's own description replaced it about half a second later. An assistive technology holding an element from that interval, such as VoiceOver's cursor, lost it. In Symphony, the invoice window did this each time it switched to Modify mode with 0.34.0. A form whose definition holds the bridge's area (`%AXB Area`) is now never described as a form without one. [Forms without a bridge area](tests/GENERIC-FORMS.md); [acceptance](validation/generic-forms-development.json).
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.34.0, the formula editor, and long lists read one at a time and paged
 
 4D's formula editor is published, and drawn lists are read as lists and paged through, by the native plugin alone, with no host change:
