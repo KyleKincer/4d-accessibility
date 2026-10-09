@@ -1,3 +1,15 @@
+# 0.34.0, the formula editor, and long lists read one at a time and paged
+
+4D's formula editor is published, and drawn lists are read as lists and paged through, by the native plugin alone, with no host change:
+- **The formula editor**, which `EDIT FORMULA` and the Order By editor's Add Formula… and Modify… open, is published. The Fields, Operators and Commands lists' lines are buttons that insert them into the formula with a double click, as with the mouse; tables and themes of commands are disclosure triangles, read from the chevron 4D draws and pressed on it. The menus that choose what each list shows (Tables, Kind of operators, Order of commands) open 4D's native menus. The formula is an editable text field; while it holds 4D's caret it is the focused element, so VoiceOver echoes typing. Load…, Save…, Cancel and OK are published by their titles. [Formula editor](tests/FORMULA-EDITOR.md); [acceptance](validation/formula-editor-development.json).
+- **Lists are read one at a time.** In the formula, Order By and Quick Report editors, each drawn list is a list element that holds its lines, which VoiceOver enters with VO-Shift-Down. VoiceOver used to read side-by-side lists interleaved row by row. VoiceOver stays on a theme it expands.
+- **Long lists page.** A list, or a list box in a form without a bridge area, whose drawn scroll bar shows more lines scrolls a page with `AXScrollDownByPage` and `AXScrollUpByPage`, and VoiceOver offers Scroll down and Scroll up in its actions menu (VO-Command-Space). A page keeps one line. The scroll is a mouse-wheel event at the list, so it changes no selection and runs no object method; the pointer does not move. The Query editor's field chooser keeps its fields as the window's own elements and pages through its scroll bar, Fields, with Increment and Decrement. Before, only the lines 4D draws were reachable. [Forms without a bridge area](tests/GENERIC-FORMS.md); [Query editor](tests/QUERY-EDITOR.md); [Quick Report editor](tests/QUICK-REPORT.md); [Order By editor](tests/ORDER-BY.md).
+- Closing the Query editor's field chooser returns focus to the criterion's field.
+
+For developers: internal-form entries accept `list` (a list element, or a scroll bar, that holds lines) and `pressArea`, and the role `NSAccessibilityDisclosureTriangleRole`; the overlay scrolls a layer with `scrollLayer:down:points:`. Scrolling uses CoreGraphics's `CGEventSetWindowLocation`, looked up at run time; without it, lists offer no scrolling.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.33.0, the Quick Report sheet and the Order By editor
 
 4D's own editors are described more fully, by the native plugin alone, with no host change:
