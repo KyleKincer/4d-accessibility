@@ -54,6 +54,10 @@
 - (NSRect)area;
 @end
 
+static NSString *Localized(NSString *key) {
+    return [[NSBundle bundleForClass:AXBInternalFormOverlay.class] localizedStringForKey:key value:key table:@"AccessibilityBridge"];
+}
+
 static NSRect TableArea(AXBInternalTable *table, NSRect area) {
     CALayer *layer = table.layer;
     return layer ? [table.owner screenFrameForArea:area inLayer:layer] : NSZeroRect;
@@ -91,6 +95,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 @end
 
 @implementation AXBInternalCell
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions { return [self.row.table scrollActions]; }
 - (NSString *)accessibilityRole { return NSAccessibilityCellRole; }
 - (id)accessibilityParent { return self.row; }
 - (BOOL)isAccessibilityElement { return self.row.isAccessibilityElement; }
@@ -153,6 +158,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 
 @implementation AXBInternalRow
 - (NSString *)accessibilityRole { return NSAccessibilityRowRole; }
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions { return [self.table scrollActions]; }
 - (NSString *)accessibilitySubrole { return NSAccessibilityTableRowSubrole; }
 - (id)accessibilityParent { return self.table; }
 - (BOOL)isAccessibilityElement { return self.table.isAccessibilityElement; }
@@ -218,6 +224,43 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
     if (row < 0 || (NSUInteger)row >= self.rows.count || column < 0) return nil;
     NSArray *cells = self.rows[row].cells;
     return (NSUInteger)column < cells.count ? cells[column] : nil;
+}
+// A list box longer than its box: its whole rows are those in the band its scroll bar spans,
+// give or take the quarter of a row that rows' drawn text leaves uncertain. A page keeps one row,
+// as a list's does.
+- (NSArray<AXBInternalRow *> *)wholeRows:(CGFloat *)height {
+    CALayer *scroller = AXBInternalFormChild(self.layer, @"vertical_scrollbar");
+    NSMutableArray *whole = [NSMutableArray new];
+    if (!scroller || scroller.hidden) return whole;
+    NSRect band = scroller.frame;
+    for (AXBInternalRow *row in self.rows) {
+        CGFloat slack = NSHeight(row.area) / 4;
+        if (NSMinY(row.area) >= NSMinY(band) - slack && NSMaxY(row.area) <= NSMaxY(band) + slack) { [whole addObject:row]; *height = NSHeight(row.area); }
+    }
+    return whole;
+}
+- (BOOL)scrollPage:(BOOL)down {
+    CGFloat height = 0;
+    NSArray *whole = [self wholeRows:&height];
+    return height > 0 && [self.owner scrollLayer:self.layer down:down points:MAX(1, (NSInteger)whole.count - 1) * height];
+}
+- (NSArray<NSAccessibilityCustomAction *> *)scrollActions {
+    __weak AXBInternalTable *weakSelf = self;
+    NSMutableArray *actions = [NSMutableArray new];
+    for (NSNumber *down in @[@YES, @NO])
+        if ([self.owner canScrollLayer:self.layer down:down.boolValue])
+            [actions addObject:[[NSAccessibilityCustomAction alloc] initWithName:Localized(down.boolValue ? @"Scroll down" : @"Scroll up") handler:^BOOL {
+                return [weakSelf scrollPage:down.boolValue];
+            }]];
+    return actions;
+}
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions { return [self scrollActions]; }
+- (NSArray<NSString *> *)accessibilityActionNames {
+    return AXBInternalFormChild(self.layer, @"vertical_scrollbar") ? @[@"AXScrollDownByPage", @"AXScrollUpByPage"] : @[];
+}
+- (void)accessibilityPerformAction:(NSString *)action {
+    if ([action isEqual:@"AXScrollDownByPage"]) (void)[self scrollPage:YES];
+    else if ([action isEqual:@"AXScrollUpByPage"]) (void)[self scrollPage:NO];
 }
 - (id)accessibilityValue { return nil; }
 - (BOOL)accessibilityPerformPress { return NO; }
