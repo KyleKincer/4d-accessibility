@@ -23,6 +23,12 @@ $data:=New object("name"; ""; "city"; "Lyon"; "active"; False; "retail"; 1; "who
 $data.tier:=New object("values"; New collection("Gold"; "Silver"; "Bronze"); "index"; 0)
 $data.orders:=New collection(New object("customer"; "Ada"; "amount"; 10); New object("customer"; "Grace"; "amount"; 20); New object("customer"; "Linus"; "amount"; 30); New object("customer"; "Margaret"; "amount"; 40))
 $data.position:=0
+// Twenty order lines, more than their list box shows.
+var $line : Integer
+$data.lines:=New collection
+For ($line; 1; 20)
+ $data.lines.push(New object("text"; "Line "+String($line)))
+End for
 $data.search:=New object("text"; "")
 $data.query:=""
 File("/RESOURCES/events.jsonl").delete()
@@ -101,8 +107,8 @@ def main():
     }}, {'objects': {
         'labelNotes': {'type': 'text', 'text': 'Order notes', 'left': 20, 'top': 50, 'width': 200, 'height': 17},
         # No caption: the list box is named by its object name.
-        'lbOrderLines': {'type': 'listbox', 'listboxType': 'collection', 'dataSource': 'Form.orders', 'left': 20, 'top': 120, 'width': 262, 'height': 96,
-                         'columns': [{'name': 'colLine', 'dataSource': 'This.customer', 'width': 240, 'header': {'name': 'headLine', 'text': 'Line'}}]},
+        'lbOrderLines': {'type': 'listbox', 'listboxType': 'collection', 'dataSource': 'Form.lines', 'left': 20, 'top': 120, 'width': 262, 'height': 96,
+                         'columns': [{'name': 'colLine', 'dataSource': 'This.text', 'width': 240, 'header': {'name': 'headLine', 'text': 'Line'}}]},
     }}]}
     # A page subform's own form: a search field and its Go button, whose method records it.
     search = {'width': 110, 'height': 26, 'destination': 'detailScreen', 'pages': [None, {'objects': {

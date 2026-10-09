@@ -17,6 +17,10 @@
 //   editableColumns  NSIndexSet: the columns whose cells' values can be written; a write
 //             edits the cell in place, as AXBInternalFormOverlay's editText describes
 // Pressing or selecting a row is an ordinary click on it, as the mouse selects it.
+// A list box whose scroll bar shows more rows scrolls by a page, keeping one row: the table
+// names AXScrollDownByPage and AXScrollUpByPage, and the table, its rows and cells offer Scroll
+// down and Scroll up as custom actions, which VoiceOver lists in its actions menu.
 @interface AXBInternalTable : AXBInternalFormElement
+- (NSArray<NSAccessibilityCustomAction *> *)scrollActions;
 - (void)updateWithModel:(NSDictionary *)model;
 @end

@@ -3,7 +3,7 @@
  "date": "2026-10-09",
  "scope": "4D's Quick Report editor (QR REPORT with the editor), published by the native plugin alone from its form's layers: the toolbar, its Destination and Options panels, the report's sheet as a table of its row titles, its columns titled as their header buttons are drawn and each cell's drawn text, whose cells are pressed, written in place and open 4D's context menus with Show Menu, as do the column titles, with the pointer moved to each click; the record count; and the Fields sheet whose available fields are added by pressing and whose columns are selected and removed; a columnar report built, titled and formatted through accessibility and executed to HTML through macOS's Save dialog; the Fields sheet's available fields and report columns each a list element, the fields paging down and up with AXScrollDownByPage and AXScrollUpByPage; by AX and by VoiceOver",
  "fixture": "prepare_quick_report_fixture.py and test_quick_report_fixture.py (Orders table with five records and twenty note fields after its first five)",
- "pluginSHA256": "97ff428d24258fec70b74f1235b4ff37aba56fd5a322fdd2cb96df95b9b87a95",
+ "pluginSHA256": "413ecd52ca66b3ea9a7aeba80bebb4b54a9444f8801d17f14853ec1b0701d035",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
@@ -69,7 +69,6 @@
   "Fields list",
   "In Fields list id button (1 of 18)",
   "Customer button (2 of 18)",
-  "actions available You are currently on a button, inside of a list. To click this button, press Control-Option-Space. To Scroll down, press Control-Option-Command-Space first to bring up the action menu.",
   "Out of Fields list",
   "Add field button",
   "Report columns list",
@@ -108,6 +107,7 @@
   "Preview button",
   "Execute button",
   "Clear button",
+  "Header button",
   "Options button",
   "Fields button",
   "Revert button",
@@ -117,7 +117,8 @@
   "Print selected radio button"
  ],
  "regressions": {
-  "native provider suite": "535 checks",
+  "native provider suite": "537 checks",
+  "test_query_editor_fixture.py": "17 checks",
   "test_formula_editor_fixture.py": "19 checks",
   "test_order_by_fixture.py": "9 checks",
   "test_native_messages.py": "37 checks"
