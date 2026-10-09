@@ -792,9 +792,16 @@ static void MessageDialogsTest(void) {
     CGContextRelease(bitmap); CGColorSpaceRelease(space);
     Check(clean, "a freed image's text never attaches to a later image");
 }
+static id FindElement(NSArray *elements, NSString *identifier) {
+    for (id element in elements) {
+        if ([[element accessibilityIdentifier] isEqual:identifier]) return element;
+        // A list holds its lines.
+        if ([[element accessibilityRole] isEqual:NSAccessibilityListRole]) { id found = FindElement([element accessibilityChildren], identifier); if (found) return found; }
+    }
+    return nil;
+}
 static id ProgressElement(NSView *form, NSString *identifier) {
-    for (NSView *view in form.subviews)
-        for (id element in view.accessibilityChildren) if ([[element accessibilityIdentifier] isEqual:identifier]) return element;
+    for (NSView *view in form.subviews) { id found = FindElement(view.accessibilityChildren, identifier); if (found) return found; }
     return nil;
 }
 static NSArray *ProgressChildren(NSView *form) {
@@ -1127,6 +1134,9 @@ static void OrderByEditorTest(void) {
           [[ProgressElement(form, @"axb/order/bRemoveAll") accessibilityLabel] isEqual:@"Remove all fields"] && [[ProgressElement(form, @"axb/order/bOK") accessibilityLabel] isEqual:@"Sort"],
           "the arrow buttons are labelled, and Sort by its title");
     id down = ProgressElement(form, @"axb/order/order/[Orders]Customer/descending"), up = ProgressElement(form, @"axb/order/order/[Orders]Amount/descending");
+    id available = ProgressElement(form, @"axb/order/fields"), ordering = ProgressElement(form, @"axb/order/order");
+    Check([[available accessibilityLabel] isEqual:@"Available Fields"] && [customer accessibilityParent] == available && [down accessibilityParent] == ordering &&
+          [[ordering accessibilityRole] isEqual:NSAccessibilityListRole], "each list holds its lines, named by its caption; the ordered list holds each line's direction");
     Check(ProgressElement(form, @"axb/order/order/[Orders]Customer") && [[down accessibilityRole] isEqual:NSAccessibilityCheckBoxRole] &&
           [[down accessibilityLabel] isEqual:@"Descending"] && [[down accessibilityValue] isEqual:@YES] && [[up accessibilityValue] isEqual:@NO],
           "each ordered field is followed by its direction: Descending, checked where its triangle points down");
@@ -1142,6 +1152,13 @@ static void OrderByEditorTest(void) {
     Check(!AXBOrderByEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the ordered list is left untouched");
     [window close]; Pump();
 }
+// A form view that records the scroll-wheel events it receives.
+@interface AXBScrollRecorderView : NSView
+@property(nonatomic, strong) NSMutableArray<NSEvent *> *scrolls;
+@end
+@implementation AXBScrollRecorderView
+- (void)scrollWheel:(NSEvent *)event { if (!self.scrolls) self.scrolls = [NSMutableArray new]; [self.scrolls addObject:event]; }
+@end
 static void FormulaEditorTest(void) {
     // 4D's formula editor: its lists of fields, operators and commands, the menus that choose
     // what they show, the formula and its buttons.
@@ -1149,7 +1166,7 @@ static void FormulaEditorTest(void) {
     NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 200, 660, 350) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
     window.releasedWhenClosed = NO; window.title = @"AXB Formula Editor";
     [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
-    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    AXBScrollRecorderView *form = [[AXBScrollRecorderView alloc] initWithFrame:window.contentView.bounds];
     form.wantsLayer = YES;
     [window.contentView addSubview:form];
     CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
@@ -1176,38 +1193,76 @@ static void FormulaEditorTest(void) {
     AXBDrawnTextRecordOriginsForTesting(fields, @[[NSValue valueWithPoint:NSMakePoint(23, 18.5)], [NSValue valueWithPoint:NSMakePoint(23, 36.5)]]);
     CGImageRef image = paint(^(CGContextRef c) { for (CGFloat middle : {166.0, 148.0}) CGContextFillRect(c, CGRectMake(5, middle - 7, 15, 14)); });
     fields.contents = (__bridge id)image; CGImageRelease(image);
-    MessageLayer(context, @"LH_Operateur", NSMakeRect(234, 91, 208, 180), @[@"Concatenation"]);
-    AXBDrawnTextRecordOriginsForTesting(Child(context, @"LH_Operateur"), @[[NSValue valueWithPoint:NSMakePoint(22, 18.5)]]);
+    // An operator after its icon, :=, two dots and two bars as small as a chevron.
+    CALayer *operators = MessageLayer(context, @"LH_Operateur", NSMakeRect(234, 91, 216, 180), @[@"Assignment"]);
+    AXBDrawnTextRecordOriginsForTesting(operators, @[[NSValue valueWithPoint:NSMakePoint(22, 18.5)]]);
+    image = paint(^(CGContextRef c) {
+        for (CGFloat y : {163.0, 168.0}) { CGContextFillRect(c, CGRectMake(7, y, 2, 2)); CGContextFillRect(c, CGRectMake(11, y, 6, 2)); }
+    });
+    operators.contents = (__bridge id)image; CGImageRelease(image);
     // Themes of commands, each a chevron then an icon: Boolean expanded, its chevron pointing
     // down, with its command False below; Math collapsed, its chevron pointing right, and
     // selected: 4D fills its line with the accent color, inset from the list's edge.
     CALayer *commands = MessageLayer(context, @"LH_EnCm", NSMakeRect(445, 91, 216, 180), @[@"Boolean", @"False", @"Math"]);
     AXBDrawnTextRecordOriginsForTesting(commands, @[[NSValue valueWithPoint:NSMakePoint(39, 18.5)], [NSValue valueWithPoint:NSMakePoint(54, 36.5)], [NSValue valueWithPoint:NSMakePoint(39, 54.5)]]);
     image = paint(^(CGContextRef c) {
-        CGContextFillRect(c, CGRectMake(9, 164, 9, 5));
+        // Down: its middle column lowest.
+        for (int i = 0; i < 9; i++) CGContextFillRect(c, CGRectMake(9 + i, 168 - (4 - abs(i - 4)), 1, 1.5));
         CGContextSetRGBFillColor(c, 0.04, 0.52, 1, 1); CGContextFillRect(c, CGRectMake(3, 121, 210, 18));
-        CGContextSetRGBFillColor(c, 0.6, 0.6, 0.6, 1); CGContextFillRect(c, CGRectMake(11, 126, 5, 9));
+        // Right: its middle row furthest right.
+        CGContextSetRGBFillColor(c, 0.6, 0.6, 0.6, 1);
+        for (int i = 0; i < 9; i++) CGContextFillRect(c, CGRectMake(11 + (4 - abs(i - 4)), 126 + i, 1.5, 1));
         CGContextSetRGBFillColor(c, 0.2, 0.2, 0.2, 1);
         for (CGFloat middle : {166.0, 130.0}) CGContextFillRect(c, CGRectMake(22, middle - 7, 14, 14));
     });
     commands.contents = (__bridge id)image; CGImageRelease(image);
+    // Its scroll bar: a dark track with a light thumb, narrower than the bar, at the top.
+    CALayer *scroller = MessageLayer(commands, @"vertical_scrollbar", NSMakeRect(181, 5, 15, 170), nil);
+    {
+        CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+        CGContextRef bar = CGBitmapContextCreate(NULL, 15, 170, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
+        CGContextSetRGBFillColor(bar, 0.18, 0.18, 0.18, 1); CGContextFillRect(bar, CGRectMake(0, 0, 15, 170));
+        CGContextSetRGBFillColor(bar, 0.4, 0.4, 0.4, 1); CGContextFillRect(bar, CGRectMake(4, 50, 7, 118));
+        CGImageRef track = CGBitmapContextCreateImage(bar);
+        scroller.contents = (__bridge id)track;
+        CGImageRelease(track); CGContextRelease(bar); CGColorSpaceRelease(rgb);
+    }
     MessageLayer(context, @"vFormula", NSMakeRect(10, 36, 654, 49), @[@"[Orders]Amount"]);
     for (NSString *name in @[@"bLoad", @"bSave", @"bCancel", @"bOK"])
         MessageLayer(context, name, NSMakeRect(15 + 100 * [@[@"bLoad", @"bSave", @"bCancel", @"bOK"] indexOfObject:name], 15, 90, 32), @[[@{@"bLoad": @"Load...", @"bSave": @"Save...", @"bCancel": @"Cancel", @"bOK": @"OK"} objectForKey:name]]);
     Check(AXBFormulaEditorRefreshWindow(window), "a window holding the formula editor's form is published");
     id tables = ProgressElement(form, @"axb/formula/fields/show"), customer = ProgressElement(form, @"axb/formula/fields/item/Customer");
     Check([[tables accessibilityRole] isEqual:NSAccessibilityPopUpButtonRole] && [[tables accessibilityLabel] isEqual:@"Tables"] && [[tables accessibilityValue] isEqual:@"Master Table"] &&
-          [[ProgressElement(form, @"axb/formula/commands/show") accessibilityLabel] isEqual:@"Commands"], "each list's menu is a pop-up button, labelled by what it chooses");
+          [[ProgressElement(form, @"axb/formula/commands/show") accessibilityLabel] isEqual:@"Order of commands"], "each list's menu is a pop-up button, labelled by what it chooses");
     Check([[customer accessibilityRole] isEqual:NSAccessibilityButtonRole] && [[customer accessibilityLabel] isEqual:@"Customer"] &&
-          ProgressElement(form, @"axb/formula/operators/item/Concatenation"), "fields after their type icons, and operators, are buttons");
+          [[ProgressElement(form, @"axb/formula/operators/item/Assignment") accessibilityRole] isEqual:NSAccessibilityButtonRole],
+          "fields after their type icons, and operators after theirs, such as :=, are buttons");
+    id fieldList = ProgressElement(form, @"axb/formula/fields/list"), commandList = ProgressElement(form, @"axb/formula/commands/list");
+    Check([[fieldList accessibilityRole] isEqual:NSAccessibilityListRole] && [[fieldList accessibilityLabel] isEqual:@"Fields"] &&
+          [[[fieldList accessibilityChildren] valueForKey:@"accessibilityIdentifier"] isEqual:@[@"axb/formula/fields/item/id", @"axb/formula/fields/item/Customer"]] &&
+          [customer accessibilityParent] == fieldList && ![ProgressChildren(form) containsObject:customer], "each list holds its lines, so they read one list at a time");
     id boolean = ProgressElement(form, @"axb/formula/commands/group/Boolean"), math = ProgressElement(form, @"axb/formula/commands/group/Math");
     Check([[boolean accessibilityRole] isEqual:NSAccessibilityDisclosureTriangleRole] && [[boolean accessibilityValue] isEqual:@YES] && [[math accessibilityValue] isEqual:@NO] &&
           [[ProgressElement(form, @"axb/formula/commands/item/False") accessibilityRole] isEqual:NSAccessibilityButtonRole],
           "a theme is a disclosure triangle, expanded where its chevron points down, and its command a button");
-    NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
-    Check([keys indexOfObject:@"axb/formula/commands/item/False"] == [keys indexOfObject:@"axb/formula/commands/group/Boolean"] + 1 &&
-          [keys indexOfObject:@"axb/formula/formula"] > [keys indexOfObject:@"axb/formula/commands/group/Math"] && [keys.lastObject isEqual:@"axb/formula/bOK"],
-          "the lists read in order, then the formula, then the buttons");
+    NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"], *themes = [[commandList accessibilityChildren] valueForKey:@"accessibilityIdentifier"];
+    Check([themes isEqual:@[@"axb/formula/commands/group/Boolean", @"axb/formula/commands/item/False", @"axb/formula/commands/group/Math"]] &&
+          [keys indexOfObject:@"axb/formula/formula"] > [keys indexOfObject:@"axb/formula/commands/list"] && [keys.lastObject isEqual:@"axb/formula/bOK"],
+          "the lists read in order, each after its menu, then the formula, then the buttons");
+    // The page actions are named the way AppKit's scroll areas name theirs, with the older interface.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    Check([[commandList accessibilityActionNames] isEqual:@[@"AXScrollDownByPage", @"AXScrollUpByPage"]] &&
+          [[[commandList accessibilityCustomActions] valueForKey:@"name"] isEqual:@[@"Scroll down"]] && [[[customer accessibilityCustomActions] valueForKey:@"name"] isEqual:@[]] &&
+          [[[boolean accessibilityCustomActions] valueForKey:@"name"] isEqual:@[@"Scroll down"]],
+          "a list whose scroll bar shows more lines below offers to scroll down, on itself and its lines; one without more lines offers nothing");
+    [commandList accessibilityPerformAction:@"AXScrollDownByPage"];
+#pragma clang diagnostic pop
+    for (int i = 0; i < 30 && !form.scrolls.count; i++) Pump();
+    NSEvent *wheel = form.scrolls.firstObject;
+    NSPoint over = [form convertPoint:wheel.locationInWindow fromView:nil];
+    Check(wheel.type == NSEventTypeScrollWheel && wheel.hasPreciseScrollingDeltas && fabs(wheel.scrollingDeltaY + 36) < 0.5 && NSPointInRect(over, NSMakeRect(445, 91, 216, 180)),
+          "scrolling down a page is a wheel event over the list, a page of its whole lines but one");
     id field = ProgressElement(form, @"axb/formula/formula");
     NSRect box = [field accessibilityFrame], layer = [window convertRectToScreen:[form convertRect:NSMakeRect(10, 36, 654, 49) toView:nil]];
     Check([[field accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[field accessibilityLabel] isEqual:@"Formula"] && [[field accessibilityValue] isEqual:@"[Orders]Amount"] &&

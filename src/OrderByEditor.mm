@@ -16,6 +16,10 @@ static NSSet<NSString *> *OrderNames(void) {
     return names;
 }
 
+static NSString *Joined(NSArray<NSString *> *texts) {
+    return [[texts ?: @[] componentsJoinedByString:@" "] stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+}
+
 static NSMutableDictionary *Entry(NSString *key, CALayer *layer, NSString *role, NSString *label) {
     NSMutableDictionary *entry = [@{@"key": key, @"layer": layer, @"role": role} mutableCopy];
     if (label) entry[@"label"] = label;
@@ -66,27 +70,36 @@ static NSArray<NSDictionary *> *OrderEntries(CALayer *form) {
     if (!fields || !ordered || !sort) return nil;
     NSMutableArray *entries = [NSMutableArray new];
     CALayer *layer;
-    if ((layer = AXBInternalFormChild(form, @"tFields.title"))) [entries addObject:Entry(@"fields.title", layer, NSAccessibilityStaticTextRole, nil)];
-    // An available field is added with a double click, as with the mouse.
+    CALayer *caption = AXBInternalFormChild(form, @"tFields.title");
+    if (caption) [entries addObject:Entry(@"fields.title", caption, NSAccessibilityStaticTextRole, nil)];
+    // Each list holds its lines, named by its caption. An available field is added with a
+    // double click, as with the mouse.
+    [entries addObject:Entry(@"fields", fields, NSAccessibilityListRole, caption ? Joined(AXBDrawnTextForLayer(caption)) : Localized(@"Available Fields"))];
     for (NSDictionary *item in AXBInternalListItems(fields, @"field/", NSAccessibilityButtonRole) ?: @[]) {
         NSMutableDictionary *entry = [item mutableCopy];
         entry[@"clicks"] = @2;
+        entry[@"list"] = @"fields";
         [entries addObject:entry];
     }
     NSArray *moves = @[@[@"bOne", @"Add field"], @[@"bRemoveOne", @"Remove field"], @[@"bRemoveAll", @"Remove all fields"]];
     for (NSArray *move in moves)
         if ((layer = AXBInternalFormChild(form, move[0]))) [entries addObject:Entry(move[0], layer, NSAccessibilityButtonRole, Localized(move[1]))];
-    if ((layer = AXBInternalFormChild(form, @"tSortedFields.title"))) [entries addObject:Entry(@"order.title", layer, NSAccessibilityStaticTextRole, nil)];
+    caption = AXBInternalFormChild(form, @"tSortedFields.title");
+    if (caption) [entries addObject:Entry(@"order.title", caption, NSAccessibilityStaticTextRole, nil)];
+    [entries addObject:Entry(@"order", ordered, NSAccessibilityListRole, caption ? Joined(AXBDrawnTextForLayer(caption)) : Localized(@"Ordered by"))];
     // An ordered line is selected with a click, for Remove field; its triangle, left of the
     // list's scroll bar, is its direction.
     CALayer *scroller = AXBInternalFormChild(ordered, @"vertical_scrollbar");
     CGFloat end = scroller ? NSMinX(scroller.frame) : NSWidth(ordered.bounds) - 20;
     for (NSDictionary *item in AXBInternalListItems(ordered, @"order/", NSAccessibilityButtonRole) ?: @[]) {
-        [entries addObject:item];
+        NSMutableDictionary *ordering = [item mutableCopy];
+        ordering[@"list"] = @"order";
+        [entries addObject:ordering];
         NSRect line = [item[@"area"] rectValue];
         NSRect triangle = NSMakeRect(end - 26, NSMinY(line), 22, NSHeight(line));
         NSMutableDictionary *direction = Entry([item[@"key"] stringByAppendingString:@"/descending"], ordered, NSAccessibilityCheckBoxRole, Localized(@"Descending"));
         direction[@"area"] = [NSValue valueWithRect:triangle];
+        direction[@"list"] = @"order";
         NSNumber *descending = Descending(ordered, triangle);
         if (descending) direction[@"checked"] = descending;
         [entries addObject:direction];
