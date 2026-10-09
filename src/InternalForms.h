@@ -92,6 +92,11 @@
 @property(nonatomic, weak) AXBInternalFormElement *placedFocus;
 @property(nonatomic) NSTimeInterval publishedAt;
 // Whether a list's scroll bar shows more lines that way, and a page's scroll that way.
+// The scroll bar 4D draws in a layer: where its thumb is, whether it shows more that way, and a
+// scroll of the layer by whole points that way, as the mouse wheel's.
+- (BOOL)thumbOfLayer:(CALayer *)layer top:(CGFloat *)top bottom:(CGFloat *)bottom;
+- (BOOL)canScrollLayer:(CALayer *)layer down:(BOOL)down;
+- (BOOL)scrollLayer:(CALayer *)layer down:(BOOL)down points:(CGFloat)points;
 - (BOOL)thumbOfList:(AXBInternalFormElement *)list top:(CGFloat *)top bottom:(CGFloat *)bottom;
 - (BOOL)canScrollList:(AXBInternalFormElement *)list down:(BOOL)down;
 - (BOOL)scrollList:(AXBInternalFormElement *)list down:(BOOL)down;

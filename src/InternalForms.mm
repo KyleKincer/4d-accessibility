@@ -499,33 +499,40 @@ static CALayer *ListLayer(AXBInternalFormElement *list) {
         }
     return lines;
 }
-- (BOOL)thumbOfList:(AXBInternalFormElement *)list top:(CGFloat *)top bottom:(CGFloat *)bottom {
-    CALayer *scroller = AXBInternalFormChild(ListLayer(list), @"vertical_scrollbar");
+- (BOOL)thumbOfLayer:(CALayer *)layer top:(CGFloat *)top bottom:(CGFloat *)bottom {
+    CALayer *scroller = AXBInternalFormChild(layer, @"vertical_scrollbar");
     return scroller && !scroller.hidden && ThumbSpan(scroller, top, bottom);
 }
-- (BOOL)canScrollList:(AXBInternalFormElement *)list down:(BOOL)down {
+- (BOOL)canScrollLayer:(CALayer *)layer down:(BOOL)down {
     CGFloat top = 0, bottom = 1;
-    if (![self thumbOfList:list top:&top bottom:&bottom]) return NO;
+    if (![self thumbOfLayer:layer top:&top bottom:&bottom]) return NO;
     return down ? bottom < 1 : top > 0;
 }
-- (BOOL)scrollList:(AXBInternalFormElement *)list down:(BOOL)down {
-    CGFloat height = 0;
-    NSArray *lines = [self wholeLinesOf:list height:&height];
-    if (![self canScrollList:list down:down] || height <= 0) return NO;
-    // A page keeps one line: the last whole line moves to the top, or the first to the bottom.
-    CGFloat points = MAX(1, (NSInteger)lines.count - 1) * height * (down ? 1 : -1);
-    if ([list isKindOfClass:AXBInternalList.class]) ((AXBInternalList *)list).scrolled = YES;
+- (BOOL)scrollLayer:(CALayer *)layer down:(BOOL)down points:(CGFloat)points {
+    if (![self canScrollLayer:layer down:down] || points <= 0) return NO;
     __weak AXBInternalFormOverlay *weakSelf = self;
-    __weak CALayer *weakList = ListLayer(list);
+    __weak CALayer *weakLayer = layer;
     [self whenSettled:^{
         AXBInternalFormOverlay *strongSelf = weakSelf;
-        CALayer *target = weakList;
+        CALayer *target = weakLayer;
         NSWindow *window = strongSelf.formView.window;
         if (!strongSelf || !target || target.hidden || !window.isVisible) return;
         NSRect frame = [strongSelf screenFrameForArea:target.bounds inLayer:target];
         if (NSIsEmptyRect(frame)) return;
-        PostScroll(window, [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], points);
+        PostScroll(window, [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], down ? points : -points);
     }];
+    return YES;
+}
+- (BOOL)thumbOfList:(AXBInternalFormElement *)list top:(CGFloat *)top bottom:(CGFloat *)bottom {
+    return [self thumbOfLayer:ListLayer(list) top:top bottom:bottom];
+}
+- (BOOL)canScrollList:(AXBInternalFormElement *)list down:(BOOL)down { return [self canScrollLayer:ListLayer(list) down:down]; }
+- (BOOL)scrollList:(AXBInternalFormElement *)list down:(BOOL)down {
+    CGFloat height = 0;
+    NSArray *lines = [self wholeLinesOf:list height:&height];
+    // A page keeps one line: the last whole line moves to the top, or the first to the bottom.
+    if (![self scrollLayer:ListLayer(list) down:down points:MAX(1, (NSInteger)lines.count - 1) * height]) return NO;
+    if ([list isKindOfClass:AXBInternalList.class]) ((AXBInternalList *)list).scrolled = YES;
     return YES;
 }
 - (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer {

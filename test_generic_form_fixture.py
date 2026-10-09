@@ -204,6 +204,11 @@ def main():
         def rows():
             return [[cell.read("AXValue") for cell in row.read("AXChildren") or []] for row in element("listOrders").read("AXRows") or []]
 
+        def line_rows():
+            """The Notes page's order lines the list box draws, top to bottom."""
+            table = element("lbOrderLines")
+            return [(row.read("AXChildren") or [None])[0].read("AXValue") for row in (table.read("AXRows") if table else None) or [] if row.read("AXChildren")]
+
         def selected():
             return [row.read("AXSelected") for row in element("listOrders").read("AXRows") or []]
         check(table.read("AXRole") == "AXTable" and table.read("AXDescription") == "Orders" and
@@ -259,6 +264,15 @@ def main():
             ax.wait_for(lambda: element("labelNotes") is not None and element("inputName") is None, "The Notes page", timeout=10)
             check(element("tabPages/Notes").read("AXValue") is True, "VO-Space on a tab shows its page, and the tab is chosen")
             check(vo_to(lambda ph: "Order Lines" in ph and "table" in ph), "VoiceOver reads a list box without a caption by its object's name")
+            front(); mark = heard.mark(); vo.key("space", vo.VO + ("cmd",))
+            phrase_until(lambda ph: "Scroll down" in ph or "Actions" in ph, mark)
+            for _ in range(4):
+                if any("Scroll down" in ph for _, ph in heard.since(mark)):
+                    break
+                front(); vo.key("down"); time.sleep(0.8)
+            front(); vo.key("return")
+            ax.wait_for(lambda: line_rows()[:1] == ["Line 3"], "A page down", timeout=10)
+            check(True, "Scroll down, from VoiceOver's actions menu, scrolls the list box a page, keeping one row")
         else:
             # 4D's keyboard focus, drawn as its focus ring, is the application's focused element.
             focused = lambda: (ax.application(process.pid).read("AXFocusedUIElement") or name).read("AXIdentifier")
@@ -335,6 +349,19 @@ def main():
             check(True, "pressing a tab shows its page through the tab control's own action, and the tab is chosen")
             check(element("lbOrderLines").read("AXRole") == "AXTable" and element("lbOrderLines").read("AXDescription") == "Order Lines",
                   "a list box without a caption is a table named by the words of its object name")
+            # Twenty lines, of which the list box shows three whole and part of a fourth.
+            check(line_rows() == ["Line 1", "Line 2", "Line 3", "Line 4"] and "AXScrollDownByPage" in element("lbOrderLines").actions(),
+                  "a list box longer than its box publishes the rows it draws, and offers to scroll a page")
+            for _ in range(12):
+                if "Line 20" in line_rows():
+                    break
+                assert element("lbOrderLines").perform("AXScrollDownByPage") == 0
+                first = line_rows()[:1]
+                ax.wait_for(lambda: line_rows()[:1] != first or "Line 20" in line_rows(), "A page down", timeout=10)
+            check("Line 20" in line_rows() and "Line 1" not in line_rows(), "a page at a time, keeping one row, it scrolls to the last rows")
+            assert element("lbOrderLines").perform("AXScrollUpByPage") == 0
+            ax.wait_for(lambda: "Line 20" not in line_rows(), "A page up", timeout=10)
+            check(True, "a page up scrolls back")
             assert element("tabPages/Details").perform("AXPress") == 0
             ax.wait_for(lambda: element("inputName") is not None and element("labelNotes") is None, "The Details page", timeout=10)
             check(all(e["runId"] == run_id and e["compiled"] == args.compiled for e in events()), "every event belongs to this run")

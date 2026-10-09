@@ -1421,6 +1421,19 @@ static void GenericFormsTest(void) {
     Check([[table accessibilityRole] isEqual:NSAccessibilityTableRole] && [[[table accessibilityColumnHeaderUIElements] valueForKey:@"accessibilityValue"] isEqual:(@[@"Customer", @"Amount"])] &&
           [cells isEqual:(@[@[@"Ada", @"10"], @[@"Grace", @"20"]])], "a list box is a table of its visible rows, with each text in its column and the column titles");
     Check([[table accessibilityLabel] isEqual:@"Orders"], "a list box without a caption is named by the words of its object name");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    Check([[table accessibilityActionNames] isEqual:@[]] && [[table accessibilityCustomActions] count] == 0, "a list box without a scroll bar offers no scrolling");
+    // Longer than its box: its scroll bar's thumb is at the top, beside its rows.
+    ScrollerLayer(list, NSMakeRect(262, 26, 15, 64), 2, 30);
+    Check([[table accessibilityActionNames] isEqual:(@[@"AXScrollDownByPage", @"AXScrollUpByPage"])] &&
+          [[[table accessibilityCustomActions] valueForKey:@"name"] isEqual:@[@"Scroll down"]] &&
+          [[[(NSAccessibilityElement *)[[table accessibilityRows] firstObject] accessibilityCustomActions] valueForKey:@"name"] isEqual:@[@"Scroll down"]] &&
+          [[[(NSAccessibilityElement *)[[(NSAccessibilityElement *)[[table accessibilityRows] firstObject] accessibilityChildren] firstObject] accessibilityCustomActions]
+             valueForKey:@"name"] isEqual:@[@"Scroll down"]],
+          "a list box whose scroll bar shows more rows below offers to scroll a page down, on itself, its rows and its cells");
+#pragma clang diagnostic pop
+    [Child(list, @"vertical_scrollbar") removeFromSuperlayer];
     NSDictionary *names = @{@"listboxSalesLimitCountries": @"Sales Limit Countries", @"lb_windows_clients": @"Windows clients", @"SourceLB": @"Source",
                             @"lbRMAInfo": @"RMA Info", @"inventoryItems": @"Inventory Items", @"List Box1": [NSNull null], @"lbx2": [NSNull null], @"Bulb": @"Bulb"};
     BOOL named = YES;
