@@ -1301,6 +1301,32 @@ static void FormulaEditorTest(void) {
     Check(!AXBFormulaEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the commands is left untouched");
     [window close]; Pump();
 }
+static void GenericIntegratedFormTest(void) {
+    // A form with the bridge's area is left to its area, even while 4D draws its objects before
+    // the area's view exists, so the window is not published twice over.
+    NSDictionary *buttons = @{@"btnOne": @{@"type": @"button", @"text": @"One", @"width": @90, @"height": @24},
+                              @"btnTwo": @{@"type": @"button", @"text": @"Two", @"width": @90, @"height": @24},
+                              @"btnThree": @{@"type": @"button", @"text": @"Three", @"width": @90, @"height": @24}};
+    NSMutableDictionary *integrated = [buttons mutableCopy];
+    integrated[@"AXBArea"] = @{@"type": @"plugin", @"pluginAreaKind": @"%AXB Area", @"width": @10, @"height": @10};
+    for (NSDictionary *objects in @[buttons, integrated]) {
+        AXBGenericFormsEnableForTesting(@{@"Plain": @{@"pages": @[[NSNull null], @{@"objects": objects}]}});
+        NSWindow *window = Window(@"AXB integrated form");
+        [window makeKeyAndOrderFront:nil]; Pump();
+        NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+        form.wantsLayer = YES;
+        [window.contentView addSubview:form];
+        CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+        [form.layer addSublayer:context];
+        MessageLayer(context, @"btnOne", NSMakeRect(15, 20, 100, 34), @[@"One"]);
+        MessageLayer(context, @"btnTwo", NSMakeRect(115, 20, 100, 34), @[@"Two"]);
+        MessageLayer(context, @"btnThree", NSMakeRect(215, 20, 100, 34), @[@"Three"]);
+        BOOL published = AXBGenericFormsRefreshWindow(window);
+        if (objects == buttons) Check(published && ProgressChildren(form).count == 3, "a form's three buttons are published without the bridge's area");
+        else Check(!published && ProgressChildren(form).count == 0, "the same form holding the bridge's area is left to its area, before the area's view exists");
+        [window close]; Pump();
+    }
+}
 static void ComponentArchiveTest(void) {
     // A component's forms are read from its archive, deflated or stored; other entries are not forms.
     NSString *path = NSProcessInfo.processInfo.environment[@"AXB_TEST_COMPONENT_ARCHIVE"];
@@ -2374,6 +2400,7 @@ int main(void) {
         OrderByEditorTest();
         FormulaEditorTest();
         GenericFormsTest();
+        GenericIntegratedFormTest();
         ComponentArchiveTest();
         FocusAfterLayoutTest();
         ParkedControlsTest();

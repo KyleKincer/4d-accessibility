@@ -39,7 +39,8 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
             (void)inner;
             if (![object isKindOfClass:NSDictionary.class]) return;
             NSMutableDictionary *info = [@{@"page": @(number)} mutableCopy];
-            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight", @"detailForm", @"listForm", @"display", @"picture", @"icon"])
+            for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight", @"detailForm", @"listForm", @"display", @"picture", @"icon",
+                                    @"pluginAreaKind"])
                 if (object[key] && ![object[key] isKindOfClass:NSDictionary.class] && ![object[key] isKindOfClass:NSArray.class]) info[key] = object[key];
             // A list box's columns: their titles and widths, as defined.
             if ([object[@"columns"] isKindOfClass:NSArray.class]) {
@@ -193,6 +194,13 @@ static NSString *MatchForm(NSArray<NSString *> *names) {
     }
     if (!best || top < 3 || top * 10 < names.count * 8 || top == second) return nil;
     return best;
+}
+
+// Whether a form holds the bridge's own area.
+static BOOL Integrated(NSDictionary<NSString *, NSDictionary *> *objects) {
+    for (NSDictionary *info in objects.allValues)
+        if ([info[@"type"] isEqual:@"plugin"] && [info[@"pluginAreaKind"] isEqual:@"%AXB Area"]) return YES;
+    return NO;
 }
 
 static NSString *Plain(id text) {
@@ -819,6 +827,10 @@ BOOL AXBGenericFormsRefreshWindow(NSWindow *window) {
         [Matches setObject:match forKey:window];
     }
     NSDictionary *objects = [match[@"form"] length] ? Forms[match[@"form"]] : nil;
+    // A form with the bridge's area is described by its area. While 4D loads such a form, its
+    // objects are drawn before the area's view exists; describing them meanwhile would publish
+    // the window twice over, replacing its elements under an assistive technology.
+    if (Integrated(objects)) objects = nil;
     NSArray *entries = objects ? FormEntries(form, objects, @"", 0) : nil;
     if (!entries.count) { RemoveOverlay(window, overlay); return NO; }
     BOOL created = NO;
