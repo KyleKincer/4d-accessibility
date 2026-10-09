@@ -26,11 +26,14 @@
 //   clicks    @2 for an object that a double click operates, such as adding a list's item
 //   checked   for a radio button or checkbox: whether it is chosen; for a disclosure triangle,
 //             whether it is expanded; absent when unknown
-//   list      the key of a list entry, published before this one, that holds this element: a
+//   list      the key of a list entry, before or after this one, that holds this element: a
 //             list entry, NSAccessibilityListRole with the list's layer and label, publishes its
 //             lines as its own children, so an assistive technology reads one list at a time. When
 //             the scroll bar 4D draws in the list shows more lines, the list and its lines offer
-//             to scroll a page down or up, as AXBInternalList describes
+//             to scroll a page down or up, as AXBInternalList describes. A list entry can instead
+//             be NSAccessibilityScrollBarRole with the list's vertical_scrollbar layer: its lines
+//             stay the overlay's own, for a window that holds one list, and the scroll bar reports
+//             its thumb and pages with Increment and Decrement
 //   focused   @YES for the object 4D draws with its keyboard focus ring, which becomes the
 //             application's focused element when it moves, as AppKit reports a Tab
 // An entry without drawn text is published only when it has a fixed label or is a text field.
@@ -74,6 +77,7 @@
 // down and Scroll up, scroll the list 4D draws by a page, keeping one line, with a wheel event
 // at the list, as the mouse scrolls it.
 @interface AXBInternalList : AXBInternalFormElement
+- (CALayer *)listLayer;
 // A page's scroll was posted and its lines have not yet changed.
 @property(nonatomic) BOOL scrolled;
 - (NSArray<NSAccessibilityCustomAction *> *)scrollActions;
@@ -88,6 +92,7 @@
 @property(nonatomic, weak) AXBInternalFormElement *placedFocus;
 @property(nonatomic) NSTimeInterval publishedAt;
 // Whether a list's scroll bar shows more lines that way, and a page's scroll that way.
+- (BOOL)thumbOfList:(AXBInternalFormElement *)list top:(CGFloat *)top bottom:(CGFloat *)bottom;
 - (BOOL)canScrollList:(AXBInternalFormElement *)list down:(BOOL)down;
 - (BOOL)scrollList:(AXBInternalFormElement *)list down:(BOOL)down;
 - (instancetype)initWithFormView:(NSView *)view prefix:(NSString *)prefix;
