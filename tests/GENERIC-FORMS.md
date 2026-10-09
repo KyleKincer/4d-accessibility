@@ -1,6 +1,6 @@
 # Forms without a bridge area
 
-An application's own forms that have no bridge area get a baseline description from the native plugin alone, with no host change. An integrated form, with its lifecycle area, keeps the bridge's complete description; the plugin leaves it to the bridge.
+An application's own forms that have no bridge area get a baseline description from the native plugin alone, with no host change. An integrated form, with its lifecycle area, keeps the bridge's complete description; the plugin leaves it to the bridge. A form whose definition holds the bridge's area (`%AXB Area`) is never described this way, even while 4D draws its objects before the area's view exists, so the window is not published twice over as it opens.
 
 4D draws each form object into a layer named after the object, and the plugin reads the text it draws there. When it starts, the plugin indexes the open project's form definitions, `Project/Sources/Forms` and `TableForms`, in the background. A window is matched to the form that holds most of its object layers. Too few objects, or two equally likely forms, leave the window untouched. The plugin then publishes, in reading order:
 

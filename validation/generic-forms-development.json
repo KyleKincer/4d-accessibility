@@ -1,9 +1,9 @@
 {
  "passed": true,
  "date": "2026-10-09",
- "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, named by their titles, help tips, object names or picture files, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows, named by their caption or object name, with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus, on buttons too, as the focused element and operated with ordinary clicks and keys; a list box longer than its box paging a row short of its whole rows with AXScrollDownByPage and AXScrollUpByPage, and Scroll down and Scroll up offered to VoiceOver on the table, its rows and cells; by AX and by VoiceOver",
+ "scope": "An application form with no bridge area, described by the native plugin alone: matched to the project's form definition from its object layers, its buttons, named by their titles, help tips, object names or picture files, captions, inputs labelled by captions, checkboxes and radio buttons with drawn states, drop-down lists, tab controls by their drawn labels, and list boxes as tables of their visible rows, named by their caption or object name, with the column titles 4D draws, and page subforms' own forms, including components' such as 4D Widgets', published in reading order with 4D's keyboard focus, on buttons too, as the focused element and operated with ordinary clicks and keys; a list box longer than its box paging a row short of its whole rows with AXScrollDownByPage and AXScrollUpByPage, and Scroll down and Scroll up offered to VoiceOver on the table, its rows and cells; a form whose definition holds the bridge's area left to that area, even before its view exists; by AX and by VoiceOver",
  "fixture": "prepare_generic_form_fixture.py and test_generic_form_fixture.py (Customer form without a bridge area, with a collection list box whose Amount column the form renames Total when it loads, a tab control going to two pages, a page subform, 4D Widgets' search picker, and a list box of twenty lines on its Notes page)",
- "pluginSHA256": "413ecd52ca66b3ea9a7aeba80bebb4b54a9444f8801d17f14853ec1b0701d035",
+ "pluginSHA256": "836aa846798d1c00bad4c543c6d3d1c29c72e8fa7e63966cce522fc1ecc97e76",
  "environment": {
   "4D": "20.8 build 20.102009",
   "macOS": "26.7.1"
@@ -96,7 +96,10 @@
  ],
  "symphonyProbe": "With the plugin alone, Symphony's unintegrated Manufacturers window (TableForms/46/ManufacturerAbbv_Browser) was matched among 1993 indexed forms. Its buttons and captions, and its three list boxes as tables, were published. The main list box, whose columns the application hides and resizes at run time, showed all 21 visible rows with each cell in its drawn column; five column titles matched their defined widths and three resized columns were left unnamed. Not an acceptance record. With component forms indexed, the window's 4D Widgets search picker was published as a text field labelled Search; writing \"Able\" through accessibility filtered the manufacturers list through the application's own search.",
  "regressions": {
-  "native provider suite": "537 checks",
+  "native provider suite": "539 checks",
+  "test_quick_report_fixture.py": "16 checks",
+  "test_hlist_fixture.py": "33 checks",
+  "test_button_menu_fixture.py": "15 checks",
   "test_query_editor_fixture.py": "17 checks",
   "test_formula_editor_fixture.py": "19 checks",
   "test_order_by_fixture.py": "9 checks",
