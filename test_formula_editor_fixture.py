@@ -68,12 +68,18 @@ def main():
         return next((w for w in app.read("AXWindows") or [] if w.read("AXTitle") == TITLE), None)
 
     def published():
+        """The published elements by key, in reading order, with each list's lines after it."""
         current = window()
         found = {}
-        for child in (current.read("AXChildren") if current else None) or []:
-            identifier = child.read("AXIdentifier") or ""
-            if identifier.startswith(PREFIX):
-                found[identifier[len(PREFIX):]] = child
+
+        def visit(children):
+            for child in children or []:
+                identifier = child.read("AXIdentifier") or ""
+                if identifier.startswith(PREFIX):
+                    found[identifier[len(PREFIX):]] = child
+                    if child.read("AXRole") == "AXList":
+                        visit(child.read("AXChildren"))
+        visit(current.read("AXChildren") if current else None)
         return found
 
     def element(key):
@@ -88,7 +94,7 @@ def main():
         return field.read("AXValue") if field else None
 
     def lines(list_name):
-        return [key[len(list_name) + 1:] for key in published() if key.startswith(list_name + "/") and key != list_name + "/show"]
+        return [key[len(list_name) + 1:] for key in published() if key.startswith(list_name + "/") and key not in (list_name + "/show", list_name + "/list")]
 
     def menu():
         def walk(node, depth=0):
@@ -189,24 +195,52 @@ def main():
         roles = {key: (value.read("AXRole"), value.read("AXDescription") or value.read("AXTitle") or value.read("AXValue")) for key, value in published().items()}
         report["published"] = roles
         check(roles.get("fields/show") == ("AXPopUpButton", "Tables") and element("fields/show").read("AXValue") == "Master Table" and
-              {"item/id", "item/Customer", "item/Amount", "item/Paid", "item/Due"} <= set(lines("fields")) and roles["fields/item/Customer"][0] == "AXButton",
-              "the table's fields are buttons, after the menu that chooses the tables")
-        check(roles.get("operators/show") == ("AXPopUpButton", "Operators") and roles.get("operators/item/Concatenation", ("",))[0] == "AXButton",
-              "the operators are buttons, after the menu that chooses their kind")
-        check(roles.get("commands/show") == ("AXPopUpButton", "Commands") and roles.get("commands/group/Boolean", ("",))[0] == "AXDisclosureTriangle" and
-              element("commands/group/Boolean").read("AXValue") == 0, "the themes of commands are collapsed disclosure triangles")
+              roles.get("fields/list") == ("AXList", "Fields") and lines("fields") == ["item/id", "item/Customer", "item/Amount", "item/Paid", "item/Due"] and
+              roles["fields/item/Customer"][0] == "AXButton", "the table's fields are buttons in the Fields list, after the menu that chooses the tables")
+        check(roles.get("operators/show") == ("AXPopUpButton", "Kind of operators") and roles.get("operators/list") == ("AXList", "Operators") and
+              all(roles.get("operators/" + line, ("",))[0] == "AXButton" for line in ("item/Assignment", "item/Concatenation")),
+              "the operators are buttons in the Operators list, after the menu that chooses their kind")
+        check(roles.get("commands/show") == ("AXPopUpButton", "Order of commands") and roles.get("commands/list") == ("AXList", "Commands") and
+              roles.get("commands/group/Boolean", ("",))[0] == "AXDisclosureTriangle" and element("commands/group/Boolean").read("AXValue") == 0,
+              "the themes of commands are collapsed disclosure triangles in the Commands list")
         check(roles.get("formula", ("",))[0] == "AXTextField" and roles["formula"][1] == "Formula" and formula() == "[Orders]Amount", "the formula is a text field holding the formula")
         check(all(roles.get(name, ("",))[0] == "AXButton" for name in ("bLoad", "bSave", "bCancel", "bOK")) and roles["bOK"][1] == "OK", "Load, Save, Cancel and OK are buttons")
         if args.voiceover:
             check(phrase_until(lambda ph: TITLE in ph, 0, 40), "VoiceOver reaches the formula editor")
-            check(vo_to(lambda ph: "Boolean" in ph and "collapsed" in ph), "VoiceOver reads a theme of commands as collapsed")
-            front(); mark = heard.mark(); vo.key("space", vo.VO)
+            check(vo_to(lambda ph: ph.startswith("Commands") and "list" in ph), "VoiceOver reads the Commands list as one list")
+            front(); vo.key("down", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: "Boolean" in ph and "collapsed" in ph), "VoiceOver enters it, and reads a theme of commands as collapsed")
+            front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: element("commands/item/True"), "Boolean expanded", timeout=10)
             check(element("commands/group/Boolean").read("AXValue") == 1, "VO-Space on it expands it, showing its commands")
-            check(vo_to(lambda ph: ph.startswith("Customer") and "button" in ph), "VoiceOver reads the fields")
+            last, repeated = cursor(), 0
+            for _ in range(20):
+                front(); vo.key("right", vo.VO); time.sleep(0.6)
+                text = cursor()
+                repeated = repeated + 1 if text == last else 0
+                last = text
+                if repeated >= 2:
+                    break
+            check("Tools" not in last and "disclosure" in last, "VoiceOver reads on to the last line the list shows")
+            front(); mark = heard.mark(); vo.key("space", vo.VO + ("cmd",))
+            phrase_until(lambda ph: "Scroll down" in ph or "Actions" in ph, mark)
+            for _ in range(4):
+                if any("Scroll down" in ph for _, ph in heard.since(mark)):
+                    break
+                front(); vo.key("down"); time.sleep(0.8)
+            front(); vo.key("return")
+            ax.wait_for(lambda: element("commands/group/Tools"), "The later themes", timeout=10)
+            check("group/Boolean" not in lines("commands"), "Scroll down, from VoiceOver's actions menu, scrolls the list a page, to its last themes")
+            front(); vo.key("down", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: ph.split(" ")[0] in ("Records", "String", "Tools") and "disclosure" in ph), "VoiceOver enters the list again and reads the themes it scrolled into view")
+            front(); vo.key("up", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: ph.startswith("Fields") and "list" in ph), "VoiceOver reads the Fields list")
+            front(); vo.key("down", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: ph.startswith("Customer") and "button" in ph), "VoiceOver enters it and reads the fields")
             front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: "[Orders]Customer" in (formula() or ""), "Customer inserted", timeout=10)
             check(True, "VO-Space on a field inserts it into the formula")
+            front(); vo.key("up", vo.VO + ("shift",)); time.sleep(1)
             check(vo_to(lambda ph: "Formula" in ph and "edit text" in ph), "VoiceOver reads the formula as an edit field")
             front(); vo.key("a", ("cmd",)); time.sleep(0.5)
             mark = heard.mark()
@@ -235,6 +269,14 @@ def main():
             press("commands/group/Boolean")
             ax.wait_for(lambda: not element("commands/item/True") and element("commands/group/Boolean").read("AXValue") == 0, "Boolean collapsed", timeout=10)
             check(True, "pressing it again collapses it")
+            top = lines("commands")
+            assert element("commands/list").perform("AXScrollDownByPage") == 0
+            ax.wait_for(lambda: element("commands/group/Tools"), "A page down", timeout=10)
+            check("group/Boolean" not in lines("commands") and "group/Printing" in lines("commands"),
+                  "a page down scrolls the Commands list to the themes after those it showed, up to its end")
+            assert element("commands/list").perform("AXScrollUpByPage") == 0
+            ax.wait_for(lambda: lines("commands")[0] == "group/Boolean", "Back up", timeout=10)
+            check(lines("commands") == top, "a page up scrolls it back")
             choose("commands/show", "Commands by Alphabetical Order")
             check(lines("commands")[:2] == ["item/Abs", "item/Add to date"], "the commands menu lists the commands alphabetically, as buttons")
             press("commands/item/Abs")

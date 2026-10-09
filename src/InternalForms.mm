@@ -3,6 +3,12 @@
 #import "InternalTable.h"
 #import "BridgePrivate.h"
 #include <initializer_list>
+#include <vector>
+#include <dlfcn.h>
+
+static NSString *Localized(NSString *key) {
+    return [[NSBundle bundleForClass:AXBInternalFormOverlay.class] localizedStringForKey:key value:key table:@"AccessibilityBridge"];
+}
 
 static NSString *Joined(NSArray<NSString *> *texts) {
     NSMutableArray *parts = [NSMutableArray new];
@@ -93,7 +99,24 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     return [self.placeholders containsObject:text] ? text : nil;
 }
 - (NSRect)accessibilityFrame { return [self screenFrame]; }
-- (id)accessibilityParent { return self.owner; }
+- (id)accessibilityParent { return self.container ?: self.owner; }
+- (BOOL)isList { return [self.accessibilityRole isEqual:NSAccessibilityListRole]; }
+// A line offers its list's scrolling.
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions {
+    return [self.container isKindOfClass:AXBInternalList.class] ? [(AXBInternalList *)self.container scrollActions] : nil;
+}
+// A list holds the lines published after it that name it, in their order.
+- (NSArray *)accessibilityChildren {
+    if (!self.isList) return nil;
+    NSMutableArray *children = [NSMutableArray new];
+    for (NSString *key in self.owner.order) {
+        AXBInternalFormElement *element = self.owner.elements[key];
+        if (element.container == self && element.isAccessibilityElement) [children addObject:element];
+    }
+    return children;
+}
+- (NSArray *)accessibilityVisibleChildren { return self.isList ? self.accessibilityChildren : nil; }
+- (NSAccessibilityOrientation)accessibilityOrientation { return self.isList ? NSAccessibilityOrientationVertical : NSAccessibilityOrientationUnknown; }
 - (NSString *)accessibilityIdentifier { return [self.owner.identifierPrefix stringByAppendingString:self.key]; }
 - (BOOL)isAccessibilityElement { return self.layer != nil && !self.layer.hidden; }
 - (BOOL)isAccessibilityEnabled { return YES; }
@@ -104,7 +127,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 - (id)accessibilityValue {
     // A state 4D draws only as an image is not known; such a control reports no value.
     if (self.isRadio || [@[NSAccessibilityCheckBoxRole, NSAccessibilityDisclosureTriangleRole] containsObject:self.accessibilityRole]) return self.stateUnknown ? nil : @(self.checked);
-    if (self.isButton) return nil;
+    if (self.isButton || self.isList) return nil;
     return [self currentText] ?: @"";
 }
 - (BOOL)accessibilityPerformPress {
@@ -216,6 +239,35 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 }
 @end
 
+// A list 4D draws as a whole into one layer: its lines are its children, and when the scroll
+// bar 4D draws in it shows more lines one way, it scrolls by a page that way, as with the mouse
+// wheel. Assistive technologies scroll it with the standard page actions; VoiceOver offers them
+// as Scroll down and Scroll up in its actions menu, on the list and on each line.
+@implementation AXBInternalList
+- (NSArray<NSString *> *)accessibilityActionNames { return @[@"AXScrollDownByPage", @"AXScrollUpByPage"]; }
+- (void)accessibilityPerformAction:(NSString *)action {
+    if ([action isEqual:@"AXScrollDownByPage"]) (void)[self.owner scrollList:self down:YES];
+    else if ([action isEqual:@"AXScrollUpByPage"]) (void)[self.owner scrollList:self down:NO];
+}
+- (NSString *)accessibilityActionDescription:(NSString *)action {
+    if ([action isEqual:@"AXScrollDownByPage"]) return Localized(@"Scroll down");
+    if ([action isEqual:@"AXScrollUpByPage"]) return Localized(@"Scroll up");
+    return nil;
+}
+- (NSArray<NSAccessibilityCustomAction *> *)scrollActions {
+    __weak AXBInternalList *weakSelf = self;
+    NSMutableArray *actions = [NSMutableArray new];
+    for (NSNumber *down in @[@YES, @NO])
+        if ([self.owner canScrollList:self down:down.boolValue])
+            [actions addObject:[[NSAccessibilityCustomAction alloc] initWithName:Localized(down.boolValue ? @"Scroll down" : @"Scroll up") handler:^BOOL {
+                AXBInternalList *list = weakSelf;
+                return list && [list.owner scrollList:list down:down.boolValue];
+            }]];
+    return actions;
+}
+- (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions { return [self scrollActions]; }
+@end
+
 @implementation AXBInternalFormOverlay
 - (instancetype)initWithFormView:(NSView *)view prefix:(NSString *)prefix {
     if (!(self = [super initWithFrame:view.bounds])) return nil;
@@ -234,7 +286,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     NSMutableArray *children = [NSMutableArray new];
     for (NSString *key in self.order) {
         AXBInternalFormElement *element = self.elements[key];
-        if (element.isAccessibilityElement) [children addObject:element];
+        if (element.isAccessibilityElement && !element.container) [children addObject:element];
     }
     return children;
 }
@@ -259,7 +311,9 @@ static NSRect Visible(NSRect rect, CALayer *layer, CALayer *form) {
 }
 - (NSRect)screenFrameForArea:(NSRect)area inLayer:(CALayer *)layer {
     // An item's area within its layer's image, from the image's bottom left; the layer can
-    // show its image flipped.
+    // show its image flipped. A line the layer's edge cuts shows only its part within it.
+    area = NSIntersectionRect(area, NSMakeRect(0, 0, NSWidth(layer.bounds), NSHeight(layer.bounds)));
+    if (NSIsEmptyRect(area)) return NSZeroRect;
     if (layer.contentsAreFlipped) area.origin.y = NSHeight(layer.bounds) - NSMaxY(area);
     CALayer *form = self.formView.layer;
     NSView *view = self.formView;
@@ -357,6 +411,96 @@ static void MovePointer(NSWindow *window, NSPoint point) {
         CFRunLoopWakeUp(CFRunLoopGetMain());
     });
 }
+// Where the thumb of a scroll bar 4D draws lies along its track, as fractions from the top: the
+// rows whose middle stands out from the track beside the thumb, which is narrower than the bar.
+// NO when the image cannot be read or shows no thumb.
+static BOOL ThumbSpan(CALayer *scroller, CGFloat *top, CGFloat *bottom) {
+    id contents = scroller.contents;
+    if (!contents || CFGetTypeID((__bridge CFTypeRef)contents) != CGImageGetTypeID()) return NO;
+    CGImageRef image = (__bridge CGImageRef)contents;
+    size_t width = CGImageGetWidth(image), rows = CGImageGetHeight(image);
+    if (width < 8 || rows < 8) return NO;
+    NSMutableData *pixels = [NSMutableData dataWithLength:width * rows * 4];
+    CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
+    CGContextRef context = CGBitmapContextCreate(pixels.mutableBytes, width, rows, 8, width * 4, space, kCGImageAlphaPremultipliedLast);
+    CGColorSpaceRelease(space);
+    if (!context) return NO;
+    CGContextDrawImage(context, CGRectMake(0, 0, width, rows), image);
+    CGContextRelease(context);
+    const uint8_t *bytes = (const uint8_t *)pixels.bytes;
+    auto shade = [&](size_t x, size_t y) { const uint8_t *p = bytes + (y * width + x) * 4; return 0.3 * p[0] + 0.59 * p[1] + 0.11 * p[2]; };
+    // The track a fifth of the bar's width in from its right edge, and the middle.
+    size_t middle = width / 2, track = width - 1 - width / 5;
+    NSInteger first = -1, last = -1;
+    for (size_t y = 0; y < rows; y++)
+        if (fabs(shade(middle, y) - shade(track, y)) > 25) { if (first < 0) first = (NSInteger)y; last = (NSInteger)y; }
+    // A thumb is a run, not a speck, and shorter than the track.
+    if (first < 0 || last - first < 4 || (size_t)(last - first) >= rows - 2) return NO;
+    // The bitmap's rows run from the top. The track ends a little inside the bar: a thumb
+    // within 2.5 points of an end is at it.
+    CGFloat margin = NSHeight(scroller.bounds) > 0 ? 2.5 * rows / NSHeight(scroller.bounds) : 3;
+    *top = first <= margin ? 0 : (CGFloat)first / rows;
+    *bottom = last + 1 >= rows - margin ? 1 : (CGFloat)(last + 1) / rows;
+    return YES;
+}
+// A scroll of the list at a point of the window, as the mouse wheel's, by whole points: positive
+// scrolls down to later lines. 4D finds the list from the event's place in its window, which an
+// event made from a CGEvent carries only once given its window: the window number AppKit reads
+// (field 51, which CGEventTypes.h does not name) and the place, set by CoreGraphics's
+// CGEventSetWindowLocation where it exists.
+static void PostScroll(NSWindow *window, NSPoint point, CGFloat points) {
+    static void (*setWindowLocation)(CGEventRef, CGPoint) = (void (*)(CGEventRef, CGPoint))dlsym(RTLD_DEFAULT, "CGEventSetWindowLocation");
+    if (!setWindowLocation) return;
+    CGEventRef wheel = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 1, (int32_t)-lround(points));
+    if (!wheel) return;
+    CGFloat top = NSMaxY(NSScreen.screens.firstObject.frame);
+    NSPoint at = [window convertPointToScreen:point];
+    CGEventSetLocation(wheel, CGPointMake(at.x, top - at.y));
+    CGEventSetIntegerValueField(wheel, (CGEventField)51, window.windowNumber);
+    // From the window's top left.
+    setWindowLocation(wheel, CGPointMake(point.x, NSHeight(window.frame) - point.y));
+    NSEvent *event = [NSEvent eventWithCGEvent:wheel];
+    CFRelease(wheel);
+    if (event.windowNumber == window.windowNumber) [window sendEvent:event];
+}
+// The whole lines of a list, those its edges do not cut, and the height of one.
+- (NSArray<AXBInternalFormElement *> *)wholeLinesOf:(AXBInternalFormElement *)list height:(CGFloat *)height {
+    CALayer *layer = list.layer;
+    NSRect bounds = NSMakeRect(0, 0, NSWidth(layer.bounds), NSHeight(layer.bounds));
+    NSMutableArray *lines = [NSMutableArray new];
+    for (AXBInternalFormElement *element in self.elements.allValues)
+        if (element.container == list && element.layer == layer && !NSIsEmptyRect(element.area) && NSContainsRect(bounds, element.area)) {
+            [lines addObject:element];
+            *height = NSHeight(element.area);
+        }
+    return lines;
+}
+- (BOOL)canScrollList:(AXBInternalFormElement *)list down:(BOOL)down {
+    CALayer *scroller = AXBInternalFormChild(list.layer, @"vertical_scrollbar");
+    CGFloat top = 0, bottom = 1;
+    if (!list.layer || !scroller || scroller.hidden || !ThumbSpan(scroller, &top, &bottom)) return NO;
+    return down ? bottom < 1 : top > 0;
+}
+- (BOOL)scrollList:(AXBInternalFormElement *)list down:(BOOL)down {
+    CGFloat height = 0;
+    NSArray *lines = [self wholeLinesOf:list height:&height];
+    if (![self canScrollList:list down:down] || height <= 0) return NO;
+    // A page keeps one line: the last whole line moves to the top, or the first to the bottom.
+    CGFloat points = MAX(1, (NSInteger)lines.count - 1) * height * (down ? 1 : -1);
+    if ([list isKindOfClass:AXBInternalList.class]) ((AXBInternalList *)list).scrolled = YES;
+    __weak AXBInternalFormOverlay *weakSelf = self;
+    __weak CALayer *weakList = list.layer;
+    [self whenSettled:^{
+        AXBInternalFormOverlay *strongSelf = weakSelf;
+        CALayer *target = weakList;
+        NSWindow *window = strongSelf.formView.window;
+        if (!strongSelf || !target || target.hidden || !window.isVisible) return;
+        NSRect frame = [strongSelf screenFrameForArea:target.bounds inLayer:target];
+        if (NSIsEmptyRect(frame)) return;
+        PostScroll(window, [window convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], points);
+    }];
+    return YES;
+}
 - (BOOL)clickArea:(NSRect)area inLayer:(CALayer *)layer {
     return [self clickArea:area inLayer:layer secondary:NO movingPointer:NO];
 }
@@ -451,9 +595,16 @@ static void MovePointer(NSWindow *window, NSPoint point) {
     }];
     return YES;
 }
+// The keys of the objects the overlay itself holds, outside any list.
+- (NSArray<NSString *> *)topLevelKeys:(NSArray<NSString *> *)keys {
+    NSMutableArray *top = [NSMutableArray new];
+    for (NSString *key in keys) if (self.elements[key] && !self.elements[key].container) [top addObject:key];
+    return top;
+}
 - (BOOL)updateWithEntries:(NSArray<NSDictionary *> *)entries {
     NSView *view = self.formView;
     if (!view.window) return NO;
+    NSArray *before = [self topLevelKeys:self.order];
     BOOL changed = NO;
     NSMutableArray *order = [NSMutableArray new];
     for (NSDictionary *entry in entries) {
@@ -464,7 +615,7 @@ static void MovePointer(NSWindow *window, NSPoint point) {
         NSRect area = entry[@"area"] ? [entry[@"area"] rectValue] : NSZeroRect;
         AXBInternalFormElement *element = self.elements[key];
         // An empty text field or table is still one.
-        BOOL field = [role isEqual:NSAccessibilityTextFieldRole] || [role isEqual:NSAccessibilityTableRole];
+        BOOL field = [role isEqual:NSAccessibilityTextFieldRole] || [role isEqual:NSAccessibilityTableRole] || [role isEqual:NSAccessibilityListRole];
         // An empty text field is still a field; other objects need text or a fixed label.
         if (!layer || layer.hidden || (!text.length && !label.length && !field)) continue;
         if (element && ![element.accessibilityRole isEqual:role]) {
@@ -475,7 +626,7 @@ static void MovePointer(NSWindow *window, NSPoint point) {
         [order addObject:key];
         BOOL table = [role isEqual:NSAccessibilityTableRole];
         if (!element) {
-            element = table ? [AXBInternalTable new] : [AXBInternalFormElement new];
+            element = table ? [AXBInternalTable new] : [role isEqual:NSAccessibilityListRole] ? [AXBInternalList new] : [AXBInternalFormElement new];
             element.owner = self; element.layer = layer; element.key = key; element.accessibilityRole = role;
             element.label = label; element.editable = [entry[@"editable"] boolValue]; element.caret = [entry[@"caret"] boolValue];
             element.inset = [entry[@"inset"] doubleValue];
@@ -483,6 +634,7 @@ static void MovePointer(NSWindow *window, NSPoint point) {
             element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
             element.pressArea = entry[@"pressArea"] ? [entry[@"pressArea"] rectValue] : NSZeroRect;
             element.clicks = [entry[@"clicks"] integerValue];
+            element.container = entry[@"list"] ? self.elements[entry[@"list"]] : nil;
             element.checked = [entry[@"checked"] boolValue];
             element.stateUnknown = entry[@"checked"] == nil;
             element.publishedText = text;
@@ -503,6 +655,7 @@ static void MovePointer(NSWindow *window, NSPoint point) {
         element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
         element.pressArea = entry[@"pressArea"] ? [entry[@"pressArea"] rectValue] : NSZeroRect;
         element.clicks = [entry[@"clicks"] integerValue];
+        element.container = entry[@"list"] ? self.elements[entry[@"list"]] : nil;
         element.stateUnknown = entry[@"checked"] == nil;
         if (element.checked != [entry[@"checked"] boolValue]) {
             element.checked = [entry[@"checked"] boolValue];
@@ -528,8 +681,20 @@ static void MovePointer(NSWindow *window, NSPoint point) {
         NSAccessibilityPostNotification(element, NSAccessibilityUIElementDestroyedNotification);
         changed = YES;
     }
+    // The window's layout changes when its own objects do; a list's lines change within the list.
+    BOOL windowChanged = ![[self topLevelKeys:order] isEqual:before];
     if (![order isEqual:self.order]) { self.order = order; changed = YES; }
-    if (changed) NSAccessibilityPostNotification(view.window, NSAccessibilityLayoutChangedNotification);
+    if (windowChanged) NSAccessibilityPostNotification(view.window, NSAccessibilityLayoutChangedNotification);
+    else if (changed)
+        // A list's lines change when one expands, collapses or scrolls. VoiceOver stays on its line as
+        // it expands; after a page's scroll, the list's layout changes, so VoiceOver returns to the
+        // list and reads the new page from its top rather than from where its line was.
+        for (NSString *key in order) {
+            AXBInternalList *list = (AXBInternalList *)self.elements[key];
+            if (![list isKindOfClass:AXBInternalList.class] || !list.scrolled) continue;
+            list.scrolled = NO;
+            NSAccessibilityPostNotificationWithUserInfo(list, NSAccessibilityLayoutChangedNotification, @{NSAccessibilityUIElementsKey: @[list]});
+        }
     return self.order.count > 0;
 }
 @end

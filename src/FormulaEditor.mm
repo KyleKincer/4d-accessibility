@@ -27,26 +27,27 @@ static NSMutableDictionary *Entry(NSString *key, CALayer *layer, NSString *role,
     return entry;
 }
 
-// The bounds of what is drawn in an area of a layer's image, in points from the area's bottom
-// left: the pixels that stand out from the area's background, its most common shade, which is
-// the line's own or its selection's. Empty when nothing is drawn there; nil when the image
-// cannot be read.
-static NSValue *InkBounds(CALayer *layer, NSRect area) {
+// Whether 4D draws a disclosure chevron in an area of a list's image, and which way it points.
+// Its pixels stand out from the area's most common shade, the line's own or its selection's.
+// They span at most 11 points by 7, smaller than any icon, and form a tip in the middle of
+// their long side: the middle row reaches furthest right for a chevron pointing right, the
+// middle column lowest for one pointing down. Bars and dots, such as an operator's :=, do not.
+static BOOL Chevron(CALayer *layer, NSRect area, BOOL *expanded) {
     id contents = layer.contents;
-    if (!contents || CFGetTypeID((__bridge CFTypeRef)contents) != CGImageGetTypeID()) return nil;
+    if (!contents || CFGetTypeID((__bridge CFTypeRef)contents) != CGImageGetTypeID()) return NO;
     CGImageRef image = (__bridge CGImageRef)contents;
     CGFloat height = NSHeight(layer.bounds), scale = height > 0 ? CGImageGetHeight(image) / height : 0;
-    if (scale <= 0) return nil;
+    if (scale <= 0) return NO;
     // From the bottom left to the image's top left, in pixels.
     CGRect box = CGRectIntegral(CGRectMake(NSMinX(area) * scale, (height - NSMaxY(area)) * scale, NSWidth(area) * scale, NSHeight(area) * scale));
     CGImageRef part = CGImageCreateWithImageInRect(image, box);
-    if (!part) return nil;
+    if (!part) return NO;
     size_t width = CGImageGetWidth(part), rows = CGImageGetHeight(part);
     NSMutableData *pixels = [NSMutableData dataWithLength:width * rows * 4];
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
     CGContextRef context = CGBitmapContextCreate(pixels.mutableBytes, width, rows, 8, width * 4, space, kCGImageAlphaPremultipliedLast);
     CGColorSpaceRelease(space);
-    if (!context) { CGImageRelease(part); return nil; }
+    if (!context) { CGImageRelease(part); return NO; }
     CGContextDrawImage(context, CGRectMake(0, 0, width, rows), part);
     CGContextRelease(context);
     CGImageRelease(part);
@@ -58,39 +59,57 @@ static NSValue *InkBounds(CALayer *layer, NSRect area) {
     NSUInteger common = 0;
     for (NSUInteger i = 1; i < 33; i++) if (counts[i] > counts[common]) common = i;
     double background = common * 8 + 4;
+    auto ink = [&](size_t x, size_t y) { return fabs(luminance(x, y) - background) > 40; };
     NSInteger left = NSIntegerMax, right = -1, top = NSIntegerMax, bottom = -1;
     for (size_t y = 0; y < rows; y++)
         for (size_t x = 0; x < width; x++)
-            if (fabs(luminance(x, y) - background) > 40) {
-                left = MIN(left, (NSInteger)x); right = MAX(right, (NSInteger)x);
-                top = MIN(top, (NSInteger)y); bottom = MAX(bottom, (NSInteger)y);
-            }
-    if (right < 0) return [NSValue valueWithRect:NSZeroRect];
-    // Rows run down from the part's top; the bounds run up from its bottom.
-    return [NSValue valueWithRect:NSMakeRect(left / scale, (rows - 1 - bottom) / scale, (right - left + 1) / scale, (bottom - top + 1) / scale)];
+            if (ink(x, y)) { left = MIN(left, (NSInteger)x); right = MAX(right, (NSInteger)x); top = MIN(top, (NSInteger)y); bottom = MAX(bottom, (NSInteger)y); }
+    if (right < 0) return NO;
+    CGFloat across = (right - left + 1) / scale, along = (bottom - top + 1) / scale;
+    BOOL down = across > along;
+    if (MAX(across, along) < 4 || MAX(across, along) > 11 || MIN(across, along) < 2 || MIN(across, along) > 7) return NO;
+    // The mean position of the ink in a row (or, pointing down, a column), across it.
+    auto middle = [&](NSInteger at) {
+        double sum = 0, count = 0;
+        for (NSInteger i = down ? top : left; i <= (down ? bottom : right); i++)
+            if (down ? ink((size_t)at, (size_t)i) : ink((size_t)i, (size_t)at)) { sum += i; count++; }
+        return count ? sum / count : NAN;
+    };
+    NSInteger first = down ? left : top, last = down ? right : bottom;
+    double ends = (middle(first) + middle(last)) / 2, tip = middle((first + last) / 2);
+    // Rows run down, so a lower tip is a larger row, as a tip further right is a larger column.
+    if (isnan(ends) || isnan(tip) || tip - ends < 1.5 * scale) return NO;
+    *expanded = down;
+    return YES;
 }
 
 // A list's lines. A line that 4D draws with a disclosure chevron, a table of fields or a theme
 // of commands, is a disclosure triangle: the chevron points right while the line is collapsed
 // and down while it is expanded, and a click on it toggles it. Any other line is a button whose
 // double click inserts it into the formula, as with the mouse.
-static NSArray<NSDictionary *> *ListEntries(CALayer *list, NSString *prefix) {
-    NSMutableArray *entries = [NSMutableArray new];
+static NSArray<NSDictionary *> *ListEntries(CALayer *list, NSString *prefix, NSString *label) {
+    // The list itself, which holds its lines.
+    NSString *container = [prefix stringByAppendingString:@"list"];
+    NSMutableArray *entries = [NSMutableArray arrayWithObject:Entry(container, list, NSAccessibilityListRole, label, 0)];
     NSCountedSet *seen = [NSCountedSet new];
     for (NSDictionary *item in AXBInternalListItems(list, @"", NSAccessibilityButtonRole) ?: @[]) {
         NSMutableDictionary *entry = [item mutableCopy];
-        NSRect line = [item[@"area"] rectValue], chevron = NSZeroRect, drawn = NSZeroRect;
+        entry[@"list"] = container;
+        NSRect line = [item[@"area"] rectValue], chevron = NSZeroRect;
+        CGFloat offset = 0;
         CGFloat origin = [item[@"originX"] doubleValue];
-        // The chevron lies just left of the text, or of the icon before it. It is smaller than
-        // an icon: at most 11 points long and 7 across, where a field's type icon is larger.
-        for (NSNumber *offset in @[@16, @32]) {
-            NSRect candidate = NSMakeRect(origin - offset.doubleValue, NSMinY(line) + 2, 12, NSHeight(line) - 4);
-            if (NSMinX(candidate) < 0) continue;
-            NSRect ink = InkBounds(list, candidate).rectValue;
-            CGFloat length = MAX(NSWidth(ink), NSHeight(ink)), across = MIN(NSWidth(ink), NSHeight(ink));
-            if (length >= 4 && length <= 11 && across >= 2 && across <= 7) { chevron = candidate; drawn = ink; break; }
+        // The chevron lies just left of the text, or of the icon before it.
+        BOOL expanded = NO;
+        for (NSNumber *left in @[@16, @32]) {
+            NSRect candidate = NSMakeRect(origin - left.doubleValue, NSMinY(line) + 2, 12, NSHeight(line) - 4);
+            if (NSMinX(candidate) < 0 || !Chevron(list, candidate, &expanded)) continue;
+            chevron = candidate; offset = left.doubleValue;
+            break;
         }
         BOOL disclosure = !NSIsEmptyRect(chevron);
+        // A line the list's edge cuts can lose its chevron: it is a table or theme when a whole one
+        // starts its text where it does, so it keeps its element as it scrolls into view.
+        if (NSMinY(line) < 0 || NSMaxY(line) > NSHeight(list.bounds)) entry[@"clipped"] = @YES;
         NSString *name = [(disclosure ? @"group/" : @"item/") stringByAppendingString:item[@"text"]];
         [seen addObject:name];
         NSUInteger count = [seen countForObject:name];
@@ -98,12 +117,28 @@ static NSArray<NSDictionary *> *ListEntries(CALayer *list, NSString *prefix) {
         if (disclosure) {
             entry[@"role"] = NSAccessibilityDisclosureTriangleRole;
             entry[@"pressArea"] = [NSValue valueWithRect:chevron];
-            // Pointing down, it is wider than it is tall.
-            entry[@"checked"] = @(NSWidth(drawn) > NSHeight(drawn));
+            entry[@"chevron"] = @(offset);
+            // Expanded, it points down; a cut chevron's way is unknown.
+            if (!entry[@"clipped"]) entry[@"checked"] = @(expanded);
         } else {
             entry[@"clicks"] = @2;
         }
         [entries addObject:entry];
+    }
+    // Where each whole table's or theme's chevron lies left of its text, by where its text starts.
+    NSMutableDictionary<NSNumber *, NSNumber *> *groups = [NSMutableDictionary new];
+    for (NSDictionary *entry in entries)
+        if (![entry[@"clipped"] boolValue] && entry[@"chevron"]) groups[entry[@"originX"]] = entry[@"chevron"];
+    for (NSMutableDictionary *entry in entries) {
+        NSNumber *offset = groups[entry[@"originX"]];
+        if (![entry[@"clipped"] boolValue] || entry[@"chevron"] || !offset) continue;
+        // Its state is unknown without its chevron.
+        entry[@"role"] = NSAccessibilityDisclosureTriangleRole;
+        entry[@"key"] = [entry[@"key"] stringByReplacingOccurrencesOfString:[prefix stringByAppendingString:@"item/"] withString:[prefix stringByAppendingString:@"group/"]
+                                                                      options:NSAnchoredSearch range:NSMakeRange(0, [entry[@"key"] length])];
+        [entry removeObjectForKey:@"clicks"];
+        NSRect line = [entry[@"area"] rectValue];
+        entry[@"pressArea"] = [NSValue valueWithRect:NSMakeRect([entry[@"originX"] doubleValue] - offset.doubleValue, NSMinY(line) + 2, 12, NSHeight(line) - 4)];
     }
     return entries;
 }
@@ -130,11 +165,11 @@ static NSArray<NSDictionary *> *FormulaEntries(NSWindow *window, NSView *view, C
     CALayer *layer;
     if ((layer = AXBInternalFormChild(form, @"helpString"))) [entries addObject:Entry(@"help", layer, NSAccessibilityStaticTextRole, nil, 0)];
     // Each list follows the menu that chooses what it shows.
-    NSArray *lists = @[@[@"_ope_filter", @"Tables", @"lh_champ", @"fields/"], @[@"_ope_theme", @"Operators", @"LH_Operateur", @"operators/"],
-                       @[@"_ope_routine", @"Commands", @"LH_EnCm", @"commands/"]];
+    NSArray *lists = @[@[@"_ope_filter", @"Tables", @"lh_champ", @"fields/", @"Fields"], @[@"_ope_theme", @"Kind of operators", @"LH_Operateur", @"operators/", @"Operators"],
+                       @[@"_ope_routine", @"Order of commands", @"LH_EnCm", @"commands/", @"Commands"]];
     for (NSArray *list in lists) {
         if ((layer = AXBInternalFormChild(form, list[0]))) [entries addObject:Entry([list[3] stringByAppendingString:@"show"], layer, NSAccessibilityPopUpButtonRole, Localized(list[1]), PopupInset)];
-        if ((layer = AXBInternalFormChild(form, list[2]))) [entries addObjectsFromArray:ListEntries(layer, list[3])];
+        if ((layer = AXBInternalFormChild(form, list[2]))) [entries addObjectsFromArray:ListEntries(layer, list[3], Localized(list[4]))];
     }
     NSMutableDictionary *field = Entry(@"formula", formula, NSAccessibilityTextFieldRole, Localized(@"Formula"), 0);
     field[@"editable"] = @YES;
