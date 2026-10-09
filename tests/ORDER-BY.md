@@ -10,7 +10,7 @@ The editor is a form of 4D whose objects are layers, and the plugin reads the te
 - after each ordered field, its **Descending** checkbox. 4D ends each line with a triangle that points up for ascending and down for descending, and a click on the triangle reverses it. The plugin reads which way the triangle points from 4D's image, and pressing the checkbox clicks the triangle;
 - **Add Formula…**, **Modify…**, **Cancel** and **Sort**, by their titles.
 
-Every press is an ordinary click, so 4D runs its own handling exactly as for the mouse. Add Formula… and Modify… open 4D's formula editor, which is not yet described.
+Every press is an ordinary click, so 4D runs its own handling exactly as for the mouse. Add Formula… and Modify… open 4D's [formula editor](FORMULA-EDITOR.md), which is published in turn.
 
 VoiceOver orders this window's elements by their positions: the ordered fields, which sit at the top right, come before the available fields below their caption.
 
@@ -26,4 +26,4 @@ python3 test_order_by_fixture.py --server /path/to/4D\ Server.app --run --voiceo
 
 [Acceptance](../validation/order-by-development.json): the AX run passes interpreted and compiled, in native ARM and Rosetta, with an unchanged window; the VoiceOver run passes interpreted and compiled on ARM and compiled under Rosetta.
 
-Remaining scope: formulas and the formula editor, related tables' fields, localized editors, 4D Server and remote clients, and 4D on Windows.
+Remaining scope: an acceptance run that orders by a formula, related tables' fields, localized editors, 4D Server and remote clients, and 4D on Windows.

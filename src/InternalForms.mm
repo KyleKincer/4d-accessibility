@@ -72,7 +72,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 
 @implementation AXBInternalFormElement
 - (BOOL)isButton {
-    return [@[NSAccessibilityButtonRole, NSAccessibilityRadioButtonRole, NSAccessibilityCheckBoxRole] containsObject:self.accessibilityRole];
+    return [@[NSAccessibilityButtonRole, NSAccessibilityRadioButtonRole, NSAccessibilityCheckBoxRole, NSAccessibilityDisclosureTriangleRole] containsObject:self.accessibilityRole];
 }
 - (BOOL)isRadio { return [self.accessibilityRole isEqual:NSAccessibilityRadioButtonRole]; }
 - (BOOL)isPopup { return [self.accessibilityRole isEqual:NSAccessibilityPopUpButtonRole]; }
@@ -103,7 +103,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 }
 - (id)accessibilityValue {
     // A state 4D draws only as an image is not known; such a control reports no value.
-    if (self.isRadio || [self.accessibilityRole isEqual:NSAccessibilityCheckBoxRole]) return self.stateUnknown ? nil : @(self.checked);
+    if (self.isRadio || [@[NSAccessibilityCheckBoxRole, NSAccessibilityDisclosureTriangleRole] containsObject:self.accessibilityRole]) return self.stateUnknown ? nil : @(self.checked);
     if (self.isButton) return nil;
     return [self currentText] ?: @"";
 }
@@ -321,7 +321,8 @@ static void PostKey(NSWindow *window, NSString *characters, NSEventModifierFlags
         NSWindow *current = strongSelf.formView.window;
         if (!strongSelf || !target.layer || target.layer.hidden || !current.isVisible) return;
         CALayer *press = target.pressLayer;
-        NSRect frame = press ? [strongSelf screenFrameForLayer:press inset:target.pressInset] : [target screenFrame];
+        NSRect frame = press ? [strongSelf screenFrameForLayer:press inset:target.pressInset]
+                     : !NSIsEmptyRect(target.pressArea) ? [strongSelf screenFrameForArea:target.pressArea inLayer:target.layer] : [target screenFrame];
         if (NSIsEmptyRect(frame)) return; // Nothing of it is shown to click.
         PostClick(current, [current convertPointFromScreen:NSMakePoint(NSMidX(frame), NSMidY(frame))], target.clicks);
     }];
@@ -480,6 +481,7 @@ static void MovePointer(NSWindow *window, NSPoint point) {
             element.inset = [entry[@"inset"] doubleValue];
             element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
             element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
+            element.pressArea = entry[@"pressArea"] ? [entry[@"pressArea"] rectValue] : NSZeroRect;
             element.clicks = [entry[@"clicks"] integerValue];
             element.checked = [entry[@"checked"] boolValue];
             element.stateUnknown = entry[@"checked"] == nil;
@@ -496,8 +498,10 @@ static void MovePointer(NSWindow *window, NSPoint point) {
         // keystroke. The object keeps its element, so assistive focus and echo survive.
         element.layer = layer;
         element.editable = [entry[@"editable"] boolValue];
+        element.caret = [entry[@"caret"] boolValue];
         element.area = area; element.text = entry[@"text"]; element.placeholders = entry[@"placeholders"];
         element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
+        element.pressArea = entry[@"pressArea"] ? [entry[@"pressArea"] rectValue] : NSZeroRect;
         element.clicks = [entry[@"clicks"] integerValue];
         element.stateUnknown = entry[@"checked"] == nil;
         if (element.checked != [entry[@"checked"] boolValue]) {

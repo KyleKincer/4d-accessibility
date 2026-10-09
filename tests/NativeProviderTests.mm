@@ -10,6 +10,7 @@
 #import "QueryEditor.h"
 #import "QuickReport.h"
 #import "OrderByEditor.h"
+#import "FormulaEditor.h"
 #import "GenericForms.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
@@ -1141,6 +1142,96 @@ static void OrderByEditorTest(void) {
     Check(!AXBOrderByEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the ordered list is left untouched");
     [window close]; Pump();
 }
+static void FormulaEditorTest(void) {
+    // 4D's formula editor: its lists of fields, operators and commands, the menus that choose
+    // what they show, the formula and its buttons.
+    AXBFormulaEditorEnableForTesting();
+    NSWindow *window = [[NSWindow alloc] initWithContentRect:NSMakeRect(100, 200, 660, 350) styleMask:NSWindowStyleMaskTitled backing:NSBackingStoreBuffered defer:NO];
+    window.releasedWhenClosed = NO; window.title = @"AXB Formula Editor";
+    [NSApp activateIgnoringOtherApps:YES]; [window makeKeyAndOrderFront:nil]; Pump();
+    NSView *form = [[NSView alloc] initWithFrame:window.contentView.bounds];
+    form.wantsLayer = YES;
+    [window.contentView addSubview:form];
+    CALayer *context = [CALayer layer]; context.name = @"formContext"; context.frame = form.layer.bounds;
+    [form.layer addSublayer:context];
+    MessageLayer(context, @"helpString", NSMakeRect(20, 307, 602, 13), @[@"Choose below the elements which will enable you to build your formula"]);
+    MessageLayer(context, @"_ope_filter", NSMakeRect(30, 262, 206, 46), @[@"Master Table"]);
+    MessageLayer(context, @"_ope_theme", NSMakeRect(249, 263, 198, 46), @[@"String Operators"]);
+    MessageLayer(context, @"_ope_routine", NSMakeRect(467, 263, 184, 46), @[@"Commands by Themes"]);
+    // Each list is one image on a light background: the lines' baselines are 18 points apart,
+    // the first 18.5 points from the top, and each line's middle 184.5 points less its baseline
+    // above the image's bottom.
+    CGImageRef (^paint)(void (^)(CGContextRef)) = ^CGImageRef(void (^draw)(CGContextRef)) {
+        CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+        CGContextRef bitmap = CGBitmapContextCreate(NULL, 216, 180, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
+        CGContextSetRGBFillColor(bitmap, 0.92, 0.92, 0.92, 1); CGContextFillRect(bitmap, CGRectMake(0, 0, 216, 180));
+        CGContextSetRGBFillColor(bitmap, 0.2, 0.2, 0.2, 1);
+        draw(bitmap);
+        CGImageRef image = CGBitmapContextCreateImage(bitmap);
+        CGContextRelease(bitmap); CGColorSpaceRelease(rgb);
+        return image;
+    };
+    // Fields, each after its type's icon, which is larger than a chevron.
+    CALayer *fields = MessageLayer(context, @"lh_champ", NSMakeRect(15, 91, 216, 180), @[@"id", @"Customer"]);
+    AXBDrawnTextRecordOriginsForTesting(fields, @[[NSValue valueWithPoint:NSMakePoint(23, 18.5)], [NSValue valueWithPoint:NSMakePoint(23, 36.5)]]);
+    CGImageRef image = paint(^(CGContextRef c) { for (CGFloat middle : {166.0, 148.0}) CGContextFillRect(c, CGRectMake(5, middle - 7, 15, 14)); });
+    fields.contents = (__bridge id)image; CGImageRelease(image);
+    MessageLayer(context, @"LH_Operateur", NSMakeRect(234, 91, 208, 180), @[@"Concatenation"]);
+    AXBDrawnTextRecordOriginsForTesting(Child(context, @"LH_Operateur"), @[[NSValue valueWithPoint:NSMakePoint(22, 18.5)]]);
+    // Themes of commands, each a chevron then an icon: Boolean expanded, its chevron pointing
+    // down, with its command False below; Math collapsed, its chevron pointing right, and
+    // selected: 4D fills its line with the accent color, inset from the list's edge.
+    CALayer *commands = MessageLayer(context, @"LH_EnCm", NSMakeRect(445, 91, 216, 180), @[@"Boolean", @"False", @"Math"]);
+    AXBDrawnTextRecordOriginsForTesting(commands, @[[NSValue valueWithPoint:NSMakePoint(39, 18.5)], [NSValue valueWithPoint:NSMakePoint(54, 36.5)], [NSValue valueWithPoint:NSMakePoint(39, 54.5)]]);
+    image = paint(^(CGContextRef c) {
+        CGContextFillRect(c, CGRectMake(9, 164, 9, 5));
+        CGContextSetRGBFillColor(c, 0.04, 0.52, 1, 1); CGContextFillRect(c, CGRectMake(3, 121, 210, 18));
+        CGContextSetRGBFillColor(c, 0.6, 0.6, 0.6, 1); CGContextFillRect(c, CGRectMake(11, 126, 5, 9));
+        CGContextSetRGBFillColor(c, 0.2, 0.2, 0.2, 1);
+        for (CGFloat middle : {166.0, 130.0}) CGContextFillRect(c, CGRectMake(22, middle - 7, 14, 14));
+    });
+    commands.contents = (__bridge id)image; CGImageRelease(image);
+    MessageLayer(context, @"vFormula", NSMakeRect(10, 36, 654, 49), @[@"[Orders]Amount"]);
+    for (NSString *name in @[@"bLoad", @"bSave", @"bCancel", @"bOK"])
+        MessageLayer(context, name, NSMakeRect(15 + 100 * [@[@"bLoad", @"bSave", @"bCancel", @"bOK"] indexOfObject:name], 15, 90, 32), @[[@{@"bLoad": @"Load...", @"bSave": @"Save...", @"bCancel": @"Cancel", @"bOK": @"OK"} objectForKey:name]]);
+    Check(AXBFormulaEditorRefreshWindow(window), "a window holding the formula editor's form is published");
+    id tables = ProgressElement(form, @"axb/formula/fields/show"), customer = ProgressElement(form, @"axb/formula/fields/item/Customer");
+    Check([[tables accessibilityRole] isEqual:NSAccessibilityPopUpButtonRole] && [[tables accessibilityLabel] isEqual:@"Tables"] && [[tables accessibilityValue] isEqual:@"Master Table"] &&
+          [[ProgressElement(form, @"axb/formula/commands/show") accessibilityLabel] isEqual:@"Commands"], "each list's menu is a pop-up button, labelled by what it chooses");
+    Check([[customer accessibilityRole] isEqual:NSAccessibilityButtonRole] && [[customer accessibilityLabel] isEqual:@"Customer"] &&
+          ProgressElement(form, @"axb/formula/operators/item/Concatenation"), "fields after their type icons, and operators, are buttons");
+    id boolean = ProgressElement(form, @"axb/formula/commands/group/Boolean"), math = ProgressElement(form, @"axb/formula/commands/group/Math");
+    Check([[boolean accessibilityRole] isEqual:NSAccessibilityDisclosureTriangleRole] && [[boolean accessibilityValue] isEqual:@YES] && [[math accessibilityValue] isEqual:@NO] &&
+          [[ProgressElement(form, @"axb/formula/commands/item/False") accessibilityRole] isEqual:NSAccessibilityButtonRole],
+          "a theme is a disclosure triangle, expanded where its chevron points down, and its command a button");
+    NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
+    Check([keys indexOfObject:@"axb/formula/commands/item/False"] == [keys indexOfObject:@"axb/formula/commands/group/Boolean"] + 1 &&
+          [keys indexOfObject:@"axb/formula/formula"] > [keys indexOfObject:@"axb/formula/commands/group/Math"] && [keys.lastObject isEqual:@"axb/formula/bOK"],
+          "the lists read in order, then the formula, then the buttons");
+    id field = ProgressElement(form, @"axb/formula/formula");
+    NSRect box = [field accessibilityFrame], layer = [window convertRectToScreen:[form convertRect:NSMakeRect(10, 36, 654, 49) toView:nil]];
+    Check([[field accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[field accessibilityLabel] isEqual:@"Formula"] && [[field accessibilityValue] isEqual:@"[Orders]Amount"] &&
+          [field isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)], "the formula is an editable text field holding its text");
+    Check(fabs(NSMinX(box) - NSMinX(layer) - 8) < 0.5 && fabs(NSMaxX(layer) - NSMaxX(box) - 22) < 0.5 && fabs(NSMinY(box) - NSMinY(layer) - 21) < 0.5 && fabs(NSHeight(box) - 21) < 0.5,
+          "the formula covers its box within its layer's margins");
+    Check([[ProgressElement(form, @"axb/formula/bOK") accessibilityLabel] isEqual:@"OK"] && [[ProgressElement(form, @"axb/formula/help") accessibilityValue] hasPrefix:@"Choose below"],
+          "the buttons by their titles, and the help line as text");
+    Check([customer accessibilityPerformPress], "pressing a field is accepted");
+    NSEvent *first = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSEvent *second = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    Check(first.clickCount == 1 && second.clickCount == 2, "the press is a double click on the field, which inserts it");
+    Check([math accessibilityPerformPress], "pressing a theme is accepted");
+    NSEvent *click = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:1.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSEvent *extra = [NSApp nextEventMatchingMask:NSEventMaskLeftMouseDown untilDate:[NSDate dateWithTimeIntervalSinceNow:0.5] inMode:NSDefaultRunLoopMode dequeue:YES];
+    NSPoint at = [form convertPoint:click.locationInWindow fromView:nil];
+    Check(click.clickCount == 1 && !extra && fabs(at.x - (445 + 13)) < 1 && fabs(at.y - (91 + 180 - 54.5 - 4.5 + 9)) < 1.5, "the press is one click on its chevron, which toggles it");
+    [commands removeFromSuperlayer];
+    Check(!AXBFormulaEditorRefreshWindow(window) && ProgressChildren(form).count == 0, "a window without the commands is left untouched");
+    [window close]; Pump();
+}
 static void ComponentArchiveTest(void) {
     // A component's forms are read from its archive, deflated or stored; other entries are not forms.
     NSString *path = NSProcessInfo.processInfo.environment[@"AXB_TEST_COMPONENT_ARCHIVE"];
@@ -2199,6 +2290,7 @@ int main(void) {
         QueryEditorTest();
         QuickReportTest();
         OrderByEditorTest();
+        FormulaEditorTest();
         GenericFormsTest();
         ComponentArchiveTest();
         FocusAfterLayoutTest();

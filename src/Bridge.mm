@@ -10,6 +10,7 @@
 #import "QueryEditor.h"
 #import "QuickReport.h"
 #import "OrderByEditor.h"
+#import "FormulaEditor.h"
 #import "GenericForms.h"
 #import <objc/runtime.h>
 
@@ -1517,6 +1518,7 @@ void AXBInitialize(void) {
     AXBQueryEditorInitialize();
     AXBQuickReportInitialize();
     AXBOrderByEditorInitialize();
+    AXBFormulaEditorInitialize();
     // 4D can close and reopen a database while this bundle remains loaded.
     // Shutdown has retired old sessions and completed native-view cleanup.
     @synchronized(registryLock) { stopped = NO; }
@@ -1535,7 +1537,7 @@ void AXBShutdown(void) {
     // No monitor is held, and cleanup never calls 4D or waits for the form.
     dispatch_block_t cleanup = ^{
         for (AXBWindowView *v in views.allValues) [v invalidate];
-        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBOrderByEditorShutdown(); AXBGenericFormsShutdown();
+        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBOrderByEditorShutdown(); AXBFormulaEditorShutdown(); AXBGenericFormsShutdown();
         if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
         helpTipObserver = nil;
     };
