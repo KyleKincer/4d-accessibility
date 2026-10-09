@@ -130,17 +130,27 @@ static void AddFieldsSheet(CALayer *sheet, NSMutableArray *entries) {
         [entries addObject:entry];
     }
     if ((layer = AXBInternalFormChild(sheet, @"action"))) [entries addObject:Entry(@"sheet/options", layer, NSAccessibilityPopUpButtonRole, Localized(@"Field options"), 0)];
-    if ((layer = AXBInternalFormChild(sheet, @"field.list")))
+    // Each list holds its lines, and pages through more than its box shows.
+    if ((layer = AXBInternalFormChild(sheet, @"field.list"))) {
+        [entries addObject:Entry(@"sheet/fields", layer, NSAccessibilityListRole, Localized(@"Fields"), 0)];
         for (NSDictionary *item in AXBInternalListItems(layer, @"sheet/field/", NSAccessibilityButtonRole) ?: @[]) {
             NSMutableDictionary *entry = [item mutableCopy];
             entry[@"clicks"] = @2;
+            entry[@"list"] = @"sheet/fields";
             [entries addObject:entry];
         }
+    }
     NSArray *moves = @[@[@"b.add.one", @"Add field"], @[@"b.add.all", @"Add all fields"], @[@"b.remove.one", @"Remove column"], @[@"b.remove.all", @"Remove all columns"]];
     for (NSArray *move in moves)
         if ((layer = AXBInternalFormChild(sheet, move[0]))) [entries addObject:Entry([@"sheet/" stringByAppendingString:move[0]], layer, NSAccessibilityButtonRole, Localized(move[1]), 0)];
-    if ((layer = AXBInternalFormChild(sheet, @"report.list")))
-        for (NSDictionary *item in AXBInternalListItems(layer, @"sheet/column/", NSAccessibilityButtonRole) ?: @[]) [entries addObject:item];
+    if ((layer = AXBInternalFormChild(sheet, @"report.list"))) {
+        [entries addObject:Entry(@"sheet/columns", layer, NSAccessibilityListRole, Localized(@"Report columns"), 0)];
+        for (NSDictionary *item in AXBInternalListItems(layer, @"sheet/column/", NSAccessibilityButtonRole) ?: @[]) {
+            NSMutableDictionary *entry = [item mutableCopy];
+            entry[@"list"] = @"sheet/columns";
+            [entries addObject:entry];
+        }
+    }
     if ((layer = AXBInternalFormChild(sheet, @"cancel"))) [entries addObject:Entry(@"sheet/cancel", layer, NSAccessibilityButtonRole, nil, 0)];
     if ((layer = AXBInternalFormChild(sheet, @"ok"))) [entries addObject:Entry(@"sheet/ok", layer, NSAccessibilityButtonRole, nil, 0)];
 }

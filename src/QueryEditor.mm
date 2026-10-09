@@ -131,18 +131,42 @@ static NSArray<NSDictionary *> *QueryEntries(CALayer *form) {
 static NSArray<NSDictionary *> *ChooserEntries(CALayer *form) {
     CALayer *list = AXBInternalFormChild(form, @"table.list");
     if (!list || !AXBInternalFormChild(form, @"b.done") || AXBInternalFormChild(form, @"bottom.b.query")) return nil;
-    NSArray *entries = AXBInternalListItems(list, @"item/", NSAccessibilityButtonRole);
-    return entries.count ? entries : nil;
+    NSArray *items = AXBInternalListItems(list, @"item/", NSAccessibilityButtonRole);
+    if (!items.count) return nil;
+    // The window holds this one list, whose fields stay its own elements: VoiceOver, which starts
+    // on the current field, cannot move on from a line nested in a list in this window. The list's
+    // scroll bar pages through a table longer than its box.
+    NSMutableArray *entries = [NSMutableArray new];
+    CALayer *scroller = AXBInternalFormChild(list, @"vertical_scrollbar");
+    for (NSDictionary *item in items) {
+        NSMutableDictionary *entry = [item mutableCopy];
+        if (scroller) entry[@"list"] = @"scroll";
+        [entries addObject:entry];
+    }
+    if (scroller) [entries addObject:Entry(@"scroll", scroller, NSAccessibilityScrollBarRole, Localized(@"Fields"), 0)];
+    return entries;
 }
 
 static NSMapTable<NSWindow *, AXBInternalFormOverlay *> *Overlays;
 static id KeyObserver, CloseObserver;
 
+// The criterion's field that the open field list chooses for.
+static __weak AXBInternalFormElement *ChooserField;
+
 static void RemoveOverlay(NSWindow *window, AXBInternalFormOverlay *overlay) {
     if (!overlay) return;
+    BOOL chooser = [overlay.identifierPrefix hasSuffix:@"/fields/"];
+    BOOL focused = [overlay.elements.allValues containsObject:NSApp.accessibilityApplicationFocusedUIElement];
     [overlay releaseFocus];
     [overlay removeFromSuperview];
     [Overlays removeObjectForKey:window];
+    // Closing the field list leaves assistive focus on nothing: return it to the field it chose for,
+    // as AppKit returns focus from a closed pop-up, so VoiceOver goes on from there.
+    AXBInternalFormElement *field = ChooserField;
+    if (!chooser || !focused || !field.isAccessibilityElement) return;
+    ChooserField = nil;
+    NSApp.accessibilityApplicationFocusedUIElement = field;
+    NSAccessibilityPostNotification(field, NSAccessibilityFocusedUIElementChangedNotification);
 }
 
 BOOL AXBQueryEditorRefreshWindow(NSWindow *window) {
@@ -184,6 +208,7 @@ BOOL AXBQueryEditorRefreshWindow(NSWindow *window) {
         NSString *name = [field.currentText componentsSeparatedByString:@"]"].lastObject;
         AXBInternalFormElement *focus = name.length ? overlay.elements[[@"item/" stringByAppendingString:name]] : nil;
         focus = focus ?: overlay.elements[overlay.order.firstObject];
+        ChooserField = field;
         if (focus) {
             overlay.placedFocus = focus;
             NSApp.accessibilityApplicationFocusedUIElement = focus;

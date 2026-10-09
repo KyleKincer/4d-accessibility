@@ -1,8 +1,8 @@
 """Build a project whose startup method opens 4D's Query editor on a small table.
 
-The Orders table has text, number, Boolean and date fields and five records. The startup
-method opens the Query editor with QUERY([Orders]) and records OK and the customers of the
-resulting selection, then quits.
+The Orders table has text, number, Boolean and date fields, twenty note fields after them, and
+five records. The startup method opens the Query editor with QUERY([Orders]) and records OK and
+the customers of the resulting selection, then quits.
 """
 import argparse
 import json
@@ -66,7 +66,9 @@ def main():
     table = ET.SubElement(tree.getroot(), 'table', name='Orders', uuid=uuid.uuid4().hex.upper(), id='1')
     key = uuid.uuid4().hex.upper()
     ET.SubElement(table, 'field', name='id', uuid=key, type='4', unique='true', never_null='true', id='1')
-    for number, (name, kind) in enumerate((('Customer', '10'), ('Amount', '6'), ('Paid', '1'), ('Due', '8')), start=2):
+    # Twenty notes after them make the field lists longer than their boxes.
+    notes = tuple((f'Note{i:02d}', '10') for i in range(1, 21))
+    for number, (name, kind) in enumerate((('Customer', '10'), ('Amount', '6'), ('Paid', '1'), ('Due', '8')) + notes, start=2):
         ET.SubElement(table, 'field', name=name, uuid=uuid.uuid4().hex.upper(), type=kind, id=str(number))
     ET.SubElement(table, 'primary_key', field_name='id', field_uuid=key)
     tree.write(catalog, encoding='unicode')
