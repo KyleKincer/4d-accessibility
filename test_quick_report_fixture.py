@@ -85,13 +85,19 @@ def main():
         return next((w for w in ax.application(process.pid).read("AXWindows") or [] if w.read("AXTitle") == title), None)
 
     def published():
+        """The published elements by key, with each list's lines after it."""
         current = window()
         found = {}
-        for child in (current.read("AXChildren") if current else None) or []:
-            # Read each identifier once: an element can retire between two reads.
-            identifier = child.read("AXIdentifier") or ""
-            if identifier.startswith("axb/report/"):
-                found[identifier[len("axb/report/"):]] = child
+
+        def visit(children):
+            for child in children or []:
+                # Read each identifier once: an element can retire between two reads.
+                identifier = child.read("AXIdentifier") or ""
+                if identifier.startswith("axb/report/"):
+                    found[identifier[len("axb/report/"):]] = child
+                    if child.read("AXRole") == "AXList":
+                        visit(child.read("AXChildren"))
+        visit(current.read("AXChildren") if current else None)
         return found
 
     def element(key_name):
@@ -225,10 +231,13 @@ def main():
             check(vo_to(lambda ph: "Fields" in ph and "button" in ph), "VoiceOver reaches the Fields button")
             front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: element("sheet/ok"), "The Fields sheet", timeout=10)
-            check(vo_to(lambda ph: ph.startswith("Customer") and "button" in ph), "VoiceOver reads the available fields")
+            check(vo_to(lambda ph: ph.startswith("Fields") and "list" in ph), "VoiceOver reads the available fields as one list")
+            front(); vo.key("down", vo.VO + ("shift",)); time.sleep(1)
+            check(vo_to(lambda ph: ph.startswith("Customer") and "button" in ph), "VoiceOver enters it and reads the available fields")
             front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: columns("sheet/column/") == ["[Orders]Customer"], "Customer added", timeout=10)
             check(True, "VO-Space on a field adds it to the report's columns")
+            front(); vo.key("up", vo.VO + ("shift",)); time.sleep(1)
             check(vo_to(lambda ph: "OK" in ph and "button" in ph), "VoiceOver reaches OK")
             front(); vo.key("space", vo.VO)
             ax.wait_for(lambda: sheet()[0][1:] == ["[Orders]Customer"], "The column", timeout=10)
@@ -274,6 +283,14 @@ def main():
             ax.wait_for(lambda: element("sheet/ok"), "The Fields sheet", timeout=10)
             check({"id", "Customer", "Amount", "Paid", "Due"} <= set(columns("sheet/field/")) and element("sheet/b.remove.one").read("AXDescription") == "Remove column",
                   "the Fields sheet publishes the available fields and the buttons that move them")
+            check(element("sheet/fields").read("AXRole") == "AXList" and element("sheet/columns").read("AXDescription") == "Report columns" and "Note20" not in columns("sheet/field/"),
+                  "the available fields and the report's columns are each one list, the fields showing their first lines")
+            assert element("sheet/fields").perform("AXScrollDownByPage") == 0
+            ax.wait_for(lambda: "Note20" in columns("sheet/field/"), "The last fields", timeout=10)
+            check("id" not in columns("sheet/field/"), "a page down shows the table's last fields")
+            assert element("sheet/fields").perform("AXScrollUpByPage") == 0
+            ax.wait_for(lambda: "Customer" in columns("sheet/field/"), "The first fields", timeout=10)
+            check(True, "a page up shows its first fields again")
             press("sheet/field/Customer")
             ax.wait_for(lambda: columns("sheet/column/") == ["[Orders]Customer"], "Customer added", timeout=10)
             press("sheet/field/Amount")

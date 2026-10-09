@@ -67,12 +67,18 @@ def main():
         return next((w for w in ax.application(process.pid).read("AXWindows") or [] if w.read("AXTitle") == TITLE), None)
 
     def published():
+        """The published elements by key, with the field list's lines after it."""
         found = {}
-        for current in ax.application(process.pid).read("AXWindows") or []:
-            for child in current.read("AXChildren") or []:
+
+        def visit(children):
+            for child in children or []:
                 identifier = child.read("AXIdentifier") or ""
                 if identifier.startswith("axb/query/"):
                     found[identifier[len("axb/query/"):]] = child
+                    if child.read("AXRole") == "AXList":
+                        visit(child.read("AXChildren"))
+        for current in ax.application(process.pid).read("AXWindows") or []:
+            visit(current.read("AXChildren"))
         return found
 
     def element(key):
@@ -168,10 +174,13 @@ def main():
         raise AssertionError("VoiceOver did not say the expected phrase; heard " + repr([p for _, p in heard.since(since)][-5:]))
 
     def vo_to(predicate, limit=24):
-        """Move the VoiceOver cursor right until it reads a matching phrase."""
+        """Move the VoiceOver cursor right until it reads a matching phrase. One move can say more
+        than one phrase, such as the window's name as VoiceOver returns to it, then the element."""
         for _ in range(limit):
             front(); mark = heard.mark(); vo.key("right", vo.VO)
             phrase = phrase_until(lambda ph: ph.strip() != "", mark)
+            time.sleep(0.5)
+            phrase = next((ph for _, ph in heard.since(mark) if predicate(ph)), phrase)
             if predicate(phrase):
                 return phrase
         raise AssertionError("VoiceOver did not reach the expected element")
@@ -234,10 +243,23 @@ def main():
             report["speech"] = [ph for _, ph in heard.since(0)]
         else:
             listed, focused = choose_field("line1/target", "Customer")
-            check({"Amount", "Customer", "Due", "Paid", "id"} <= set(listed), "the field list publishes the table's fields as buttons")
+            check({"Amount", "Customer", "Due", "id", "Note01"} <= set(listed), "the field list publishes the table's fields as buttons")
             report["listFocus"] = focused
             check(focused is not None and focused in listed, "the field list starts on the line's current field")
             check(element("line1/target").read("AXValue") == "[Orders]Customer", "pressing a field in the list makes it the criterion's field")
+            # A table longer than the list's box: page down to its last fields and back, then keep Customer.
+            assert element("line1/target").perform("AXPress") == 0
+            bar = ax.wait_for(lambda: element("fields/scroll"), "The field list's scroll bar", timeout=10)
+            check(bar.read("AXRole") == "AXScrollBar" and bar.read("AXDescription") == "Fields" and bar.read("AXValue") == 0 and "Note20" not in items(),
+                  "the field list's scroll bar is at the top, with the first fields shown")
+            assert bar.perform("AXIncrement") == 0
+            ax.wait_for(lambda: "Note20" in items(), "The last fields", timeout=10)
+            check("Amount" not in items() and element("fields/scroll").read("AXValue") > 0.5, "incrementing the scroll bar pages down to the table's last fields")
+            assert element("fields/scroll").perform("AXDecrement") == 0
+            ax.wait_for(lambda: "Customer" in items(), "The first fields", timeout=10)
+            assert items()["Customer"].perform("AXPress") == 0
+            ax.wait_for(lambda: not items() and element("line1/target").read("AXValue") == "[Orders]Customer", "Customer kept", timeout=10)
+            check(True, "decrementing it pages back up to the first fields, and a field there is chosen")
             comparisons = choose("line1/popup.0", "starts with")
             check({"contains", "starts with", "is between"} <= set(comparisons), "the comparison opens 4D's own menu of comparisons for a text field")
             write("line1/box.1", "Customer 3")
@@ -267,6 +289,8 @@ def main():
         report["passed"] = True
     finally:
         if heard:
+            # Kept on failure too, to show where VoiceOver was.
+            report["speech"] = [ph for _, ph in heard.since(0)]
             heard.stop()
         if vo:
             vo.stop()

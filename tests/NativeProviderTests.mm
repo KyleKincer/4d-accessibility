@@ -665,6 +665,20 @@ static CALayer *MessageLayer(CALayer *form, NSString *name, NSRect frame, NSArra
     if (texts) AXBDrawnTextRecordForTesting(layer, texts);
     return layer;
 }
+// A scroll bar as 4D draws one in a list: a dark track with a light thumb, narrower than the bar,
+// from rows first to last of its image, counted from the top.
+static CALayer *ScrollerLayer(CALayer *list, NSRect frame, int first, int last) {
+    CALayer *scroller = MessageLayer(list, @"vertical_scrollbar", frame, nil);
+    CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
+    int width = (int)NSWidth(frame), height = (int)NSHeight(frame);
+    CGContextRef bar = CGBitmapContextCreate(NULL, width, height, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
+    CGContextSetRGBFillColor(bar, 0.18, 0.18, 0.18, 1); CGContextFillRect(bar, CGRectMake(0, 0, width, height));
+    CGContextSetRGBFillColor(bar, 0.4, 0.4, 0.4, 1); CGContextFillRect(bar, CGRectMake(4, height - 1 - last, width - 8, last - first + 1));
+    CGImageRef track = CGBitmapContextCreateImage(bar);
+    scroller.contents = (__bridge id)track;
+    CGImageRelease(track); CGContextRelease(bar); CGColorSpaceRelease(rgb);
+    return scroller;
+}
 static NSArray *MessageChildren(NSView *form) {
     for (NSView *view in form.subviews) if (![view isKindOfClass:AXBWindowView.class] && view.accessibilityChildren.count) return view.accessibilityChildren;
     return @[];
@@ -960,8 +974,14 @@ static void QueryEditorTest(void) {
     AXBDrawnTextRecordOriginsForTesting(list, @[[NSValue valueWithPoint:NSMakePoint(39, 18.5)], [NSValue valueWithPoint:NSMakePoint(54, 36.5)],
         [NSValue valueWithPoint:NSMakePoint(54, 54.5)], [NSValue valueWithPoint:NSMakePoint(54, 72.5)]]);
     MessageLayer(listContext, @"b.done", NSMakeRect(381, 184, 77, 32), @[@"Return"]);
+    // A table longer than the list: its scroll bar's thumb is at the top.
+    ScrollerLayer(list, NSMakeRect(220, 5, 15, 240), 2, 120);
     Check(AXBQueryEditorRefreshWindow(chooser), "the field list is published");
-    NSArray *rows = ProgressChildren(listForm);
+    NSArray *children = ProgressChildren(listForm), *rows = [children subarrayWithRange:NSMakeRange(0, MIN(children.count, 4))];
+    id bar = children.lastObject;
+    Check(children.count == 5 && [[bar accessibilityRole] isEqual:NSAccessibilityScrollBarRole] && [[bar accessibilityLabel] isEqual:@"Fields"] && [[bar accessibilityValue] isEqual:@0] &&
+          [bar isAccessibilitySelectorAllowed:@selector(accessibilityPerformIncrement)] && [[[rows[1] accessibilityCustomActions] valueForKey:@"name"] isEqual:@[@"Scroll down"]] &&
+          [rows[1] accessibilityParent] != bar, "the list's scroll bar follows its fields, which stay the window's own and offer to scroll down");
     Check([[rows valueForKey:@"accessibilityLabel"] isEqual:(@[@"[Orders]", @"Amount", @"Customer", @"id"])] &&
           [[rows.firstObject accessibilityRole] isEqual:NSAccessibilityButtonRole], "each item of the list is a button, in the list's order");
     NSRect top = [rows[0] accessibilityFrame], next = [rows[1] accessibilityFrame];
@@ -974,7 +994,8 @@ static void QueryEditorTest(void) {
     [NSApp nextEventMatchingMask:NSEventMaskLeftMouseUp untilDate:[NSDate dateWithTimeIntervalSinceNow:1] inMode:NSDefaultRunLoopMode dequeue:YES];
     Check(down && down.window == chooser && fabs(down.locationInWindow.y - rowCenter.y) < 2, "the press is an ordinary click on that item's line");
     [chooser close]; Pump();
-    Check(NSApp.accessibilityApplicationFocusedUIElement != rows[2], "closing the list releases its focus");
+    Check(NSApp.accessibilityApplicationFocusedUIElement != rows[2] && NSApp.accessibilityApplicationFocusedUIElement == field,
+          "closing the list returns focus from it to the criterion's field it chose for");
     [second removeFromSuperlayer];
     AXBQueryEditorRefreshWindow(window);
     Check(!QueryElement(form, @"line2/operator") && QueryElement(form, @"line1/target") == field, "a removed criterion leaves the tree; the others keep their elements");
@@ -1077,8 +1098,10 @@ static void QuickReportTest(void) {
     MessageLayer(sheet, @"ok", NSMakeRect(451, 34, 85, 32), @[@"OK"]);
     AXBQuickReportRefreshWindow(window);
     NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
-    Check([keys isEqual:(@[@"axb/report/sheet/field/id", @"axb/report/sheet/field/Customer", @"axb/report/sheet/b.remove.one", @"axb/report/sheet/ok"])],
-          "while the Fields sheet is open, only its fields and buttons are published");
+    id available = ProgressElement(form, @"axb/report/sheet/fields");
+    Check([keys isEqual:(@[@"axb/report/sheet/fields", @"axb/report/sheet/b.remove.one", @"axb/report/sheet/ok"])] &&
+          [[[available accessibilityChildren] valueForKey:@"accessibilityIdentifier"] isEqual:(@[@"axb/report/sheet/field/id", @"axb/report/sheet/field/Customer"])],
+          "while the Fields sheet is open, only its list of fields and its buttons are published");
     id field = ProgressElement(form, @"axb/report/sheet/field/Customer");
     Check([[ProgressElement(form, @"axb/report/sheet/b.remove.one") accessibilityLabel] isEqual:@"Remove column"], "the sheet's arrow buttons are labelled");
     Check([field accessibilityPerformPress], "pressing an available field is accepted");
@@ -1216,17 +1239,8 @@ static void FormulaEditorTest(void) {
         for (CGFloat middle : {166.0, 130.0}) CGContextFillRect(c, CGRectMake(22, middle - 7, 14, 14));
     });
     commands.contents = (__bridge id)image; CGImageRelease(image);
-    // Its scroll bar: a dark track with a light thumb, narrower than the bar, at the top.
-    CALayer *scroller = MessageLayer(commands, @"vertical_scrollbar", NSMakeRect(181, 5, 15, 170), nil);
-    {
-        CGColorSpaceRef rgb = CGColorSpaceCreateDeviceRGB();
-        CGContextRef bar = CGBitmapContextCreate(NULL, 15, 170, 8, 0, rgb, kCGImageAlphaPremultipliedLast);
-        CGContextSetRGBFillColor(bar, 0.18, 0.18, 0.18, 1); CGContextFillRect(bar, CGRectMake(0, 0, 15, 170));
-        CGContextSetRGBFillColor(bar, 0.4, 0.4, 0.4, 1); CGContextFillRect(bar, CGRectMake(4, 50, 7, 118));
-        CGImageRef track = CGBitmapContextCreateImage(bar);
-        scroller.contents = (__bridge id)track;
-        CGImageRelease(track); CGContextRelease(bar); CGColorSpaceRelease(rgb);
-    }
+    // Its scroll bar, with its thumb at the top.
+    ScrollerLayer(commands, NSMakeRect(181, 5, 15, 170), 2, 119);
     MessageLayer(context, @"vFormula", NSMakeRect(10, 36, 654, 49), @[@"[Orders]Amount"]);
     for (NSString *name in @[@"bLoad", @"bSave", @"bCancel", @"bOK"])
         MessageLayer(context, name, NSMakeRect(15 + 100 * [@[@"bLoad", @"bSave", @"bCancel", @"bOK"] indexOfObject:name], 15, 90, 32), @[[@{@"bLoad": @"Load...", @"bSave": @"Save...", @"bCancel": @"Cancel", @"bOK": @"OK"} objectForKey:name]]);
