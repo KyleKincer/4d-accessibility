@@ -12,6 +12,8 @@
 #import "OrderByEditor.h"
 #import "FormulaEditor.h"
 #import "GenericForms.h"
+#import "Activation.h"
+#import "DrawnText.h"
 #import <objc/runtime.h>
 
 static NSMutableDictionary<NSString *, AXBSession *> *sessions;
@@ -929,6 +931,8 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
 // accessibility child even though it skips this transparent geometry anchor.
 - (BOOL)isAccessibilityElement { return NO; }
 - (NSArray *)accessibilityChildren {
+    // A client reading a form whose session waits for activation wakes the process.
+    AXBActivationNoteRequest();
     if (!self.live || !self.session.snapshot || !self.element) return @[];
     return self.rootContainer ? [@[self.element] arrayByAddingObjectsFromArray:TopLevelNodes(self)] : @[self.element];
 }
@@ -1292,6 +1296,14 @@ static void ScheduleRefresh(AXBSession *session, void *nativeWindow) {
     });
 }
 
+BOOL AXBWindowHasSession(void *nativeWindow) {
+    Init();
+    @synchronized(registryLock) {
+        for (NSDictionary *binding in bindings.allValues) if ([binding[@"native"] pointerValue] == nativeWindow) return YES;
+    }
+    return NO;
+}
+
 NSString *AXBOpen(NSInteger windowID, NSInteger processID, void *nativeWindow) {
     Init();
     if (windowID <= 0 || processID <= 0 || !nativeWindow)
@@ -1508,17 +1520,35 @@ static void QuietHelpTips(void) {
 
 void AXBInitialize(void) {
     Init();
+    // Off: no hooks or observers at all; the application runs as without the plugin.
+    if (AXBActivationIsOff()) {
+        AXBActivationInitialize();
+        @synchronized(registryLock) { stopped = NO; }
+        return;
+    }
     AXBLayoutInitialize();
     if (NSThread.isMainThread) QuietHelpTips(); else dispatch_async(dispatch_get_main_queue(), ^{ QuietHelpTips(); });
-    // Standard 4D messages, Progress component windows and the Query, Quick Report and Order By editors have no application form method to integrate. Install
-    // now, on 4D's calling thread: a startup method's first message can be drawn inside a
-    // modal loop that never drains the main queue, so a deferred install would miss it.
-    AXBMessagesInitialize();
-    AXBProgressInitialize();
-    AXBQueryEditorInitialize();
-    AXBQuickReportInitialize();
-    AXBOrderByEditorInitialize();
-    AXBFormulaEditorInitialize();
+    // Observe drawing from the start, so the text of windows drawn before activation is known.
+    AXBDrawnTextInitialize();
+    // Standard 4D messages, Progress component windows and the Query, Quick Report, Order By and
+    // formula editors have no application form method to integrate. Install them on activation:
+    // at once, on 4D's calling thread, when the process starts active, since a startup method's
+    // first message can be drawn inside a modal loop that never drains the main queue; later,
+    // in any run-loop mode, with the windows already open.
+    AXBWhenActive(^{
+        AXBMessagesInitialize();
+        AXBProgressInitialize();
+        AXBQueryEditorInitialize();
+        AXBQuickReportInitialize();
+        AXBOrderByEditorInitialize();
+        AXBFormulaEditorInitialize();
+        for (NSWindow *window in NSApp.windows) {
+            if (!window.isVisible) continue;
+            AXBMessagesRefreshWindow(window); AXBProgressRefreshWindow(window); AXBQueryEditorRefreshWindow(window);
+            AXBQuickReportRefreshWindow(window); AXBOrderByEditorRefreshWindow(window); AXBFormulaEditorRefreshWindow(window);
+        }
+    });
+    AXBActivationInitialize();
     // 4D can close and reopen a database while this bundle remains loaded.
     // Shutdown has retired old sessions and completed native-view cleanup.
     @synchronized(registryLock) { stopped = NO; }
@@ -1537,7 +1567,7 @@ void AXBShutdown(void) {
     // No monitor is held, and cleanup never calls 4D or waits for the form.
     dispatch_block_t cleanup = ^{
         for (AXBWindowView *v in views.allValues) [v invalidate];
-        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBOrderByEditorShutdown(); AXBFormulaEditorShutdown(); AXBGenericFormsShutdown();
+        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBOrderByEditorShutdown(); AXBFormulaEditorShutdown(); AXBGenericFormsShutdown(); AXBActivationShutdown();
         if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
         helpTipObserver = nil;
     };

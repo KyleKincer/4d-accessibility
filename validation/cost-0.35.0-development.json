@@ -1,0 +1,401 @@
+{
+ "date": "2026-10-13",
+ "runtime": "4D 20.8, compiled, Apple Silicon (native ARM), macOS 26",
+ "method": "measure_cost.py: one compiled project per variant. Five openings of a small dialog and three of a large form (600 buttons, a field, a 2,000-row collection list box), each timed until 4D first runs the form's timer; then the large form idle for 30 s with a one-second timer (quiet: CPU), idle for 30 s with a one-tick timer (gaps between ticks: pauses of the form's process), and scrolling its list box every tick for 30 s. CPU time and resident memory read with ps; CPU is the share of one core.",
+ "variants": {
+  "none": "no plugin, no component, no lifecycle area",
+  "plugin": "plugin and component installed, host methods installed, forms without a lifecycle area",
+  "area": "plugin, component and host methods, with the installer's lifecycle area in every form (--all-forms)"
+ },
+ "wake": "With wake, an accessibility client reads every element of each window before each phase.",
+ "release": "0.35.0 development (activation), locally built packages; mode auto, VoiceOver not running",
+ "sources_sha256": {
+  "src/Activation.mm": "a22ede7e91cb86c50d48674d12ae51edec5bd24d9fdd87d58c7e8f9fcd0e4c1b",
+  "src/Activation.h": "fdb3a3015948a64354c96f4b24a394c637e6eaac14961487cabdc2bab1f9746c",
+  "src/Area.mm": "754eea3bc0f3a4f7e455d443cbc65f76447f26309dbcfe8b21d5965f85149a01",
+  "src/Bridge.mm": "47b09ee31f361245834c4c7478a098b0e7f31716017b770d0f750718a8c9a2c8",
+  "src/Plugin.mm": "19b843b2ddbf89a0af855a21f13a7ae8c065bc539ac0b43e3263b58dc35c515a",
+  "host/Methods/AXB_Pulse.4dm": "7457c555324f4988daea6f2cf00c45bb1dfa09046a25115f15245e76fc1508a4",
+  "measure_cost.py": "cdfc00c0a562b55d3706756018837081b00d64ee70eee338f7b572f636f569e5"
+ },
+ "runs": [
+  {
+   "variant": "plugin",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 2.6,
+     "seconds": 31.0,
+     "rssMB": 310
+    },
+    "idle": {
+     "cpuPercent": 20.6,
+     "seconds": 30.0,
+     "rssMB": 319,
+     "ticks": 875,
+     "medianMs": 38,
+     "p99Ms": 47,
+     "maxMs": 48,
+     "over50Ms": 0,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 27.2,
+     "seconds": 30.0,
+     "rssMB": 326,
+     "ticks": 870,
+     "medianMs": 32.0,
+     "p99Ms": 49,
+     "maxMs": 58,
+     "over50Ms": 2,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.77,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 48,
+    "max": 79,
+    "runs": [
+     79,
+     37,
+     40,
+     60,
+     48
+    ]
+   },
+   "closeSmallMs": 82,
+   "openLargeMs": {
+    "median": 203,
+    "max": 209,
+    "runs": [
+     203,
+     209,
+     201
+    ]
+   },
+   "closeLargeMs": 257,
+   "attempt": 1,
+   "nativeSha256": "4d4259a092c3bd932c9f2a31e61c99350463e2079fc2d4f17ca344ec2b4bc498",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  {
+   "variant": "plugin",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 3.0,
+     "seconds": 31.0,
+     "rssMB": 308
+    },
+    "idle": {
+     "cpuPercent": 22.0,
+     "seconds": 30.0,
+     "rssMB": 318,
+     "ticks": 882,
+     "medianMs": 38.0,
+     "p99Ms": 46,
+     "maxMs": 49,
+     "over50Ms": 0,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 27.0,
+     "seconds": 30.0,
+     "rssMB": 325,
+     "ticks": 870,
+     "medianMs": 32.0,
+     "p99Ms": 50,
+     "maxMs": 51,
+     "over50Ms": 5,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.16,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 54,
+    "max": 75,
+    "runs": [
+     75,
+     54,
+     57,
+     52,
+     50
+    ]
+   },
+   "closeSmallMs": 106,
+   "openLargeMs": {
+    "median": 208,
+    "max": 215,
+    "runs": [
+     215,
+     208,
+     200
+    ]
+   },
+   "closeLargeMs": 286,
+   "attempt": 2,
+   "nativeSha256": "4d4259a092c3bd932c9f2a31e61c99350463e2079fc2d4f17ca344ec2b4bc498",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  {
+   "variant": "area",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 4.6,
+     "seconds": 30.2,
+     "rssMB": 309
+    },
+    "idle": {
+     "cpuPercent": 19.6,
+     "seconds": 30.0,
+     "rssMB": 320,
+     "ticks": 870,
+     "medianMs": 38.0,
+     "p99Ms": 46,
+     "maxMs": 52,
+     "over50Ms": 1,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 25.7,
+     "seconds": 30.0,
+     "rssMB": 326,
+     "ticks": 883,
+     "medianMs": 32,
+     "p99Ms": 49,
+     "maxMs": 51,
+     "over50Ms": 3,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.95,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 54,
+    "max": 81,
+    "runs": [
+     81,
+     57,
+     54,
+     43,
+     50
+    ]
+   },
+   "closeSmallMs": 98,
+   "openLargeMs": {
+    "median": 201,
+    "max": 203,
+    "runs": [
+     198,
+     203,
+     201
+    ]
+   },
+   "closeLargeMs": 248,
+   "attempt": 1,
+   "nativeSha256": "4d4259a092c3bd932c9f2a31e61c99350463e2079fc2d4f17ca344ec2b4bc498",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  {
+   "variant": "area",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 3.0,
+     "seconds": 30.0,
+     "rssMB": 309
+    },
+    "idle": {
+     "cpuPercent": 20.8,
+     "seconds": 30.1,
+     "rssMB": 318,
+     "ticks": 873,
+     "medianMs": 38,
+     "p99Ms": 48,
+     "maxMs": 64,
+     "over50Ms": 3,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 27.7,
+     "seconds": 30.0,
+     "rssMB": 326,
+     "ticks": 871,
+     "medianMs": 32,
+     "p99Ms": 50,
+     "maxMs": 51,
+     "over50Ms": 3,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.18,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 60,
+    "max": 77,
+    "runs": [
+     77,
+     54,
+     54,
+     60,
+     67
+    ]
+   },
+   "closeSmallMs": 102,
+   "openLargeMs": {
+    "median": 197,
+    "max": 225,
+    "runs": [
+     225,
+     195,
+     197
+    ]
+   },
+   "closeLargeMs": 233,
+   "attempt": 2,
+   "nativeSha256": "4d4259a092c3bd932c9f2a31e61c99350463e2079fc2d4f17ca344ec2b4bc498",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  {
+   "variant": "plugin",
+   "wake": true,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.02,
+     "cpuPercent": 6.3,
+     "seconds": 30.2,
+     "rssMB": 313
+    },
+    "idle": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.0,
+     "cpuPercent": 24.1,
+     "seconds": 30.1,
+     "rssMB": 322,
+     "ticks": 859,
+     "medianMs": 38,
+     "p99Ms": 53,
+     "maxMs": 74,
+     "over50Ms": 11,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.0,
+     "cpuPercent": 28.3,
+     "seconds": 30.1,
+     "rssMB": 329,
+     "ticks": 867,
+     "medianMs": 33,
+     "p99Ms": 50,
+     "maxMs": 60,
+     "over50Ms": 5,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.99,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 49,
+    "max": 74,
+    "runs": [
+     74,
+     32,
+     55,
+     41,
+     49
+    ]
+   },
+   "closeSmallMs": 84,
+   "openLargeMs": {
+    "median": 197,
+    "max": 232,
+    "runs": [
+     232,
+     197,
+     194
+    ]
+   },
+   "closeLargeMs": 249,
+   "attempt": 1,
+   "nativeSha256": "4d4259a092c3bd932c9f2a31e61c99350463e2079fc2d4f17ca344ec2b4bc498",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  {
+   "variant": "area",
+   "wake": true,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.01,
+     "cpuPercent": 24.2,
+     "seconds": 31.0,
+     "rssMB": 323
+    },
+    "idle": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.01,
+     "cpuPercent": 32.7,
+     "seconds": 30.0,
+     "rssMB": 334,
+     "ticks": 701,
+     "medianMs": 37,
+     "p99Ms": 173,
+     "maxMs": 200,
+     "over50Ms": 47,
+     "over100Ms": 47
+    },
+    "scroll": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.0,
+     "cpuPercent": 38.8,
+     "seconds": 30.1,
+     "rssMB": 344,
+     "ticks": 712,
+     "medianMs": 40.0,
+     "p99Ms": 171,
+     "maxMs": 181,
+     "over50Ms": 47,
+     "over100Ms": 47
+    }
+   },
+   "startupSeconds": 3.96,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 56,
+    "max": 75,
+    "runs": [
+     75,
+     56,
+     54,
+     55,
+     65
+    ]
+   },
+   "closeSmallMs": 103,
+   "openLargeMs": {
+    "median": 213,
+    "max": 224,
+    "runs": [
+     224,
+     195,
+     213
+    ]
+   },
+   "closeLargeMs": 288,
+   "attempt": 1,
+   "nativeSha256": "4d4259a092c3bd932c9f2a31e61c99350463e2079fc2d4f17ca344ec2b4bc498",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  }
+ ]
+}

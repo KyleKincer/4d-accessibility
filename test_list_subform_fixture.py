@@ -250,6 +250,7 @@ def main():
                 return {issue.get("reason") for issue in state().get("diagnostics", {}).get("issues", [])}
             ax.wait_for(lambda: expected <= diagnostic_reasons(), "Parent diagnostics disappeared while the identity binding failed", timeout=20)
             check(expected <= diagnostic_reasons(), "parent metadata and identity failures are both reported")
+            table = control("Items")
             check(table.read("AXEnabled") is False, "invalid list is disabled in the public accessibility tree")
             check("AXPress" not in table.actions(), "invalid binding exposes no mutation action")
             leave_editor()
@@ -257,8 +258,11 @@ def main():
             report["diagnosticReasons"] = sorted(diagnostic_reasons())
             report["passed"] = True
             return
-        ax.wait_for(
-            lambda: table.count("AXRows") == 600, "Missing logical rows", timeout=20
+        # A list subform is published as loading, then replaced by its loaded table. The first
+        # read of the window wakes the process, so the test can see the loading table.
+        table = ax.wait_for(
+            lambda: (lambda found: found if found is not None and found.read("AXEnabled") is True and found.count("AXRows") == 600 else None)(control("Items")),
+            "Missing logical rows", timeout=20
         )
         check(
             table.count("AXColumns") == 5,

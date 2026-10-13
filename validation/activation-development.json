@@ -1,0 +1,142 @@
+{
+ "passed": true,
+ "date": "2026-10-13",
+ "release": "0.35.0 development (activation)",
+ "scope": "A 4D process starts dormant and wakes when VoiceOver runs, Switch Control is on, or an accessibility client reads a window's contents; the Activation setting chooses auto, on or off.",
+ "runtime": "4D 20.8 desktop, compiled fixture, native ARM and Rosetta, macOS 26",
+ "liveActivation": {
+  "activation": {
+   "passed": true,
+   "checks": [
+    "auto: the fixture runs compiled",
+    "auto: reading the window's title and frame leaves the process dormant",
+    "auto: reading the window's contents wakes the process",
+    "auto: the woken form publishes its buttons",
+    "auto: Alpha accepts a press",
+    "auto: a press runs the form's own method",
+    "off: reading the window's contents leaves the process dormant and publishes nothing",
+    "on: the process is active before any client reads it",
+    "on: the form is published"
+   ],
+   "autoWakeSeconds": 0.16,
+   "voiceOverWakeReason": null,
+   "nativeSha256": "362166fa7e2abc58d34721791a04faee2ce07efa3722c6a63d55a52ba742ea4f",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  "activation-intel": {
+   "passed": true,
+   "checks": [
+    "auto: the fixture runs compiled",
+    "auto: reading the window's title and frame leaves the process dormant",
+    "auto: reading the window's contents wakes the process",
+    "auto: the woken form publishes its buttons",
+    "auto: Alpha accepts a press",
+    "auto: a press runs the form's own method",
+    "off: reading the window's contents leaves the process dormant and publishes nothing",
+    "on: the process is active before any client reads it",
+    "on: the form is published"
+   ],
+   "autoWakeSeconds": 0.17,
+   "voiceOverWakeReason": null,
+   "nativeSha256": "362166fa7e2abc58d34721791a04faee2ce07efa3722c6a63d55a52ba742ea4f",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  },
+  "activation-voiceover": {
+   "passed": true,
+   "checks": [
+    "auto: the fixture runs compiled",
+    "auto: reading the window's title and frame leaves the process dormant",
+    "auto: reading the window's contents wakes the process",
+    "auto: the woken form publishes its buttons",
+    "auto: Alpha accepts a press",
+    "auto: a press runs the form's own method",
+    "off: reading the window's contents leaves the process dormant and publishes nothing",
+    "on: the process is active before any client reads it",
+    "on: the form is published",
+    "VoiceOver: the process is dormant before VoiceOver starts",
+    "VoiceOver: starting VoiceOver wakes a running process",
+    "VoiceOver: the woken form is published",
+    "VoiceOver: the process starts active while VoiceOver is on"
+   ],
+   "autoWakeSeconds": 0.15,
+   "voiceOverWakeReason": "accessibility client",
+   "nativeSha256": "362166fa7e2abc58d34721791a04faee2ce07efa3722c6a63d55a52ba742ea4f",
+   "componentSha256": "afce5403e879f6a9ff4aaa4f42555bb3fdb7346ce83af4461644c9443ef18f09"
+  }
+ },
+ "nativeProviderChecks": {
+  "count": 551,
+  "activation": [
+   "a process starts dormant with nothing run",
+   "dormant activation is described",
+   "a dormant process watches its windows",
+   "reading a window's title and frame does not wake the process",
+   "reading a window's contents wakes the process",
+   "activation does not run work inside the accessibility request",
+   "activation runs pending work once and removes the watchers",
+   "active activation names its cause",
+   "work registered while active runs at once",
+   "off never wakes and watches no window",
+   "off is described",
+   "on starts active"
+  ]
+ },
+ "autoModeRegressionMatrix": {
+  "note": "Existing live fixtures with no AXB_ACTIVATION, so every test wakes the process with its first read. First run: area and list subform failed. The area test waited for 4D to report a started bridge before reading the window; it now reads the window first, as any client. The list subform test held the table element published while its rows load, which the bridge replaces once loaded (as at every form open); it now finds the loaded table. Its data had also been left edited by the aborted runs and was prepared again. No product change was needed for these. A separate product change followed: providers for forms without an area now leave a window whose bridge session is open but whose view has not attached yet.",
+  "firstRun": [
+   "picture :: PASS: 29 picture control checks (arm64, interpreted)",
+   "picture voiceover :: PASS: 25 picture control checks (arm64, interpreted, VoiceOver)",
+   "splitter :: PASS: 9 splitter checks (arm64, interpreted)",
+   "splitter voiceover :: PASS: 8 splitter checks (arm64, interpreted, VoiceOver)",
+   "hlist :: PASS: 33 hierarchical list checks (arm64, interpreted)",
+   "hlist voiceover :: PASS: 12 hierarchical list checks (arm64, interpreted, VoiceOver)",
+   "progress :: PASS: 9 progress checks (arm64, interpreted)",
+   "progress voiceover :: PASS: 10 progress checks (arm64, interpreted, VoiceOver)",
+   "button_menu :: PASS: 15 button menu checks (arm64, interpreted)",
+   "button_menu voiceover :: PASS: 12 button menu checks (arm64, interpreted, VoiceOver)",
+   "query_editor :: PASS: 17 Query editor checks (arm64, interpreted)",
+   "query_editor voiceover :: PASS: 13 Query editor checks (arm64, interpreted, VoiceOver)",
+   "quick_report :: PASS: 16 Quick Report checks (arm64, interpreted)",
+   "quick_report voiceover :: PASS: 16 Quick Report checks (arm64, interpreted, VoiceOver)",
+   "generic_form :: PASS: 24 generic form checks (arm64, interpreted)",
+   "generic_form voiceover :: PASS: 23 generic form checks (arm64, interpreted, VoiceOver)",
+   "order_by :: PASS: 9 Order By editor checks (arm64, interpreted)",
+   "order_by voiceover :: PASS: 13 Order By editor checks (arm64, interpreted, VoiceOver)",
+   "formula_editor :: PASS: 19 formula editor checks (arm64, interpreted)",
+   "formula_editor voiceover :: PASS: 19 formula editor checks (arm64, interpreted, VoiceOver)",
+   "list_subform  :: RuntimeError: AX array count failed: AXRows, -25202",
+   "list_subform --voiceover --compiled :: RuntimeError: AX array count failed: AXRows, -25202",
+   "messages  :: PASS: 37 standard-message checks (arm64, interpreted)",
+   "messages --voiceover :: PASS: 32 standard-message checks (arm64, interpreted, VoiceOver)",
+   "selection_fixture :: PASS: 34 classic-selection AX checks",
+   "combo_fixture :: PASS: owned combo fixture closes normally",
+   "dropdown_fixture :: PASS: owned dropdown fixture closes normally",
+   "area :: AssertionError: Bridge did not start: {'runId': 'e0c290331e8e4d2782dbb86bf699fcfb', 'compiled': False, 'name': 'After initialization', 'child': {'name': 'Child', 'clicks': 0}, 'clicks': 0, 'ticks': 15",
+   "area compiled :: AssertionError: Bridge did not start: {'runId': 'e0c290331e8e4d2782dbb86bf699fcfb', 'compiled': True, 'name': 'After initialization', 'child': {'name': 'Child', 'clicks': 0}, 'clicks': 0, 'ticks': 15,",
+   "large :: PASS: the ordinary close action exits the large form normally"
+  ],
+  "reruns": [
+   "area :: PASS: ordinary application exits cleanly",
+   "area compiled :: PASS: ordinary application exits cleanly",
+   "list_subform :: PASS: 51 list-subform AX checks",
+   "list_subform --voiceover --compiled :: PASS: VO-Space runs the row button's own On Clicked once",
+   "generic_form (after the session change) :: PASS: 24 generic form checks",
+   "query_editor (after the session change) :: PASS: 17 Query editor checks"
+  ]
+ },
+ "costRecords": [
+  "validation/cost-0.34.1.json",
+  "validation/cost-0.35.0-development.json"
+ ],
+ "sources_sha256": {
+  "src/Activation.mm": "8786fd7722e62e2bf89a95c2e651bd70530fe5276d73bdb456bb132a97f49b3e",
+  "src/Activation.h": "0e9fdaba005168aee8956f46e43bc162ce2f03ab79308f7bd1a2dcfdf3fb09e0",
+  "src/Area.mm": "754eea3bc0f3a4f7e455d443cbc65f76447f26309dbcfe8b21d5965f85149a01",
+  "src/Bridge.mm": "3d0d1fc28cf3483236f26a4917f1f209d3760aa8cc239a7a1d096da88b3028f2",
+  "src/Plugin.mm": "19b843b2ddbf89a0af855a21f13a7ae8c065bc539ac0b43e3263b58dc35c515a",
+  "src/InternalForms.mm": "545cc460f084b54c5550b26e3259d71082a16d20267330d8248283429b71371f",
+  "host/Methods/AXB_Pulse.4dm": "7457c555324f4988daea6f2cf00c45bb1dfa09046a25115f15245e76fc1508a4",
+  "manifest.json": "b0d6611e599ef2f61f690855c3b5e7e7ec29e3ac707e6bd2262d72190a544cd0",
+  "test_activation_fixture.py": "e8402a9698d9228396b46a59de3bb3daad397fe84a606d6f05b6151a0701e899"
+ }
+}

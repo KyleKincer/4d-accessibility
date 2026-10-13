@@ -36,6 +36,11 @@
       "theme": "Accessibility Bridge",
       "syntax": "AXB Native layout(&L;&T):T",
       "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Active:L",
+      "threadSafe": false
     }
   ]
 }

@@ -81,6 +81,9 @@ def main():
             check(report["architecture"].upper().replace("-", "").replace("_", "").startswith("X8664" if args.intel else "ARM64"), "requested desktop architecture")
             check(all(ready["preparation"].values()), "generated form preparation preserves source and rejects conflicts before mutation")
             app, window = activate_fixture(process, project, TITLE)
+            # A process starts dormant: as any accessibility client, this read of the window's
+            # contents wakes it, and the areas then start.
+            window.read("AXChildren")
             if compiled.get("noPlugin"):
                 check(state()["areas"]["areas"] == [], "absent native plugin delivers no area callbacks")
                 check(state()["dependencies"].get("error") == "dependencyUnavailable" and not state()["dependencies"]["native"], "dependency check identifies missing native plugin")

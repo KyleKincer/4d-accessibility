@@ -87,16 +87,18 @@ def main():
         report["architecture"] = ax.process_architecture(process.pid)
         check(report["architecture"].replace("-", "").startswith("ARM64"), "actual native ARM execution")
         app, window = activate_fixture(process, project, TITLE)
-        pending = [window]
-        group = None
-        while pending:
-            item = pending.pop()
-            identifier = item.read("AXIdentifier")
-            if isinstance(identifier, str) and identifier.startswith("axb/"):
-                group = item
-                break
-            if item.read("AXRole") != "AXTable":
-                pending.extend(item.read("AXChildren") or [])
+        def find_group():
+            pending = [window]
+            while pending:
+                item = pending.pop()
+                identifier = item.read("AXIdentifier")
+                if isinstance(identifier, str) and identifier.startswith("axb/"):
+                    return item
+                if item.read("AXRole") != "AXTable":
+                    pending.extend(item.read("AXChildren") or [])
+            return None
+        # A process starts dormant: this first read of the window wakes it.
+        group = ax.wait_for(find_group, "No bridge root", timeout=15)
         check(group is not None, "one root contains both ordinary controls and grid")
 
         def controls():

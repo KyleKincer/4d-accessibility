@@ -1,5 +1,6 @@
 #import <Foundation/Foundation.h>
 #include "Area.h"
+#import "Activation.h"
 #include <vector>
 
 @interface AXBAreaLifetime : NSObject
@@ -89,7 +90,8 @@ void AXBArea(PA_PluginParameters parameters) {
         [areas removeObjectForKey:@(key)];
         PA_SetAreaReference(parameters, nullptr);
         NotifyHost(area, @"stop");
-    } else if (event == eAE_Idle && !area.attached) {
+    } else if (event == eAE_Idle && !area.attached && AXBActivationIsActive()) {
+        // Until an assistive technology needs it, the form runs as if it had no area.
         area.attached = YES;
         NotifyHost(area, @"attach");
     } else if (event == eAE_MouseDown || event == eAE_KeyDown) {

@@ -2,6 +2,7 @@
 #import "DrawnText.h"
 #import "InternalTable.h"
 #import "BridgePrivate.h"
+#import "Bridge.h"
 #include <initializer_list>
 #include <vector>
 #include <dlfcn.h>
@@ -30,6 +31,8 @@ CALayer *AXBInternalFormContext(NSView *view) {
 }
 
 NSView *AXBInternalFormView(NSWindow *window) {
+    // A session opened in On Load attaches its view later, once the main queue drains.
+    if (AXBWindowHasSession((__bridge void *)window)) return nil;
     NSMutableArray<NSView *> *pending = window.contentView ? [NSMutableArray arrayWithObject:window.contentView] : [NSMutableArray new];
     NSView *form = nil;
     NSUInteger visited = 0;

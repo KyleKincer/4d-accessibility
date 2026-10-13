@@ -2,7 +2,9 @@
 
 Expose 4D forms through macOS accessibility so VoiceOver, accessibility tools and AI agents can read and operate them. The bridge discovers supported controls and uses their existing editors, validation and actions.
 
-The initial release supports the controls and integration patterns listed below. Start with a named workflow and validate its whole path, including prompts, editing and save/reopen. Several control families remain unfinished, so installing the bridge does not make an entire application accessible. Read the [support status](skills/4d-accessibility/references/STATUS.md) for the tested scope and open work.
+The initial release supports the controls and integration patterns listed below. Start with a named workflow and validate its whole path, including prompts, editing and save/reopen. Several control families remain unfinished, so installing the bridge does not make an entire application accessible. [Coverage and gaps](COVERAGE.md) summarizes what is accessible, what is not and what is untested; the [support status](skills/4d-accessibility/references/STATUS.md) holds the detailed evidence.
+
+A 4D process pays for the bridge only when an assistive technology uses it. It starts dormant, and wakes when VoiceOver runs or a client reads a window's contents. A setting turns it on or off per Mac. See [performance and activation](PERFORMANCE.md) for the measured cost.
 
 The implementation targets 4D 20.8 on macOS. Native binaries contain Apple Silicon and Intel code; live validation has primarily used Apple Silicon and macOS 26. Windows accessibility is not implemented.
 

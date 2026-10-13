@@ -26,6 +26,8 @@ The installer adds `__AXB_Bridge`, a non-enterable 1×1 `%AXB Area`, at (0,0) on
 
 The [0.21.1 early-focus and close-during-load tests](../../../validation/compound-form-focus-0.21.1.json) verify area reservation before On Load on the tested runtime, so the existing [focus observer](INTEGRATION.md#repeated-controls-with-ambiguous-focus) can retain early events. Root registration and `AXB_Configure` still wait until the form reaches its ordinary event loop. Closing during On Load retires the reservation without starting a provider.
 
+The area starts its form's session only once the process is active, when an assistive technology needs it; until then its state is `queued` and the form runs as if it had no area. A dormant area costs what the form costs without the bridge. Add the area to every detail form: [performance and activation](../../../PERFORMANCE.md) gives the measurements and the per-Mac setting.
+
 For an ordinary form with clear existing labels, there is no application method to write. Its form method keeps its existing initialization, timer and business code. The area queues startup after initialization and retires its own captured lifetime when destroyed.
 
 Matching 0.22.0 development kits generate `Resources/AXB.FormMetadata.json` beside `Project`, including metadata from forms outside the selected set. This can happen during ordinary area installation even when that form has no list. Commit and ship the generated resource. Follow the [resource ownership and update contract](LIST-SUBFORMS.md#install-a-parent-form), keeping your existing installer options.

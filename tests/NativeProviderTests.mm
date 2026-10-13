@@ -12,6 +12,7 @@
 #import "OrderByEditor.h"
 #import "FormulaEditor.h"
 #import "GenericForms.h"
+#import "Activation.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
 #include <cstdio>
@@ -2366,11 +2367,69 @@ static void TabSemanticsTest(void) {
     [window close]; Pump();
 }
 
+// A process starts dormant, wakes when a client reads a window's contents, and not when one
+// reads only the window, as window managers do. Off never wakes.
+static void ActivationTest(void) {
+    if ([NSRunningApplication runningApplicationsWithBundleIdentifier:@"com.apple.VoiceOver"].count || NSWorkspace.sharedWorkspace.switchControlEnabled) {
+        printf("SKIP: activation (an assistive technology is on)\n");
+        AXBActivationSetActiveForTesting(YES);
+        return;
+    }
+    unsetenv("AXB_ACTIVATION");
+    AXBActivationSetActiveForTesting(NO);
+    __block int ran = 0;
+    AXBWhenActive(^{ ran++; });
+    AXBActivationInitialize();
+    Check(!AXBActivationIsActive() && ran == 0, "a process starts dormant with nothing run");
+    Check([AXBActivationDescription() isEqual:@"auto; dormant"], "dormant activation is described");
+    NSWindow *window = Window(@"AXB activation");
+    Pump();
+    Check(AXBActivationSentinelCountForTesting() >= 1, "a dormant process watches its windows");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [window accessibilityAttributeValue:NSAccessibilityTitleAttribute];
+    [window accessibilityAttributeValue:NSAccessibilityPositionAttribute];
+    [window accessibilityAttributeValue:NSAccessibilitySizeAttribute];
+    Pump();
+    Check(!AXBActivationIsActive() && ran == 0, "reading a window's title and frame does not wake the process");
+    [window accessibilityAttributeValue:NSAccessibilityChildrenAttribute];
+#pragma clang diagnostic pop
+    Check(AXBActivationIsActive(), "reading a window's contents wakes the process");
+    Check(ran == 0, "activation does not run work inside the accessibility request");
+    Pump();
+    Check(ran == 1 && AXBActivationSentinelCountForTesting() == 0, "activation runs pending work once and removes the watchers");
+    Check([AXBActivationDescription() isEqual:@"auto; active; accessibility client"], "active activation names its cause");
+    AXBWhenActive(^{ ran++; });
+    Check(ran == 2, "work registered while active runs at once");
+    [window close];
+
+    AXBActivationSetActiveForTesting(NO);
+    setenv("AXB_ACTIVATION", "off", 1);
+    AXBActivationInitialize();
+    NSWindow *off = Window(@"AXB activation off");
+    Pump();
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [off accessibilityAttributeValue:NSAccessibilityChildrenAttribute];
+#pragma clang diagnostic pop
+    AXBActivationNoteRequest();
+    Pump();
+    Check(!AXBActivationIsActive() && AXBActivationSentinelCountForTesting() == 0, "off never wakes and watches no window");
+    Check([AXBActivationDescription() isEqual:@"off; dormant"], "off is described");
+    [off close];
+
+    setenv("AXB_ACTIVATION", "on", 1);
+    AXBActivationInitialize();
+    Check(AXBActivationIsActive() && [AXBActivationDescription() isEqual:@"on; active; configured"], "on starts active");
+    unsetenv("AXB_ACTIVATION");
+}
+
 int main(void) {
     @autoreleasepool {
         [NSApplication sharedApplication];
         [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
         [NSApp finishLaunching];
+        ActivationTest();
         StableIdentifierTest();
         OutlineSemanticsTest();
         OutlineDisclosureTest();

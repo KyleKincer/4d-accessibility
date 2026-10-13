@@ -5,7 +5,7 @@ description: Integrate or extend the 4D Accessibility bridge in 4D projects, inc
 
 # Integrate 4D accessibility
 
-Prefer an installer-added lifecycle area and automatic discovery. Keep business methods and timers. Return labels and provider configuration from application-owned `AXB_Configure`; map a shared controller only where the adapter needs application intent it cannot infer.
+Prefer an installer-added lifecycle area and automatic discovery. Give every detail form the area (`--all-forms`), and give each new detail form one when it is created: a process starts dormant, so an area costs nothing until an assistive technology uses it ([performance](../../PERFORMANCE.md)). Keep business methods and timers. Return labels and provider configuration from application-owned `AXB_Configure`; map a shared controller only where the adapter needs application intent it cannot infer.
 
 ## 1. Establish the integration boundary
 

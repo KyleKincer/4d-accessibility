@@ -32,4 +32,4 @@ python3 test_generic_form_fixture.py --server /path/to/4D\ Server.app --run --vo
 
 [Acceptance](../validation/generic-forms-development.json): the AX run passes interpreted and compiled, in native ARM and Rosetta, with an unchanged window; the VoiceOver run passes interpreted and compiled on ARM and compiled under Rosetta. Integrated fixtures keep the bridge's description.
 
-Remaining scope: reading on past a list box's last drawn row without a page action, cell editing, tab controls, list subforms and the other kinds above; the keyboard focus 4D gives a field; 4D Server and remote clients; and 4D on Windows.
+Remaining scope: reading on past a list box's last drawn row without a page action, cell editing, list subforms and the other kinds above, including spinners, progress indicators, splitters, steppers and button grids; 4D Server and remote clients; and 4D on Windows.

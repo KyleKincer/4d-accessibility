@@ -1,0 +1,514 @@
+{
+ "date": "2026-10-13",
+ "runtime": "4D 20.8, compiled, Apple Silicon (native ARM), macOS 26",
+ "method": "measure_cost.py: one compiled project per variant. Five openings of a small dialog and three of a large form (600 buttons, a field, a 2,000-row collection list box), each timed until 4D first runs the form's timer; then the large form idle for 30 s with a one-second timer (quiet: CPU), idle for 30 s with a one-tick timer (gaps between ticks: pauses of the form's process), and scrolling its list box every tick for 30 s. CPU time and resident memory read with ps; CPU is the share of one core.",
+ "variants": {
+  "none": "no plugin, no component, no lifecycle area",
+  "plugin": "plugin and component installed, host methods installed, forms without a lifecycle area",
+  "area": "plugin, component and host methods, with the installer's lifecycle area in every form (--all-forms)"
+ },
+ "wake": "With wake, an accessibility client reads every element of each window before each phase.",
+ "release": "0.34.1 source (2ca4378352a85f1e7f02946931fb19ceb112d9f1), locally built packages",
+ "runs": [
+  {
+   "variant": "none",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 2.9,
+     "seconds": 31.0,
+     "rssMB": 280
+    },
+    "idle": {
+     "cpuPercent": 18.9,
+     "seconds": 30.1,
+     "rssMB": 283,
+     "ticks": 869,
+     "medianMs": 38,
+     "p99Ms": 47,
+     "maxMs": 65,
+     "over50Ms": 1,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 23.3,
+     "seconds": 30.0,
+     "rssMB": 285,
+     "ticks": 862,
+     "medianMs": 40.0,
+     "p99Ms": 50,
+     "maxMs": 57,
+     "over50Ms": 6,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.49,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 58,
+    "max": 75,
+    "runs": [
+     75,
+     46,
+     61,
+     53,
+     58
+    ]
+   },
+   "closeSmallMs": 100,
+   "openLargeMs": {
+    "median": 196,
+    "max": 199,
+    "runs": [
+     199,
+     196,
+     188
+    ]
+   },
+   "closeLargeMs": 261,
+   "attempt": 1,
+   "nativeSha256": null,
+   "componentSha256": null
+  },
+  {
+   "variant": "none",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 3.0,
+     "seconds": 31.0,
+     "rssMB": 280
+    },
+    "idle": {
+     "cpuPercent": 19.6,
+     "seconds": 30.1,
+     "rssMB": 285,
+     "ticks": 870,
+     "medianMs": 38.0,
+     "p99Ms": 46,
+     "maxMs": 49,
+     "over50Ms": 0,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 22.7,
+     "seconds": 30.0,
+     "rssMB": 287,
+     "ticks": 867,
+     "medianMs": 40,
+     "p99Ms": 50,
+     "maxMs": 58,
+     "over50Ms": 6,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.17,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 51,
+    "max": 79,
+    "runs": [
+     79,
+     51,
+     57,
+     42,
+     42
+    ]
+   },
+   "closeSmallMs": 94,
+   "openLargeMs": {
+    "median": 196,
+    "max": 216,
+    "runs": [
+     216,
+     190,
+     196
+    ]
+   },
+   "closeLargeMs": 234,
+   "attempt": 2,
+   "nativeSha256": null,
+   "componentSha256": null
+  },
+  {
+   "variant": "plugin",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 6.0,
+     "seconds": 30.2,
+     "rssMB": 314
+    },
+    "idle": {
+     "cpuPercent": 16.6,
+     "seconds": 30.0,
+     "rssMB": 322,
+     "ticks": 870,
+     "medianMs": 38.0,
+     "p99Ms": 48,
+     "maxMs": 57,
+     "over50Ms": 5,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 25.1,
+     "seconds": 30.1,
+     "rssMB": 329,
+     "ticks": 872,
+     "medianMs": 38.0,
+     "p99Ms": 49,
+     "maxMs": 52,
+     "over50Ms": 4,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 5.96,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 51,
+    "max": 79,
+    "runs": [
+     79,
+     51,
+     34,
+     34,
+     53
+    ]
+   },
+   "closeSmallMs": 84,
+   "openLargeMs": {
+    "median": 207,
+    "max": 218,
+    "runs": [
+     218,
+     207,
+     207
+    ]
+   },
+   "closeLargeMs": 249,
+   "attempt": 1,
+   "nativeSha256": "6d2c22995a3b7174b2093ff036eb466967f71c8ba0ad6aba3f0e96b99df1ade5",
+   "componentSha256": "0d464a12fc40d8502798b32173f180e07ebfa5bed2ecc223ed4573a30b3af82d"
+  },
+  {
+   "variant": "plugin",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 5.5,
+     "seconds": 31.0,
+     "rssMB": 312
+    },
+    "idle": {
+     "cpuPercent": 17.2,
+     "seconds": 30.1,
+     "rssMB": 321,
+     "ticks": 872,
+     "medianMs": 38.0,
+     "p99Ms": 46,
+     "maxMs": 58,
+     "over50Ms": 3,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "cpuPercent": 24.0,
+     "seconds": 30.1,
+     "rssMB": 327,
+     "ticks": 883,
+     "medianMs": 37,
+     "p99Ms": 49,
+     "maxMs": 54,
+     "over50Ms": 6,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 3.42,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 52,
+    "max": 77,
+    "runs": [
+     77,
+     46,
+     63,
+     52,
+     49
+    ]
+   },
+   "closeSmallMs": 99,
+   "openLargeMs": {
+    "median": 201,
+    "max": 226,
+    "runs": [
+     226,
+     194,
+     201
+    ]
+   },
+   "closeLargeMs": 260,
+   "attempt": 2,
+   "nativeSha256": "6d2c22995a3b7174b2093ff036eb466967f71c8ba0ad6aba3f0e96b99df1ade5",
+   "componentSha256": "0d464a12fc40d8502798b32173f180e07ebfa5bed2ecc223ed4573a30b3af82d"
+  },
+  {
+   "variant": "area",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 22.0,
+     "seconds": 30.6,
+     "rssMB": 321
+    },
+    "idle": {
+     "cpuPercent": 33.8,
+     "seconds": 30.1,
+     "rssMB": 330,
+     "ticks": 704,
+     "medianMs": 37.0,
+     "p99Ms": 168,
+     "maxMs": 191,
+     "over50Ms": 48,
+     "over100Ms": 48
+    },
+    "scroll": {
+     "cpuPercent": 38.6,
+     "seconds": 30.0,
+     "rssMB": 342,
+     "ticks": 716,
+     "medianMs": 40.0,
+     "p99Ms": 168,
+     "maxMs": 192,
+     "over50Ms": 48,
+     "over100Ms": 48
+    }
+   },
+   "startupSeconds": 4.45,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 39,
+    "max": 83,
+    "runs": [
+     83,
+     39,
+     34,
+     35,
+     68
+    ]
+   },
+   "closeSmallMs": 84,
+   "openLargeMs": {
+    "median": 227,
+    "max": 232,
+    "runs": [
+     227,
+     219,
+     232
+    ]
+   },
+   "closeLargeMs": 292,
+   "attempt": 1,
+   "nativeSha256": "6d2c22995a3b7174b2093ff036eb466967f71c8ba0ad6aba3f0e96b99df1ade5",
+   "componentSha256": "0d464a12fc40d8502798b32173f180e07ebfa5bed2ecc223ed4573a30b3af82d"
+  },
+  {
+   "variant": "area",
+   "wake": false,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "cpuPercent": 23.1,
+     "seconds": 30.7,
+     "rssMB": 323
+    },
+    "idle": {
+     "cpuPercent": 33.5,
+     "seconds": 30.1,
+     "rssMB": 334,
+     "ticks": 702,
+     "medianMs": 38.0,
+     "p99Ms": 165,
+     "maxMs": 190,
+     "over50Ms": 50,
+     "over100Ms": 48
+    },
+    "scroll": {
+     "cpuPercent": 38.7,
+     "seconds": 30.0,
+     "rssMB": 342,
+     "ticks": 717,
+     "medianMs": 40,
+     "p99Ms": 166,
+     "maxMs": 181,
+     "over50Ms": 48,
+     "over100Ms": 48
+    }
+   },
+   "startupSeconds": 7.43,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 79,
+    "max": 83,
+    "runs": [
+     83,
+     60,
+     66,
+     80,
+     79
+    ]
+   },
+   "closeSmallMs": 106,
+   "openLargeMs": {
+    "median": 225,
+    "max": 226,
+    "runs": [
+     226,
+     225,
+     222
+    ]
+   },
+   "closeLargeMs": 296,
+   "attempt": 2,
+   "nativeSha256": "6d2c22995a3b7174b2093ff036eb466967f71c8ba0ad6aba3f0e96b99df1ade5",
+   "componentSha256": "0d464a12fc40d8502798b32173f180e07ebfa5bed2ecc223ed4573a30b3af82d"
+  },
+  {
+   "variant": "plugin",
+   "wake": true,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "wakeElements": 798,
+     "wakeSeconds": 0.17,
+     "cpuPercent": 6.2,
+     "seconds": 30.1,
+     "rssMB": 312
+    },
+    "idle": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.0,
+     "cpuPercent": 20.7,
+     "seconds": 30.1,
+     "rssMB": 322,
+     "ticks": 870,
+     "medianMs": 38.0,
+     "p99Ms": 49,
+     "maxMs": 65,
+     "over50Ms": 3,
+     "over100Ms": 0
+    },
+    "scroll": {
+     "wakeElements": 798,
+     "wakeSeconds": 0.17,
+     "cpuPercent": 26.7,
+     "seconds": 30.0,
+     "rssMB": 328,
+     "ticks": 879,
+     "medianMs": 32,
+     "p99Ms": 49,
+     "maxMs": 60,
+     "over50Ms": 4,
+     "over100Ms": 0
+    }
+   },
+   "startupSeconds": 4.0,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 53,
+    "max": 62,
+    "runs": [
+     62,
+     42,
+     55,
+     47,
+     53
+    ]
+   },
+   "closeSmallMs": 85,
+   "openLargeMs": {
+    "median": 212,
+    "max": 214,
+    "runs": [
+     214,
+     212,
+     211
+    ]
+   },
+   "closeLargeMs": 254,
+   "attempt": 1,
+   "nativeSha256": "6d2c22995a3b7174b2093ff036eb466967f71c8ba0ad6aba3f0e96b99df1ade5",
+   "componentSha256": "0d464a12fc40d8502798b32173f180e07ebfa5bed2ecc223ed4573a30b3af82d"
+  },
+  {
+   "variant": "area",
+   "wake": true,
+   "intel": false,
+   "phases": {
+    "quiet": {
+     "wakeElements": 609,
+     "wakeSeconds": 0.2,
+     "cpuPercent": 23.2,
+     "seconds": 30.1,
+     "rssMB": 324
+    },
+    "idle": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.0,
+     "cpuPercent": 31.9,
+     "seconds": 30.0,
+     "rssMB": 337,
+     "ticks": 706,
+     "medianMs": 37.0,
+     "p99Ms": 169,
+     "maxMs": 186,
+     "over50Ms": 47,
+     "over100Ms": 47
+    },
+    "scroll": {
+     "wakeElements": 6,
+     "wakeSeconds": 0.0,
+     "cpuPercent": 38.5,
+     "seconds": 30.0,
+     "rssMB": 345,
+     "ticks": 715,
+     "medianMs": 40,
+     "p99Ms": 170,
+     "maxMs": 183,
+     "over50Ms": 47,
+     "over100Ms": 47
+    }
+   },
+   "startupSeconds": 5.73,
+   "compiled": true,
+   "openSmallMs": {
+    "median": 64,
+    "max": 86,
+    "runs": [
+     86,
+     60,
+     55,
+     77,
+     64
+    ]
+   },
+   "closeSmallMs": 107,
+   "openLargeMs": {
+    "median": 205,
+    "max": 238,
+    "runs": [
+     238,
+     205,
+     202
+    ]
+   },
+   "closeLargeMs": 258,
+   "attempt": 1,
+   "nativeSha256": "6d2c22995a3b7174b2093ff036eb466967f71c8ba0ad6aba3f0e96b99df1ade5",
+   "componentSha256": "0d464a12fc40d8502798b32173f180e07ebfa5bed2ecc223ed4573a30b3af82d"
+  }
+ ]
+}

@@ -190,6 +190,14 @@ python3 test_large_form.py --run --compiled --voiceover
 
 The VoiceOver mode reads the beginning and end of the complete form before the normal editing/validation suite. It rejects unresponsive speech and refuses to take over an existing VoiceOver session.
 
+A 4D process starts dormant until an assistive technology needs it. The fixtures above are accessibility clients, so they wake it when they first read a window. For dormancy itself, the `on` and `off` modes and VoiceOver starting while 4D runs:
+
+```sh
+python3 test_activation_fixture.py --server /path/to/4D\ Server.app --voiceover
+```
+
+To measure what the bridge costs a form, with and without an assistive technology, see [performance](PERFORMANCE.md#reproduce).
+
 For a search field that submits after one second without a keystroke:
 
 ```sh

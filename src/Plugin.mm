@@ -5,6 +5,7 @@
 #include "Limits.h"
 #import "NativeLayout.h"
 #import "GenericForms.h"
+#import "Activation.h"
 #include <vector>
 
 static NSString *TextParameter(PA_PluginParameters parameters, short index, NSUInteger limit) {
@@ -47,7 +48,12 @@ static void ReadNativeFocus(void *parameter) {
 extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
     @autoreleasepool {
         switch (selector) {
-            case kInitPlugin: AXBInitialize(); AXBGenericFormsInitialize(StructurePath()); break;
+            case kInitPlugin: {
+                AXBInitialize();
+                NSString *structure = StructurePath();
+                AXBWhenActive(^{ AXBGenericFormsInitialize(structure); });
+                break;
+            }
             case kServerInitPlugin: AXBInitialize(); break;
             case kDeinitPlugin:
             case kServerDeinitPlugin: AXBAreaShutdown();
@@ -63,7 +69,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 break;
             }
             case 2: AXBDetach(TextParameter(parameters, 1, 128), PA_GetCurrentProcessNumber()); break;
-            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; macOS", AXB_VERSION]); break;
+            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; activation 1; macOS; %@", AXB_VERSION, AXBActivationDescription()]); break;
             case 4:
             case 7: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
@@ -97,6 +103,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 break;
             }
             case 6: AXBArea(parameters); break;
+            case 8: PA_ReturnLong(parameters, AXBActivationIsActive() ? 1 : 0); break;
             default: break;
         }
     }
