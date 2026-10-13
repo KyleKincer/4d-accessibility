@@ -314,6 +314,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     NSDictionary *_pendingGridValue;
     BOOL _delivered;
     NSTimeInterval _queuedAt;
+    NSTimeInterval _lastExchangeAt;
+    NSTimeInterval _exchangeInterval;
+    NSTimeInterval _queuedInterval;
     NSString *_lastReceiptID;
     NSDictionary *_lastReceipt;
     NSDictionary *_lastResult;
@@ -527,6 +530,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     envelope = [NSJSONSerialization JSONObjectWithData:bytes options:0 error:nil];
     @synchronized(self) {
         if (!_active) return @{@"ok": @NO, @"error": @"session closed"};
+        NSTimeInterval sinceLast = _lastExchangeAt > 0 && now > _lastExchangeAt ? now - _lastExchangeAt : 0;
+        _lastExchangeAt = now;
+        if (sinceLast > 0) _exchangeInterval = sinceLast;
         NSDictionary *next = envelope[@"snapshot"];
         if (_snapshot) {
             NSComparisonResult order = [next[@"revision"] compare:_snapshot[@"revision"]];
@@ -613,7 +619,13 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         if (_pending && !_delivered) {
             BOOL changedGridValue = _pendingGridValue && !SameGridDispatchValue(_pendingGridValue,
                 [_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:now], _pending);
-            if (now - _queuedAt > 3.0 || changedGridValue || !SameDispatchState(_pendingState, ActionState(next, _pending), _pending[@"node"]) || ![next[@"enabled"] boolValue]) {
+            // A queued action is meant for now, as a click is: it expires after three seconds, or
+            // two and a half description intervals where describing the form takes longer, as an
+            // interpreted one can. The slower of the interval when it was queued and the one now
+            // ending counts, so a press made while 4D was busy runs once 4D is free, as a click
+            // queued by macOS would; never after fifteen seconds.
+            NSTimeInterval limit = MIN(15.0, MAX(3.0, 2.5 * MAX(_queuedInterval, sinceLast)));
+            if (now - _queuedAt > limit || changedGridValue || !SameDispatchState(_pendingState, ActionState(next, _pending), _pending[@"node"]) || ![next[@"enabled"] boolValue]) {
                 _lastResult = @{@"id": _pending[@"id"], @"status": @"rejected", @"message": @"expired or changed before dispatch"};
                 result[@"result"] = _lastResult;
                 _pending = nil;
@@ -779,6 +791,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
         _lastInput = nil;
         _inputResult = nil;
         _queuedAt = now;
+        _queuedInterval = _exchangeInterval;
         _delivered = NO;
         return YES;
     }

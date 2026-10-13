@@ -122,7 +122,7 @@ int main(void) {
         Check(![[s exchange:receipt now:3][@"ok"] boolValue], "receipt replay cannot change its result");
         receipt[@"receipt"] = goodReceipt;
         Check(Press(s, 2, 4), "new action accepted after completion");
-        Check([s exchange:Envelope(2) now:8][@"action"] == nil, "undelivered action expires");
+        Check([s exchange:Envelope(2) now:20][@"action"] == nil, "undelivered action expires");
         Check(Press(s, 2, 9), "queue usable after expiration");
         NSMutableDictionary *changedTarget = MutableCopy(Envelope(3));
         changedTarget[@"snapshot"][@"nodes"][0][@"label"] = @"Delete";
@@ -191,7 +191,27 @@ int main(void) {
         Check([s exchange:backgroundUpdate now:2][@"action"] == nil, "window context change cancels action");
         s = Fresh(); Check(Press(s, 1), "action queued before unrelated expired update");
         backgroundUpdate = MutableCopy(Envelope(2)); backgroundUpdate[@"snapshot"][@"nodes"][1][@"value"] = @"Updated";
-        Check([s exchange:backgroundUpdate now:5][@"action"] == nil, "unrelated updates do not extend action expiry");
+        Check([s exchange:backgroundUpdate now:16][@"action"] == nil, "unrelated updates do not extend action expiry");
+        {
+            // A form whose description takes two seconds per exchange keeps a queued action for five.
+            AXBSession *slow = Fresh();
+            Check([[slow exchange:Envelope(1) now:2][@"ok"] boolValue] && [[slow exchange:Envelope(1) now:4][@"ok"] boolValue], "slow exchanges accepted");
+            Check(Press(slow, 1, 4.5), "action queued on a slow form");
+            Check([slow exchange:Envelope(1) now:8.5][@"action"] != nil, "a slow form's queued action survives its next exchange");
+            AXBSession *late = Fresh();
+            Check([[late exchange:Envelope(1) now:2][@"ok"] boolValue] && [[late exchange:Envelope(1) now:4][@"ok"] boolValue], "slow exchanges accepted");
+            Check(Press(late, 1, 4.5), "action queued on a slow form");
+            Check([late exchange:Envelope(1) now:20][@"action"] == nil, "it still expires after fifteen seconds");
+            // A press made while 4D is busy runs once 4D is free, as a queued click would.
+            AXBSession *busy = Fresh();
+            Check([[busy exchange:Envelope(1) now:1][@"ok"] boolValue], "fast exchange accepted");
+            Check(Press(busy, 1, 1.5), "action queued as a slow description begins");
+            Check([busy exchange:Envelope(1) now:5][@"action"] != nil, "an action queued during a four-second description runs after it");
+            AXBSession *stuck = Fresh();
+            Check([[stuck exchange:Envelope(1) now:1][@"ok"] boolValue], "fast exchange accepted");
+            Check(Press(stuck, 1, 1.5), "action queued before 4D stops describing");
+            Check([stuck exchange:Envelope(1) now:20][@"action"] == nil, "an action never runs fifteen seconds late");
+        }
 
         s = Fresh(); Check(Press(s, 1), "button queued for guarded native delivery");
         NSDictionary *buttonAction = [s exchange:Envelope(1) now:1][@"action"];
