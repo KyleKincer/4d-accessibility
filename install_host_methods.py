@@ -272,10 +272,12 @@ def form_changes(project, names, all_forms):
         form = forms[path]
         updated = area_form(form) if path in owners else form
         if updated != json.loads(original):
-            # Preserve the existing project's tab/space convention. All layout,
-            # events, methods and existing object values remain identical.
+            # Preserve the existing project's tab/space convention and its final newline, which
+            # 4D omits: a form 4D saves again then differs only where the area was added.
+            # All layout, events, methods and existing object values remain identical.
             indent = "\t" if re.search(r"\n\t+\S", original) else 2
-            changes[path] = json.dumps(updated, ensure_ascii=False, indent=indent) + "\n"
+            ending = "\n" if original.endswith("\n") else ""
+            changes[path] = json.dumps(updated, ensure_ascii=False, indent=indent) + ending
     return changes
 
 

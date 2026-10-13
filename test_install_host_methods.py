@@ -51,6 +51,15 @@ class InstallTests(unittest.TestCase):
         self.run_installer("--form", "Customer")
         self.assertEqual(first, self.snapshot())
 
+    def test_area_keeps_a_form_without_a_final_newline_so(self):
+        path, _ = self.form()
+        path.write_text(json.dumps(json.loads(path.read_text()), indent="\t"))
+        self.run_installer("--form", "Customer")
+        text = path.read_text()
+        self.assertFalse(text.endswith("\n"))
+        self.assertIn("\n\t\t", text)
+        self.assertEqual(json.loads(text)["pages"][0]["objects"][AREA_NAME], AREA)
+
     def test_all_forms_includes_table_forms_and_page_zero(self):
         ordinary, _ = self.form()
         table, _ = self.form("Input", table=True)
