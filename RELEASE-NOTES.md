@@ -19,10 +19,9 @@
 - **A button nothing labels is named by the words of its object name**, in a form with the area as without one: `btnRefreshOrders` is Refresh Orders. An invisible button that nothing labels, such as a keyboard shortcut, is not published.
 - **A tab control used as a container has its tabs where 4D draws them, along its top edge.**
   - Before, the bridge placed them at the control's middle. A press there could reach another object, or was refused as overlapped.
-  - In the host application, the Vendors window's column filter is such a control.
   - [Tabs](tests/TABS.md).
 - **A press made while 4D is busy runs once 4D is free**, as a click queued by macOS would.
-  - Before, a queued action expired three seconds after it was queued, however long the form took to describe. On a form described slowly, such as an application's vendor window interpreted under Rosetta, a tab pressed after a column change was refused.
+  - Before, a queued action expired three seconds after it was queued, however long the form took to describe. On a form described slowly, such as a large form interpreted under Rosetta, a tab pressed after a column change was refused.
   - It now expires after two and a half description intervals, at least three seconds and at most fifteen.
 - **[Coverage and gaps](COVERAGE.md)** summarizes what is accessible, what is not and what has never been tested.
 
@@ -39,7 +38,7 @@ Upgrade the plugin, component and host helpers together. Tests and harnesses tha
 # 0.34.1, integrated forms are not described twice while they open
 
 0.34.1 contains everything in 0.34.0 below, which was not published, and one fix:
-- **A form with the bridge's area is left to that area while it opens.** While 4D loads an integrated form, it draws the form's objects before the bridge area's view exists. A refresh of forms without a bridge area could fall in that interval and publish the window as one, until the area's own description replaced it about half a second later. An assistive technology holding an element from that interval, such as VoiceOver's cursor, lost it. In the host application, the invoice window did this each time it switched to Modify mode with 0.34.0. A form whose definition holds the bridge's area (`%AXB Area`) is now never described as a form without one. [Forms without a bridge area](tests/GENERIC-FORMS.md); [acceptance](validation/generic-forms-development.json).
+- **A form with the bridge's area is left to that area while it opens.** While 4D loads an integrated form, it draws the form's objects before the bridge area's view exists. A refresh of forms without a bridge area could fall in that interval and publish the window as one, until the area's own description replaced it about half a second later. An assistive technology holding an element from that interval, such as VoiceOver's cursor, lost it. With 0.34.0, a form did this each time it switched to Modify mode. A form whose definition holds the bridge's area (`%AXB Area`) is now never described as a form without one. [Forms without a bridge area](tests/GENERIC-FORMS.md); [acceptance](validation/generic-forms-development.json).
 
 Upgrade the plugin, component and host helpers together.
 
