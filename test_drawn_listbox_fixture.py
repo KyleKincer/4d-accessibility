@@ -119,6 +119,8 @@ def main():
               "a list box with no grid adapter is a table in the bridge's own description")
         check(orders.read("AXDescription") == "Orders", "it is named by the words of its object name")
         check(element("btnRefreshOrders").read("AXDescription") == "Refresh Orders", "a button nothing labels is named by the words of its object name")
+        check(element("btnEscape") is None, "an invisible button nothing labels, a keyboard shortcut, is not published")
+        check(element("search/inputSearch").read("AXDescription") == "Search", "a field nothing labels is named by its placeholder")
         ax.wait_for(lambda: rows("listOrders")[:4] == [["Ada", "10"], ["Grace", "20"], ["Linus", "30"], ["Margaret", "40"]],
                     "The drawn rows " + repr(rows("listOrders")), timeout=10)
         check(True, "its rows are the rows 4D draws")
@@ -145,6 +147,16 @@ def main():
         # The click gives the list box 4D's focus; the next action waits for that description.
         ax.wait_for(lambda: element("listOrders").read("AXFocused") is True, "The list box's focus", timeout=10)
         check(True, "the list box holding 4D's focus is the focused element")
+        recent = element("tabColumns/tab/2")
+        check(recent is not None and recent.read("AXDescription") == "Recent orders", "a tab control used as a container publishes its tabs")
+        front()
+        count = len(events())
+        assert recent.perform("AXPress") == 0
+        ax.wait_for(lambda: any(e["object"] == "tabColumns" for e in events()[count:]), "The container's tab press", timeout=10)
+        ax.wait_for(lambda: element("tabColumns/tab/2").read("AXValue") is True, "The container's chosen tab", timeout=10)
+        check(True, "a tab of a container taller than its tabs is pressed where 4D draws it, at its top edge, and is chosen")
+        # A press queued before the previous one's result is published can expire (TABS.md).
+        time.sleep(1.5)
         notes = element("tabPages/tab/2")
         assert notes is not None and notes.perform("AXPress") == 0
         try:

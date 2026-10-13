@@ -186,11 +186,14 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     // alternative while preserving the stable identifier and raw value for AX.
     if ([self.data[@"role"] isEqual:@"image"] && [self.data[@"value"] length])
         return [self.data[@"label"] length] ? [NSString stringWithFormat:@"%@: %@", self.data[@"label"], self.data[@"value"]] : self.data[@"value"];
-    // A button nothing labels is named by the words of its object name, as in a form without an area.
+    // A button nothing labels is named by the words of its object name, as in a form without an area,
+    // and a field by its placeholder, the prompt it shows while empty.
     if ([self.data[@"missingLabel"] boolValue] && [self.data[@"role"] isEqual:@"button"]) {
         NSString *words = AXBGenericFormsObjectName(self.data[@"objectName"], YES);
         if (words) return words;
     }
+    if ([self.data[@"missingLabel"] boolValue] && [self.data[@"role"] isEqual:@"textfield"] && [self.data[@"placeholder"] length])
+        return self.data[@"placeholder"];
     return self.data[@"label"];
 }
 - (NSString *)accessibilityRole {

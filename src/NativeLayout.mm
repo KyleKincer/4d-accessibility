@@ -310,6 +310,9 @@ NSString *AXBReadNativeLayout(void *nativeWindow, NSString *request) {
         [body[2] doubleValue], [body[3] doubleValue]);
     if (NSWidth(parent) > NSWidth(rect)+1) return JSON(@{@"ok": @NO, @"error": @"nativeTabOverflowPending"});
     if ([found[@"kind"] isEqual:@"popup"]) return JSON(@{@"ok": @YES, @"kind": @"popup", @"serial": found[@"serial"], @"label": found[@"label"], @"frame": RectJSON(parent)});
+    // 4D draws the tabs along the tab object's top edge, centered across it. A tab object
+    // used as a container is taller than its tabs: its tabs are not at its middle.
+    parent.origin.y = NSMinY(rect);
     NSMutableArray *segments = [NSMutableArray new];
     for (NSDictionary *item in found[@"segments"]) {
         NSArray *relative = item[@"frame"];

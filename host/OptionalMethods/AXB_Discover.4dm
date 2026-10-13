@@ -199,6 +199,11 @@ For ($i; 1; Size of array($names))
     $label:=Substring($label; 1; $end)
    End if
   End if
+  // An invisible button that nothing labels is a keyboard shortcut or a click area over
+  // something drawn: a user finds nothing there, so it is not published.
+  If (($type=Object type invisible button) & ($label="") & Not(($metadata#Null) && (Value type($metadata.label)=Is text) && ($metadata.label#"")))
+   $role:=""
+  End if
   If ($role#"")
    OBJECT GET COORDINATES(*; $name; $left; $top; $right; $bottom)
    If (($right>$left) & ($bottom>$top))

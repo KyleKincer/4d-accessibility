@@ -133,6 +133,12 @@ $file.setText($previous+JSON Stringify(New object("runId"; JSON Parse(File("/RES
     (form_path / 'method.4dm').write_text('If (Form event code=On Load)\n OBJECT SET TITLE(*; "headAmount"; "Total")\nEnd if\n')
     (form_path / 'form.4DForm').write_text(json.dumps(form, indent=2) + '\n')
     if args.area:
+        # A tab control used as a container, behind the Orders list, as many applications draw a
+        # column filter: 4D draws its tabs along its top edge, not at its middle.
+        objects = form['pages'][1]['objects']
+        form['pages'][1]['objects'] = {'tabColumns': {'type': 'tab', 'labels': ['All orders', 'Recent orders'], 'left': 15, 'top': 252, 'width': 274,
+                                                      'height': 126, **logged}, **objects}
+        (form_path / 'form.4DForm').write_text(json.dumps(form, indent=2) + '\n')
         from install_host_methods import main as install
         install(['--project-dir', str(project.parent), '--all-forms'])
     (FIXTURE / 'Resources/launch.json').write_text(json.dumps({'runId': uuid.uuid4().hex}) + '\n')

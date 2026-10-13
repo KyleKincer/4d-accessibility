@@ -29,3 +29,7 @@ Prepare again with `--dynamic` for a generated root, `--narrow` for a compact ar
 After preparing the normal fixture, `python3 test_tabs_fixture.py --run --restart-only` runs the short recovery regression. The full matrix restarts each tabbed form twice after its ordinary editing and presentation tests. Recovery must preserve bindings and business handlers while retiring the previous tree.
 
 `python3 test_tabs_pixels.py --server /path/to/4D\ Server.app --run` compares the complete compiled window against a baseline with no plugin, component or bridge helpers. It also accepts `--narrow` and `--icons`. It requires Pillow and accepts no changed pixels, masks or tolerance. The native provider suite separately checks drawing preservation, normal AppKit controls, shutdown, database reopen and coexistence with another drawing observer.
+
+A tab control used as a container, taller than its tabs, has its tabs along its top edge, where 4D draws them. Before 0.35.0 the bridge placed them at the control's middle, so a press there could reach another object, or was refused as overlapped. [Acceptance](../validation/container-tabs-development.json).
+
+A press queued before the previous press's result is published can expire: the bridge refuses an action queued against a form state that changes before dispatch, and the root's `AXHelp` reports it. Presses about a second apart were all applied; at 0.3 seconds, one of four was. Wait for each completion receipt, as [AX actions](../skills/4d-accessibility/references/AX-ACTIONS.md) describes.

@@ -11,7 +11,7 @@ A list box in a form with the bridge's area, and with no entry in `AXB_Configure
 
 A `grids` entry replaces the drawn table with the complete one: every row, beyond the visible ones, with keyed identity and editing. [Grids](../skills/4d-accessibility/references/GRIDS.md).
 
-A button that nothing labels is named the same way, by the words of its object name: `btnRefreshOrders` is Refresh Orders. Before, it was named by the object name itself.
+A button that nothing labels is named the same way, by the words of its object name: `btnRefreshOrders` is Refresh Orders. A field that nothing labels is named by its placeholder, the prompt it shows while empty. Before, both were named by the object name itself.
 
 ## Test
 
@@ -24,6 +24,8 @@ The test prepares the [generic form fixture](GENERIC-FORMS.md) with `--area`, so
 - the Orders table's name, its rows and its column titles, after the form renames one when it loads;
 - a row press, which the list box's On Selection Change records;
 - the table's focus;
+- a tab of a tab control used as a container, behind the list, pressed where 4D draws it;
+- an invisible shortcut button, which is not published, and a field named by its placeholder;
 - paging through the 20 lines of another page's list box to the last.
 
 Remaining scope: editing cells and every row without a page action, which need a `grids` entry; list boxes inside list subforms; two list boxes with the same object name in different subforms of one window, where the first is read; 4D Server and remote clients; and 4D on Windows.
