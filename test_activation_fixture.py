@@ -126,7 +126,7 @@ def main():
             command = ["arch", "-x86_64", *command]
         log = (BUILD / f"activation-{mode}.log").open("w")
         process = subprocess.Popen(command, stdout=log, stderr=log, env=environment)
-        wait_for_start(process, project, lambda: status_file.exists(), BUILD, timeout=60)
+        wait_for_start(process, project, lambda: status_file.exists(), BUILD, timeout=60, awake=False)
         return process
 
     def status(process):

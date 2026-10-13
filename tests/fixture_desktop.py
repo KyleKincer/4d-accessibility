@@ -124,8 +124,20 @@ def activate(process, project, timeout=15):
         previous = current
 
 
-def wait_for_start(process, project, ready, build, timeout=40, area_list_demo=False, area_list_title="AreaList Pro 11.4.2"):
-    """Acknowledge only the vendor's application-mode notice, if it appears."""
+def wake(process):
+    """Read the contents of every window, as an assistive technology does when it arrives.
+
+    A 4D process with the bridge starts dormant and wakes on such a read. A test that waits for
+    the bridge's state in 4D, before reading the window itself, needs the process awake."""
+    for window in ax.application(process.pid).read("AXWindows") or []:
+        window.read("AXChildren")
+
+
+def wait_for_start(process, project, ready, build, timeout=40, area_list_demo=False, area_list_title="AreaList Pro 11.4.2", awake=True):
+    """Acknowledge only the vendor's application-mode notice, if it appears.
+
+    Once the fixture is ready, its windows are read as an assistive technology would, which wakes
+    a dormant process; awake=False leaves it dormant."""
     project = Path(project).resolve()
     deadline = time.monotonic() + timeout
     acknowledged = False
@@ -142,6 +154,8 @@ def wait_for_start(process, project, ready, build, timeout=40, area_list_demo=Fa
         value = ready()
         if value:
             activate(process, project)
+            if awake:
+                wake(process)
             return value, acknowledged
         if not acknowledged:
             image = build / "fixture-startup.png"

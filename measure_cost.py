@@ -259,7 +259,7 @@ def run(fixture, project, variant, wake, intel):
         raise AssertionError(f"Timed out waiting for {expected}")
 
     try:
-        wait_for_start(process, project, lambda: mark() is not None, BUILD, timeout=120)
+        wait_for_start(process, project, lambda: mark() is not None, BUILD, timeout=120, awake=wake)
         report["startupSeconds"] = round(time.monotonic() - launched, 2)
         for phase in ("quiet", "idle", "scroll"):
             wait_mark(phase, 120)
