@@ -13,6 +13,7 @@
 #import "FormulaEditor.h"
 #import "GenericForms.h"
 #import "Activation.h"
+#import "InternalForms.h"
 #import "DrawnText.h"
 #import <objc/runtime.h>
 
@@ -37,13 +38,31 @@ static NSString *JSON(id object) {
 }
 static NSTimeInterval Now(void) { return NSProcessInfo.processInfo.systemUptime; }
 
+// A list box no grid adapter describes is published as the table of its drawn rows, which
+// stands in its node's place in every list of children. Each table's node, by table.
+static NSMapTable *DrawnOwners;
+static BOOL IsDrawnTable(id child) { return [child isKindOfClass:AXBNode.class] && [((AXBNode *)child).data[@"role"] isEqual:@"drawnTable"]; }
+// The element published for a child: a drawn table's node gives way to its table, or to nothing
+// until its rows are drawn.
+static id Exposed(id child) { return IsDrawnTable(child) ? ((AXBNode *)child).drawn : child; }
+static NSArray *ExposedAll(NSArray *children) {
+    NSMutableArray *exposed = [NSMutableArray new];
+    for (id child in children) { id element = Exposed(child); if (element) [exposed addObject:element]; }
+    return exposed;
+}
+// The node data that places a child in reading order, a drawn table's being its node's.
+static NSDictionary *NavigationData(id child) {
+    if ([child isKindOfClass:AXBNode.class]) return ((AXBNode *)child).data;
+    return ((AXBNode *)[DrawnOwners objectForKey:child]).data;
+}
+
 // Form-local coordinates stay fixed while a scroll container reveals a child.
 // Keep that reading order instead of letting screen geometry reorder siblings.
 static NSArray *NavigationChildren(NSArray *children) {
     for (id child in children)
-        if (![child isKindOfClass:AXBNode.class] || !((AXBNode *)child).data[@"navigation"]) return nil;
-    return [children sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(AXBNode *a, AXBNode *b) {
-        NSArray *left = a.data[@"navigation"], *right = b.data[@"navigation"];
+        if (!NavigationData(child)[@"navigation"]) return nil;
+    return [children sortedArrayWithOptions:NSSortStable usingComparator:^NSComparisonResult(id a, id b) {
+        NSArray *left = NavigationData(a)[@"navigation"], *right = NavigationData(b)[@"navigation"];
         for (NSUInteger i = 0; i < MIN(left.count, right.count); i++) {
             NSComparisonResult result = [left[i] compare:right[i]];
             if (result != NSOrderedSame) return result;
@@ -167,6 +186,11 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     // alternative while preserving the stable identifier and raw value for AX.
     if ([self.data[@"role"] isEqual:@"image"] && [self.data[@"value"] length])
         return [self.data[@"label"] length] ? [NSString stringWithFormat:@"%@: %@", self.data[@"label"], self.data[@"value"]] : self.data[@"value"];
+    // A button nothing labels is named by the words of its object name, as in a form without an area.
+    if ([self.data[@"missingLabel"] boolValue] && [self.data[@"role"] isEqual:@"button"]) {
+        NSString *words = AXBGenericFormsObjectName(self.data[@"objectName"], YES);
+        if (words) return words;
+    }
     return self.data[@"label"];
 }
 - (NSString *)accessibilityRole {
@@ -214,7 +238,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     }
     NSMutableArray *children = [NSMutableArray new];
     for (AXBNode *node in self.owner.nodes) if (node.isAccessibilityElement && [node.data[@"parent"] isEqual:self.data[@"id"]]) [children addObject:node];
-    return children;
+    return ExposedAll(children);
 }
 - (id)accessibilityTopLevelUIElement { return self.owner.window; }
 - (NSArray *)accessibilityChildrenInNavigationOrder { return NavigationChildren(self.accessibilityChildren); }
@@ -568,9 +592,9 @@ static id DeepestHit(id element, NSPoint point) {
 
 static NSArray *TopLevelNodes(AXBWindowView *view) {
     if (!view.live) return @[];
-    return [view.nodes filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(AXBNode *node, NSDictionary *bindings) {
+    return ExposedAll([view.nodes filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(AXBNode *node, NSDictionary *bindings) {
         (void)bindings; return node.isAccessibilityElement && !node.data[@"parent"];
-    }]];
+    }]]);
 }
 
 static id DeepestFormHit(AXBWindowView *view, NSPoint point) {
@@ -745,10 +769,10 @@ static BOOL InheritsViewMethod(NSView *view, SEL selector) {
 
 static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     NSArray *(^position)(id) = ^NSArray *(id child) {
-        if ([child isKindOfClass:AXBNode.class]) {
-            AXBNode *node = child;
-            NSArray *navigation = node.data[@"navigation"];
-            return navigation.count >= 2 ? navigation : @[node.data[@"frame"][1], node.data[@"frame"][0]];
+        NSDictionary *data = NavigationData(child);
+        if (data) {
+            NSArray *navigation = data[@"navigation"];
+            return navigation.count >= 2 ? navigation : @[data[@"frame"][1], data[@"frame"][0]];
         }
         NSRect frame = [window.contentView convertRect:[window convertRectFromScreen:[child accessibilityFrame]] fromView:nil];
         CGFloat top = window.contentView.isFlipped ? NSMinY(frame) - NSMinY(window.contentView.bounds) : NSMaxY(window.contentView.bounds) - NSMaxY(frame);
@@ -923,7 +947,7 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     self.menuFocus = nil;
 }
 - (id)accessibilityFocusedUIElement {
-    for (AXBNode *node in self.nodes) if (node.isAccessibilityFocused) return [node isKindOfClass:AXBGridNode.class] ? [node accessibilityFocusedUIElement] : node;
+    for (AXBNode *node in self.nodes) if (node.isAccessibilityFocused) return [node isKindOfClass:AXBGridNode.class] ? [node accessibilityFocusedUIElement] : IsDrawnTable(node) ? node.drawn : node;
     return nil;
 }
 - (BOOL)isFlipped { return YES; }
@@ -1006,6 +1030,78 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
         if (self.window) NSAccessibilityPostNotification(self.window, NSAccessibilityLayoutChangedNotification);
     }
 }
+// The layer 4D draws an object into, by object name, in the form or one of its subforms.
+static CALayer *ObjectLayer(CALayer *context, NSString *name) {
+    if (!context || !name.length) return nil;
+    NSMutableArray<CALayer *> *pending = [NSMutableArray arrayWithObject:context];
+    for (NSUInteger visited = 0; pending.count && visited < 4096; visited++) {
+        CALayer *layer = pending.firstObject; [pending removeObjectAtIndex:0];
+        if (layer != context && [layer.name isEqual:name]) return layer;
+        CALayer *inner = AXBInternalSubformContext(layer);
+        [pending addObjectsFromArray:(inner ?: layer).sublayers ?: @[]];
+    }
+    return nil;
+}
+
+- (void)refreshDrawnTables {
+    NSMutableArray<AXBNode *> *drawn = [NSMutableArray new];
+    for (AXBNode *node in self.nodes) if (IsDrawnTable(node) && node.isAccessibilityElement) [drawn addObject:node]; else node.drawn = nil;
+    NSString *observer = [@"bridge/" stringByAppendingString:self.session.identifier ?: @""];
+    AXBInternalFormOverlay *overlay = self.drawnOverlay;
+    NSView *form = drawn.count ? AXBIntegratedFormView(self.window) : nil;
+    CALayer *context = form ? AXBInternalFormContext(form) : nil;
+    if (!context) {
+        for (AXBNode *node in drawn) node.drawn = nil;
+        if (overlay) { [overlay releaseFocus]; self.drawnOverlay = nil; AXBDrawnTextSetObserver(observer, nil, nil); }
+        return;
+    }
+    if (!overlay || overlay.formView != form) {
+        [overlay releaseFocus];
+        overlay = [[AXBInternalFormOverlay alloc] initWithFormView:form prefix:@""];
+        self.drawnOverlay = overlay;
+    }
+    NSMutableArray *entries = [NSMutableArray new];
+    NSMutableSet<NSString *> *names = [NSMutableSet new];
+    for (AXBNode *node in drawn) {
+        CALayer *layer = ObjectLayer(context, node.data[@"objectName"]);
+        NSArray *frame = node.data[@"frame"];
+        if (!layer || frame.count < 4) continue;
+        NSMutableDictionary *info = [node.data[@"table"] isKindOfClass:NSDictionary.class] ? [node.data[@"table"] mutableCopy] : [NSMutableDictionary new];
+        info[@"width"] = frame[2]; info[@"height"] = frame[3];
+        NSString *label = [node.data[@"missingLabel"] boolValue] ? nil : node.data[@"label"];
+        NSMutableDictionary *entry = [AXBGenericListboxEntry(layer, info, node.identifier, label, node.data[@"objectName"]) mutableCopy];
+        // The session reports focus; the drawn ring would be a second, competing report.
+        [entry removeObjectForKey:@"focused"];
+        if (!entry[@"label"]) entry[@"label"] = node.data[@"label"];
+        if (entry) { [entries addObject:entry]; [names addObject:layer.name]; }
+    }
+    [overlay updateWithEntries:entries];
+    if (!DrawnOwners) DrawnOwners = [NSMapTable weakToWeakObjectsMapTable];
+    for (AXBNode *node in drawn) {
+        AXBInternalFormElement *element = overlay.elements[node.identifier];
+        if (element && ![overlay.order containsObject:node.identifier]) element = nil;
+        node.drawn = element;
+        if (!element) continue;
+        element.embeddingParent = node.accessibilityParent;
+        [DrawnOwners setObject:node forKey:element];
+    }
+    // The rows change as 4D redraws the list, after a scroll or a selection, between polls.
+    __weak AXBWindowView *weakSelf = self;
+    __block BOOL pending = NO;
+    if (!names.count) { AXBDrawnTextSetObserver(observer, nil, nil); return; }
+    AXBDrawnTextSetObserver(observer, names, ^(CALayer *layer) {
+        (void)layer;
+        if (pending) return;
+        pending = YES;
+        CFRunLoopRef main = CFRunLoopGetMain();
+        CFArrayRef modes = CFRunLoopCopyAllModes(main);
+        if (!modes) { pending = NO; return; }
+        CFRunLoopPerformBlock(main, modes, ^{ pending = NO; [weakSelf refreshDrawnTables]; });
+        CFRelease(modes);
+        CFRunLoopWakeUp(main);
+    });
+}
+
 - (void)refresh {
     NSDictionary *snapshot = self.session.snapshot;
     if (!self.session.active) { [self invalidate]; return; }
@@ -1071,6 +1167,7 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     if (![self.nodes isEqualToArray:next]) structureChanged = YES;
     self.nodes = next;
     self.publishedSnapshot = snapshot;
+    [self refreshDrawnTables];
     self.element.identifier = AXBRootIdentifier(snapshot);
     [self refreshComboPopup];
     id focused = self.accessibilityFocusedUIElement;
@@ -1216,6 +1313,13 @@ static NSArray *MixedNavigationChildren(NSArray *children, NSWindow *window) {
     [self.nativeRoot restore];
     [self.session invalidate];
     for (AXBNode *node in self.nodes) [node invalidate];
+    if (self.drawnOverlay) {
+        AXBDrawnTextSetObserver([@"bridge/" stringByAppendingString:self.session.identifier ?: @""], nil, nil);
+        [(AXBInternalFormOverlay *)self.drawnOverlay releaseFocus];
+        for (AXBInternalFormElement *element in [(AXBInternalFormOverlay *)self.drawnOverlay elements].allValues)
+            NSAccessibilityPostNotification(element, NSAccessibilityUIElementDestroyedNotification);
+        self.drawnOverlay = nil;
+    }
     NSAccessibilityPostNotification(self.element, NSAccessibilityUIElementDestroyedNotification);
     NSWindow *window = self.window;
     [self removeFromSuperview];

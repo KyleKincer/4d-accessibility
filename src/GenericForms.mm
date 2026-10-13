@@ -255,7 +255,8 @@ static NSString *PictureName(id path) {
     return ObjectName([file stringByReplacingOccurrencesOfString:@"-" withString:@"_"], AXBNameButton);
 }
 
-NSString *AXBGenericFormsObjectNameForTesting(NSString *object, BOOL button) { return ObjectName(object, button ? AXBNameButton : AXBNameList); }
+NSString *AXBGenericFormsObjectName(NSString *object, BOOL button) { return ObjectName(object, button ? AXBNameButton : AXBNameList); }
+NSString *AXBGenericFormsObjectNameForTesting(NSString *object, BOOL button) { return AXBGenericFormsObjectName(object, button); }
 NSString *AXBGenericFormsPictureNameForTesting(NSString *path) { return PictureName(path); }
 
 // The object's own rectangle within its layer, in the layer's points from its bottom left.
@@ -951,4 +952,16 @@ void AXBGenericFormsEnableForTesting(NSDictionary<NSString *, NSDictionary *> *d
     }];
     Forms = forms; FormsByObject = byObject;
     ObserveWindows();
+}
+
+NSDictionary *AXBGenericListboxEntry(CALayer *layer, NSDictionary *info, NSString *key, NSString *label, NSString *objectName) {
+    if (!layer || !key) return nil;
+    NSRect area = ObjectArea(layer, info);
+    NSMutableDictionary *entry = [@{@"key": key, @"layer": layer, @"role": NSAccessibilityTableRole} mutableCopy];
+    if (!NSEqualRects(area, layer.bounds)) entry[@"area"] = [NSValue valueWithRect:area];
+    entry[@"table"] = ListboxModel(layer, info, area);
+    if (FocusRing(layer, area, AXBRingField)) entry[@"focused"] = @YES;
+    NSString *name = Plain(label) ?: ObjectName(objectName, AXBNameList);
+    if (name) entry[@"label"] = name;
+    return entry;
 }

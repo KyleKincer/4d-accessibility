@@ -177,6 +177,11 @@ For ($i; 1; Size of array($names))
     If ($label="")
      $label:="Splitter"
     End if
+   : ($type=Object type listbox)
+    // Without a grid adapter, the native plugin publishes the rows 4D draws. A configured
+    // grid replaces this node with its complete table.
+    $role:="drawnTable"
+    $label:=OBJECT Get help tip(*; $name)
    Else
     If (New collection(Object type line; Object type rectangle; Object type rounded rectangle; Object type oval).indexOf($type)<0)
      $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "providerPending"))
@@ -244,6 +249,9 @@ For ($i; 1; Size of array($names))
     End if
     If (New collection("group"; "image"; "progress"; "splitter").indexOf($role)>=0)
      $node.focusable:=False
+    End if
+    If ($role="drawnTable")
+     $node.table:=AXB_DrawnTableInfo($name)
     End if
     If ($role="splitter")
      $node.adjustable:=OBJECT Get enabled(*; $name)

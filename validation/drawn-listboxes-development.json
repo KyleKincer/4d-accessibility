@@ -1,0 +1,126 @@
+{
+ "passed": true,
+ "date": "2026-10-13",
+ "release": "0.35.0 development (drawn list boxes)",
+ "scope": "A list box in a form with the bridge's area and no grids entry is published as a table of the rows 4D draws, in its place in the bridge's tree; unlabelled buttons are named by the words of their object names.",
+ "runtime": "4D 20.8 desktop; interpreted and compiled ARM, compiled Rosetta; VoiceOver interpreted ARM; macOS 26",
+ "runs": {
+  "drawn-listbox-arm64": {
+   "passed": true,
+   "mode": "interpreted",
+   "architecture": "arm64",
+   "checks": [
+    "a list box with no grid adapter is a table in the bridge's own description",
+    "it is named by the words of its object name",
+    "a button nothing labels is named by the words of its object name",
+    "its rows are the rows 4D draws",
+    "its columns are titled as 4D shows them, after the form renames one",
+    "pressing a row selects it through the list box's own On Selection Change",
+    "the list box holding 4D's focus is the focused element",
+    "a list box longer than its box offers to scroll a page",
+    "a page at a time, it scrolls to the last rows",
+    "every event belongs to this run",
+    "Done closes the form"
+   ],
+   "headers": [
+    "Customer",
+    "Total"
+   ],
+   "pluginSHA256": "83ea1395b68d884cda2d44cdffb88bcd0ef42e34c7400705931e4071af39d9c7"
+  },
+  "drawn-listbox-arm64-compiled": {
+   "passed": true,
+   "mode": "compiled",
+   "architecture": "arm64",
+   "checks": [
+    "a list box with no grid adapter is a table in the bridge's own description",
+    "it is named by the words of its object name",
+    "a button nothing labels is named by the words of its object name",
+    "its rows are the rows 4D draws",
+    "its columns are titled as 4D shows them, after the form renames one",
+    "pressing a row selects it through the list box's own On Selection Change",
+    "the list box holding 4D's focus is the focused element",
+    "a list box longer than its box offers to scroll a page",
+    "a page at a time, it scrolls to the last rows",
+    "every event belongs to this run",
+    "Done closes the form"
+   ],
+   "headers": [
+    "Customer",
+    "Total"
+   ],
+   "pluginSHA256": "83ea1395b68d884cda2d44cdffb88bcd0ef42e34c7400705931e4071af39d9c7"
+  },
+  "drawn-listbox-x86_64-compiled": {
+   "passed": true,
+   "mode": "compiled",
+   "architecture": "x86_64",
+   "checks": [
+    "a list box with no grid adapter is a table in the bridge's own description",
+    "it is named by the words of its object name",
+    "a button nothing labels is named by the words of its object name",
+    "its rows are the rows 4D draws",
+    "its columns are titled as 4D shows them, after the form renames one",
+    "pressing a row selects it through the list box's own On Selection Change",
+    "the list box holding 4D's focus is the focused element",
+    "a list box longer than its box offers to scroll a page",
+    "a page at a time, it scrolls to the last rows",
+    "every event belongs to this run",
+    "Done closes the form"
+   ],
+   "headers": [
+    "Customer",
+    "Total"
+   ],
+   "pluginSHA256": "83ea1395b68d884cda2d44cdffb88bcd0ef42e34c7400705931e4071af39d9c7"
+  },
+  "drawn-listbox-arm64-voiceover": {
+   "passed": true,
+   "mode": "interpreted",
+   "architecture": "arm64",
+   "checks": [
+    "a list box with no grid adapter is a table in the bridge's own description",
+    "it is named by the words of its object name",
+    "a button nothing labels is named by the words of its object name",
+    "its rows are the rows 4D draws",
+    "its columns are titled as 4D shows them, after the form renames one",
+    "VoiceOver reads the list box as the Orders table",
+    "interacting with it reads the first row",
+    "VO-Down moves to the next row",
+    "the row VoiceOver reaches is selected through the list box's own handling",
+    "pressing a row selects it through the list box's own On Selection Change",
+    "the list box holding 4D's focus is the focused element",
+    "a list box longer than its box offers to scroll a page",
+    "a page at a time, it scrolls to the last rows",
+    "every event belongs to this run",
+    "Done closes the form"
+   ],
+   "headers": [
+    "Customer",
+    "Total"
+   ],
+   "pluginSHA256": "83ea1395b68d884cda2d44cdffb88bcd0ef42e34c7400705931e4071af39d9c7"
+  }
+ },
+ "regressions": [
+  "grid_fixture :: PASS: 4D confirms normal acceptance separately from cancellation (after waiting for the woken bridge)",
+  "grid_headers_fixture :: PASS: owned 4D fixture closes normally",
+  "area :: PASS: ordinary application exits cleanly",
+  "selection :: PASS: 34 classic-selection AX checks",
+  "generic :: PASS: 24 generic form checks (arm64, interpreted)",
+  "generic vo :: PASS: 23 generic form checks (arm64, interpreted, VoiceOver)",
+  "SessionTests :: PASS: 319 checks",
+  "NativeProviderTests :: 551 checks"
+ ],
+ "sources_sha256": {
+  "src/Bridge.mm": "cd7f9e4e3d4f5f54e41beed1418e9ba6a4ecd70f10f958d199d5c958e0a38eff",
+  "src/BridgePrivate.h": "6b72c3664c57de7cdd7fe40bd9d9abb81a0a5cf7a6344e7039ea9efc05fade21",
+  "src/GenericForms.mm": "ee1ecb6cbc635f1e50243b0bcbfd123280a09e1f6982c5667e3783ea0d4f03f0",
+  "src/InternalForms.mm": "884e2b36ed6a8d36e7ef5bbf0aa517b4baa38515c71b8d5d48f476a38ef9a0c4",
+  "src/Session.mm": "5ae6dc1f7727a7c3aa622e08d220b73fd73f757b64540080c396f09cd6d03642",
+  "host/OptionalMethods/AXB_Discover.4dm": "f5d91ca41beca5d6ca322a708ede620b220338c742ff099ff17179b3531f92dc",
+  "host/OptionalMethods/AXB_View.4dm": "46b8e82f87ad9645cf8f790e8afe2eb8a704e47aeec47d5e1ead2e0e0c6e5625",
+  "host/OptionalMethods/AXB_DrawnTableInfo.4dm": "9614a3fe390d25afe1e7abb10b29b61b6d68d738f515162b2c29e42622731da5",
+  "test_drawn_listbox_fixture.py": "5a3957500ab9c6c45922bea3b599ebef5d2100b1376a902a85b396fc84451149"
+ }
+}

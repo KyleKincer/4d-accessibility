@@ -57,6 +57,9 @@
 @property(nonatomic) CGFloat pressInset;
 @property(nonatomic) NSRect pressArea;
 @property(nonatomic) NSInteger clicks;
+// The element that holds this one in another provider's tree, such as a bridge session's, when
+// its overlay is not in the view hierarchy.
+@property(nonatomic, weak) id embeddingParent;
 // The list that holds this element, if any.
 @property(nonatomic, weak) AXBInternalFormElement *container;
 @property(nonatomic) BOOL checked;
@@ -125,6 +128,8 @@
 // The view whose layer holds a form's formContext layer, or nil when an integrated form
 // owns the window; and that layer.
 NSView *AXBInternalFormView(NSWindow *window);
+// The same view in a window with a bridge session, for the session's own use.
+NSView *AXBIntegratedFormView(NSWindow *window);
 CALayer *AXBInternalFormContext(NSView *view);
 CALayer *AXBInternalFormChild(CALayer *context, NSString *name);
 // The items of a list 4D draws as a whole into one layer, such as a hierarchical list:

@@ -11,6 +11,8 @@ Install matching packages and add the root [lifecycle area](AREA-INTEGRATION.md)
 | AreaList Pro | [AreaList grids](AREALIST-GRIDS.md) |
 | Record editor combining fields, an editable grid and subforms | [Record-editor example](examples/RECORD-EDITOR.md) |
 
+A list box with no `grids` entry is still published, as a read-only table of the rows 4D draws, paged a screen at a time ([drawn list boxes](../../../tests/DRAWN-LIST-BOXES.md)). Add an entry for every row, keyed identity and editing.
+
 Every kind shares the [loading guard](#gate-loading-and-record-changes), [temporary keys for unsaved rows](#give-unsaved-rows-temporary-keys) and [stable column locators](#describe-custom-native-grid-columns). Flat selectable grids also use the [selection callback contract](#reuse-the-existing-selection-controller). This file is the authority for those contracts.
 
 ## Add a native array list box without replacing discovery

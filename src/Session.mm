@@ -117,7 +117,7 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     NSMutableSet *ids = [NSMutableSet new];
     NSMutableSet *locators = [NSMutableSet new];
     NSMutableDictionary *byID = [NSMutableDictionary new];
-    NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper", @"tabgroup", @"tab", @"splitter"]];
+    NSSet *roles = [NSSet setWithArray:@[@"button", @"checkbox", @"radio", @"popup", @"textfield", @"text", @"table", @"row", @"cell", @"group", @"image", @"progress", @"slider", @"stepper", @"tabgroup", @"tab", @"splitter", @"drawnTable"]];
     for (id raw in nodes) {
         if (![raw isKindOfClass:NSDictionary.class]) return @"invalid node";
         NSDictionary *n = raw;
@@ -164,6 +164,15 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
                 if (n[@"min"] || n[@"max"]) return @"formatted date stepper cannot claim a numeric range";
             } else if (!Number(n[@"value"]) || !Number(n[@"min"]) || !Number(n[@"max"]) ||
                        [n[@"min"] doubleValue] > [n[@"max"] doubleValue]) return @"invalid adjustable range";
+        } else if ([n[@"role"] isEqual:@"drawnTable"]) {
+            // A list box no grid adapter describes: the plugin reads the rows 4D draws, guided
+            // by its columns' titles, widths and visibility.
+            NSDictionary *table = n[@"table"];
+            if (![table isKindOfClass:NSDictionary.class] || !Number(table[@"headerHeight"]) || !Bool(table[@"showHeaders"])) return @"invalid drawn table";
+            NSArray *columns = table[@"columns"];
+            if (![columns isKindOfClass:NSArray.class] || columns.count > 256) return @"invalid drawn table columns";
+            for (NSDictionary *column in columns)
+                if (![column isKindOfClass:NSDictionary.class] || !Text(column[@"header"], 512) || !Number(column[@"width"]) || !Bool(column[@"hidden"])) return @"invalid drawn table column";
         } else if ([n[@"role"] isEqual:@"splitter"]) {
             // The host moves a splitter through 4D's own splitter handling by one step.
             if (!Bool(n[@"adjustable"]) || !Number(n[@"step"]) || [n[@"step"] doubleValue] <= 0 || !Bool(n[@"vertical"]) ||

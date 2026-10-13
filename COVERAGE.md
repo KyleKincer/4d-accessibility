@@ -17,7 +17,8 @@ A form gets a bridge area from the installer (`--form` or `--all-forms`), or fro
 | Splitters | Adjustable | |
 | Buttons with pop-up menus | Press and Show Menu | Separated menus on the regular and toolbar styles |
 | Standard-action menus | | Not implemented |
-| Array, collection, entity-selection and current-selection list boxes | Every row, beyond the visible ones; selection, sorting and editing through the native editors | Needs an `AXB_Configure` entry with stable row keys. Styled cells, per-row restrictions, transactions, grids inside grid rows |
+| List boxes without configuration | The rows 4D draws, column titles, a row press that selects it, focus, paging ([drawn list boxes](tests/DRAWN-LIST-BOXES.md)) | Editing cells, every row without paging |
+| Array, collection, entity-selection and current-selection list boxes, configured | Every row, beyond the visible ones; selection, sorting and editing through the native editors | An `AXB_Configure` entry with stable row keys. Styled cells, per-row restrictions, transactions, grids inside grid rows |
 | Grouped (hierarchical) list boxes | Read text and date groups; open and close a group through one application formula | Selecting a leaf beyond the keyboard, reveal, editing. Compiled VoiceOver sometimes misses the state announcement after a disclosure |
 | Hierarchical lists | Items, depth, expansion and selection, automatically | Editing an item's text, drag and drop, extending a selection through accessibility, icons and styles |
 | Page subforms, repeated and nested | Automatic | |

@@ -10,6 +10,8 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic, strong) NSNumber *revision;
 @property(nonatomic, copy) NSString *identifier;
 @property(nonatomic, strong) NSAccessibilityElement *comboButton;
+// For a list box no grid adapter describes: the table of its drawn rows that stands in its place.
+@property(nonatomic, strong) NSAccessibilityElement *drawn;
 @property(nonatomic) BOOL live;
 - (BOOL)queue:(NSString *)operation value:(id)value;
 - (void)invalidate;
@@ -50,7 +52,10 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic, strong) NSDictionary *pictureChoice;
 @property(nonatomic) BOOL live;
 @property(nonatomic) BOOL omitOutsideWindow;
+// Publishes the drawn tables of list boxes no grid adapter describes; not in the view hierarchy.
+@property(nonatomic, strong) id drawnOverlay;
 - (void)refresh;
+- (void)refreshDrawnTables;
 - (void)refreshNativeRoot;
 - (void)refreshComboPopup;
 - (void)invalidate;

@@ -5,7 +5,7 @@ var $view; $description; $node; $other; $copy; $route; $child; $packet; $options
 var $pageByObject : Object
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
 var $detailForm; $listForm : Text
-var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames : Collection
+var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames; $kept : Collection
 var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY; $part : Integer
 var $x; $y; $r; $b : Real
 var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
@@ -136,6 +136,24 @@ If ($view.automatic=True)
    $description.unsupported.push(New object("object"; $name; "reason"; $key))
   End if
  End for each
+ // A configured grid describes its list box in full, in place of the drawn rows.
+ If ($grids.nodes.length>0)
+  $kept:=New collection
+  For each ($node; $description.nodes)
+   $allowed:=True
+   If ($node.role="drawnTable")
+    For each ($other; $grids.nodes)
+     If (Compare strings($other.objectName; $node.objectName; sk char codes)=0)
+      $allowed:=False
+     End if
+    End for each
+   End if
+   If ($allowed)
+    $kept.push($node)
+   End if
+  End for each
+  $description.nodes:=$kept
+ End if
  $description.nodes:=$description.nodes.concat($grids.nodes)
  $description.unsupported:=$description.unsupported.concat($grids.unsupported)
  $description.unsupported:=$description.unsupported.concat(AXB_ControlGroups($description.nodes; $view.options))

@@ -41,6 +41,18 @@ int main(void) {
         Check(AXBValidateEnvelope(stable) != nil, "duplicate public paths reject the complete snapshot");
         stable[@"snapshot"][@"nodes"][1][@"automationPath"] = @[@"LeftChild", @"Search", @"É%"];
         Check(AXBValidateEnvelope(stable) == nil, "a slash in one name cannot collide with nested names");
+        {
+            // A list box no grid adapter describes: its columns guide the plugin's reading of its drawn rows.
+            NSMutableDictionary *drawn = MutableCopy(Envelope(1));
+            drawn[@"snapshot"][@"nodes"][0][@"role"] = @"drawnTable";
+            drawn[@"snapshot"][@"nodes"][0][@"table"] = [@{@"headerHeight": @22, @"showHeaders": @YES,
+                @"columns": @[@{@"header": @"Customer", @"width": @160, @"hidden": @NO}]} mutableCopy];
+            Check(AXBValidateEnvelope(drawn) == nil, "a drawn table with its columns is accepted");
+            drawn[@"snapshot"][@"nodes"][0][@"table"][@"columns"] = @[@{@"header": @"Customer", @"width": @"wide", @"hidden": @NO}];
+            Check(AXBValidateEnvelope(drawn) != nil, "a drawn table column needs a numeric width");
+            [drawn[@"snapshot"][@"nodes"][0] removeObjectForKey:@"table"];
+            Check(AXBValidateEnvelope(drawn) != nil, "a drawn table needs its columns");
+        }
         for (id bad in @[@"", @1, NSNull.null, [@"x" stringByPaddingToLength:129 withString:@"x" startingAtIndex:0]]) {
             NSMutableDictionary *invalid = MutableCopy(stable); invalid[@"snapshot"][@"automationKey"] = bad;
             Check(AXBValidateEnvelope(invalid) != nil, "invalid screen automation key is rejected");

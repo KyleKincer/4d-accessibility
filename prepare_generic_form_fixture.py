@@ -57,6 +57,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--server', type=Path, required=True)
     parser.add_argument('--no-bridge', action='store_true', help='Native baseline with no plugin or component')
+    parser.add_argument('--area', action='store_true', help='Give every form the bridge area, so the bridge describes it')
     args = parser.parse_args()
     for name in ('4D', '4D Server'):
         if subprocess.run(['pgrep', '-x', name], capture_output=True).returncode == 0:
@@ -131,6 +132,9 @@ $file.setText($previous+JSON Stringify(New object("runId"; JSON Parse(File("/RES
     (form_path / 'ObjectMethods/Event.4dm').write_text(EVENT)
     (form_path / 'method.4dm').write_text('If (Form event code=On Load)\n OBJECT SET TITLE(*; "headAmount"; "Total")\nEnd if\n')
     (form_path / 'form.4DForm').write_text(json.dumps(form, indent=2) + '\n')
+    if args.area:
+        from install_host_methods import main as install
+        install(['--project-dir', str(project.parent), '--all-forms'])
     (FIXTURE / 'Resources/launch.json').write_text(json.dumps({'runId': uuid.uuid4().hex}) + '\n')
     before = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob('*') if p.is_file()}
     server = args.server.expanduser().resolve()
@@ -148,7 +152,7 @@ $file.setText($previous+JSON Stringify(New object("runId"; JSON Parse(File("/RES
             f'$result:=Compile project(File({literal(project)}); $options)', 120)
     changed = [name for name, digest in before.items() if sha(FIXTURE / name) != digest]
     passed = compiled.get('success') is True and not compiled.get('errors') and not changed
-    (BUILD / 'generic-form-compile-report.json').write_text(json.dumps({'passed': passed, 'compiler': compiled, 'bridge': not args.no_bridge}, indent=2) + '\n')
+    (BUILD / 'generic-form-compile-report.json').write_text(json.dumps({'passed': passed, 'compiler': compiled, 'bridge': not args.no_bridge, 'area': args.area}, indent=2) + '\n')
     print(('PASS' if passed else 'FAIL') + ': generic form fixture compilation')
     if not passed:
         print(json.dumps(compiled, indent=2))

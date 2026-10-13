@@ -30,20 +30,30 @@ CALayer *AXBInternalFormContext(NSView *view) {
     return nil;
 }
 
-NSView *AXBInternalFormView(NSWindow *window) {
-    // A session opened in On Load attaches its view later, once the main queue drains.
-    if (AXBWindowHasSession((__bridge void *)window)) return nil;
+static NSView *FormView(NSWindow *window, BOOL integrated) {
     NSMutableArray<NSView *> *pending = window.contentView ? [NSMutableArray arrayWithObject:window.contentView] : [NSMutableArray new];
     NSView *form = nil;
     NSUInteger visited = 0;
     while (pending.count && visited++ < 64) {
         NSView *view = pending.firstObject; [pending removeObjectAtIndex:0];
-        if ([view isKindOfClass:AXBWindowView.class]) return nil; // An integrated form owns its window.
+        if ([view isKindOfClass:AXBWindowView.class]) {
+            if (!integrated) return nil; // An integrated form owns its window.
+            continue;
+        }
         if (!form && AXBInternalFormContext(view)) form = view;
+        if (form && integrated) return form;
         [pending addObjectsFromArray:view.subviews];
     }
-    return pending.count ? nil : form; // Too many views to rule out an integrated form.
+    return pending.count && !integrated ? nil : form; // Too many views to rule out an integrated form.
 }
+
+NSView *AXBInternalFormView(NSWindow *window) {
+    // A session opened in On Load attaches its view later, once the main queue drains.
+    if (AXBWindowHasSession((__bridge void *)window)) return nil;
+    return FormView(window, NO);
+}
+
+NSView *AXBIntegratedFormView(NSWindow *window) { return FormView(window, YES); }
 
 NSArray<NSDictionary *> *AXBInternalListItems(CALayer *list, NSString *prefix, NSString *role) {
     NSArray<NSString *> *texts = AXBDrawnTextForLayer(list);
@@ -103,7 +113,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 }
 - (NSRect)accessibilityFrame { return [self screenFrame]; }
 // A list holds its lines; lines whose list is published as its scroll bar stay the overlay's.
-- (id)accessibilityParent { return self.container.isList ? self.container : self.owner; }
+- (id)accessibilityParent { return self.container.isList ? self.container : self.embeddingParent ?: self.owner; }
 - (BOOL)isList { return [self.accessibilityRole isEqual:NSAccessibilityListRole]; }
 // A line offers its list's scrolling.
 - (NSArray<NSAccessibilityCustomAction *> *)accessibilityCustomActions {
@@ -149,7 +159,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     NSString *value = self.accessibilityValue;
     return self.isField ? [value substringWithRange:[self clampedSelection]] : nil;
 }
-- (BOOL)isAccessibilityFocused { return NSApp.accessibilityApplicationFocusedUIElement == self && self.owner.window.isKeyWindow; }
+- (BOOL)isAccessibilityFocused { return NSApp.accessibilityApplicationFocusedUIElement == self && self.owner.formView.window.isKeyWindow; }
 // Focusing a field gives it 4D's keyboard focus with an ordinary click at its end, so the
 // keys a user then types reach it, as after clicking it with the mouse.
 - (void)setAccessibilityFocused:(BOOL)focused {
@@ -178,7 +188,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 }
 // 4D's editor reports where each character lies, as AppKit fields do.
 - (NSRect)accessibilityFrameForRange:(NSRange)range {
-    NSResponder *responder = self.owner.window.firstResponder;
+    NSResponder *responder = self.owner.formView.window.firstResponder;
     NSUInteger length = [self.accessibilityValue length];
     if (!self.caret || ![responder conformsToProtocol:@protocol(NSTextInputClient)] ||
         range.location > length || range.length > length - range.location) return NSZeroRect;
@@ -192,7 +202,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 // 4D's editor for the focused field is the window's text-input client. Its selection
 // is the actual caret, including moves by the arrow keys.
 - (BOOL)nativeSelection:(NSRange *)range {
-    NSResponder *responder = self.owner.window.firstResponder;
+    NSResponder *responder = self.owner.formView.window.firstResponder;
     if (!self.caret || ![responder conformsToProtocol:@protocol(NSTextInputClient)]) return NO;
     id<NSTextInputClient> client = (id<NSTextInputClient>)responder;
     NSRange selected = client.selectedRange;
