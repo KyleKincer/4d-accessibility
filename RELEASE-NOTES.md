@@ -1,3 +1,41 @@
+# 0.35.0, accessibility only when it is needed, and list boxes in every form with the area
+
+- **A 4D process now pays for the bridge only when an assistive technology uses it.**
+  - It starts dormant. Lifecycle areas wait to start their forms' sessions, forms started by hand do not poll, and the providers for forms without an area and for 4D's own windows wait.
+  - It becomes active, until 4D quits, when VoiceOver runs, Switch Control is on, or an accessibility client reads one of its windows' contents. Window managers, which read only titles and frames, do not wake it.
+  - A dormant form is published about 0.2 seconds after the first read.
+  - **Measured on a compiled form with 600 buttons and a 2,000-row list box:** an area used to cost 22.6% of a core at idle and paused the form's process 48 times in 30 seconds, for up to 191 ms. Dormant, it costs 3.8% with no pauses, against 3.0% with no bridge.
+  - **Per-Mac setting:** `Activation` in the `io.github.kylekincer.4d-accessibility` domain chooses `auto` (the default), `on` or `off`. A configuration profile can manage it, and the `AXB_ACTIVATION` environment variable overrides it for one process. `off` installs no hooks or observers.
+  - `AXB Active` returns 1 when the process is active, and `AXB Status` ends with the mode and state.
+  - [Performance and activation](PERFORMANCE.md); [activation acceptance](validation/activation-development.json).
+- **List boxes without a grid adapter are published in forms with the area.**
+  - Before, a list box with no `grids` entry in `AXB_Configure` was reported as `providerPending` and not published, though the plugin publishes it in a form without an area.
+  - Now the bridge publishes it as a table of the rows 4D draws, in its place in the form's reading order:
+    - its column titles as 4D shows them;
+    - a row press that runs the list box's own On Selection Change;
+    - its focus, and paging.
+  - A `grids` entry still gives the complete table, with every row and editing.
+  - [Drawn list boxes](tests/DRAWN-LIST-BOXES.md); [acceptance](validation/drawn-listboxes-development.json).
+- **A button nothing labels is named by the words of its object name**, in a form with the area as without one: `btnRefreshOrders` is Refresh Orders. An invisible button that nothing labels, such as a keyboard shortcut, is not published.
+- **A tab control used as a container has its tabs where 4D draws them, along its top edge.**
+  - Before, the bridge placed them at the control's middle. A press there could reach another object, or was refused as overlapped.
+  - In the host application, the Vendors window's column filter is such a control.
+  - [Tabs](tests/TABS.md).
+- **A press made while 4D is busy runs once 4D is free**, as a click queued by macOS would.
+  - Before, a queued action expired three seconds after it was queued, however long the form took to describe. On a form described slowly, such as an application's vendor window interpreted under Rosetta, a tab pressed after a column change was refused.
+  - It now expires after two and a half description intervals, at least three seconds and at most fifteen.
+- **[Coverage and gaps](COVERAGE.md)** summarizes what is accessible, what is not and what has never been tested.
+
+Give every detail form the area (`install_host_methods.py --all-forms`): a dormant area costs what the form costs without the bridge.
+
+For developers:
+- `src/Activation.{h,mm}` holds the process state, and `AXBWhenActive` defers work until activation.
+- Internal-form overlays accept an `embeddingParent`, and `AXBIntegratedFormView` finds a bridge window's form view.
+- Session nodes accept the role `drawnTable` with a `table` of columns.
+- `measure_cost.py` measures a form's cost with and without an assistive technology.
+
+Upgrade the plugin, component and host helpers together. Tests and harnesses that read a form's state from 4D before any accessibility client reads its window should read the window first, or set `AXB_ACTIVATION=on`.
+
 # 0.34.1, integrated forms are not described twice while they open
 
 0.34.1 contains everything in 0.34.0 below, which was not published, and one fix:
