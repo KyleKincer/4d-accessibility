@@ -12,7 +12,8 @@
 #include <unistd.h>
 
 // Drawing happens on 4D's render threads; every table below is guarded by TableLock.
-// Keys are weak and compared by identity: a freed line, frame or image leaves its table.
+// Keys are compared by identity. Lines, images and layers are held weakly, so a freed one leaves
+// its table; framesetters and frames by address, in small tables (see AddressTable).
 static os_unfair_lock TableLock = OS_UNFAIR_LOCK_INIT;
 static NSMapTable *LineText, *SetterText, *FrameText, *ImageText, *LayerText;
 static NSMutableDictionary<NSValue *, NSMutableArray<NSString *> *> *ContextText;
@@ -54,6 +55,15 @@ static ContextCreateWithDataFn OriginalContextCreateWithData;
 // A context that never becomes an image must not grow the tables without bound.
 // A list box draws every visible cell's text into one context.
 static const NSUInteger ContextLimit = 512, ContextTextLimit = 4096;
+
+// A framesetter's or frame's text, by its address: a weak reference would keep CoreText's
+// framesetters and frames alive. Each is needed only until its frame is made or drawn, and a
+// new one at the same address passes through the same call first, so the table stays small.
+static NSMapTable *AddressTable(void) {
+    return [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsOpaqueMemory | NSPointerFunctionsOpaquePersonality
+                                     valueOptions:NSPointerFunctionsStrongMemory capacity:0];
+}
+static const NSUInteger AddressLimit = 1024;
 
 static NSMapTable *WeakIdentityTable(void) {
     return [[NSMapTable alloc] initWithKeyOptions:NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPointerPersonality
@@ -146,7 +156,11 @@ static void ObservedLineDraw(CTLineRef line, CGContextRef context) {
 static CTFramesetterRef ObservedSetterCreate(CFAttributedStringRef string) {
     CTFramesetterRef setter = OriginalSetterCreate(string);
     NSString *text = StringOf(string);
-    if (setter && text) { AXBTableGuard guard; [SetterText setObject:text forKey:(__bridge id)setter]; }
+    if (setter && text) {
+        AXBTableGuard guard;
+        if (SetterText.count >= AddressLimit) [SetterText removeAllObjects];
+        [SetterText setObject:text forKey:(__bridge id)setter];
+    }
     return setter;
 }
 
@@ -157,7 +171,11 @@ static CTFrameRef ObservedFrameCreate(CTFramesetterRef setter, CFRange range, CG
     if (frame && string) {
         CFRange visible = CTFrameGetVisibleStringRange(frame);
         NSString *text = TextOf(string, visible.length ? visible : range);
-        if (text) { AXBTableGuard guard; [FrameText setObject:text forKey:(__bridge id)frame]; }
+        if (text) {
+            AXBTableGuard guard;
+            if (FrameText.count >= AddressLimit) [FrameText removeAllObjects];
+            [FrameText setObject:text forKey:(__bridge id)frame];
+        }
     }
     return frame;
 }
@@ -389,8 +407,8 @@ BOOL AXBDrawnTextInitialize(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         LineText = WeakIdentityTable();
-        SetterText = WeakIdentityTable();
-        FrameText = WeakIdentityTable();
+        SetterText = AddressTable();
+        FrameText = AddressTable();
         ImageText = WeakIdentityTable();
         ImageOrigins = WeakIdentityTable();
         if (!LayerText) LayerText = WeakIdentityTable();
