@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-14",
+  "sourceCommit": "2fb7a9fa8f1781a09fb6fb5cc8f24a694d9568fe",
+  "host": "4D 20.8 and 4D Server 20.8 on one Mac, macOS 26, compiled, native Apple Silicon",
+  "pluginSHA256": "03ab9d21b2870373f860a94aabf39570f44763300470ca87a0c731db47a983ad",
+  "componentSHA256": "fedc56e40de79b277629173d1e07a54da47aac838c9abd165727a6a0a718e1fa",
+  "runnerSHA256": "e3cdadcae95a7536f01a8e9c52ce688f7fb788776a97a009478cc0d1dda6851f",
+  "checks": [
+    {
+      "passed": true,
+      "name": "a project opened from its archive publishes its form, labelled by its caption"
+    },
+    {
+      "passed": true,
+      "name": "the client publishes the project form's field, labelled by its caption"
+    },
+    {
+      "passed": true,
+      "name": "the client publishes the project form's button by its title"
+    },
+    {
+      "passed": true,
+      "name": "Save accepts a press"
+    },
+    {
+      "passed": true,
+      "name": "the press ran 4D's accept action on the client"
+    },
+    {
+      "passed": true,
+      "name": "the client publishes the table form from the cached archive"
+    },
+    {
+      "passed": true,
+      "name": "the client ran the project from an archive in its cache folder"
+    }
+  ],
+  "clientCache": [
+    "AXBRemoteClient_127_0_0_1_19813_783"
+  ],
+  "before": "With the plugin from main at 2fb7a9f, the same runner fails its first check: the archived project's form was not published. 4D reports a project opened from a .4DZ by the folder holding it, and a remote client by the project's name alone, so the plugin found no form definitions.",
+  "notRun": "Clients on another Mac, and 4D Server over a real network."
+}

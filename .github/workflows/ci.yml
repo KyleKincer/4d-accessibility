@@ -54,6 +54,7 @@ jobs:
           python3 measure_cost.py --help
           python3 test_activation_fixture.py --help
           python3 test_first_click_fixture.py --help
+          python3 test_archived_project_fixture.py --help
           python3 test_drawn_listbox_fixture.py --help
       - name: Test session and grid models
         run: |

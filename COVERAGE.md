@@ -54,7 +54,7 @@ Lists in 4D's own windows publish the lines they draw. Paging actions reach the 
 
 ## Never tested
 
-- 4D Server with remote clients: every test runs a local 4D. Each client's plugin works alone, but nothing has measured remote data or latency.
+- 4D Server with remote clients on other machines: one test connects a 4D client to 4D Server on the same Mac, and its forms without an area are published from the client's cached archive ([archived projects](validation/archived-projects-development.json)). Remote data volume, latency and clients on other Macs are untested.
 - Windows: there is no implementation.
 - Voice Control, Switch Control and Full Keyboard Access.
 - Physical Intel Macs: Intel code runs only under Rosetta.
