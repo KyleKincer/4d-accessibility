@@ -1590,6 +1590,16 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
     return JSON(response);
 }
 
+BOOL AXBRefreshDue(NSString *sessionID) {
+    Init();
+    AXBSession *session;
+    @synchronized(registryLock) { session = sessions[sessionID]; }
+    if (!session) return YES;
+    AXBChanges changes = AXBCurrentChanges();
+    return [session claimRefreshWithSignificant:changes.significant minor:changes.minor settleUntil:changes.settleUntil
+                                drawingObserved:AXBDrawnTextAvailable() now:Now()];
+}
+
 void AXBDetach(NSString *sessionID, NSInteger processID) {
     Init();
     @synchronized(registryLock) {
@@ -1646,6 +1656,7 @@ void AXBInitialize(void) {
     // first message can be drawn inside a modal loop that never drains the main queue; later,
     // in any run-loop mode, with the windows already open.
     AXBWhenActive(^{
+        AXBObserveChanges();
         AXBMessagesInitialize();
         AXBProgressInitialize();
         AXBQueryEditorInitialize();
@@ -1677,7 +1688,7 @@ void AXBShutdown(void) {
     // No monitor is held, and cleanup never calls 4D or waits for the form.
     dispatch_block_t cleanup = ^{
         for (AXBWindowView *v in views.allValues) [v invalidate];
-        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBOrderByEditorShutdown(); AXBFormulaEditorShutdown(); AXBGenericFormsShutdown(); AXBActivationShutdown();
+        [views removeAllObjects]; AXBLayoutShutdown(); AXBMessagesShutdown(); AXBProgressShutdown(); AXBQueryEditorShutdown(); AXBQuickReportShutdown(); AXBOrderByEditorShutdown(); AXBFormulaEditorShutdown(); AXBGenericFormsShutdown(); AXBStopObservingChanges(); AXBActivationShutdown();
         if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
         helpTipObserver = nil;
     };

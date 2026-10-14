@@ -1,6 +1,7 @@
 #import "GenericForms.h"
 #import "InternalForms.h"
 #import "DrawnText.h"
+#import "Activation.h"
 #include <mach/mach.h>
 #include <objc/message.h>
 #include <vector>
@@ -863,14 +864,22 @@ static void ObserveWindows(void) {
 }
 
 // Forms redraw their objects as their data change; refresh the open windows a few times a
-// second, through every run-loop mode, since 4D's own loops do not drain the main queue.
+// second while anything changes, else every few seconds, through every run-loop mode, since
+// 4D's own loops do not drain the main queue.
 static void StartRefreshing(void) {
     if (RefreshTimer) return;
     RefreshTimer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_global_queue(QOS_CLASS_UTILITY, 0));
     dispatch_source_set_timer(RefreshTimer, DISPATCH_TIME_NOW, 400 * NSEC_PER_MSEC, 100 * NSEC_PER_MSEC);
     __block BOOL pending = NO;
+    __block uint64_t refreshed = UINT64_MAX;
+    __block NSTimeInterval refreshedAt = 0;
     dispatch_source_set_event_handler(RefreshTimer, ^{
         if (pending) return;
+        AXBChanges changes = AXBCurrentChanges();
+        NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+        if (changes.significant == refreshed && now >= changes.settleUntil && now - refreshedAt < 5) return;
+        refreshed = changes.significant;
+        refreshedAt = now;
         CFRunLoopRef main = CFRunLoopGetMain();
         CFArrayRef modes = CFRunLoopCopyAllModes(main);
         if (!modes) return;

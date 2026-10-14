@@ -47,6 +47,20 @@ void AXBHooksNoteInstalled(void);
 // For diagnostics: for example "4D 20.8; hooks installed" or "4D 21.0; hooks withheld".
 NSString *AXBHooksDescription(void);
 
+// What a form shows can have changed. A described form is described again only after a change,
+// or after its idle interval: describing an unchanged form costs its process for nothing.
+// A significant change is one 4D shows: a form object drawn again, the user's input, a window
+// gaining or losing key status, a page change. A form running code is a minor change, since most
+// code that changes what a form shows also redraws it. Input also keeps forms changing for a
+// moment, while 4D runs the methods it triggers. Thread-safe and cheap.
+typedef NS_ENUM(NSInteger, AXBChange) { AXBChangeSignificant, AXBChangeMinor, AXBChangeInput };
+void AXBNoteChange(AXBChange change);
+typedef struct { uint64_t significant, minor; NSTimeInterval settleUntil; } AXBChanges;
+AXBChanges AXBCurrentChanges(void);
+// Observe the user's input and key-window changes; call on the main thread once active.
+void AXBObserveChanges(void);
+void AXBStopObservingChanges(void);
+
 // Test support: become active now, or return to dormant with no pending blocks.
 void AXBActivationSetActiveForTesting(BOOL active);
 // Test support: the number of windows carrying a wake sentinel.

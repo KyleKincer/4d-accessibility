@@ -67,10 +67,11 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 sLONG_PTR native = PA_GetWindowPtr(reinterpret_cast<PA_WindowRef>(static_cast<intptr_t>(windowID)));
                 if (PA_GetLastError() != eER_NoErr) native = 0;
                 ReturnText(parameters, AXBExchange(windowID, processID, reinterpret_cast<void *>(native), sessionID, json));
+                AXBAreaNoteOwnCycle(static_cast<PA_long32>(processID));
                 break;
             }
             case 2: AXBDetach(TextParameter(parameters, 1, 128), PA_GetCurrentProcessNumber()); break;
-            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; activation 1; macOS; %@; %@", AXB_VERSION, AXBHooksDescription(), AXBActivationDescription()]); break;
+            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; activation 1; refreshOnChange 1; macOS; %@; %@", AXB_VERSION, AXBHooksDescription(), AXBActivationDescription()]); break;
             case 4:
             case 7: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
@@ -105,6 +106,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
             }
             case 6: AXBArea(parameters); break;
             case 8: PA_ReturnLong(parameters, AXBActivationIsActive() ? 1 : 0); break;
+            case 9: PA_ReturnLong(parameters, AXBRefreshDue(TextParameter(parameters, 1, 128)) ? 1 : 0); break;
             default: break;
         }
     }

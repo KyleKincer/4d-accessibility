@@ -15,6 +15,29 @@
 // and reenter DeinitArea, so no callback holds a raw lifetime pointer.
 static NSMutableDictionary<NSNumber *, AXBAreaLifetime *> *areas;
 static uintptr_t nextArea;
+static NSMutableSet<NSNumber *> *ownCycles;
+static NSObject *ownCyclesLock;
+
+static void SetupOwnCycles(void) {
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{ ownCycles = [NSMutableSet new]; ownCyclesLock = [NSObject new]; });
+}
+
+void AXBAreaNoteOwnCycle(PA_long32 process) {
+    SetupOwnCycles();
+    @synchronized(ownCyclesLock) { [ownCycles addObject:@(process)]; }
+}
+
+// A form's execution cycle ended: whether the bridge ran it.
+static BOOL TakeOwnCycle(void) {
+    SetupOwnCycles();
+    NSNumber *process = @(PA_GetCurrentProcessNumber());
+    @synchronized(ownCyclesLock) {
+        if (![ownCycles containsObject:process]) return NO;
+        [ownCycles removeObject:process];
+        return YES;
+    }
+}
 
 static void SetText(PA_Variable *variable, NSString *text) {
     std::vector<PA_Unichar> characters(text.length + 1, 0);
@@ -84,6 +107,12 @@ void AXBArea(PA_PluginParameters parameters) {
     uintptr_t key = reinterpret_cast<uintptr_t>(PA_GetAreaReference(parameters));
     AXBAreaLifetime *area = areas[@(key)];
     if (!area) return;
+    // What the form shows can change when it runs code, changes page or loads a record.
+    if (AXBActivationIsActive()) {
+        if (event == eAE_EndExecutionCycle) { if (!TakeOwnCycle()) AXBNoteChange(AXBChangeMinor); }
+        else if (event == eAE_PageChange || event == eAE_LoadRecord || event == eAE_SaveRecord || event == eAE_Scroll || event == eAE_ShowHide ||
+                 event == eAE_Select || event == eAE_Deselect) AXBNoteChange(AXBChangeSignificant);
+    }
     if (event == eAE_Deinit) {
         // Retire before entering 4D. Queued startup and reentrant callbacks
         // cannot acquire this lifetime again.

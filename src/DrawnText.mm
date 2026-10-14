@@ -373,6 +373,8 @@ BOOL AXBDrawnTextInitialize(void) {
             IMP original = method_getImplementation(method);
             method_setImplementation(method, imp_implementationWithBlock(^(CALayer *layer, id contents) {
                 ((void (*)(id, SEL, id))original)(layer, @selector(setContents:), contents);
+                // 4D names each form object's layer; drawing one again changes what its form shows.
+                if (layer.name && contents) AXBNoteChange(AXBChangeSignificant);
                 // Only images can carry drawn text; other contents matter only to a named layer.
                 if ((contents && CFGetTypeID((__bridge CFTypeRef)contents) == CGImageGetTypeID()) || layer.name) RecordContents(layer, contents);
             }));

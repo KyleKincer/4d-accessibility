@@ -70,6 +70,10 @@ End if
 If ($context.view.options.omitOutsideWindow=True)
  $snapshot.omitOutsideWindow:=True
 End if
+// Seconds between descriptions of an unchanged form; the plugin's default is 5.
+If (Value type($context.view.options.idleRefresh)=Is real)
+ $snapshot.idleRefresh:=$context.view.options.idleRefresh
+End if
 $state:=JSON Stringify($snapshot)
 If (Compare strings($state; $context.state; sk char codes)#0)
  $context.revision:=$context.revision+1

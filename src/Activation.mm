@@ -164,6 +164,44 @@ void AXBActivationShutdown(void) {
 
 BOOL AXBActivationIsOff(void) { return ReadMode() == AXBActivationOff; }
 
+static std::atomic<uint64_t> SignificantChanges{0}, MinorChanges{0};
+static std::atomic<double> SettleUntil{0};
+// How long after the user's input forms keep being described, while 4D runs what it triggered.
+static const NSTimeInterval InputSettle = 1.0;
+
+void AXBNoteChange(AXBChange change) {
+    if (change == AXBChangeMinor) { MinorChanges++; return; }
+    SignificantChanges++;
+    if (change == AXBChangeInput) SettleUntil = NSProcessInfo.processInfo.systemUptime + InputSettle;
+}
+
+AXBChanges AXBCurrentChanges(void) { return {SignificantChanges.load(), MinorChanges.load(), SettleUntil.load()}; }
+
+static id InputMonitor;
+static NSArray *KeyObservers;
+
+void AXBObserveChanges(void) {
+    if (InputMonitor) return;
+    NSEventMask input = NSEventMaskKeyDown | NSEventMaskKeyUp | NSEventMaskFlagsChanged | NSEventMaskLeftMouseDown | NSEventMaskLeftMouseUp |
+        NSEventMaskRightMouseDown | NSEventMaskRightMouseUp | NSEventMaskOtherMouseDown | NSEventMaskOtherMouseUp | NSEventMaskLeftMouseDragged | NSEventMaskScrollWheel;
+    InputMonitor = [NSEvent addLocalMonitorForEventsMatchingMask:input handler:^NSEvent *(NSEvent *event) {
+        AXBNoteChange(AXBChangeInput);
+        return event;
+    }];
+    NSMutableArray *observers = [NSMutableArray new];
+    for (NSNotificationName name in @[NSWindowDidBecomeKeyNotification, NSWindowDidResignKeyNotification, NSWindowDidBecomeMainNotification])
+        [observers addObject:[NSNotificationCenter.defaultCenter addObserverForName:name object:nil queue:nil
+                                                                         usingBlock:^(NSNotification *note) { (void)note; AXBNoteChange(AXBChangeSignificant); }]];
+    KeyObservers = observers;
+}
+
+void AXBStopObservingChanges(void) {
+    if (InputMonitor) [NSEvent removeMonitor:InputMonitor];
+    InputMonitor = nil;
+    for (id observer in KeyObservers) [NSNotificationCenter.defaultCenter removeObserver:observer];
+    KeyObservers = nil;
+}
+
 // The 4D versions whose drawing the observations were validated on, by major version.
 static const unsigned int ValidatedMajors[] = {20};
 static unsigned int Version;

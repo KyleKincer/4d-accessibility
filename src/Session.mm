@@ -112,6 +112,8 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (!Text(s[@"label"], 512) || !Bool(s[@"enabled"])) return @"invalid window metadata";
     if (s[@"automationKey"] && (!Text(s[@"automationKey"], 128) || ![s[@"automationKey"] length])) return @"invalid automation key";
     if (s[@"omitOutsideWindow"] && !Bool(s[@"omitOutsideWindow"])) return @"invalid window metadata";
+    if (s[@"idleRefresh"] && (!Number(s[@"idleRefresh"]) || [s[@"idleRefresh"] doubleValue] < 1 || [s[@"idleRefresh"] doubleValue] > 60))
+        return @"invalid idle refresh interval";
     NSArray *nodes = s[@"nodes"];
     if (![nodes isKindOfClass:NSArray.class] || nodes.count > AXBLimits::nodes) return @"invalid node count";
     NSMutableSet *ids = [NSMutableSet new];
@@ -327,6 +329,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     NSDictionary *_controlInputState;
     NSDictionary *_controlInputResult;
     BOOL _controlMenuOpened;
+    BOOL _claimed;
+    uint64_t _claimedSignificant, _claimedMinor;
+    NSTimeInterval _claimedAt;
 }
 - (instancetype)initWithIdentifier:(NSString *)identifier windowID:(NSInteger)windowID {
     if ((self = [super init])) { _identifier = [identifier copy]; _windowID = windowID; _active = YES; _grids = [NSMutableDictionary new]; }
@@ -352,6 +357,21 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     }
 }
 - (AXBGrid *)gridForNode:(NSString *)nodeID { @synchronized(self) { return _grids[nodeID]; } }
+- (BOOL)claimRefreshWithSignificant:(uint64_t)significant minor:(uint64_t)minor settleUntil:(NSTimeInterval)settleUntil
+                     drawingObserved:(BOOL)drawingObserved now:(NSTimeInterval)now {
+    @synchronized(self) {
+        if (!_active) return NO;
+        NSTimeInterval since = now - _claimedAt;
+        id interval = _snapshot[@"idleRefresh"];
+        NSTimeInterval idle = interval ? [interval doubleValue] : 5;
+        BOOL due = !_claimed || !_snapshot || _pending || significant != _claimedSignificant || now < settleUntil || since >= idle ||
+            (!drawingObserved && minor != _claimedMinor && since >= 1);
+        if (!due) for (AXBGrid *grid in _grids.allValues) if (grid.hasQueuedRequests) { due = YES; break; }
+        if (!due) return NO;
+        _claimed = YES; _claimedSignificant = significant; _claimedMinor = minor; _claimedAt = now;
+        return YES;
+    }
+}
 - (void)invalidate {
     @synchronized(self) {
         _active = NO; _pending = nil; _pendingState = nil; _pendingGridValue = nil; _pendingSelectionGeneration = nil; _delivered = NO; _snapshot = nil; _lastInput = nil; _inputResult = nil; _controlInput = nil; _controlInputState = nil; _controlInputResult = nil;
