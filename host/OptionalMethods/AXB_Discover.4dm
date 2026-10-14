@@ -1,6 +1,8 @@
 // Discover ordinary live controls in their owning form. Never evaluate source
 // expressions, read masked values, or copy application object/collection data.
-#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection) -> $result : Object
+// With $only, discover only the objects it names; $knownLabels are the form's
+// captions, from an earlier complete discovery, to label them.
+#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection; $only : Object; $knownLabels : Collection) -> $result : Object
 var $name; $role; $label; $font : Text
 var $detailForm; $listForm : Text
 var $subformTable : Pointer
@@ -25,6 +27,9 @@ FORM GET OBJECTS($names; $pointers; $pages; Form current page+Form inherited)
 FORM GET ENTRY ORDER($entry; *)
 For ($i; 1; Size of array($names))
  $name:=$names{$i}
+ If (($only#Null) && Not(OB Is defined($only; $name)))
+  continue
+ End if
  // The lifecycle area is infrastructure, with no visible content or action.
  If ((($name="__AXB_Bridge") | (Position("__AXB_Bridge."; $name)=1)) && (OBJECT Get type(*; $name)=Object type plugin area))
   continue
@@ -384,6 +389,9 @@ End for
 // names remain diagnosable and can be supplied once in declarative metadata.
 $result.nodes:=AXB_ControlLayers($result.nodes; $options)
 $labels:=New collection
+If ($knownLabels#Null)
+ $labels:=$knownLabels.slice(0)
+End if
 For each ($node; $result.nodes)
  If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))
   $labels.push($node)

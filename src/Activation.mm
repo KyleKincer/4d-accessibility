@@ -1,5 +1,6 @@
 #import "Activation.h"
 #include <atomic>
+#include <os/lock.h>
 #include <stdlib.h>
 
 typedef NS_ENUM(NSInteger, AXBActivationMode) { AXBActivationAuto, AXBActivationOn, AXBActivationOff };
@@ -165,17 +166,54 @@ void AXBActivationShutdown(void) {
 BOOL AXBActivationIsOff(void) { return ReadMode() == AXBActivationOff; }
 
 static std::atomic<uint64_t> SignificantChanges{0}, MinorChanges{0};
-static std::atomic<double> SettleUntil{0};
+static std::atomic<double> SettleUntil{0}, ChangedAt{0};
 // How long after the user's input forms keep being described, while 4D runs what it triggered.
 static const NSTimeInterval InputSettle = 1.0;
 
 void AXBNoteChange(AXBChange change) {
     if (change == AXBChangeMinor) { MinorChanges++; return; }
+    NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
     SignificantChanges++;
-    if (change == AXBChangeInput) SettleUntil = NSProcessInfo.processInfo.systemUptime + InputSettle;
+    ChangedAt = now;
+    if (change == AXBChangeInput) SettleUntil = now + InputSettle;
 }
 
-AXBChanges AXBCurrentChanges(void) { return {SignificantChanges.load(), MinorChanges.load(), SettleUntil.load()}; }
+static std::atomic<uint64_t> StructureChanges{0};
+static NSMutableDictionary<NSString *, NSNumber *> *ObjectChanges; // Guarded by ObjectLock.
+static os_unfair_lock ObjectLock = OS_UNFAIR_LOCK_INIT;
+
+void AXBNoteObjectChange(NSString *name) {
+    if (!Active || !name.length) { AXBNoteChange(AXBChangeSignificant); return; }
+    NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+    os_unfair_lock_lock(&ObjectLock);
+    uint64_t generation = ++SignificantChanges;
+    if (!ObjectChanges) ObjectChanges = [NSMutableDictionary new];
+    ObjectChanges[name] = @(generation);
+    os_unfair_lock_unlock(&ObjectLock);
+    ChangedAt = now;
+}
+
+void AXBNoteStructureChange(void) {
+    StructureChanges++;
+    AXBNoteChange(AXBChangeSignificant);
+}
+
+uint64_t AXBStructureGeneration(void) { return StructureChanges.load(); }
+
+NSArray<NSString *> *AXBObjectsChangedSince(uint64_t generation, NSUInteger limit, uint64_t *latest) {
+    NSMutableArray<NSString *> *names = [NSMutableArray new];
+    os_unfair_lock_lock(&ObjectLock);
+    *latest = SignificantChanges.load();
+    [ObjectChanges enumerateKeysAndObjectsUsingBlock:^(NSString *name, NSNumber *changed, BOOL *stop) {
+        if (changed.unsignedLongLongValue <= generation) return;
+        [names addObject:name];
+        if (names.count > limit) *stop = YES;
+    }];
+    os_unfair_lock_unlock(&ObjectLock);
+    return names.count > limit ? nil : names;
+}
+
+AXBChanges AXBCurrentChanges(void) { return {SignificantChanges.load(), MinorChanges.load(), ChangedAt.load(), SettleUntil.load()}; }
 
 static id InputMonitor;
 static NSArray *KeyObservers;

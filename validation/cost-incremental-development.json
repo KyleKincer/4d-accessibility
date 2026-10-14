@@ -1,0 +1,676 @@
+{
+  "date": "2026-10-14",
+  "host": "4D 20.8, macOS 26, compiled, native Apple Silicon",
+  "command": "python3 measure_cost.py --server /path/to/4D\\ Server.app --variant area --wake --repeat 2; ... --variant none --variant area --repeat 2",
+  "notes": [
+    "activeBefore: describing whole forms once changes pause, with a 30-second backstop, before describing only changed objects",
+    "active: describing only the objects whose image, visibility or position changed",
+    "descriptionParts: milliseconds per description during the scroll phase, timed around the host calls (viewWhole and viewPartial are the root form view described whole and only where it changed)"
+  ],
+  "runs": {
+    "active": [
+      {
+        "variant": "area",
+        "wake": true,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "wakeElements": 799,
+            "wakeSeconds": 0.24,
+            "cpuPercent": 3.7,
+            "seconds": 30.1,
+            "rssMB": 337
+          },
+          "idle": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.0,
+            "cpuPercent": 22.6,
+            "seconds": 30.0,
+            "rssMB": 336,
+            "ticks": 869,
+            "medianMs": 37,
+            "p99Ms": 48,
+            "maxMs": 137,
+            "over50Ms": 4,
+            "over100Ms": 1
+          },
+          "scroll": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.0,
+            "cpuPercent": 34.7,
+            "seconds": 30.1,
+            "rssMB": 343,
+            "ticks": 844,
+            "medianMs": 29.0,
+            "p99Ms": 68,
+            "maxMs": 153,
+            "over50Ms": 31,
+            "over100Ms": 1
+          }
+        },
+        "startupSeconds": 4.08,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 40,
+          "max": 80,
+          "runs": [
+            80,
+            32,
+            50,
+            40,
+            36
+          ]
+        },
+        "closeSmallMs": 100,
+        "openLargeMs": {
+          "median": 221,
+          "max": 260,
+          "runs": [
+            260,
+            218,
+            221
+          ]
+        },
+        "closeLargeMs": 294,
+        "attempt": 1,
+        "nativeSha256": "c9b84877ad3154177e6fbffb7a73ca34ff734691e681900aa9ba9dd9ec4665ca",
+        "componentSha256": "5090a00b3bec99b93e04b31e6718ae7d09e0b7bc063e1c67d0eac752da3a3422"
+      },
+      {
+        "variant": "area",
+        "wake": true,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "wakeElements": 799,
+            "wakeSeconds": 0.23,
+            "cpuPercent": 4.1,
+            "seconds": 30.2,
+            "rssMB": 325
+          },
+          "idle": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.02,
+            "cpuPercent": 24.6,
+            "seconds": 30.0,
+            "rssMB": 341,
+            "ticks": 871,
+            "medianMs": 38,
+            "p99Ms": 47,
+            "maxMs": 136,
+            "over50Ms": 2,
+            "over100Ms": 1
+          },
+          "scroll": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.01,
+            "cpuPercent": 35.0,
+            "seconds": 30.1,
+            "rssMB": 340,
+            "ticks": 845,
+            "medianMs": 29,
+            "p99Ms": 74,
+            "maxMs": 142,
+            "over50Ms": 30,
+            "over100Ms": 1
+          }
+        },
+        "startupSeconds": 3.71,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 75,
+          "max": 109,
+          "runs": [
+            75,
+            32,
+            45,
+            109,
+            79
+          ]
+        },
+        "closeSmallMs": 119,
+        "openLargeMs": {
+          "median": 233,
+          "max": 257,
+          "runs": [
+            257,
+            223,
+            233
+          ]
+        },
+        "closeLargeMs": 307,
+        "attempt": 2,
+        "nativeSha256": "c9b84877ad3154177e6fbffb7a73ca34ff734691e681900aa9ba9dd9ec4665ca",
+        "componentSha256": "5090a00b3bec99b93e04b31e6718ae7d09e0b7bc063e1c67d0eac752da3a3422"
+      }
+    ],
+    "dormantAndNone": [
+      {
+        "variant": "none",
+        "wake": false,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "cpuPercent": 3.3,
+            "seconds": 30.0,
+            "rssMB": 280
+          },
+          "idle": {
+            "cpuPercent": 22.6,
+            "seconds": 30.0,
+            "rssMB": 286,
+            "ticks": 867,
+            "medianMs": 38,
+            "p99Ms": 47,
+            "maxMs": 49,
+            "over50Ms": 0,
+            "over100Ms": 0
+          },
+          "scroll": {
+            "cpuPercent": 28.2,
+            "seconds": 30.0,
+            "rssMB": 286,
+            "ticks": 853,
+            "medianMs": 33,
+            "p99Ms": 50,
+            "maxMs": 54,
+            "over50Ms": 7,
+            "over100Ms": 0
+          }
+        },
+        "startupSeconds": 3.51,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 54,
+          "max": 77,
+          "runs": [
+            77,
+            54,
+            74,
+            39,
+            40
+          ]
+        },
+        "closeSmallMs": 87,
+        "openLargeMs": {
+          "median": 199,
+          "max": 209,
+          "runs": [
+            209,
+            199,
+            192
+          ]
+        },
+        "closeLargeMs": 258,
+        "attempt": 1,
+        "nativeSha256": null,
+        "componentSha256": null
+      },
+      {
+        "variant": "none",
+        "wake": false,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "cpuPercent": 3.3,
+            "seconds": 30.0,
+            "rssMB": 280
+          },
+          "idle": {
+            "cpuPercent": 24.4,
+            "seconds": 30.0,
+            "rssMB": 288,
+            "ticks": 860,
+            "medianMs": 38.0,
+            "p99Ms": 48,
+            "maxMs": 55,
+            "over50Ms": 1,
+            "over100Ms": 0
+          },
+          "scroll": {
+            "cpuPercent": 27.4,
+            "seconds": 30.0,
+            "rssMB": 289,
+            "ticks": 853,
+            "medianMs": 32,
+            "p99Ms": 51,
+            "maxMs": 59,
+            "over50Ms": 15,
+            "over100Ms": 0
+          }
+        },
+        "startupSeconds": 2.94,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 58,
+          "max": 126,
+          "runs": [
+            126,
+            48,
+            58,
+            40,
+            58
+          ]
+        },
+        "closeSmallMs": 100,
+        "openLargeMs": {
+          "median": 195,
+          "max": 205,
+          "runs": [
+            205,
+            195,
+            188
+          ]
+        },
+        "closeLargeMs": 270,
+        "attempt": 2,
+        "nativeSha256": null,
+        "componentSha256": null
+      },
+      {
+        "variant": "area",
+        "wake": false,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "cpuPercent": 3.2,
+            "seconds": 31.0,
+            "rssMB": 309
+          },
+          "idle": {
+            "cpuPercent": 24.8,
+            "seconds": 30.0,
+            "rssMB": 318,
+            "ticks": 871,
+            "medianMs": 38,
+            "p99Ms": 48,
+            "maxMs": 63,
+            "over50Ms": 3,
+            "over100Ms": 0
+          },
+          "scroll": {
+            "cpuPercent": 29.5,
+            "seconds": 30.1,
+            "rssMB": 325,
+            "ticks": 868,
+            "medianMs": 32.0,
+            "p99Ms": 50,
+            "maxMs": 58,
+            "over50Ms": 5,
+            "over100Ms": 0
+          }
+        },
+        "startupSeconds": 3.96,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 44,
+          "max": 74,
+          "runs": [
+            74,
+            44,
+            68,
+            44,
+            44
+          ]
+        },
+        "closeSmallMs": 99,
+        "openLargeMs": {
+          "median": 209,
+          "max": 222,
+          "runs": [
+            222,
+            209,
+            200
+          ]
+        },
+        "closeLargeMs": 264,
+        "attempt": 1,
+        "nativeSha256": "c9b84877ad3154177e6fbffb7a73ca34ff734691e681900aa9ba9dd9ec4665ca",
+        "componentSha256": "5090a00b3bec99b93e04b31e6718ae7d09e0b7bc063e1c67d0eac752da3a3422"
+      },
+      {
+        "variant": "area",
+        "wake": false,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "cpuPercent": 3.5,
+            "seconds": 30.1,
+            "rssMB": 309
+          },
+          "idle": {
+            "cpuPercent": 23.4,
+            "seconds": 30.0,
+            "rssMB": 318,
+            "ticks": 872,
+            "medianMs": 38.0,
+            "p99Ms": 47,
+            "maxMs": 63,
+            "over50Ms": 1,
+            "over100Ms": 0
+          },
+          "scroll": {
+            "cpuPercent": 29.5,
+            "seconds": 30.0,
+            "rssMB": 326,
+            "ticks": 867,
+            "medianMs": 31,
+            "p99Ms": 50,
+            "maxMs": 58,
+            "over50Ms": 5,
+            "over100Ms": 0
+          }
+        },
+        "startupSeconds": 2.94,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 53,
+          "max": 133,
+          "runs": [
+            133,
+            53,
+            44,
+            56,
+            52
+          ]
+        },
+        "closeSmallMs": 99,
+        "openLargeMs": {
+          "median": 204,
+          "max": 213,
+          "runs": [
+            213,
+            204,
+            200
+          ]
+        },
+        "closeLargeMs": 257,
+        "attempt": 2,
+        "nativeSha256": "c9b84877ad3154177e6fbffb7a73ca34ff734691e681900aa9ba9dd9ec4665ca",
+        "componentSha256": "5090a00b3bec99b93e04b31e6718ae7d09e0b7bc063e1c67d0eac752da3a3422"
+      }
+    ],
+    "activeBefore": [
+      {
+        "variant": "area",
+        "wake": true,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "wakeElements": 799,
+            "wakeSeconds": 0.25,
+            "cpuPercent": 5.0,
+            "seconds": 30.5,
+            "rssMB": 324
+          },
+          "idle": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.02,
+            "cpuPercent": 24.4,
+            "seconds": 30.1,
+            "rssMB": 333,
+            "ticks": 839,
+            "medianMs": 39,
+            "p99Ms": 50,
+            "maxMs": 143,
+            "over50Ms": 6,
+            "over100Ms": 2
+          },
+          "scroll": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.01,
+            "cpuPercent": 37.0,
+            "seconds": 30.1,
+            "rssMB": 340,
+            "ticks": 766,
+            "medianMs": 30.0,
+            "p99Ms": 153,
+            "maxMs": 162,
+            "over50Ms": 33,
+            "over100Ms": 29
+          }
+        },
+        "startupSeconds": 4.02,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 60,
+          "max": 77,
+          "runs": [
+            77,
+            35,
+            60,
+            35,
+            68
+          ]
+        },
+        "closeSmallMs": 85,
+        "openLargeMs": {
+          "median": 219,
+          "max": 239,
+          "runs": [
+            239,
+            219,
+            216
+          ]
+        },
+        "closeLargeMs": 294,
+        "attempt": 1,
+        "nativeSha256": "c5e1c23b7e87be1b4627bed9c0d9476ed3b0a80722d90412bb3cdf5893ed77a2",
+        "componentSha256": "7b25a6f66408265a3cb05b0d4095f511257163b12f95290f30fda484a204844d"
+      },
+      {
+        "variant": "area",
+        "wake": true,
+        "intel": false,
+        "phases": {
+          "quiet": {
+            "wakeElements": 799,
+            "wakeSeconds": 0.23,
+            "cpuPercent": 4.8,
+            "seconds": 30.6,
+            "rssMB": 324
+          },
+          "idle": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.0,
+            "cpuPercent": 25.9,
+            "seconds": 30.1,
+            "rssMB": 333,
+            "ticks": 843,
+            "medianMs": 38,
+            "p99Ms": 50,
+            "maxMs": 169,
+            "over50Ms": 6,
+            "over100Ms": 2
+          },
+          "scroll": {
+            "wakeElements": 6,
+            "wakeSeconds": 0.01,
+            "cpuPercent": 36.6,
+            "seconds": 30.1,
+            "rssMB": 340,
+            "ticks": 776,
+            "medianMs": 30.0,
+            "p99Ms": 148,
+            "maxMs": 159,
+            "over50Ms": 31,
+            "over100Ms": 30
+          }
+        },
+        "startupSeconds": 2.92,
+        "compiled": true,
+        "openSmallMs": {
+          "median": 69,
+          "max": 83,
+          "runs": [
+            83,
+            52,
+            69,
+            69,
+            78
+          ]
+        },
+        "closeSmallMs": 107,
+        "openLargeMs": {
+          "median": 222,
+          "max": 225,
+          "runs": [
+            225,
+            222,
+            215
+          ]
+        },
+        "closeLargeMs": 300,
+        "attempt": 2,
+        "nativeSha256": "c5e1c23b7e87be1b4627bed9c0d9476ed3b0a80722d90412bb3cdf5893ed77a2",
+        "componentSha256": "7b25a6f66408265a3cb05b0d4095f511257163b12f95290f30fda484a204844d"
+      }
+    ]
+  },
+  "descriptionParts": {
+    "tree": {
+      "calls": 41,
+      "msEach": 29.8
+    },
+    "viewWhole": {
+      "calls": 10,
+      "msEach": 68.9
+    },
+    "discover": {
+      "calls": 10,
+      "msEach": 51.4
+    },
+    "viewPartial": {
+      "calls": 31,
+      "msEach": 14.4
+    },
+    "exchange": {
+      "calls": 41,
+      "msEach": 7.9
+    },
+    "stringify": {
+      "calls": 41,
+      "msEach": 1.7
+    },
+    "grids": {
+      "calls": 41,
+      "msEach": 1.4
+    },
+    "focus": {
+      "calls": 41,
+      "msEach": 1.4
+    },
+    "gridPoll": {
+      "calls": 41,
+      "msEach": 0.0
+    }
+  },
+  "regression": [
+    "picture :: PASS: 29 picture control checks (arm64, interpreted)",
+    "picture voiceover :: PASS: 25 picture control checks (arm64, interpreted, VoiceOver)",
+    "splitter :: PASS: 9 splitter checks (arm64, interpreted)",
+    "splitter voiceover :: PASS: 8 splitter checks (arm64, interpreted, VoiceOver)",
+    "hlist :: PASS: 33 hierarchical list checks (arm64, interpreted)",
+    "hlist voiceover :: PASS: 12 hierarchical list checks (arm64, interpreted, VoiceOver)",
+    "progress :: PASS: 9 progress checks (arm64, interpreted)",
+    "progress voiceover :: PASS: 10 progress checks (arm64, interpreted, VoiceOver)",
+    "button_menu :: PASS: 15 button menu checks (arm64, interpreted)",
+    "button_menu voiceover :: PASS: 12 button menu checks (arm64, interpreted, VoiceOver)",
+    "query_editor :: PASS: 17 Query editor checks (arm64, interpreted)",
+    "query_editor voiceover :: PASS: 13 Query editor checks (arm64, interpreted, VoiceOver)",
+    "quick_report :: PASS: 16 Quick Report checks (arm64, interpreted)",
+    "quick_report voiceover :: PASS: 16 Quick Report checks (arm64, interpreted, VoiceOver)",
+    "generic_form :: PASS: 24 generic form checks (arm64, interpreted)",
+    "generic_form voiceover :: PASS: 23 generic form checks (arm64, interpreted, VoiceOver)",
+    "order_by :: PASS: 9 Order By editor checks (arm64, interpreted)",
+    "order_by voiceover :: PASS: 13 Order By editor checks (arm64, interpreted, VoiceOver)",
+    "formula_editor :: PASS: 19 formula editor checks (arm64, interpreted)",
+    "formula_editor voiceover :: PASS: 19 formula editor checks (arm64, interpreted, VoiceOver)",
+    "list_subform  :: PASS: 51 list-subform AX checks",
+    "list_subform --voiceover --compiled :: PASS: VO-Space runs the row button's own On Clicked once",
+    "messages  :: PASS: 37 standard-message checks (arm64, interpreted)",
+    "messages --voiceover :: PASS: 32 standard-message checks (arm64, interpreted, VoiceOver)",
+    "selection_fixture :: PASS: 34 classic-selection AX checks",
+    "combo_fixture :: PASS: owned combo fixture closes normally",
+    "dropdown_fixture :: PASS: owned dropdown fixture closes normally",
+    "activation  :: PASS: 14 activation checks",
+    "activation --voiceover :: PASS: 18 activation checks",
+    "drawn listbox --compiled :: PASS: 15 drawn list box checks (arm64, compiled)",
+    "drawn listbox --voiceover :: PASS: 19 drawn list box checks (arm64, interpreted, VoiceOver)",
+    "area :: PASS: ordinary application exits cleanly",
+    "tabs :: PASS: closed bridge group and owned children retire",
+    "area pixels :: PASS: lifecycle areas preserve every rendered window pixel; no masks or tolerance",
+    "incremental :: PASS: 10 incremental description checks",
+    "large :: PASS: the ordinary close action exits the large form normally",
+    "debounced :: PASS: One-second search timer receives the complete requested value",
+    "grid :: PASS: 4D confirms normal acceptance separately from cancellation",
+    "grid vo :: RuntimeError: The fixture has no onscreen window to capture",
+    "scroll :: PASS: restoring the application layout makes the same root control revealable",
+    "first click :: PASS: 11 first-click checks",
+    "archived :: PASS: 7 archived project checks"
+  ],
+  "regressionNotes": [
+    "grid vo first failed with 'The fixture has no onscreen window to capture' and passed on an immediate rerun"
+  ],
+  "incrementalFixture": {
+    "passed": true,
+    "checks": [
+      {
+        "passed": true,
+        "name": "the form is published with its labels"
+      },
+      {
+        "passed": true,
+        "name": "a field's value set by code is published"
+      },
+      {
+        "passed": true,
+        "name": "a button's new title is published"
+      },
+      {
+        "passed": true,
+        "name": "a moved button is published at its new place"
+      },
+      {
+        "passed": true,
+        "name": "a hidden button leaves the form"
+      },
+      {
+        "passed": true,
+        "name": "a shown button returns"
+      },
+      {
+        "passed": true,
+        "name": "a new caption relabels its field"
+      },
+      {
+        "passed": true,
+        "name": "unchanged controls stay published"
+      },
+      {
+        "passed": true,
+        "name": "descriptions reused the unchanged controls"
+      },
+      {
+        "passed": true,
+        "name": "a change that relabels another control described the form whole"
+      }
+    ],
+    "nativeSha256": "c9b84877ad3154177e6fbffb7a73ca34ff734691e681900aa9ba9dd9ec4665ca",
+    "componentSha256": "5090a00b3bec99b93e04b31e6718ae7d09e0b7bc063e1c67d0eac752da3a3422",
+    "latencySeconds": {
+      "value": 0.38,
+      "title": 0.53,
+      "move": 0.6,
+      "hide": 0.57,
+      "show": 0.56,
+      "caption": 0.57
+    },
+    "diagnostics": {
+      "wholeDescriptions": 4,
+      "partialDescriptions": 2,
+      "revision": 6,
+      "nodeCount": 44
+    }
+  }
+}

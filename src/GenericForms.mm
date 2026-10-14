@@ -891,6 +891,8 @@ static void StartRefreshing(void) {
         AXBChanges changes = AXBCurrentChanges();
         NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
         if (changes.significant == refreshed && now >= changes.settleUntil && now - refreshedAt < 5) return;
+        // Changes still under way, such as a list scrolling, are read once they pause.
+        if (changes.significant != refreshed && now - changes.changedAt < 0.25 && now - refreshedAt < 1) return;
         refreshed = changes.significant;
         refreshedAt = now;
         CFRunLoopRef main = CFRunLoopGetMain();

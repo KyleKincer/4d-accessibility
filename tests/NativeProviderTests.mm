@@ -2423,6 +2423,24 @@ static void ActivationTest(void) {
     Check(AXBActivationIsActive() && [AXBActivationDescription() isEqual:@"on; active; configured"], "on starts active");
     unsetenv("AXB_ACTIVATION");
 
+    // Changed objects are reported by name, from a count, while active.
+    AXBActivationSetActiveForTesting(YES);
+    uint64_t start = 0;
+    (void)AXBObjectsChangedSince(UINT64_MAX, 10, &start);
+    AXBNoteObjectChange(@"fieldName");
+    AXBNoteObjectChange(@"buttonSave");
+    AXBNoteObjectChange(@"fieldName");
+    uint64_t latest = 0;
+    NSArray *changed = AXBObjectsChangedSince(start, 10, &latest);
+    Check([[NSSet setWithArray:changed] isEqual:[NSSet setWithArray:@[@"fieldName", @"buttonSave"]]] && latest == start + 3,
+          "the objects changed since a count are reported once each, with the count now");
+    Check(AXBObjectsChangedSince(latest, 10, &latest).count == 0, "nothing changed since the latest count");
+    for (int i = 0; i < 5; i++) AXBNoteObjectChange([NSString stringWithFormat:@"item%d", i]);
+    Check(AXBObjectsChangedSince(latest, 3, &latest) == nil, "more changes than the limit ask for a whole description");
+    uint64_t structure = AXBStructureGeneration();
+    AXBNoteStructureChange();
+    Check(AXBStructureGeneration() == structure + 1, "a new page or record changes the whole form");
+
     // Drawing observation follows the 4D version unless a setting decides.
     unsetenv("AXB_HOOKS");
     AXBHooksConfigure(0xF0012008);

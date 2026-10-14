@@ -110,7 +110,8 @@ void AXBArea(PA_PluginParameters parameters) {
     // What the form shows can change when it runs code, changes page or loads a record.
     if (AXBActivationIsActive()) {
         if (event == eAE_EndExecutionCycle) { if (!TakeOwnCycle()) AXBNoteChange(AXBChangeMinor); }
-        else if (event == eAE_PageChange || event == eAE_LoadRecord || event == eAE_SaveRecord || event == eAE_Scroll || event == eAE_ShowHide ||
+        else if (event == eAE_PageChange || event == eAE_LoadRecord) AXBNoteStructureChange();
+        else if (event == eAE_SaveRecord || event == eAE_Scroll || event == eAE_ShowHide ||
                  event == eAE_Select || event == eAE_Deselect) AXBNoteChange(AXBChangeSignificant);
     }
     if (event == eAE_Deinit) {

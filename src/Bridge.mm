@@ -1598,8 +1598,24 @@ BOOL AXBRefreshDue(NSString *sessionID) {
     @synchronized(registryLock) { session = sessions[sessionID]; }
     if (!session) return YES;
     AXBChanges changes = AXBCurrentChanges();
-    return [session claimRefreshWithSignificant:changes.significant minor:changes.minor settleUntil:changes.settleUntil
-                                drawingObserved:AXBDrawnTextAvailable() now:Now()];
+    return [session claimRefreshWithSignificant:changes.significant minor:changes.minor changedAt:changes.changedAt
+                                    settleUntil:changes.settleUntil drawingObserved:AXBDrawnTextAvailable() now:Now()];
+}
+
+NSString *AXBTakeChanges(NSString *sessionID) {
+    Init();
+    AXBSession *session;
+    @synchronized(registryLock) { session = sessions[sessionID]; }
+    if (!session) return JSON(@{@"whole": @YES});
+    @synchronized(session) {
+        uint64_t latest = 0, structure = AXBStructureGeneration();
+        NSArray *names = AXBObjectsChangedSince(session.takenChanges, 256, &latest);
+        BOOL whole = !session.takenChanges || session.wholeDescriptionDue || structure != session.takenStructure || !names || !AXBDrawnTextAvailable();
+        session.takenChanges = latest;
+        session.takenStructure = structure;
+        session.wholeDescriptionDue = NO;
+        return JSON(whole ? @{@"whole": @YES} : @{@"whole": @NO, @"names": names});
+    }
 }
 
 void AXBDetach(NSString *sessionID, NSInteger processID) {

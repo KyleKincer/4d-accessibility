@@ -46,6 +46,11 @@
       "theme": "Accessibility Bridge",
       "syntax": "AXB Refresh due(&T):L",
       "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Changes(&T):T",
+      "threadSafe": false
     }
   ]
 }

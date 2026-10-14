@@ -320,6 +320,66 @@ static NSUInteger RebindImage(const struct mach_header_64 *header, intptr_t slid
     return replaced;
 }
 
+// Each named layer's last image, by a hash of its pixels. 4D draws every object of a form again
+// after many changes, though most look the same: only an object whose image differs changed.
+static NSMapTable *LayerHashes; // Weak layers to hashes; guarded by HashLock.
+static os_unfair_lock HashLock = OS_UNFAIR_LOCK_INIT;
+
+static uint64_t ImageHash(CGImageRef image) {
+    CGDataProviderRef provider = CGImageGetDataProvider(image);
+    CFDataRef data = provider ? CGDataProviderCopyData(provider) : NULL;
+    if (!data) return 0;
+    const uint8_t *bytes = CFDataGetBytePtr(data);
+    size_t length = (size_t)CFDataGetLength(data), words = length / sizeof(uint64_t);
+    uint64_t hash = 0xcbf29ce484222325ULL ^ ((uint64_t)CGImageGetWidth(image) << 32) ^ CGImageGetHeight(image);
+    for (size_t i = 0; i < words; i++) {
+        uint64_t word;
+        memcpy(&word, bytes + i * sizeof(word), sizeof(word));
+        hash = (hash ^ word) * 0x100000001b3ULL;
+        hash ^= hash >> 29;
+    }
+    for (size_t i = words * sizeof(uint64_t); i < length; i++) hash = (hash ^ bytes[i]) * 0x100000001b3ULL;
+    CFRelease(data);
+    return hash ? hash : 1;
+}
+
+// A named layer's new contents change its form only when they look different.
+static void NoteNewContents(CALayer *layer, id contents) {
+    if (!AXBActivationIsActive()) return;
+    if (!contents || CFGetTypeID((__bridge CFTypeRef)contents) != CGImageGetTypeID()) { AXBNoteObjectChange(layer.name); return; }
+    uint64_t hash = ImageHash((__bridge CGImageRef)contents);
+    os_unfair_lock_lock(&HashLock);
+    if (!LayerHashes) LayerHashes = [NSMapTable weakToStrongObjectsMapTable];
+    BOOL changed = !hash || [[LayerHashes objectForKey:layer] unsignedLongLongValue] != hash;
+    if (changed) [LayerHashes setObject:@(hash) forKey:layer];
+    os_unfair_lock_unlock(&HashLock);
+    if (changed) AXBNoteObjectChange(layer.name);
+}
+
+static void ObserveLayerGeometry(void) {
+    Method hidden = class_getInstanceMethod(CALayer.class, @selector(setHidden:));
+    Method position = class_getInstanceMethod(CALayer.class, @selector(setPosition:));
+    Method bounds = class_getInstanceMethod(CALayer.class, @selector(setBounds:));
+    if (!hidden || !position || !bounds) return;
+    IMP originalHidden = method_getImplementation(hidden), originalPosition = method_getImplementation(position), originalBounds = method_getImplementation(bounds);
+    // Only a named layer that actually changes: AppKit sets the same values again constantly.
+    method_setImplementation(hidden, imp_implementationWithBlock(^(CALayer *layer, BOOL value) {
+        BOOL changed = layer.name && layer.hidden != value;
+        ((void (*)(id, SEL, BOOL))originalHidden)(layer, @selector(setHidden:), value);
+        if (changed) AXBNoteObjectChange(layer.name);
+    }));
+    method_setImplementation(position, imp_implementationWithBlock(^(CALayer *layer, CGPoint value) {
+        BOOL changed = layer.name && !CGPointEqualToPoint(layer.position, value);
+        ((void (*)(id, SEL, CGPoint))originalPosition)(layer, @selector(setPosition:), value);
+        if (changed) AXBNoteObjectChange(layer.name);
+    }));
+    method_setImplementation(bounds, imp_implementationWithBlock(^(CALayer *layer, CGRect value) {
+        BOOL changed = layer.name && !CGRectEqualToRect(layer.bounds, value);
+        ((void (*)(id, SEL, CGRect))originalBounds)(layer, @selector(setBounds:), value);
+        if (changed) AXBNoteObjectChange(layer.name);
+    }));
+}
+
 BOOL AXBDrawnTextInitialize(void) {
     if (!Installed && !AXBHooksAllowed()) return NO;
     static dispatch_once_t once;
@@ -373,11 +433,14 @@ BOOL AXBDrawnTextInitialize(void) {
             IMP original = method_getImplementation(method);
             method_setImplementation(method, imp_implementationWithBlock(^(CALayer *layer, id contents) {
                 ((void (*)(id, SEL, id))original)(layer, @selector(setContents:), contents);
-                // 4D names each form object's layer; drawing one again changes what its form shows.
-                if (layer.name && contents) AXBNoteChange(AXBChangeSignificant);
+                // 4D names each form object's layer; a new image of one can change what its form shows.
+                if (layer.name) NoteNewContents(layer, contents);
                 // Only images can carry drawn text; other contents matter only to a named layer.
                 if ((contents && CFGetTypeID((__bridge CFTypeRef)contents) == CGImageGetTypeID()) || layer.name) RecordContents(layer, contents);
             }));
+            // Hiding, showing or moving a form object's layer changes what its form shows too,
+            // though 4D draws nothing new: code can hide or move an object without redrawing it.
+            ObserveLayerGeometry();
             Available = YES;
             AXBHooksNoteInstalled();
         }
