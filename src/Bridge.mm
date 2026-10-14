@@ -1596,7 +1596,8 @@ BOOL AXBRefreshDue(NSString *sessionID) {
     @synchronized(registryLock) { session = sessions[sessionID]; }
     if (!session) return YES;
     AXBChanges changes = AXBCurrentChanges();
-    return [session claimRefreshWithSignificant:changes.significant minor:changes.minor settleUntil:changes.settleUntil now:Now()];
+    return [session claimRefreshWithSignificant:changes.significant minor:changes.minor settleUntil:changes.settleUntil
+                                drawingObserved:AXBDrawnTextAvailable() now:Now()];
 }
 
 void AXBDetach(NSString *sessionID, NSInteger processID) {

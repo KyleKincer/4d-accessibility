@@ -357,14 +357,15 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     }
 }
 - (AXBGrid *)gridForNode:(NSString *)nodeID { @synchronized(self) { return _grids[nodeID]; } }
-- (BOOL)claimRefreshWithSignificant:(uint64_t)significant minor:(uint64_t)minor settleUntil:(NSTimeInterval)settleUntil now:(NSTimeInterval)now {
+- (BOOL)claimRefreshWithSignificant:(uint64_t)significant minor:(uint64_t)minor settleUntil:(NSTimeInterval)settleUntil
+                     drawingObserved:(BOOL)drawingObserved now:(NSTimeInterval)now {
     @synchronized(self) {
         if (!_active) return NO;
         NSTimeInterval since = now - _claimedAt;
         id interval = _snapshot[@"idleRefresh"];
         NSTimeInterval idle = interval ? [interval doubleValue] : 5;
         BOOL due = !_claimed || !_snapshot || _pending || significant != _claimedSignificant || now < settleUntil || since >= idle ||
-            (minor != _claimedMinor && since >= 1);
+            (!drawingObserved && minor != _claimedMinor && since >= 1);
         if (!due) for (AXBGrid *grid in _grids.allValues) if (grid.hasQueuedRequests) { due = YES; break; }
         if (!due) return NO;
         _claimed = YES; _claimedSignificant = significant; _claimedMinor = minor; _claimedAt = now;
