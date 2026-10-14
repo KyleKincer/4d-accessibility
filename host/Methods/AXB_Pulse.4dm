@@ -1,7 +1,7 @@
 // One cooperative sleeping process per registered form; one queued callback maximum.
 // A blocked/modal form cannot accumulate callbacks. No 4D form timer is used.
 #DECLARE($token : Object)
-var $send; $dormant : Boolean
+var $send; $dormant; $due : Boolean
 var $delay; $started : Real
 $delay:=6
 While ($token.active)
@@ -11,21 +11,31 @@ While ($token.active)
  $send:=False
  // Until an assistive technology needs the form, it runs without polling.
  $dormant:=AXB Active=0
+ // Describe the form again only when what it shows can have changed: describing an
+ // unchanged form makes its user wait for nothing. A staged operation always continues.
+ $due:=False
+ If (Not($dormant) & Not($token.pending))
+  $due:=($token.fast=True) | (AXB Refresh due($token.session)=1)
+ End if
  Use ($token)
   If ($token.active)
    If (Window process($token.window)#$token.owner)
     $token.active:=False
    Else
-    If (Not($token.pending) & Not($dormant))
+    If (Not($token.pending) & $due)
      $token.pending:=True
      $send:=True
     End if
    End if
   End if
  End use
- If ($dormant)
-  $delay:=15
- End if
+ Case of
+  : ($dormant)
+   $delay:=15
+  : (Not($send))
+   // Asking whether the form changed costs nothing; ask often, so a change is described promptly.
+   $delay:=6
+ End case
  If ($send)
   $started:=Tickcount
   CALL FORM($token.window; "AXB_Poll"; $token.session)

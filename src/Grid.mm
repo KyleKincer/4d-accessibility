@@ -356,6 +356,7 @@ NSString *AXBValidateGridPageForDescriptor(NSDictionary *page, NSDictionary *des
         return result;
     }
 }
+- (BOOL)hasQueuedRequests { @synchronized(self) { return _active && _queued.count > 0; } }
 - (BOOL)acceptPage:(NSDictionary *)page now:(NSTimeInterval)now {
     if (AXBValidateGridPage(page)) return NO;
     @synchronized(self) {

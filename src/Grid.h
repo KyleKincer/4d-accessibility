@@ -29,6 +29,7 @@ NSDictionary *AXBGridGroupActionState(NSDictionary *descriptor, NSString *row);
 - (NSDictionary *)cellForRow:(NSString *)row column:(NSString *)column now:(NSTimeInterval)now;
 // Requests are read-only and separate from the single-flight action queue.
 - (NSArray *)takeRequestsAtTime:(NSTimeInterval)now;
+- (BOOL)hasQueuedRequests;
 // A stale generation/order response is ignored. Invalid current data rejects.
 - (BOOL)acceptPage:(NSDictionary *)page now:(NSTimeInterval)now;
 - (void)invalidate;

@@ -21,6 +21,11 @@
 - (void)finishControlInput:(NSDictionary *)input accepted:(BOOL)accepted;
 - (void)noteMenuForControlInput:(NSString *)action;
 - (AXBGrid *)gridForNode:(NSString *)nodeID;
+// Whether the host should describe its form again now: before its first description, while an
+// action or a grid's rows wait for it, after a significant change, after a minor change at most
+// once a second, while the user's input settles, and otherwise after its idle interval (the
+// snapshot's idleRefresh seconds, else 5). A true answer claims the changes counted so far.
+- (BOOL)claimRefreshWithSignificant:(uint64_t)significant minor:(uint64_t)minor settleUntil:(NSTimeInterval)settleUntil now:(NSTimeInterval)now;
 - (void)invalidate;
 @end
 
