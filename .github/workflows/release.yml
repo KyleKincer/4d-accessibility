@@ -68,7 +68,9 @@ jobs:
           python3 - <<'PY'
           import os, pathlib, subprocess
           tag = os.environ['RELEASE_TAG']
-          args = ['gh', 'release', 'create', tag, '--verify-tag', '--draft', '--latest=false', '--title', tag, '--notes-file', 'RELEASE-NOTES.md']
+          notes = pathlib.Path(os.environ['RUNNER_TEMP']) / 'release-notes.md'
+          subprocess.run(['python3', 'ci/release_notes.py', '--tag', tag, '--output', str(notes)], check=True)
+          args = ['gh', 'release', 'create', tag, '--verify-tag', '--draft', '--latest=false', '--title', tag, '--notes-file', str(notes)]
           if '-' in tag:
               args.append('--prerelease')
           subprocess.run(args + [str(p) for p in sorted(pathlib.Path('dist').iterdir()) if p.is_file()], check=True)

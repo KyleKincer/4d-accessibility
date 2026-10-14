@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-14",
+  "sourceCommit": "3aef80fead6b2f415ce0246583bc9c034517a48c",
+  "purpose": "A form with the lifecycle area on a 4D without the native plugin, as on a platform the plugin does not support such as Windows, and without both plugin and component.",
+  "host": "4D 20.8, macOS, compiled mode, native Apple Silicon",
+  "pluginSHA256": "a3dfd2a51b0509968db838e51eed4f6e0aae15dcf70635dfca2ffac58bbf8134",
+  "componentSHA256": "f031e33e03ee3ec48355dc6f7c24d735f2a013f3fb29d2b0bade6fac181fb0a4",
+  "runnerSHA256": "bc12421a627bacc7cad928f08733550231e5787485d4f34b585c6d2634ab9b4a",
+  "fixtureSHA256": "3816b53031dd25652c60e9352dd4ee74455e31a933e45bd90dfb60461b242324",
+  "commands": [
+    "python3 test_area_pixels.py --server /path/to/4D\\ Server.app --run",
+    "python3 test_area_pixels.py --server /path/to/4D\\ Server.app --run --missing plugin",
+    "python3 test_area_pixels.py --server /path/to/4D\\ Server.app --run --missing all"
+  ],
+  "checks": [
+    "the fixture with the area compiles without the plugin, and without the plugin and component",
+    "its business initialization completes and no 4D error is raised",
+    "4D opens no window other than the form",
+    "the form renders pixel-identical to the same form without the area",
+    "4D quits normally"
+  ],
+  "runs": {
+    "none": {
+      "passed": true,
+      "windows": {
+        "baseline": [
+          "AXB area lifecycle"
+        ],
+        "area": [
+          "AXB area lifecycle"
+        ]
+      },
+      "baselineImageSHA256": "971026f9171c6e2fcebe4c90159cbff959cbace89ed54046bcd8e902cfd199c3",
+      "areaImageSHA256": "971026f9171c6e2fcebe4c90159cbff959cbace89ed54046bcd8e902cfd199c3",
+      "differenceBounds": null
+    },
+    "plugin": {
+      "passed": true,
+      "windows": {
+        "baseline": [
+          "AXB area lifecycle"
+        ],
+        "area": [
+          "AXB area lifecycle"
+        ]
+      },
+      "baselineImageSHA256": "971026f9171c6e2fcebe4c90159cbff959cbace89ed54046bcd8e902cfd199c3",
+      "areaImageSHA256": "971026f9171c6e2fcebe4c90159cbff959cbace89ed54046bcd8e902cfd199c3",
+      "differenceBounds": null
+    },
+    "all": {
+      "passed": true,
+      "windows": {
+        "baseline": [
+          "AXB area lifecycle"
+        ],
+        "area": [
+          "AXB area lifecycle"
+        ]
+      },
+      "baselineImageSHA256": "971026f9171c6e2fcebe4c90159cbff959cbace89ed54046bcd8e902cfd199c3",
+      "areaImageSHA256": "971026f9171c6e2fcebe4c90159cbff959cbace89ed54046bcd8e902cfd199c3",
+      "differenceBounds": null
+    }
+  },
+  "notRun": "Windows itself. The plugin bundle has no Windows code; this proxy removes it instead."
+}

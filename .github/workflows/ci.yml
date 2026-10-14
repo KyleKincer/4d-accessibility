@@ -28,6 +28,7 @@ jobs:
       - name: Check repository and installer
         run: |
           python3 ci/check_repository.py
+          python3 ci/release_notes.py --tag "v$(cat VERSION)" --output "$RUNNER_TEMP/release-notes.md"
           python3 test_install_host_methods.py
           python3 test_signing_keychain.py
           python3 tests/test_desktop_session.py
