@@ -51,12 +51,23 @@ NSString *AXBHooksDescription(void);
 // or after its idle interval: describing an unchanged form costs its process for nothing.
 // A significant change is one 4D shows: a form object drawn again, the user's input, a window
 // gaining or losing key status, a page change. A form running code is a minor change, since most
-// code that changes what a form shows also redraws it. Input also keeps forms changing for a
-// moment, while 4D runs the methods it triggers. Thread-safe and cheap.
+// code that changes what a form shows also redraws it. After the user's input, 4D can still be
+// running the methods it triggered until settleUntil. changedAt is the last significant change's
+// time, so that a form is described once its changes pause. Thread-safe and cheap.
 typedef NS_ENUM(NSInteger, AXBChange) { AXBChangeSignificant, AXBChangeMinor, AXBChangeInput };
 void AXBNoteChange(AXBChange change);
-typedef struct { uint64_t significant, minor; NSTimeInterval settleUntil; } AXBChanges;
+typedef struct { uint64_t significant, minor; NSTimeInterval changedAt, settleUntil; } AXBChanges;
 AXBChanges AXBCurrentChanges(void);
+// A significant change to one form object: 4D drew its layer again, or hid, showed or moved it.
+// Recorded by the object's name while active, so a form can describe only the objects that
+// changed. Thread-safe.
+void AXBNoteObjectChange(NSString *name);
+// A change to a whole form, such as a new page or record: its objects are described again.
+void AXBNoteStructureChange(void);
+uint64_t AXBStructureGeneration(void);
+// The names of the objects that changed after a significant-change count, and the count now.
+// Nil when more than limit changed: the form is better described whole.
+NSArray<NSString *> *AXBObjectsChangedSince(uint64_t generation, NSUInteger limit, uint64_t *latest);
 // Observe the user's input and key-window changes; call on the main thread once active.
 void AXBObserveChanges(void);
 void AXBStopObservingChanges(void);

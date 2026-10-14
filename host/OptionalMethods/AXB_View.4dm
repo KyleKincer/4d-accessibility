@@ -10,6 +10,10 @@ var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scro
 var $x; $y; $r; $b : Real
 var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
 var $pointer; $focusPointer : Pointer
+var $only; $cache; $buckets; $bucket; $described; $full : Object
+var $cacheKey; $last : Text
+var $order : Collection
+var $reusable; $storing : Boolean
 var $subformTable : Pointer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
@@ -104,8 +108,47 @@ If ($view.automatic=True)
    End if
   End if
  Else
-  $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset)
-  $view.discovery:=$description
+  // A form described before is described again only where its drawing changed: the objects
+  // the plugin names. Anything that could change other objects' nodes describes it whole.
+  $cache:=Null
+  If ($request.operation="describe")
+   $originX:=0
+   $originY:=0
+   CONVERT COORDINATES($originX; $originY; XY Current form; XY Current window)
+   $cacheKey:=JSON Stringify(New collection(Current form name; FORM Get current page; $request.path; $request.ancestors; $request.enabled; $request.nativeEnabled; $request.clip; $request.paintOffset; $request.navigation; $request.rootOrigin; $originX; $originY; $view.instance))
+   If (($request.changes#Null) && Not($request.changes.whole=True) && ($view.described#Null))
+    If (Compare strings($view.described.key; $cacheKey; sk char codes)=0)
+     $cache:=$view.described
+     $only:=New object
+     For each ($name; $request.changes.names)
+      If (OB Is defined($cache.owners; $name))
+       $name:=$cache.owners[$name]
+      End if
+      Case of
+       : (OB Is defined($cache.subforms; $name))
+        // A subform's own form describes its objects.
+       : (OB Is defined($cache.structural; $name))
+        $cache:=Null
+       : (OB Is defined($cache.known; $name))
+        $only[$name]:=True
+       : (Find in array($objects; $name)>0)
+        // An object the last complete description did not see.
+        $cache:=Null
+      End case
+      If ($cache=Null)
+       break
+      End if
+     End for each
+    End if
+   End if
+  End if
+  If ($cache=Null)
+   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset)
+   $view.discovery:=$description
+  Else
+   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; $only; $cache.labels)
+   $description.subforms:=$cache.subformList.copy()
+  End if
  End if
  $grids:=AXB_Grids($view; New object("operation"; "describe"))
  If (Not($grids.ok=True))
@@ -315,6 +358,23 @@ If (Compare strings($description.scope; $view.scope; sk char codes)#0)
 End if
 $lineage:=$request.ancestors.concat(New collection($view.instance))
 $prefix:=$view.instance+"."+Substring(Generate digest(JSON Stringify(New collection($request.path; $lineage)); SHA256 digest); 1; 16)+"."
+If ($cache#Null)
+ If (Compare strings($prefix; $cache.prefix; sk char codes)#0)
+  // A new scope renames every node: describe the whole form.
+  $full:=New object
+  For each ($key; $request)
+   $full[$key]:=$request[$key]
+  End for each
+  OB REMOVE($full; "changes")
+  return AXB_View($full)
+ End if
+End if
+// Record what each object produces, to reuse it while the object does not change.
+$storing:=($view.automatic=True) & ($request.operation="describe") & ($cache=Null)
+$buckets:=New object
+$order:=New collection
+$reusable:=True
+$last:=""
 $result:=New object("ok"; True; "nodes"; New collection; "routes"; New object; "issues"; New collection)
 If (($view.automatic=True) & (Value type($description.unsupported)=Is collection))
  For each ($issue; $description.unsupported)
@@ -454,7 +514,124 @@ For each ($node; $description.nodes)
   $result.issues.push(New object("path"; $request.path.copy(); "object"; $copy.objectName; "reason"; "missingLabel"))
  End if
  $result.routes[$id]:=New object("path"; $request.path; "lineage"; $lineage; "instance"; $view.instance; "scope"; $view.scope; "localID"; $node.id; "node"; $copy)
+ If (Value type($node.objectName)=Is text)
+  If ($buckets[$node.objectName]=Null)
+   $buckets[$node.objectName]:=New object("nodes"; New collection; "routes"; New object; "contexts"; New object; "pointers"; New object; "cellPointers"; New object)
+   $order.push($node.objectName)
+  Else
+   // An object whose nodes are not together cannot be replaced in place.
+   $reusable:=$reusable & (Compare strings($last; $node.objectName; sk char codes)=0)
+  End if
+  $last:=$node.objectName
+  $bucket:=$buckets[$node.objectName]
+  $bucket.nodes.push($copy)
+  $bucket.routes[$id]:=$result.routes[$id]
+  If ($registry.controlContexts[$id]#Null)
+   $bucket.contexts[$id]:=$registry.controlContexts[$id]
+  End if
+  If (OB Is defined($registry.controlPointers; $id))
+   $bucket.pointers[$id]:=$registry.controlPointers[$id]
+  End if
+  If (OB Is defined($registry.cellPointers; $id))
+   $bucket.cellPointers[$id]:=$registry.cellPointers[$id]
+  End if
+ Else
+  $reusable:=False
+ End if
 End for each
+If ($cache#Null)
+ // Assemble the form's nodes in their order, with each changed object's new nodes. An object
+ // that appeared, disappeared or changed shape describes the whole form.
+ For each ($name; $buckets)
+  If ((Not(OB Is defined($cache.buckets; $name))) || ($cache.buckets[$name].nodes.length#$buckets[$name].nodes.length))
+   $reusable:=False
+  End if
+ End for each
+ For each ($name; $only)
+  If (Not(OB Is defined($buckets; $name)) && OB Is defined($cache.buckets; $name))
+   $reusable:=False
+  End if
+ End for each
+ If (Not($reusable))
+  $full:=New object
+  For each ($key; $request)
+   $full[$key]:=$request[$key]
+  End for each
+  OB REMOVE($full; "changes")
+  return AXB_View($full)
+ End if
+ $result.nodes:=New collection
+ For each ($name; $cache.order)
+  If (OB Is defined($buckets; $name))
+   $cache.buckets[$name]:=$buckets[$name]
+  End if
+  $bucket:=$cache.buckets[$name]
+  For each ($node; $bucket.nodes)
+   $result.nodes.push($node)
+  End for each
+  For each ($key; $bucket.routes)
+   $result.routes[$key]:=$bucket.routes[$key]
+  End for each
+  For each ($key; $bucket.contexts)
+   $registry.controlContexts[$key]:=$bucket.contexts[$key]
+  End for each
+  For each ($key; $bucket.pointers)
+   $registry.controlPointers[$key]:=$bucket.pointers[$key]
+  End for each
+  For each ($key; $bucket.cellPointers)
+   $registry.cellPointers[$key]:=$bucket.cellPointers[$key]
+  End for each
+ End for each
+ $result.issues:=$cache.issues.copy()
+ $registry.partialDescriptions:=Num($registry.partialDescriptions)+1
+End if
+If ($storing)
+ $registry.wholeDescriptions:=Num($registry.wholeDescriptions)+1
+ OB REMOVE($view; "described")
+ If ($reusable)
+  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "order"; $order; "buckets"; $buckets; "known"; New object; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "issues"; $result.issues.copy())
+  For ($position; 1; Size of array($objects))
+   $described.known[$objects{$position}]:=True
+  End for
+  If (Value type($description.subforms)=Is collection)
+   $described.subformList:=$description.subforms.copy()
+   For each ($name; $description.subforms)
+    $described.subforms[$name]:=True
+   End for each
+  End if
+  For each ($node; $description.nodes)
+   If (Value type($node.objectName)=Is text)
+    // Captions label their neighbours, and radio buttons, tabs and groups relate to other
+    // objects: changing one describes the whole form.
+    If ((New collection("text"; "radio"; "tab"; "tabgroup"; "group").indexOf($node.role)>=0) | ($buckets[$node.objectName].nodes.length>1))
+     $described.structural[$node.objectName]:=True
+    End if
+    If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))
+     $described.labels.push($node)
+    End if
+    If ((($node.role="drawnTable") | ($node.grid#Null)) && (OBJECT Get type(*; $node.objectName)=Object type listbox))
+     // 4D draws a list box's columns and headers in layers of their own.
+     LISTBOX GET OBJECTS(*; $node.objectName; $parts)
+     For ($part; 1; Size of array($parts))
+      $described.owners[$parts{$part}]:=$node.objectName
+     End for
+    End if
+   End if
+  End for each
+  // Declared layers let any control cover a button: such a form is always described whole.
+  If ($view.options.controls#Null)
+   For each ($name; $view.options.controls)
+    If (($view.options.controls[$name].layer#Null) && ($view.options.controls[$name].layer#0))
+     $described:=Null
+     break
+    End if
+   End for each
+  End if
+  If ($described#Null)
+   $view.described:=$described
+  End if
+ End if
+End if
 If (Value type($description.subforms)=Is collection)
  For each ($name; $description.subforms)
   If (Find in array($objects; $name)>0)
@@ -488,6 +665,7 @@ If (Value type($description.subforms)=Is collection)
     $packet.navigation:=$request.navigation.concat(New collection($top; $left))
     $packet.rootOrigin:=$request.rootOrigin
     $packet.rootView:=$request.rootView
+    $packet.changes:=$request.changes
     OBJECT GET SCROLL POSITION(*; $name; $scrollY; $scrollX)
     $packet.paintOffset:=New collection($request.paintOffset[0]+$scrollX; $request.paintOffset[1]+$scrollY)
     If ($view.automatic=True)

@@ -58,23 +58,27 @@ Lifecycle areas also follow `AXB_Configure`'s `enabled` per form, as before.
 | 0.34.1, area in every form | 22.6% | 322 MB | 48 | 191 ms | 39% | 226 ms |
 | 0.35.0, area in every form, dormant | 3.8% | 309 MB | 0 | 64 ms | 27% | 199 ms |
 | 0.35.0, area in every form, active | 24.2% | 323 MB | 47 | 200 ms | 39% | 213 ms |
-| Development, no bridge | 3.4% | 280 MB | 0 | 56 ms | 28% | 197 ms |
-| Development, area in every form, dormant | 3.4% | 310 MB | 0 | 50 ms | 30% | 205 ms |
-| Development, area in every form, active | 6.4% | 324 MB | 7 | 177 ms | 42% | 227 ms |
+| Development, no bridge | 3.3% | 280 MB | 0 | 52 ms | 28% | 197 ms |
+| Development, area in every form, dormant | 3.4% | 309 MB | 0 | 63 ms | 30% | 207 ms |
+| Development, area in every form, active | 3.9% | 331 MB | 1 | 137 ms | 35% | 227 ms |
 
 Dormant, a form with an area costs what the same form costs without the bridge. Two costs remain:
 - about 30 MB, the loaded plugin and component;
 - 2–4 points of CPU while 4D redraws continuously, here a list box scrolling every tick. The plugin records the text 4D draws from load, so that a window open when an assistive technology arrives can be described: see [observing 4D's drawing](#observing-4ds-drawing).
 
-Active, the bridge describes a form again only when what it shows can have changed: 4D draws one of its objects again, the user types, clicks or scrolls, a window gains or loses key status, the form changes page or loads a record, or an assistive technology acts or reads a grid's rows. Each description runs on the form's own process and, on this form, takes about 170 ms. Before, every form was described every 0.1–1 second whether or not it changed, which cost 24% of a core and paused the form 47 times in 30 seconds. Now an unchanged form is described every 5 seconds, as a backstop for a change no signal reports: 6.4% of a core, against 3.4% with no bridge, and 7 pauses in 30 seconds. The form's own one-tick timer, which redraws nothing, no longer triggers descriptions: that phase costs 24.5% with the bridge active and 24% without it. While its content keeps changing, here a list box scrolling every tick, the form is still described as often as before. Making each description cheaper is the next performance work. In a large customer form, about 650 described elements, one description took about 280 ms under Rosetta.
+Active, the bridge describes a form again only when what it shows can have changed: 4D draws one of its objects with a different image, or hides, shows or moves one; the user types, clicks or scrolls; a window gains or loses key status; the form changes page or loads a record; or an assistive technology acts or reads a grid's rows. Changes still under way, such as a list scrolling or a field being typed in, are described once they pause for a quarter second, and at least once a second while they continue.
 
-Code that runs without redrawing anything counts as a change, at most once a second, only when the plugin does not observe 4D's drawing. A form whose controls change without redrawing can shorten the 5-second interval: see `idleRefresh` in the [integration guide](skills/4d-accessibility/references/INTEGRATION.md).
+It describes only the objects that changed and reuses the nodes of the rest. 4D draws every object of a form again after many changes, so the plugin compares each new image with the object's last one, by a hash of its pixels. On this form a whole description takes about 70 ms on the form's own process, and a description of a few changed objects about 15 ms, plus 10 ms to pass the form's tree to the plugin. A change that can alter other controls' nodes, such as a caption or a control appearing, still describes the form whole.
+
+Before, every form was described whole every 0.1–1 second whether or not it changed, which cost 24% of a core and paused the form 47 times in 30 seconds. Now an unchanged form is described whole every 30 seconds, as a backstop for a change no signal reports: 3.9% of a core, against 3.3% with no bridge, and one pause over 100 ms in 30 seconds, when an accessibility client first reads the window. The form's own one-tick timer, which redraws nothing, triggers no description. While a list box scrolls every tick, the form costs 35% of a core against 28% with no bridge, with one pause over 100 ms in 30 seconds. In a large customer form, about 650 described elements, one whole description took about 280 ms under Rosetta.
+
+Without the plugin's observation of 4D's drawing, code that runs without redrawing anything counts as a change, at most once a second, and an unchanged form is described every 5 seconds. A form whose controls change without any of these signals can shorten the interval: see `idleRefresh` in the [integration guide](skills/4d-accessibility/references/INTEGRATION.md).
 
 Building the plugin with `-O2` instead of `-O1` changed none of these figures beyond run-to-run noise: the time goes to 4D running the form's description, not to the plugin.
 
 The small dialog opens in 40–80 ms in every variant, with no pattern between them.
 
-Records: [0.34.1](validation/cost-0.34.1.json), [0.35.0](validation/cost-0.35.0-development.json), [refresh on change](validation/cost-refresh-development.json); [activation acceptance](validation/activation-development.json); [drawing observation and first clicks](validation/hooks-policy-development.json).
+Records: [0.34.1](validation/cost-0.34.1.json), [0.35.0](validation/cost-0.35.0-development.json), [refresh on change](validation/cost-refresh-development.json), [changed objects only](validation/cost-incremental-development.json); [activation acceptance](validation/activation-development.json); [drawing observation and first clicks](validation/hooks-policy-development.json).
 
 ## Reproduce
 

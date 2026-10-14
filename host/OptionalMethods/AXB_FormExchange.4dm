@@ -1,5 +1,5 @@
 // Own all snapshot/revision/receipt bookkeeping in one place.
-var $context; $tree; $snapshot; $envelope; $reply; $action; $route; $rowRoute; $local; $result; $node; $packet; $pending; $token; $native; $focusTree : Object
+var $context; $tree; $snapshot; $envelope; $reply; $action; $route; $rowRoute; $local; $result; $node; $packet; $pending; $token; $native; $focusTree; $changes : Object
 var $state; $rowID : Text
 var $selection; $frame; $viewport : Collection
 var $left; $top; $right; $bottom : Real
@@ -11,7 +11,12 @@ End if
 If (Not($context.active))
  return
 End if
-$tree:=AXB_FormTree
+// Describe again only the objects whose drawing changed, when the plugin knows them.
+$changes:=AXB_Host("changes"; New object("session"; $context.session))
+If (Not($changes.ok=True))
+ $changes:=Null
+End if
+$tree:=AXB_FormTree($changes)
 If (Not($tree.ok=True))
  AXB_FormFailed($context; New object("error"; $tree.error))
  return
@@ -99,6 +104,9 @@ If (Not($reply.ok=True))
  return
 End if
 $context.diagnostics:=New object("ok"; True; "ready"; True; "revision"; $context.revision; "nodeCount"; $tree.nodes.length; "issues"; $tree.issues)
+// How many form and subform views were described whole, and how many only where they changed.
+$context.diagnostics.wholeDescriptions:=Num(AXB_FormRoots[String(Current form window)].wholeDescriptions)
+$context.diagnostics.partialDescriptions:=Num(AXB_FormRoots[String(Current form window)].partialDescriptions)
 OB REMOVE($context; "receipt")
 OB REMOVE($context; "controlInput")
 $context.controlInputResult:=$reply.controlInputResult

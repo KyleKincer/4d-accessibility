@@ -24,13 +24,20 @@
 - (void)finishControlInput:(NSDictionary *)input accepted:(BOOL)accepted;
 - (void)noteMenuForControlInput:(NSString *)action;
 - (AXBGrid *)gridForNode:(NSString *)nodeID;
+// What the host last took of the changes since its last description: the significant-change and
+// whole-form counts. A description due to the idle interval is a whole one. Guarded by the session.
+@property(atomic) uint64_t takenChanges, takenStructure;
+@property(atomic) BOOL wholeDescriptionDue;
 // Whether the host should describe its form again now: before its first description, while an
-// action or a grid's rows wait for it, after a significant change, while the user's input
-// settles, and otherwise after its idle interval (the snapshot's idleRefresh seconds, else 5).
-// A minor change counts, at most once a second, only when 4D's drawing is not observed: code
-// that changes what a form shows otherwise redraws it. A true answer claims the changes so far.
-- (BOOL)claimRefreshWithSignificant:(uint64_t)significant minor:(uint64_t)minor settleUntil:(NSTimeInterval)settleUntil
-                     drawingObserved:(BOOL)drawingObserved now:(NSTimeInterval)now;
+// action or a grid's rows wait for it, after significant changes once they pause for a quarter
+// second (or a second after the last description while they continue: describing a list in
+// mid-scroll, or a field in mid-typing, is outdated at once), once the user's input settles, and
+// otherwise after its idle interval (the snapshot's idleRefresh seconds, else 30 while 4D's drawing
+// is observed and 5 when it is not). A minor change
+// counts, at most once a second, only when 4D's drawing is not observed: code that changes what
+// a form shows otherwise redraws it. A true answer claims the changes so far.
+- (BOOL)claimRefreshWithSignificant:(uint64_t)significant minor:(uint64_t)minor changedAt:(NSTimeInterval)changedAt
+                         settleUntil:(NSTimeInterval)settleUntil drawingObserved:(BOOL)drawingObserved now:(NSTimeInterval)now;
 - (void)invalidate;
 @end
 

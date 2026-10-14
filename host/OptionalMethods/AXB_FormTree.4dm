@@ -1,6 +1,8 @@
 // Binding identity stays in process-owned state, outside the application's
 // Form object. Referencing Form from its own provider would create a cycle.
-#DECLARE() -> $result : Object
+// $changes, from the plugin, names the objects whose drawing changed since the last description;
+// without it, or when it asks for the whole form, every object is described again.
+#DECLARE($changes : Object) -> $result : Object
 var $registry; $node; $focus; $column; $observed; $styledText : Object
 var $keys : Collection
 var $key : Text
@@ -18,7 +20,15 @@ If (($registry.observedFocus#Null) && ($registry.observedFocus.id=Null))
 End if
 CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
 $registry.origin:=New collection($x; $y)
-$result:=AXB_View(New object("operation"; "describe"; "rootView"; $registry.context.view; "path"; New collection; "ancestors"; New collection; "navigation"; New collection; "rootOrigin"; New collection($x; $y); "enabled"; True; "depth"; 0))
+// A reused node keeps no state from the last description: only one node is focused.
+If ($registry.focusedNode#Null)
+ $registry.focusedNode.focused:=False
+ $registry.focusedNode.value:=$registry.focusedValue
+ $registry.focusedNode.editable:=$registry.focusedEditable
+ OB REMOVE($registry.focusedNode; "selection")
+ OB REMOVE($registry; "focusedNode")
+End if
+$result:=AXB_View(New object("operation"; "describe"; "rootView"; $registry.context.view; "path"; New collection; "ancestors"; New collection; "navigation"; New collection; "rootOrigin"; New collection($x; $y); "enabled"; True; "depth"; 0; "changes"; $changes))
 $registry.controls:=New collection
 If ($result.ok=True)
  For each ($node; $result.nodes)
@@ -39,6 +49,9 @@ If ($result.ok=True)
   End if
   If ($focus.node#Null)
    $node:=$focus.node
+   $registry.focusedNode:=$node
+   $registry.focusedValue:=$node.value
+   $registry.focusedEditable:=$node.editable
    $node.focused:=True
    If ($focus.cell#Null)
     $node.grid.focused:=$focus.cell

@@ -6,7 +6,8 @@ var $columns : Collection
 var $options; $state; $reply; $action; $configured : Object
 var $table : Pointer
 var $detail; $list : Text
-var $position : Integer
+var $position; $type : Integer
+var $formKey : Text
 var $ready : Boolean
 ARRAY TEXT($objects; 0)
 ARRAY TEXT($methods; 0)
@@ -23,15 +24,30 @@ If ($view.grids=Null)
  $view.grids:=New object
 End if
 FORM GET OBJECTS($objects; $variables; $pages; Form current page+Form inherited)
+// An object's type is fixed by its form: read it once per form.
+$formKey:=Current form name
+$table:=Current form table
+If (Not(Is nil pointer($table)))
+ $formKey:=$formKey+"/"+String(Table($table))
+End if
+If ((Value type($view.objectTypes)#Is object) || ($view.objectTypes.form#$formKey))
+ $view.objectTypes:=New object("form"; $formKey; "types"; New object)
+End if
 For ($position; 1; Size of array($objects))
  $name:=$objects{$position}
- If ((OBJECT Get type(*; $name)=Object type subform) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
+ If (OB Is defined($view.objectTypes.types; $name))
+  $type:=$view.objectTypes.types[$name]
+ Else
+  $type:=OBJECT Get type(*; $name)
+  $view.objectTypes.types[$name]:=$type
+ End if
+ If (($type=Object type subform) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
   OBJECT GET SUBFORM(*; $name; $table; $detail; $list)
   If (Not(Is nil pointer($table)) & ($list#""))
    $configured[$name]:=New object("kind"; "listSubform"; "label"; $name)
   End if
  End if
- If ((OBJECT Get type(*; $name)=Object type hierarchical list) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
+ If (($type=Object type hierarchical list) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
   // A hierarchical list needs no configuration; a configured label still wins.
   $configured[$name]:=New object("kind"; "hierarchicalList")
   If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && (Value type($view.options.controls[$name].label)=Is text) && ($view.options.controls[$name].label#""))

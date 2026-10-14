@@ -32,37 +32,42 @@ static NSMutableDictionary *MutableCopy(id object) {
 int main(void) {
     @autoreleasepool {
         {
-            // A form is described again only when what it shows can have changed.
+            // A form is described again only when what it shows can have changed, once its changes pause.
             AXBSession *s = [[AXBSession alloc] initWithIdentifier:@"refresh" windowID:1];
-            Check([s claimRefreshWithSignificant:0 minor:0 settleUntil:0 drawingObserved:NO now:100], "a new form is described");
+            auto claim = [](AXBSession *session, uint64_t significant, uint64_t minor, NSTimeInterval changedAt, NSTimeInterval settle, BOOL drawing, NSTimeInterval now) {
+                return [session claimRefreshWithSignificant:significant minor:minor changedAt:changedAt settleUntil:settle drawingObserved:drawing now:now];
+            };
+            Check(claim(s, 0, 0, 0, 0, NO, 100), "a new form is described");
             Check([[s exchange:Envelope(1) now:100][@"ok"] boolValue], "its snapshot is accepted");
-            Check(![s claimRefreshWithSignificant:0 minor:0 settleUntil:0 drawingObserved:NO now:100.2], "an unchanged form is not described again");
-            Check([s claimRefreshWithSignificant:1 minor:0 settleUntil:0 drawingObserved:NO now:100.3], "a significant change is described at once");
-            Check(![s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:100.5], "a minor change waits for a second since the last description");
-            Check([s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:101.4], "a minor change is described after a second");
-            Check([s claimRefreshWithSignificant:1 minor:1 settleUntil:101.9 drawingObserved:NO now:101.5] && [s claimRefreshWithSignificant:1 minor:1 settleUntil:101.9 drawingObserved:NO now:101.6],
-                  "the form is described while input settles");
-            Check(![s claimRefreshWithSignificant:1 minor:1 settleUntil:101.9 drawingObserved:NO now:102], "settled input stops describing");
-            Check(![s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:106.5] && [s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:107.1],
-                  "an unchanged form is described after five idle seconds");
+            Check(!claim(s, 0, 0, 0, 0, NO, 100.2), "an unchanged form is not described again");
+            Check(!claim(s, 1, 0, 100.25, 0, NO, 100.3), "a change is not described while it may continue");
+            Check(claim(s, 1, 0, 100.25, 0, NO, 100.5), "a change is described once it pauses for a quarter second");
+            Check(!claim(s, 2, 0, 100.9, 0, NO, 101), "changes that continue wait");
+            Check(claim(s, 3, 0, 101.45, 0, NO, 101.5), "changes that continue are described a second after the last description");
+            Check(!claim(s, 3, 1, 101.45, 0, NO, 101.9), "a minor change waits for a second since the last description");
+            Check(claim(s, 3, 1, 101.45, 0, NO, 102.5), "a minor change is described after a second");
+            Check(!claim(s, 3, 1, 101.45, 103.5, NO, 103), "input that redraws nothing waits until it settles");
+            Check(claim(s, 3, 1, 101.45, 103.5, NO, 103.6) && !claim(s, 3, 1, 101.45, 103.5, NO, 103.8), "the form is described once, when input settles");
+            Check(!claim(s, 3, 1, 101.45, 0, NO, 108.5) && claim(s, 3, 1, 101.45, 0, NO, 108.7), "an unchanged form is described after five idle seconds");
             NSMutableDictionary *slow = MutableCopy(Envelope(2));
             slow[@"snapshot"][@"idleRefresh"] = @20;
-            Check([[s exchange:slow now:107.2][@"ok"] boolValue], "a form can choose its idle interval");
-            Check(![s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:120] && [s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:127.2],
-                  "the chosen idle interval applies");
+            Check([[s exchange:slow now:108.8][@"ok"] boolValue], "a form can choose its idle interval");
+            Check(!claim(s, 3, 1, 101.45, 0, NO, 120) && claim(s, 3, 1, 101.45, 0, NO, 128.8), "the chosen idle interval applies");
             slow[@"snapshot"][@"idleRefresh"] = @0.5;
             Check(AXBValidateEnvelope(slow) != nil, "an idle interval below a second is rejected");
-            slow[@"snapshot"][@"idleRefresh"] = @20;
-            Check([s enqueueNode:@"button" revision:@2 operation:@"press" value:nil now:127.3] &&
-                  [s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:127.3] && [s claimRefreshWithSignificant:1 minor:1 settleUntil:0 drawingObserved:NO now:127.31],
-                  "a waiting action is described at every opportunity");
+            Check([s enqueueNode:@"button" revision:@2 operation:@"press" value:nil now:128.9] &&
+                  claim(s, 3, 1, 101.45, 0, NO, 128.9) && claim(s, 3, 1, 101.45, 0, NO, 128.91), "a waiting action is described at every opportunity");
             AXBSession *t = [[AXBSession alloc] initWithIdentifier:@"refresh-code" windowID:2];
-            Check([t claimRefreshWithSignificant:0 minor:0 settleUntil:0 drawingObserved:YES now:200] && [[t exchange:Envelope(1) now:200][@"ok"] boolValue],
-                  "another form is described");
-            Check(![t claimRefreshWithSignificant:0 minor:5 settleUntil:0 drawingObserved:YES now:201.5], "code that redraws nothing is not a change while drawing is observed");
-            Check([t claimRefreshWithSignificant:0 minor:5 settleUntil:0 drawingObserved:NO now:201.5], "it is, at most once a second, when drawing is not observed");
+            Check(claim(t, 0, 0, 0, 0, YES, 200) && [[t exchange:Envelope(1) now:200][@"ok"] boolValue], "another form is described");
+            Check(!claim(t, 0, 5, 0, 0, YES, 201.5), "code that redraws nothing is not a change while drawing is observed");
+            Check(!claim(t, 0, 5, 0, 0, YES, 229) && claim(t, 0, 5, 0, 0, YES, 230.1), "an unchanged form is described after thirty idle seconds while drawing is observed");
+            Check(claim(t, 0, 6, 0, 0, NO, 231.5), "it is, at most once a second, when drawing is not observed");
+            AXBSession *u = [[AXBSession alloc] initWithIdentifier:@"refresh-whole" windowID:3];
+            Check(claim(u, 0, 0, 0, 0, YES, 400) && [[u exchange:Envelope(1) now:400][@"ok"] boolValue] && !u.wholeDescriptionDue, "a first description is not a backstop");
+            Check(claim(u, 1, 0, 400.5, 0, YES, 401) && !u.wholeDescriptionDue, "a change is described where it happened");
+            Check(claim(u, 1, 0, 400.5, 0, YES, 431.1) && u.wholeDescriptionDue, "the idle backstop describes the whole form");
             [s invalidate];
-            Check(![s claimRefreshWithSignificant:2 minor:1 settleUntil:0 drawingObserved:NO now:130], "a closed session is never described");
+            Check(!claim(s, 9, 1, 0, 0, NO, 300), "a closed session is never described");
         }
         NSMutableDictionary *stable = MutableCopy(Envelope(1));
         stable[@"snapshot"][@"automationKey"] = @"records.main";

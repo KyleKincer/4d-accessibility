@@ -8,7 +8,7 @@ ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
-If (New collection("info"; "start"; "stop"; "node"; "exchange"; "focus"; "layout").indexOf($operation)<0)
+If (New collection("info"; "start"; "stop"; "node"; "exchange"; "changes"; "focus"; "layout").indexOf($operation)<0)
  return
 End if
 If ((Value type($request)#Is object) | ($request=Null))
@@ -88,13 +88,19 @@ Case of
    return
   End if
   $result:=New object("ok"; True; "node"; AXB_ControlNode($request.objectName; $request.id; $request.role; $request.label; $request.value; $request.enabled))
- : ($operation="exchange")
+ : (($operation="exchange") | ($operation="changes"))
   $result.error:="inactiveSession"
   If (AXB_CoreWindows[String(Current form window)]=Null)
    return
   End if
   $token:=AXB_CoreWindows[String(Current form window)].token
   If (Not($token.active) | ($token.session#$request.session) | ($token.window#Current form window) | ($token.owner#Current process))
+   return
+  End if
+  If ($operation="changes")
+   // The form objects whose drawing changed since the last description.
+   $result:=JSON Parse(AXB Changes($token.session))
+   $result.ok:=True
    return
   End if
   If ((Value type($request.envelope)#Is object) | ($request.envelope=Null))
