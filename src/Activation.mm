@@ -31,6 +31,15 @@ static void Later(dispatch_block_t block) {
     CFRunLoopWakeUp(main);
 }
 
+void AXBRunOnMain(dispatch_block_t block) { Later(block); }
+
+BOOL AXBRunOnMainAndWait(dispatch_block_t block, NSTimeInterval timeout) {
+    if (NSThread.isMainThread) { block(); return YES; }
+    dispatch_semaphore_t done = dispatch_semaphore_create(0);
+    Later(^{ block(); dispatch_semaphore_signal(done); });
+    return dispatch_semaphore_wait(done, dispatch_time(DISPATCH_TIME_NOW, (int64_t)(timeout * NSEC_PER_SEC))) == 0;
+}
+
 static void RemoveSentinels(void) {
     if (UpdateObserver) [NSNotificationCenter.defaultCenter removeObserver:UpdateObserver];
     UpdateObserver = nil;
@@ -149,11 +158,54 @@ void AXBActivationShutdown(void) {
             ObservingWorkspace = NO;
         }
     };
-    if (NSThread.isMainThread) cleanup(); else dispatch_sync(dispatch_get_main_queue(), cleanup);
+    AXBRunOnMainAndWait(cleanup, 2);
     @synchronized(Lock) { [Pending removeAllObjects]; }
 }
 
 BOOL AXBActivationIsOff(void) { return ReadMode() == AXBActivationOff; }
+
+// The 4D versions whose drawing the observations were validated on, by major version.
+static const unsigned int ValidatedMajors[] = {20};
+static unsigned int Version;
+static std::atomic<bool> HooksInstalled{false};
+
+// PA_Get4DVersion's low 16 bits hold the version in hexadecimal digits: the major version, then
+// the R release, then the patch. 0x2008 is 20.8, 0x2050 is 20 R5.
+static unsigned int Major(unsigned int version) { return ((version >> 12) & 0xF) * 10 + ((version >> 8) & 0xF); }
+static NSString *VersionText(unsigned int version) {
+    unsigned int release = (version >> 4) & 0xF, patch = version & 0xF;
+    if (release) return patch ? [NSString stringWithFormat:@"4D %u R%u.%u", Major(version), release, patch]
+                              : [NSString stringWithFormat:@"4D %u R%u", Major(version), release];
+    return [NSString stringWithFormat:@"4D %u.%u", Major(version), patch];
+}
+
+static NSString *HooksSetting(void) {
+    const char *variable = getenv("AXB_HOOKS");
+    if (variable) return @(variable).lowercaseString;
+    id preference = CFBridgingRelease(CFPreferencesCopyAppValue(CFSTR("Hooks"), CFSTR("io.github.kylekincer.4d-accessibility")));
+    return [preference isKindOfClass:NSString.class] ? [preference lowercaseString] : @"auto";
+}
+
+void AXBHooksConfigure(unsigned int version) { Version = version & 0xFFFF; }
+
+BOOL AXBHooksAllowed(void) {
+    NSString *setting = HooksSetting();
+    if ([setting isEqual:@"on"]) return YES;
+    if ([setting isEqual:@"off"]) return NO;
+    // An unknown version is not 4D's: a test host.
+    if (!Version) return YES;
+    for (unsigned int major : ValidatedMajors) if (Major(Version) == major) return YES;
+    return NO;
+}
+
+void AXBHooksNoteInstalled(void) { HooksInstalled = true; }
+
+NSString *AXBHooksDescription(void) {
+    NSString *version = Version ? VersionText(Version) : @"4D unknown";
+    if (HooksInstalled) return [version stringByAppendingString:@"; hooks installed"];
+    if (!AXBHooksAllowed()) return [version stringByAppendingString:[HooksSetting() isEqual:@"off"] ? @"; hooks off" : @"; hooks withheld"];
+    return [version stringByAppendingString:@"; hooks not installed"];
+}
 
 BOOL AXBActivationIsActive(void) { return Active; }
 

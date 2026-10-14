@@ -1633,9 +1633,12 @@ void AXBInitialize(void) {
         @synchronized(registryLock) { stopped = NO; }
         return;
     }
+    // Observe 4D's drawing from load, on the 4D versions it was validated on (AXBHooksAllowed).
+    // 4D builds each line of text once and draws it again from its cache, so text built before
+    // the observation started could never be read: a window open when an assistive technology
+    // arrives would stay unreadable.
     AXBLayoutInitialize();
-    if (NSThread.isMainThread) QuietHelpTips(); else dispatch_async(dispatch_get_main_queue(), ^{ QuietHelpTips(); });
-    // Observe drawing from the start, so the text of windows drawn before activation is known.
+    if (NSThread.isMainThread) QuietHelpTips(); else AXBRunOnMain(^{ QuietHelpTips(); });
     AXBDrawnTextInitialize();
     // Standard 4D messages, Progress component windows and the Query, Quick Report, Order By and
     // formula editors have no application form method to integrate. Install them on activation:
@@ -1678,5 +1681,6 @@ void AXBShutdown(void) {
         if (helpTipObserver) [NSNotificationCenter.defaultCenter removeObserver:helpTipObserver];
         helpTipObserver = nil;
     };
-    if (NSThread.isMainThread) cleanup(); else dispatch_sync(dispatch_get_main_queue(), cleanup);
+    // The main thread can be waiting on 4D, which waits here: never wait for it unboundedly.
+    AXBRunOnMainAndWait(cleanup, 2);
 }

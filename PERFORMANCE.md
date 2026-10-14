@@ -31,7 +31,17 @@ defaults delete io.github.kylekincer.4d-accessibility Activation   # back to aut
 
 A configuration profile can manage the same domain and key. The `AXB_ACTIVATION` environment variable overrides the setting for one 4D process, for tests and diagnosis. Restart 4D after changing the mode.
 
-`AXB Status` ends with the mode and state, for example `auto; dormant` or `auto; active; VoiceOver`. `AXB Active` returns 1 when the process is active.
+`AXB Status` ends with the 4D version, whether the plugin observes 4D's drawing, and the mode and state: for example `4D 20.8; hooks not installed; auto; dormant` or `4D 20.8; hooks installed; auto; active; VoiceOver`. `AXB Active` returns 1 when the process is active.
+
+### Observing 4D's drawing
+
+Forms without a bridge area, 4D's standard messages, editors and Progress windows, and list boxes without a grid entry are published from what 4D draws. The plugin observes the text 4D draws into its form-object layers, and the tab and pop-up cells AppKit draws for it. This depends on how 4D renders, which a new 4D version can change. So by default the plugin installs these observations only on 4D versions it was validated on: currently 4D 20, its LTS and R releases. It installs them when 4D loads it, even while dormant, because 4D builds each line of text once and draws it again from its cache: text built before the observation started could never be read. This is the dormant cost measured below. The `off` mode installs nothing.
+
+The `Hooks` setting in the same domain overrides the version check: `on` observes on any 4D version, `off` never observes. The `AXB_HOOKS` environment variable overrides the setting for one process. Without the observations, forms with a bridge area are still published and operated, but forms without one, 4D's standard messages and editors, and list boxes without a grid entry are not.
+
+```sh
+defaults write io.github.kylekincer.4d-accessibility Hooks -string off
+```
 
 Lifecycle areas also follow `AXB_Configure`'s `enabled` per form, as before.
 
@@ -57,7 +67,7 @@ Active, the bridge describes the whole form every 0.1–1 second on the form's o
 
 The small dialog opens in 40–80 ms in every variant, with no pattern between them.
 
-Records: [0.34.1](validation/cost-0.34.1.json), [0.35.0](validation/cost-0.35.0-development.json); [activation acceptance](validation/activation-development.json).
+Records: [0.34.1](validation/cost-0.34.1.json), [0.35.0](validation/cost-0.35.0-development.json); [activation acceptance](validation/activation-development.json); [drawing observation and first clicks](validation/hooks-policy-development.json).
 
 ## Reproduce
 

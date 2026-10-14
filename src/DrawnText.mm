@@ -1,4 +1,5 @@
 #import "DrawnText.h"
+#import "Activation.h"
 #import <CoreText/CoreText.h>
 #import <objc/runtime.h>
 #include <dlfcn.h>
@@ -320,6 +321,7 @@ static NSUInteger RebindImage(const struct mach_header_64 *header, intptr_t slid
 }
 
 BOOL AXBDrawnTextInitialize(void) {
+    if (!Installed && !AXBHooksAllowed()) return NO;
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         LineText = WeakIdentityTable();
@@ -375,6 +377,7 @@ BOOL AXBDrawnTextInitialize(void) {
                 if ((contents && CFGetTypeID((__bridge CFTypeRef)contents) == CGImageGetTypeID()) || layer.name) RecordContents(layer, contents);
             }));
             Available = YES;
+            AXBHooksNoteInstalled();
         }
         Installed = YES;
     });

@@ -1,4 +1,5 @@
 #import "NativeLayout.h"
+#import "Activation.h"
 #import <objc/runtime.h>
 #include <cmath>
 #include <atomic>
@@ -114,7 +115,7 @@ static void DrainPaints(void) {
 // retain their native accessibility. Chain the public drawing methods without
 // changing arguments or rendering; no private 4D class/selector is referenced.
 void AXBLayoutInitialize(void) {
-    if (hooksInstalled) return;
+    if (hooksInstalled || !AXBHooksAllowed()) return;
     static dispatch_once_t once;
     dispatch_once(&once, ^{ paintLock = [NSObject new]; pendingPaints = [NSMutableArray new]; });
     Class cls = NSSegmentedCell.class, segmentClass = NSSegmentedCell.class;
