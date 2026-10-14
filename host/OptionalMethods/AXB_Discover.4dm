@@ -1,8 +1,9 @@
 // Discover ordinary live controls in their owning form. Never evaluate source
 // expressions, read masked values, or copy application object/collection data.
 // With $only, discover only the objects it names; $knownLabels are the form's
-// captions, from an earlier complete discovery, to label them.
-#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection; $only : Object; $knownLabels : Collection) -> $result : Object
+// captions and $knownEntry its entry order, from an earlier complete discovery.
+// A complete discovery returns its entry order as $result.entry.
+#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection; $only : Object; $knownLabels : Collection; $knownEntry : Object) -> $result : Object
 var $name; $role; $label; $font : Text
 var $detailForm; $listForm : Text
 var $subformTable : Pointer
@@ -24,7 +25,17 @@ ARRAY POINTER($pointers; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; True; "nodes"; New collection; "subforms"; New collection; "unsupported"; New collection)
 FORM GET OBJECTS($names; $pointers; $pages; Form current page+Form inherited)
-FORM GET ENTRY ORDER($entry; *)
+// Reading the entry order costs more than describing a few objects: reuse a known one.
+var $entryOrder : Object
+$entryOrder:=$knownEntry
+If ($entryOrder=Null)
+ FORM GET ENTRY ORDER($entry; *)
+ $entryOrder:=New object
+ For ($i; 1; Size of array($entry))
+  $entryOrder[$entry{$i}]:=True
+ End for
+ $result.entry:=$entryOrder
+End if
 For ($i; 1; Size of array($names))
  $name:=$names{$i}
  If (($only#Null) && Not(OB Is defined($only; $name)))
@@ -216,7 +227,7 @@ For ($i; 1; Size of array($names))
     // The root resolves focus after collecting every instance. 4D reports the
     // same global editor name inside all repeated child execution contexts.
     $node.focused:=False
-    $node.focusable:=Find in array($entry; $name)>0
+    $node.focusable:=OB Is defined($entryOrder; $name)
     $node.protected:=$protected
     $node.editable:=False
     If ($role="textfield")

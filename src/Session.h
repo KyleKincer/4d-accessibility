@@ -42,4 +42,6 @@
 @end
 
 NSString *AXBValidateEnvelope(NSDictionary *envelope);
+// The envelope's parts other than its snapshot, against the snapshot's nodes by identifier.
+NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID);
 BOOL AXBTextRangeValid(NSString *text, NSRange range);

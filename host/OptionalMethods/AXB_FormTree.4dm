@@ -9,10 +9,14 @@ var $key : Text
 var $x; $y : Integer
 $registry:=AXB_FormRoots[String(Current form window)]
 $registry.seen:=New object
-$registry.controlPointers:=New object
-$registry.controlContexts:=New object
+// Controls' contexts and pointers are looked up by the ids of the current nodes, so the
+// entries of nodes reused from the last description stay valid. Forms are bound again.
+If ($registry.controlPointers=Null)
+ $registry.controlPointers:=New object
+ $registry.controlContexts:=New object
+ $registry.cellPointers:=New object
+End if
 $registry.formContexts:=New object
-$registry.cellPointers:=New object
 $registry.focusPointerOwners:=New collection
 $registry.focusPointerName:=""
 If (($registry.observedFocus#Null) && ($registry.observedFocus.id=Null))

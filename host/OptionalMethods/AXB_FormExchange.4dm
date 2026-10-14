@@ -3,7 +3,7 @@ var $context; $tree; $snapshot; $envelope; $reply; $action; $route; $rowRoute; $
 var $state; $rowID : Text
 var $selection; $frame; $viewport : Collection
 var $left; $top; $right; $bottom : Real
-var $allowed : Boolean
+var $allowed; $unchanged : Boolean
 $context:=AXB_FormContext
 If ($context=Null)
  return
@@ -80,12 +80,17 @@ If (Value type($context.view.options.idleRefresh)=Is real)
  $snapshot.idleRefresh:=$context.view.options.idleRefresh
 End if
 $state:=JSON Stringify($snapshot)
-If (Compare strings($state; $context.state; sk char codes)#0)
+$unchanged:=Compare strings($state; $context.state; sk char codes)=0
+If (Not($unchanged))
  $context.revision:=$context.revision+1
  $context.state:=$state
 End if
 $snapshot.revision:=$context.revision
 $envelope:=New object("snapshot"; $snapshot)
+// The plugin holds an unchanged form's tree: send only its revision.
+If ($unchanged & ($context.exchanged=True))
+ $envelope.snapshot:=New object("version"; 1; "revision"; $context.revision; "unchanged"; True)
+End if
 If ($context.gridPages#Null)
  $envelope.gridPages:=$context.gridPages
 End if
@@ -100,9 +105,11 @@ If ($context.editorInput#Null)
 End if
 $reply:=AXB_Host("exchange"; New object("session"; $context.session; "envelope"; $envelope))
 If (Not($reply.ok=True))
+ $context.exchanged:=False
  AXB_FormFailed($context; New object("error"; $reply.error))
  return
 End if
+$context.exchanged:=True
 $context.diagnostics:=New object("ok"; True; "ready"; True; "revision"; $context.revision; "nodeCount"; $tree.nodes.length; "issues"; $tree.issues)
 // How many form and subform views were described whole, and how many only where they changed.
 $context.diagnostics.wholeDescriptions:=Num(AXB_FormRoots[String(Current form window)].wholeDescriptions)

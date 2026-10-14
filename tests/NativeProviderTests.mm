@@ -123,6 +123,12 @@ static void StableIdentifierTest(void) {
     Exchange(first, 9020, 1, session, snapshot); Pump();
     Check(table.accessibilityRows[1] == row && [table accessibilityCellForColumn:0 row:1] == cell,
         "sorting preserves row handles and public locators for the same record");
+    // A description that found the form unchanged sends only the revision the session holds.
+    Check([Exchange(first, 9020, 1, session, @{@"version": @1, @"revision": @2, @"unchanged": @YES})[@"ok"] boolValue] &&
+          [[root accessibilityChildren] count] == 2 && table.accessibilityRows[1] == row, "an unchanged form is exchanged by its revision alone");
+    Check(![Exchange(first, 9020, 1, session, @{@"version": @1, @"revision": @1, @"unchanged": @YES})[@"ok"] boolValue] &&
+          ![Exchange(first, 9020, 1, session, @{@"version": @1, @"revision": @2, @"unchanged": @YES, @"nodes": @[]})[@"ok"] boolValue],
+          "an unchanged form must name the session's revision and nothing else");
     column[@"automationKey"] = @"Renamed"; grid[@"order"] = @3; snapshot[@"revision"] = @3;
     Exchange(first, 9020, 1, session, snapshot); Pump();
     Check(![cell isAccessibilityElement] && ![header isAccessibilityElement] &&

@@ -102,6 +102,8 @@ static BOOL SameGridDispatchValue(NSDictionary *before, NSDictionary *after, NSD
     return [oldCell isEqual:newCell];
 }
 
+NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID);
+
 NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (![envelope isKindOfClass:NSDictionary.class]) return @"envelope must be an object";
     NSDictionary *s = envelope[@"snapshot"];
@@ -255,6 +257,10 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
             }
         }
     }
+    return AXBValidateEnvelopeParts(envelope, byID);
+}
+
+NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
     if (envelope[@"gridPages"]) {
         NSArray *pages = envelope[@"gridPages"];
         if (![pages isKindOfClass:NSArray.class] || pages.count > 32) return @"invalid grid page batch";

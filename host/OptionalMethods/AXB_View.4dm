@@ -12,7 +12,6 @@ var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
 var $pointer; $focusPointer : Pointer
 var $only; $cache; $buckets; $bucket; $described; $full : Object
 var $cacheKey; $last : Text
-var $order : Collection
 var $reusable; $storing : Boolean
 var $subformTable : Pointer
 ARRAY TEXT($objects; 0)
@@ -146,7 +145,7 @@ If ($view.automatic=True)
    $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset)
    $view.discovery:=$description
   Else
-   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; $only; $cache.labels)
+   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; $only; $cache.labels; $cache.entry)
    $description.subforms:=$cache.subformList.copy()
   End if
  End if
@@ -372,7 +371,6 @@ End if
 // Record what each object produces, to reuse it while the object does not change.
 $storing:=($view.automatic=True) & ($request.operation="describe") & ($cache=Null)
 $buckets:=New object
-$order:=New collection
 $reusable:=True
 $last:=""
 $result:=New object("ok"; True; "nodes"; New collection; "routes"; New object; "issues"; New collection)
@@ -516,8 +514,7 @@ For each ($node; $description.nodes)
  $result.routes[$id]:=New object("path"; $request.path; "lineage"; $lineage; "instance"; $view.instance; "scope"; $view.scope; "localID"; $node.id; "node"; $copy)
  If (Value type($node.objectName)=Is text)
   If ($buckets[$node.objectName]=Null)
-   $buckets[$node.objectName]:=New object("nodes"; New collection; "routes"; New object; "contexts"; New object; "pointers"; New object; "cellPointers"; New object)
-   $order.push($node.objectName)
+   $buckets[$node.objectName]:=New object("nodes"; New collection; "first"; $result.nodes.length-1)
   Else
    // An object whose nodes are not together cannot be replaced in place.
    $reusable:=$reusable & (Compare strings($last; $node.objectName; sk char codes)=0)
@@ -525,30 +522,20 @@ For each ($node; $description.nodes)
   $last:=$node.objectName
   $bucket:=$buckets[$node.objectName]
   $bucket.nodes.push($copy)
-  $bucket.routes[$id]:=$result.routes[$id]
-  If ($registry.controlContexts[$id]#Null)
-   $bucket.contexts[$id]:=$registry.controlContexts[$id]
-  End if
-  If (OB Is defined($registry.controlPointers; $id))
-   $bucket.pointers[$id]:=$registry.controlPointers[$id]
-  End if
-  If (OB Is defined($registry.cellPointers; $id))
-   $bucket.cellPointers[$id]:=$registry.cellPointers[$id]
-  End if
  Else
   $reusable:=False
  End if
 End for each
 If ($cache#Null)
- // Assemble the form's nodes in their order, with each changed object's new nodes. An object
- // that appeared, disappeared or changed shape describes the whole form.
+ // Replace each changed object's nodes in place. An object that appeared, disappeared or
+ // changed shape describes the whole form.
  For each ($name; $buckets)
-  If ((Not(OB Is defined($cache.buckets; $name))) || ($cache.buckets[$name].nodes.length#$buckets[$name].nodes.length))
+  If ((Not(OB Is defined($cache.counts; $name))) || ($cache.counts[$name]#$buckets[$name].nodes.length))
    $reusable:=False
   End if
  End for each
  For each ($name; $only)
-  If (Not(OB Is defined($buckets; $name)) && OB Is defined($cache.buckets; $name))
+  If (Not(OB Is defined($buckets; $name)) && (Num($cache.counts[$name])>0))
    $reusable:=False
   End if
  End for each
@@ -560,28 +547,23 @@ If ($cache#Null)
   OB REMOVE($full; "changes")
   return AXB_View($full)
  End if
- $result.nodes:=New collection
- For each ($name; $cache.order)
-  If (OB Is defined($buckets; $name))
-   $cache.buckets[$name]:=$buckets[$name]
-  End if
-  $bucket:=$cache.buckets[$name]
-  For each ($node; $bucket.nodes)
-   $result.nodes.push($node)
-  End for each
-  For each ($key; $bucket.routes)
-   $result.routes[$key]:=$bucket.routes[$key]
-  End for each
-  For each ($key; $bucket.contexts)
-   $registry.controlContexts[$key]:=$bucket.contexts[$key]
-  End for each
-  For each ($key; $bucket.pointers)
-   $registry.controlPointers[$key]:=$bucket.pointers[$key]
-  End for each
-  For each ($key; $bucket.cellPointers)
-   $registry.cellPointers[$key]:=$bucket.cellPointers[$key]
+ For each ($name; $buckets)
+  $position:=$cache.first[$name]
+  For each ($node; $buckets[$name].nodes)
+   $cache.nodes[$position]:=$node
+   $cache.routes[$node.id]:=$result.routes[$node.id]
+   $position:=$position+1
   End for each
  End for each
+ $result.nodes:=$cache.nodes
+ $result.routes:=$cache.routes
+ If ($cache.subformList.length>0)
+  // Subforms add their routes to this view's: keep the reused ones apart.
+  $result.routes:=New object
+  For each ($key; $cache.routes)
+   $result.routes[$key]:=$cache.routes[$key]
+  End for each
+ End if
  $result.issues:=$cache.issues.copy()
  $registry.partialDescriptions:=Num($registry.partialDescriptions)+1
 End if
@@ -589,7 +571,14 @@ If ($storing)
  $registry.wholeDescriptions:=Num($registry.wholeDescriptions)+1
  OB REMOVE($view; "described")
  If ($reusable)
-  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "order"; $order; "buckets"; $buckets; "known"; New object; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "issues"; $result.issues.copy())
+  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "entry"; $description.entry; "nodes"; $result.nodes; "routes"; New object; "first"; New object; "counts"; New object; "known"; New object; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "issues"; $result.issues.copy())
+  For each ($key; $result.routes)
+   $described.routes[$key]:=$result.routes[$key]
+  End for each
+  For each ($name; $buckets)
+   $described.first[$name]:=$buckets[$name].first
+   $described.counts[$name]:=$buckets[$name].nodes.length
+  End for each
   For ($position; 1; Size of array($objects))
    $described.known[$objects{$position}]:=True
   End for
