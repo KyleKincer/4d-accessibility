@@ -547,7 +547,9 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (!bytes) return @{@"ok": @NO, @"error": @"payload cannot be encoded as JSON"};
     // Large ordinary forms and long notes need the same window budget as grids.
     if (bytes.length > AXBLimits::payload) return @{@"ok": @NO, @"error": @"payload too large"};
-    envelope = [NSJSONSerialization JSONObjectWithData:bytes options:0 error:nil];
+    return [self exchangeParsed:[NSJSONSerialization JSONObjectWithData:bytes options:0 error:nil] now:now];
+}
+- (NSDictionary *)exchangeParsed:(NSDictionary *)envelope now:(NSTimeInterval)now {
     @synchronized(self) {
         if (!_active) return @{@"ok": @NO, @"error": @"session closed"};
         NSTimeInterval sinceLast = _lastExchangeAt > 0 && now > _lastExchangeAt ? now - _lastExchangeAt : 0;
