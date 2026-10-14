@@ -14,6 +14,14 @@ If ((Value type($request)#Is object) | ($request=Null))
  $result.error:="invalidRequest"
  return
 End if
+// A process's plugins and components cannot change: check them once per process.
+If (AXB_HostInfo#Null)
+ EXECUTE METHOD("AXB_Dispatch"; $result; $operation; $request)
+ If ($operation="info")
+  $result.componentInfo:=AXB_HostInfo
+ End if
+ return
+End if
 PLUGIN LIST($numbers; $names)
 COMPONENT LIST($components)
 $native:=Find in array($numbers; 31071)>0
@@ -33,6 +41,7 @@ If (($info.protocol#1) | ($info.hostAPI#1) | Not($info.compiled=True))
  $result.error:="incompatibleComponent"
  return
 End if
+AXB_HostInfo:=$info
 EXECUTE METHOD("AXB_Dispatch"; $result; $operation; $request)
 If ($operation="info")
  $result.componentInfo:=$info

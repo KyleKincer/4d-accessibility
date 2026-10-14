@@ -54,6 +54,9 @@ BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);
 @property(nonatomic) BOOL omitOutsideWindow;
 // Publishes the drawn tables of list boxes no grid adapter describes; not in the view hierarchy.
 @property(nonatomic, strong) id drawnOverlay;
+// When 4D last redrew a drawn table, and when its rows were last read.
+@property(nonatomic) NSTimeInterval drawnChangedAt, drawnRefreshedAt;
+@property(nonatomic) BOOL drawnRefreshPending;
 - (void)refresh;
 - (void)refreshDrawnTables;
 - (void)refreshNativeRoot;

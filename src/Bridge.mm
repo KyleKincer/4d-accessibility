@@ -1047,6 +1047,7 @@ static CALayer *ObjectLayer(CALayer *context, NSString *name) {
 }
 
 - (void)refreshDrawnTables {
+    self.drawnRefreshedAt = Now();
     NSMutableArray<AXBNode *> *drawn = [NSMutableArray new];
     for (AXBNode *node in self.nodes) if (IsDrawnTable(node) && node.isAccessibilityElement) [drawn addObject:node]; else node.drawn = nil;
     NSString *observer = [@"bridge/" stringByAppendingString:self.session.identifier ?: @""];
@@ -1090,19 +1091,29 @@ static CALayer *ObjectLayer(CALayer *context, NSString *name) {
     }
     // The rows change as 4D redraws the list, after a scroll or a selection, between polls.
     __weak AXBWindowView *weakSelf = self;
-    __block BOOL pending = NO;
     if (!names.count) { AXBDrawnTextSetObserver(observer, nil, nil); return; }
-    AXBDrawnTextSetObserver(observer, names, ^(CALayer *layer) {
-        (void)layer;
-        if (pending) return;
-        pending = YES;
-        CFRunLoopRef main = CFRunLoopGetMain();
-        CFArrayRef modes = CFRunLoopCopyAllModes(main);
-        if (!modes) { pending = NO; return; }
-        CFRunLoopPerformBlock(main, modes, ^{ pending = NO; [weakSelf refreshDrawnTables]; });
-        CFRelease(modes);
-        CFRunLoopWakeUp(main);
-    });
+    AXBDrawnTextSetObserver(observer, names, ^(CALayer *layer) { (void)layer; [weakSelf drawnTablesChanged]; });
+}
+// Read the rows once 4D's redrawing pauses for a quarter second, and at least once a second while
+// it continues: rows read in mid-scroll are outdated at once.
+- (void)drawnTablesChanged {
+    self.drawnChangedAt = Now();
+    if (self.drawnRefreshPending) return;
+    self.drawnRefreshPending = YES;
+    [self checkDrawnRefresh];
+}
+- (void)checkDrawnRefresh {
+    NSTimeInterval now = Now(), wait = MIN(0.25 - (now - self.drawnChangedAt), 1 - (now - self.drawnRefreshedAt));
+    if (wait > 0) {
+        // 4D's own loops do not drain the main queue: wait elsewhere, then run in every mode.
+        __weak AXBWindowView *weakSelf = self;
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(wait * NSEC_PER_SEC)), dispatch_get_global_queue(QOS_CLASS_USER_INITIATED, 0), ^{
+            AXBRunOnMain(^{ [weakSelf checkDrawnRefresh]; });
+        });
+        return;
+    }
+    self.drawnRefreshPending = NO;
+    [self refreshDrawnTables];
 }
 
 - (void)refresh {
@@ -1452,7 +1463,10 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
     if (data.length > AXBLimits::payload) return JSON(@{@"ok": @NO, @"error": @"payload too large"});
     // Parsed here, immutable, and validated once: the session neither validates nor copies it again.
     id envelope = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    NSString *error = AXBValidateEnvelope(envelope);
+    // A description that found its form unchanged sends only the revision the session holds.
+    NSDictionary *brief = [envelope isKindOfClass:NSDictionary.class] ? envelope[@"snapshot"] : nil;
+    BOOL unchanged = [brief isKindOfClass:NSDictionary.class] && [brief[@"unchanged"] isEqual:@YES];
+    NSString *error = unchanged ? nil : AXBValidateEnvelope(envelope);
     if (error) return JSON(@{@"ok": @NO, @"error": error});
     AXBSession *session;
     @synchronized(registryLock) {
@@ -1462,6 +1476,18 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
         if (session.windowID != windowID || [bindings[sessionID][@"process"] integerValue] != processID || [bindings[sessionID][@"native"] pointerValue] != nativeWindow)
             return JSON(@{@"ok": @NO, @"error": @"session window or process mismatch"});
         if (bindings[sessionID][@"error"]) return JSON(@{@"ok": @NO, @"error": bindings[sessionID][@"error"]});
+    }
+    if (unchanged) {
+        NSDictionary *known = session.snapshot;
+        if (!known || brief.count != 3 || ![brief[@"version"] isEqual:@1] || ![brief[@"revision"] isEqual:known[@"revision"]])
+            return JSON(@{@"ok": @NO, @"error": @"unchanged snapshot does not match the session's"});
+        NSMutableDictionary *byID = [NSMutableDictionary new];
+        if (envelope[@"gridPages"]) for (NSDictionary *node in known[@"nodes"]) byID[node[@"id"]] = node;
+        NSMutableDictionary *expanded = [envelope mutableCopy];
+        expanded[@"snapshot"] = known;
+        envelope = [expanded copy];
+        error = AXBValidateEnvelopeParts(envelope, byID);
+        if (error) return JSON(@{@"ok": @NO, @"error": error});
     }
     NSMutableDictionary *response = [[session exchangeParsed:envelope now:Now()] mutableCopy];
     @synchronized(registryLock) { response[@"binding"] = bindings[sessionID][@"state"] ?: @"closed"; }

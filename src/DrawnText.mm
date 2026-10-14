@@ -347,7 +347,11 @@ static uint64_t ImageHash(CGImageRef image) {
 static void NoteNewContents(CALayer *layer, id contents) {
     if (!AXBActivationIsActive()) return;
     if (!contents || CFGetTypeID((__bridge CFTypeRef)contents) != CGImageGetTypeID()) { AXBNoteObjectChange(layer.name); return; }
-    uint64_t hash = ImageHash((__bridge CGImageRef)contents);
+    // A large image, such as a list box's, is redrawn as it scrolls and is rarely unchanged:
+    // hashing it on every frame would cost more than describing it again.
+    CGImageRef image = (__bridge CGImageRef)contents;
+    if (CGImageGetBytesPerRow(image) * CGImageGetHeight(image) > 256 * 1024) { AXBNoteObjectChange(layer.name); return; }
+    uint64_t hash = ImageHash(image);
     os_unfair_lock_lock(&HashLock);
     if (!LayerHashes) LayerHashes = [NSMapTable weakToStrongObjectsMapTable];
     BOOL changed = !hash || [[LayerHashes objectForKey:layer] unsignedLongLongValue] != hash;
