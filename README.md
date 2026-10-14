@@ -8,6 +8,8 @@ A 4D process pays for the bridge only when an assistive technology uses it. It s
 
 The implementation targets 4D 20.8 on macOS. Native binaries contain Apple Silicon and Intel code; live validation has primarily used Apple Silicon and macOS 26. Windows accessibility is not implemented.
 
+**A project that also runs on Windows** needs nothing installed there. Its lifecycle areas and host methods compile and run without the plugin and component, and an area without its plugin does nothing. [The check](validation/missing-packages-development.json) ran on macOS with the packages removed, not on Windows.
+
 ## Recorded examples
 
 Full recordings from synthetic 4D fixtures, with visible accessibility calls, VoiceOver captions and test results. Both videos are silent and play at 1.5× speed. See [recording details and reproduction steps](DEMOS.md).
@@ -28,13 +30,13 @@ https://github.com/user-attachments/assets/710f9760-04cd-4838-93b3-19614d90c61b
 
 The system has three parts. The native plugin publishes the accessibility tree. The compiled component schedules work in the owning form without replacing its timer. Generated host methods read the form's controls and invoke their existing behavior.
 
-From a release package, copy `Plugins/AccessibilityBridge.bundle` and `Components/AccessibilityBridge.4dbase` beside your application's `Project` folder. Then install the matching host methods:
+From a release's `4d-accessibility-VERSION-macos.zip` or `.dmg`, copy `Plugins/AccessibilityBridge.bundle` and `Components/AccessibilityBridge.4dbase` beside your application's `Project` folder. Then install the matching host methods:
 
 ```sh
 python3 install_host_methods.py --project-dir /path/to/MyApp/Project
 ```
 
-Add `--area-list` if the application uses AreaList Pro. Restart 4D after changing the plugin or component. Download the [release kit](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Signed releases use a Developer ID and Apple notarization; each release's notes define its tested scope. Older ad hoc candidates remain separately labeled.
+Add `--area-list` if the application uses AreaList Pro. The release's `4d-accessibility.zip` holds only the component, for 4D's Dependency Manager. Restart 4D after changing the plugin or component. Download the [release kit](https://github.com/KyleKincer/4d-accessibility/releases), or [build both packages from source](CONTRIBUTING.md). Signed releases use a Developer ID and Apple notarization; each release's notes define its tested scope. Older ad hoc candidates remain separately labeled.
 
 With a matching kit that supports area integration, add the lifecycle area automatically:
 

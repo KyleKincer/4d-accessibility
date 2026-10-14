@@ -40,6 +40,8 @@ The repository check verifies that `manifest.json` and the lookup in `host/Optio
 - `4d-accessibility-VERSION-macos.dmg` contains the complete kit, signed contents and a stapled notarization ticket.
 - `SHA256SUMS` covers the final download files.
 
+`ci/release_notes.py` writes the release text: a table saying which download to use, what to do on Windows, and the version's section of `RELEASE-NOTES.md`. The component ZIP's generic name makes it look like the main download, so the table comes first.
+
 Release signing processes the compiled ARM library and native plugin explicitly, then notarizes the ZIP and DMG and staples the DMG. The component ZIP contains the same signed component. Every signed tag creates a **draft** release. CI has no licensed graphical 4D host, so a green build alone cannot publish it.
 
 Download the draft's kit, verify its manifest and `SHA256SUMS`, then run the selected live host checks with that exact plugin, component and helper set. Record the execution modes, results and asset hashes. Publish those unchanged assets with `gh release edit vVERSION --draft=false --prerelease=false --latest` only after the selected checks pass. For a prerelease, use `--prerelease --latest=false` instead. A failed download check leaves the release in draft; fix source and create a new version rather than replacing its assets.

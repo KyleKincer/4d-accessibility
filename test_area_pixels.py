@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Compare unchanged synthetic forms with and without lifecycle areas."""
+"""Compare unchanged synthetic forms with and without lifecycle areas.
+
+--missing plugin runs the form with the area but no native plugin, as on a platform
+without one, such as Windows; --missing all also omits the component. The form must
+still compile, initialize, open no other window and render every pixel unchanged."""
 import argparse
 import json
 import subprocess
@@ -20,16 +24,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--server", required=True, type=Path)
     parser.add_argument("--run", action="store_true")
+    parser.add_argument("--missing", choices=("none", "plugin", "all"), default="none", help="Omit packages from the run with the area")
     args = parser.parse_args()
     if not args.run or not ax.trusted():
         parser.error("--run and Accessibility permission are required")
-    output = BUILD / "area-pixels"
+    suffix = "" if args.missing == "none" else "-missing-" + args.missing
+    output = BUILD / ("area-pixels" + suffix)
     output.mkdir(exist_ok=True)
-    report = {"passed": False, "compiled": True, "images": {}, "baseline": {}}
+    report = {"passed": False, "compiled": True, "missing": args.missing, "images": {}, "baseline": {}}
     try:
         for area in (False, True):
             name = "area" if area else "baseline"
-            subprocess.run([sys.executable, "prepare_area_fixture.py", "--server", str(args.server), "--pixel-focus", *([] if area else ["--no-area"])], cwd=ROOT, check=True)
+            subprocess.run([sys.executable, "prepare_area_fixture.py", "--server", str(args.server), "--pixel-focus", *([] if area else ["--no-area"]), *(["--no-plugin"] if area and args.missing != "none" else []), *(["--no-component"] if area and args.missing == "all" else [])], cwd=ROOT, check=True)
             report["baseline"][name] = json.loads((FIXTURE / "Resources/form-baseline.json").read_text())
             report[name + "CompileSHA256"] = sha(BUILD / "area-compile-report.json")
             project = FIXTURE / "Project/Area.4DProject"
@@ -46,8 +52,11 @@ def main():
                 try:
                     wait_for_start(process, project, state, BUILD)
                     activate_fixture(process, project, TITLE)
-                    ax.wait_for(lambda: state().get("ticks", 0) >= 3 and (not area or state().get("diagnostics", {}).get("ready")), "Fixture did not finish initialization")
+                    ax.wait_for(lambda: state().get("ticks", 0) >= 3 and (not area or args.missing != "none" or state().get("diagnostics", {}).get("ready")), "Fixture did not finish initialization")
                     assert state()["name"] == "After initialization" and state()["child"]["name"] == "Child"
+                    titles = [w.read("AXTitle") for w in ax.application(process.pid).read("AXWindows") or []]
+                    assert titles == [TITLE], f"Unexpected windows: {titles}"
+                    report.setdefault("windows", {})[name] = titles
                     target = output / (name + ".png")
                     previous = None
                     for _ in range(10):
@@ -76,9 +85,12 @@ def main():
         report["differenceBounds"] = difference.getbbox()
         assert report["differenceBounds"] is None, "Rendered forms differ"
         report["passed"] = True
-        print("PASS: lifecycle areas preserve every rendered window pixel; no masks or tolerance")
+        if args.missing == "none":
+            print("PASS: lifecycle areas preserve every rendered window pixel; no masks or tolerance")
+        else:
+            print(f"PASS: without the {'plugin and component' if args.missing == 'all' else 'plugin'}, a form with the area compiles, initializes, opens no other window and renders every pixel unchanged")
     finally:
-        (BUILD / "area-pixels.json").write_text(json.dumps(report, indent=2) + "\n")
+        (BUILD / ("area-pixels" + suffix + ".json")).write_text(json.dumps(report, indent=2) + "\n")
 
 
 if __name__ == "__main__":

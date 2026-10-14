@@ -2,7 +2,7 @@
 
 The source repository is https://github.com/KyleKincer/4d-accessibility. The skill works when copied on its own, but its installer and binaries come from a matching checkout or release.
 
-For a published release, download the complete versioned macOS kit from that repository's Releases page and verify `SHA256SUMS`. The component-only `4d-accessibility.zip` is for Dependency Manager; it still needs the plugin and host methods from the same release. Use the [availability table](STATUS.md#availability) to select a kit containing the required adapters. For an unpublished version, use a matching development artifact from a passing Build and test workflow run or build the exact source revision. Record that revision and artifact hashes. Install plugin, component and helpers together from that kit.
+For a published release, download the complete versioned macOS kit from that repository's Releases page and verify `SHA256SUMS`. The component-only `4d-accessibility.zip` is for Dependency Manager; it still needs the plugin and host methods from the same release. Windows needs no installation. Forms with the area and the generated host methods compile and run without the plugin or component, and the area does nothing ([macOS check with the packages removed](../../../validation/missing-packages-development.json)). Use the [availability table](STATUS.md#availability) to select a kit containing the required adapters. For an unpublished version, use a matching development artifact from a passing Build and test workflow run or build the exact source revision. Record that revision and artifact hashes. Install plugin, component and helpers together from that kit.
 
 For source development:
 
