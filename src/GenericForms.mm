@@ -2,6 +2,7 @@
 #import "InternalForms.h"
 #import "DrawnText.h"
 #import "Activation.h"
+#include <dlfcn.h>
 #include <mach/mach.h>
 #include <objc/message.h>
 #include <vector>
@@ -65,9 +66,11 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
     return objects;
 }
 
-// The form definitions inside a component's archive (a .4DZ, which is a zip): each entry
-// Project/Sources/Forms/<name>/form.4DForm, read from its central directory and inflated.
-static NSDictionary<NSString *, NSData *> *ArchivedForms(NSURL *archive) {
+// The form definitions inside a project's or component's archive (a .4DZ, which is a zip): each
+// entry Project/Sources/Forms/<name>/form.4DForm, and with tables each
+// Project/Sources/TableForms/<table>/<name>/form.4DForm as "<table>/<name>", read from its
+// central directory and inflated.
+static NSDictionary<NSString *, NSData *> *ArchivedForms(NSURL *archive, BOOL tables = NO) {
     NSData *zip = [NSData dataWithContentsOfURL:archive options:NSDataReadingMappedIfSafe error:nil];
     const uint8_t *bytes = (const uint8_t *)zip.bytes;
     NSUInteger length = zip.length;
@@ -80,15 +83,17 @@ static NSDictionary<NSString *, NSData *> *ArchivedForms(NSURL *archive) {
     for (NSUInteger at = length - 22; at + 65557 >= length && at > 0; at--) if (u32(at) == 0x06054b50) { end = at; break; }
     if (end == NSNotFound) return forms;
     NSUInteger count = u16(end + 10), at = u32(end + 16);
-    NSString *prefix = @"Project/Sources/Forms/", *suffix = @"/form.4DForm";
+    NSString *prefix = @"Project/Sources/Forms/", *tablePrefix = @"Project/Sources/TableForms/", *suffix = @"/form.4DForm";
     for (NSUInteger i = 0; i < count && at + 46 <= length && u32(at) == 0x02014b50; i++) {
         uint32_t method = u16(at + 10), compressed = u32(at + 20), size = u32(at + 24), local = u32(at + 42);
         NSUInteger nameLength = u16(at + 28), extra = u16(at + 30), comment = u16(at + 32);
         NSString *name = at + 46 + nameLength <= length ? [[NSString alloc] initWithBytes:bytes + at + 46 length:nameLength encoding:NSUTF8StringEncoding] : nil;
         at += 46 + nameLength + extra + comment;
-        if (![name hasPrefix:prefix] || ![name hasSuffix:suffix] || size > 4 * 1024 * 1024) continue;
-        NSString *form = [name substringWithRange:NSMakeRange(prefix.length, name.length - prefix.length - suffix.length)];
-        if ([form containsString:@"/"] || local + 30 > length || u32(local) != 0x04034b50) continue;
+        BOOL table = tables && [name hasPrefix:tablePrefix];
+        if ((!table && ![name hasPrefix:prefix]) || ![name hasSuffix:suffix] || size > 4 * 1024 * 1024) continue;
+        NSString *start = table ? tablePrefix : prefix;
+        NSString *form = [name substringWithRange:NSMakeRange(start.length, name.length - start.length - suffix.length)];
+        if ([form componentsSeparatedByString:@"/"].count != (table ? 2 : 1) || local + 30 > length || u32(local) != 0x04034b50) continue;
         NSUInteger data = local + 30 + u16(local + 26) + u16(local + 28);
         if (data + compressed > length) continue;
         if (method == 0) { forms[form] = [zip subdataWithRange:NSMakeRange(data, compressed)]; continue; }
@@ -154,9 +159,17 @@ static NSDictionary *LoadComponentForms(NSURL *sources) {
 }
 
 // Index every form definition under a project's Sources folder.
-static void LoadIndex(NSURL *sources, void (^done)(NSDictionary *, NSDictionary *)) {
+// A project's sources, or its archive: a remote client and a built application hold the
+// compiled project as a .4DZ, with the same paths inside.
+static void LoadIndex(NSURL *sources, NSURL *archive, void (^done)(NSDictionary *, NSDictionary *)) {
     NSMutableDictionary *forms = [NSMutableDictionary new];
     NSFileManager *files = NSFileManager.defaultManager;
+    if (archive) [ArchivedForms(archive, YES) enumerateKeysAndObjectsUsingBlock:^(NSString *name, NSData *data, BOOL *stop) {
+        (void)stop;
+        if (data.length >= 3 && !memcmp(data.bytes, "\xEF\xBB\xBF", 3)) data = [data subdataWithRange:NSMakeRange(3, data.length - 3)];
+        id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+        if ([json isKindOfClass:NSDictionary.class]) forms[name] = ObjectsOf(json);
+    }];
     NSURL *projectForms = [sources URLByAppendingPathComponent:@"Forms"];
     for (NSURL *folder in [files contentsOfDirectoryAtURL:projectForms includingPropertiesForKeys:nil options:0 error:nil] ?: @[]) {
         NSDictionary *definition = ReadDefinition([folder URLByAppendingPathComponent:@"form.4DForm"]);
@@ -896,9 +909,18 @@ void AXBGenericFormsInitialize(NSString *projectFile) {
     if (!AXBDrawnTextInitialize()) return;
     Overlays = [NSMapTable weakToStrongObjectsMapTable];
     Matches = [NSMapTable weakToStrongObjectsMapTable];
-    // 4D reports the project folder as an HFS path (volume:folder:…:Project:).
+    // 4D reports the project folder as an HFS path (volume:folder:…:Project:). A remote client
+    // reports only the structure's name; it runs its server's project from a local cache folder
+    // that holds the archive, <name>.4DZ, and the Plugins folder this plugin was loaded from.
     NSString *path = projectFile;
-    if (![path hasPrefix:@"/"]) {
+    if (![path containsString:@":"] && ![path containsString:@"/"]) {
+        Dl_info own = {};
+        dladdr((const void *)&AXBGenericFormsInitialize, &own);
+        NSString *binary = own.dli_fname ? @(own.dli_fname) : nil;
+        NSRange bundle = [binary rangeOfString:@"/Plugins/" options:NSBackwardsSearch];
+        if (bundle.location == NSNotFound) return;
+        path = [[binary substringToIndex:bundle.location] stringByAppendingPathComponent:[path stringByAppendingPathExtension:@"4DZ"]];
+    } else if (![path hasPrefix:@"/"]) {
         NSMutableArray<NSString *> *parts = [[path componentsSeparatedByString:@":"] mutableCopy];
         NSString *volume = parts.firstObject;
         [parts removeObjectAtIndex:0];
@@ -907,11 +929,21 @@ void AXBGenericFormsInitialize(NSString *projectFile) {
         path = [(boot ? @"/" : mounted) stringByAppendingPathComponent:[parts componentsJoinedByString:@"/"]];
     }
     BOOL folder = NO;
-    [NSFileManager.defaultManager fileExistsAtPath:path isDirectory:&folder];
-    NSURL *project = folder ? [NSURL fileURLWithPath:path isDirectory:YES] : [[NSURL fileURLWithPath:path] URLByDeletingLastPathComponent];
+    NSFileManager *files = NSFileManager.defaultManager;
+    [files fileExistsAtPath:path isDirectory:&folder];
+    NSURL *archive = !folder && [path.pathExtension.lowercaseString isEqual:@"4dz"] ? [NSURL fileURLWithPath:path] : nil;
+    // A project opened from its archive, as a built application opens it, reports the folder
+    // holding the archive.
+    if (folder && ![files fileExistsAtPath:[path stringByAppendingPathComponent:@"Sources"]])
+        for (NSString *name in [[files contentsOfDirectoryAtPath:path error:nil] sortedArrayUsingSelector:@selector(compare:)])
+            if ([name.pathExtension.lowercaseString isEqual:@"4dz"]) { archive = [NSURL fileURLWithPath:[path stringByAppendingPathComponent:name]]; folder = NO; break; }
+    // An archive's components lie beside it, as a project folder's lie beside its Project folder.
+    NSURL *project = folder ? [NSURL fileURLWithPath:path isDirectory:YES]
+                   : archive ? [[archive URLByDeletingLastPathComponent] URLByAppendingPathComponent:@"Project" isDirectory:YES]
+                   : [[NSURL fileURLWithPath:path] URLByDeletingLastPathComponent];
     NSURL *sources = [project URLByAppendingPathComponent:@"Sources"];
     dispatch_async(dispatch_get_global_queue(QOS_CLASS_UTILITY, 0), ^{
-        LoadIndex(sources, ^(NSDictionary *forms, NSDictionary *byObject) {
+        LoadIndex(sources, archive, ^(NSDictionary *forms, NSDictionary *byObject) {
             dispatch_async(dispatch_get_main_queue(), ^{ FormsByObject = byObject; Forms = forms; });
             // The main queue can be held by a modal loop; publish the index through every mode too.
             CFRunLoopRef main = CFRunLoopGetMain();
