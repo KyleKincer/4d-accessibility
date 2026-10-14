@@ -10,6 +10,9 @@
 @property(nonatomic, readonly) NSDictionary *activity;
 - (instancetype)initWithIdentifier:(NSString *)identifier windowID:(NSInteger)windowID;
 - (NSDictionary *)exchange:(NSDictionary *)envelope now:(NSTimeInterval)now;
+// The same for an envelope that already passed AXBValidateEnvelope and was parsed, immutable,
+// from at most AXBLimits::payload bytes of JSON: it is neither validated nor copied again.
+- (NSDictionary *)exchangeParsed:(NSDictionary *)envelope now:(NSTimeInterval)now;
 - (BOOL)enqueueNode:(NSString *)nodeID revision:(NSNumber *)revision operation:(NSString *)operation value:(id)value now:(NSTimeInterval)now;
 // Native elements may lag the host snapshot. Rebase only if their complete
 // target, ancestry and focus state are unchanged in the observed snapshot.

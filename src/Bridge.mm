@@ -1449,6 +1449,8 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
         return JSON(@{@"ok": @NO, @"error": @"invalid window, session, or payload size"});
     NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
     if (!data) return JSON(@{@"ok": @NO, @"error": @"payload contains invalid Unicode"});
+    if (data.length > AXBLimits::payload) return JSON(@{@"ok": @NO, @"error": @"payload too large"});
+    // Parsed here, immutable, and validated once: the session neither validates nor copies it again.
     id envelope = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
     NSString *error = AXBValidateEnvelope(envelope);
     if (error) return JSON(@{@"ok": @NO, @"error": error});
@@ -1461,7 +1463,7 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
             return JSON(@{@"ok": @NO, @"error": @"session window or process mismatch"});
         if (bindings[sessionID][@"error"]) return JSON(@{@"ok": @NO, @"error": bindings[sessionID][@"error"]});
     }
-    NSMutableDictionary *response = [[session exchange:envelope now:Now()] mutableCopy];
+    NSMutableDictionary *response = [[session exchangeParsed:envelope now:Now()] mutableCopy];
     @synchronized(registryLock) { response[@"binding"] = bindings[sessionID][@"state"] ?: @"closed"; }
     if ([response[@"ok"] boolValue]) {
         ScheduleRefresh(session, nativeWindow);

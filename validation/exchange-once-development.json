@@ -1,0 +1,129 @@
+{
+  "date": "2026-10-14",
+  "host": "4D 20.8, macOS 26, compiled, native Apple Silicon",
+  "form": "measure_cost.py's large form: 600 buttons, a field and a 2,000-row list box, area in every form, woken; parts timed with Milliseconds around the host calls, scroll phase",
+  "before": {
+    "phases(cpuPercent,maxPauseMs,pausesOver100Ms)": {
+      "quiet": [
+        7.5,
+        null,
+        null
+      ],
+      "idle": [
+        25.0,
+        181,
+        7
+      ],
+      "scroll": [
+        41.9,
+        178,
+        47
+      ]
+    },
+    "parts": {
+      "tree": {
+        "calls": 74,
+        "msEach": 89.3
+      },
+      "discover": {
+        "calls": 74,
+        "msEach": 64.4
+      },
+      "exchange": {
+        "calls": 74,
+        "msEach": 21.8
+      },
+      "grids": {
+        "calls": 74,
+        "msEach": 10.7
+      },
+      "stringify": {
+        "calls": 74,
+        "msEach": 1.4
+      },
+      "focus": {
+        "calls": 74,
+        "msEach": 1.1
+      },
+      "gridPoll": {
+        "calls": 74,
+        "msEach": 0.0
+      }
+    }
+  },
+  "after": {
+    "phases(cpuPercent,maxPauseMs,pausesOver100Ms)": {
+      "quiet": [
+        6.0,
+        null,
+        null
+      ],
+      "idle": [
+        25.1,
+        165,
+        7
+      ],
+      "scroll": [
+        47.3,
+        159,
+        75
+      ]
+    },
+    "parts": {
+      "tree": {
+        "calls": 99,
+        "msEach": 88.2
+      },
+      "discover": {
+        "calls": 99,
+        "msEach": 63.7
+      },
+      "grids": {
+        "calls": 99,
+        "msEach": 10.6
+      },
+      "exchange": {
+        "calls": 99,
+        "msEach": 7.1
+      },
+      "stringify": {
+        "calls": 99,
+        "msEach": 1.5
+      },
+      "focus": {
+        "calls": 99,
+        "msEach": 1.0
+      },
+      "gridPoll": {
+        "calls": 99,
+        "msEach": 0.0
+      }
+    }
+  },
+  "regression": [
+    "picture :: PASS: 29 picture control checks (arm64, interpreted)",
+    "splitter :: PASS: 9 splitter checks (arm64, interpreted)",
+    "hlist :: PASS: 33 hierarchical list checks (arm64, interpreted)",
+    "progress :: PASS: 9 progress checks (arm64, interpreted)",
+    "button_menu :: PASS: 15 button menu checks (arm64, interpreted)",
+    "query_editor :: PASS: 17 Query editor checks (arm64, interpreted)",
+    "quick_report :: PASS: 16 Quick Report checks (arm64, interpreted)",
+    "generic_form :: PASS: 24 generic form checks (arm64, interpreted)",
+    "order_by :: PASS: 9 Order By editor checks (arm64, interpreted)",
+    "formula_editor :: PASS: 19 formula editor checks (arm64, interpreted)",
+    "list_subform  :: PASS: 51 list-subform AX checks",
+    "list_subform --voiceover --compiled :: PASS: VO-Space runs the row button's own On Clicked once",
+    "messages  :: PASS: 37 standard-message checks (arm64, interpreted)",
+    "messages --voiceover :: PASS: 32 standard-message checks (arm64, interpreted, VoiceOver)",
+    "selection_fixture :: PASS: 34 classic-selection AX checks",
+    "combo_fixture :: PASS: owned combo fixture closes normally",
+    "dropdown_fixture :: PASS: owned dropdown fixture closes normally",
+    "activation  :: PASS: 14 activation checks",
+    "activation --voiceover :: PASS: 18 activation checks",
+    "drawn listbox --compiled :: PASS: 15 drawn list box checks (arm64, compiled)",
+    "drawn listbox --voiceover :: PASS: 19 drawn list box checks (arm64, interpreted, VoiceOver)",
+    "area :: PASS: ordinary application exits cleanly",
+    "tabs :: PASS: closed bridge group and owned children retire",
+    "area pixels :: PASS: lifecycle areas preserve every rendered window pixel; no masks or tolerance"
+  ]
+}
