@@ -206,7 +206,9 @@ def main():
     finally:
         for process in (local, client, server):
             if process and process.poll() is None:
-                process.terminate()
+                # 4D Server crashes when terminated by a signal, and macOS then shows its crash
+                # report in a dialog that takes keyboard focus from later tests. Kill it instead.
+                process.kill() if process is server else process.terminate()
                 try:
                     process.wait(timeout=30)
                 except subprocess.TimeoutExpired:
