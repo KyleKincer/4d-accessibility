@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 # name or text: internal names of the applications and organizations that use the bridge. Only
 # hashes are kept, so the check does not publish the names it guards. Ask a maintainer to add one.
 PRIVATE_NAMES = {
+    "d19152a059b51f9956fe12ff4b066d864375fd185000afafdd4c394d23ec577e",
     "0c873ecbd3c57a0116ca9190d67c9d72bc0154efc4f81cca5d11c62181846184",
     "d22c5ede4878800bd3efaa7a5ea5fa8de9c0c9624e09f6a76b5b2c0735523244",
     "909a1f1a1a01819301b64ea45fb8fde02d643649fdeaee0b40eb187b61da21e7",

@@ -1377,7 +1377,7 @@ static void GenericFormsTest(void) {
         @"checkActive": @{@"type": @"checkbox", @"text": @"Active", @"style": @"custom", @"width": @120, @"height": @20},
         @"btnHelp": @{@"type": @"button", @"tooltip": @"Help", @"width": @24, @"height": @24},
         @"Button1": @{@"type": @"button", @"width": @24, @"height": @24},
-        @"pbNextRecord": @{@"type": @"pictureButton", @"picture": @"/RESOURCES/Buttons/Next.png", @"width": @24, @"height": @24},
+        @"pbNextPage": @{@"type": @"pictureButton", @"picture": @"/RESOURCES/Buttons/Next.png", @"width": @24, @"height": @24},
         @"btnEscape": @{@"type": @"button", @"display": @NO, @"width": @10, @"height": @10},
         @"btnSave": @{@"type": @"button", @"text": @"Save", @"width": @90, @"height": @24},
         @"line": @{@"type": @"line"},
@@ -1405,14 +1405,14 @@ static void GenericFormsTest(void) {
     MessageLayer(context, @"btnSave", NSMakeRect(15, top - 150 - 29, 100, 34), @[@"Save"]);
     MessageLayer(context, @"btnHelp", NSMakeRect(115, top - 150 - 29, 34, 34), nil);
     MessageLayer(context, @"Button1", NSMakeRect(145, top - 150 - 29, 34, 34), nil);
-    MessageLayer(context, @"pbNextRecord", NSMakeRect(175, top - 150 - 29, 34, 34), nil);
+    MessageLayer(context, @"pbNextPage", NSMakeRect(175, top - 150 - 29, 34, 34), nil);
     MessageLayer(context, @"btnEscape", NSMakeRect(205, top - 150 - 29, 20, 20), nil);
     MessageLayer(context, @"line", NSMakeRect(0, 10, 400, 1), nil);
     Check(AXBGenericFormsRefreshWindow(window), "a window whose objects match one form of the project is published");
     NSArray *keys = [ProgressChildren(form) valueForKey:@"accessibilityIdentifier"];
-    Check([keys isEqual:(@[@"axb/form/labelName", @"axb/form/inputName", @"axb/form/checkActive", @"axb/form/btnSave", @"axb/form/btnHelp", @"axb/form/pbNextRecord"])],
+    Check([keys isEqual:(@[@"axb/form/labelName", @"axb/form/inputName", @"axb/form/checkActive", @"axb/form/btnSave", @"axb/form/btnHelp", @"axb/form/pbNextPage"])],
           "its labelled objects are published in reading order; decorations, an invisible button and one with 4D's default name are not");
-    Check([[ProgressElement(form, @"axb/form/pbNextRecord") accessibilityLabel] isEqual:@"Next Page"], "a picture button without a title or help tip is named by its object name");
+    Check([[ProgressElement(form, @"axb/form/pbNextPage") accessibilityLabel] isEqual:@"Next Page"], "a picture button without a title or help tip is named by its object name");
     id field = ProgressElement(form, @"axb/form/inputName");
     Check([[field accessibilityRole] isEqual:NSAccessibilityTextFieldRole] && [[field accessibilityLabel] isEqual:@"Name"] &&
           [[field accessibilityValue] isEqual:@"Ada"] && [field isAccessibilitySelectorAllowed:@selector(setAccessibilityValue:)],
@@ -2422,6 +2422,22 @@ static void ActivationTest(void) {
     AXBActivationInitialize();
     Check(AXBActivationIsActive() && [AXBActivationDescription() isEqual:@"on; active; configured"], "on starts active");
     unsetenv("AXB_ACTIVATION");
+
+    // Drawing observation follows the 4D version unless a setting decides.
+    unsetenv("AXB_HOOKS");
+    AXBHooksConfigure(0xF0012008);
+    Check(AXBHooksAllowed() && [AXBHooksDescription() hasPrefix:@"4D 20.8; "], "4D 20.8 is read from its version and allows observation");
+    AXBHooksConfigure(0x2050);
+    Check(AXBHooksAllowed() && [AXBHooksDescription() hasPrefix:@"4D 20 R5; "], "an R release of a validated version allows observation");
+    AXBHooksConfigure(0x2100);
+    Check(!AXBHooksAllowed(), "an unvalidated 4D version withholds observation");
+    setenv("AXB_HOOKS", "on", 1);
+    Check(AXBHooksAllowed(), "on allows observation on any version");
+    setenv("AXB_HOOKS", "off", 1);
+    AXBHooksConfigure(0x2008);
+    Check(!AXBHooksAllowed(), "off withholds observation on a validated version");
+    unsetenv("AXB_HOOKS");
+    AXBHooksConfigure(0);
 }
 
 int main(void) {

@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-14",
+  "sourceCommit": "a188a7f44ffdd33f3b59b8f764a8a3fa52046f45",
+  "host": "4D 20.8, macOS, compiled, native Apple Silicon",
+  "pluginSHA256": "e08248a7648831ce02c075175c86855c2d9a4dd22716fbd0bfc1f4d559e037de",
+  "componentSHA256": "e1f17401103f8f92f6ea71736869a19d9384c78b87ec37f90cc537bcf2b9c83a",
+  "firstClick": {
+    "runnerSHA256": "d74a4226f4f6394d68a03537d868881934292df60952bb48e8c3dcf16603835b",
+    "outcomes": {
+      "none": {
+        "pressedByFirstClick": 0,
+        "keyWindowAfterFirstClick": "AXB first click",
+        "pressedAfterSecondClick": 1
+      },
+      "dormant": {
+        "pressedByFirstClick": 0,
+        "keyWindowAfterFirstClick": "AXB first click",
+        "pressedAfterSecondClick": 1
+      },
+      "active": {
+        "pressedByFirstClick": 0,
+        "keyWindowAfterFirstClick": "AXB first click",
+        "pressedAfterSecondClick": 1
+      }
+    },
+    "checks": [
+      {
+        "passed": true,
+        "name": "none: the other window is key before the click"
+      },
+      {
+        "passed": true,
+        "name": "none: a click on the key window presses the button"
+      },
+      {
+        "passed": true,
+        "name": "none: the fixture raised no error"
+      },
+      {
+        "passed": true,
+        "name": "dormant: the other window is key before the click"
+      },
+      {
+        "passed": true,
+        "name": "dormant: a click on the key window presses the button"
+      },
+      {
+        "passed": true,
+        "name": "dormant: the fixture raised no error"
+      },
+      {
+        "passed": true,
+        "name": "active: the other window is key before the click"
+      },
+      {
+        "passed": true,
+        "name": "active: a click on the key window presses the button"
+      },
+      {
+        "passed": true,
+        "name": "active: the fixture raised no error"
+      },
+      {
+        "passed": true,
+        "name": "a dormant plugin leaves a first click on an inactive window as without it"
+      },
+      {
+        "passed": true,
+        "name": "an active plugin leaves a first click on an inactive window as without it"
+      }
+    ]
+  },
+  "activation": {
+    "runnerSHA256": "5974bf929743d293d8b002d5f376923895cc5f3ee9b462de4726a6075f1bbdbb",
+    "dormantStatus": "Accessibility Bridge 0.35.0; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; activation 1; macOS; 4D 20.8; hooks installed; auto; dormant",
+    "checks": [
+      {
+        "passed": true,
+        "name": "auto: the fixture runs compiled"
+      },
+      {
+        "passed": true,
+        "name": "auto: reading the window's title and frame leaves the process dormant"
+      },
+      {
+        "passed": true,
+        "name": "auto: a dormant process reports the 4D version and observes 4D's drawing from load"
+      },
+      {
+        "passed": true,
+        "name": "auto: reading the window's contents wakes the process"
+      },
+      {
+        "passed": true,
+        "name": "auto: the woken form publishes its buttons"
+      },
+      {
+        "passed": true,
+        "name": "auto: Alpha accepts a press"
+      },
+      {
+        "passed": true,
+        "name": "auto: a press runs the form's own method"
+      },
+      {
+        "passed": true,
+        "name": "off: reading the window's contents leaves the process dormant and publishes nothing"
+      },
+      {
+        "passed": true,
+        "name": "off: the process installs no drawing observation"
+      },
+      {
+        "passed": true,
+        "name": "hooks off: a woken form with an area is published without drawing observation"
+      },
+      {
+        "passed": true,
+        "name": "hooks off: Alpha accepts a press"
+      },
+      {
+        "passed": true,
+        "name": "hooks off: a press runs the form's own method"
+      },
+      {
+        "passed": true,
+        "name": "on: the process is active before any client reads it"
+      },
+      {
+        "passed": true,
+        "name": "on: the form is published"
+      }
+    ]
+  },
+  "regression": [
+    "picture :: PASS: 29 picture control checks (arm64, interpreted)",
+    "picture voiceover :: PASS: 25 picture control checks (arm64, interpreted, VoiceOver)",
+    "splitter :: PASS: 9 splitter checks (arm64, interpreted)",
+    "splitter voiceover :: PASS: 8 splitter checks (arm64, interpreted, VoiceOver)",
+    "hlist :: PASS: 33 hierarchical list checks (arm64, interpreted)",
+    "hlist voiceover :: PASS: 12 hierarchical list checks (arm64, interpreted, VoiceOver)",
+    "progress :: PASS: 9 progress checks (arm64, interpreted)",
+    "progress voiceover :: PASS: 10 progress checks (arm64, interpreted, VoiceOver)",
+    "button_menu :: PASS: 15 button menu checks (arm64, interpreted)",
+    "button_menu voiceover :: PASS: 12 button menu checks (arm64, interpreted, VoiceOver)",
+    "query_editor :: PASS: 17 Query editor checks (arm64, interpreted)",
+    "query_editor voiceover :: PASS: 13 Query editor checks (arm64, interpreted, VoiceOver)",
+    "quick_report :: PASS: 16 Quick Report checks (arm64, interpreted)",
+    "quick_report voiceover :: PASS: 16 Quick Report checks (arm64, interpreted, VoiceOver)",
+    "generic_form :: PASS: 24 generic form checks (arm64, interpreted)",
+    "generic_form voiceover :: PASS: 23 generic form checks (arm64, interpreted, VoiceOver)",
+    "order_by :: PASS: 9 Order By editor checks (arm64, interpreted)",
+    "order_by voiceover :: PASS: 13 Order By editor checks (arm64, interpreted, VoiceOver)",
+    "formula_editor :: PASS: 19 formula editor checks (arm64, interpreted)",
+    "formula_editor voiceover :: PASS: 19 formula editor checks (arm64, interpreted, VoiceOver)",
+    "list_subform  :: PASS: 51 list-subform AX checks",
+    "list_subform --voiceover --compiled :: PASS: VO-Space runs the row button's own On Clicked once",
+    "messages  :: PASS: 37 standard-message checks (arm64, interpreted)",
+    "messages --voiceover :: PASS: 32 standard-message checks (arm64, interpreted, VoiceOver)",
+    "selection_fixture :: PASS: 34 classic-selection AX checks",
+    "combo_fixture :: PASS: owned combo fixture closes normally",
+    "dropdown_fixture :: PASS: owned dropdown fixture closes normally",
+    "activation  :: PASS: 14 activation checks",
+    "activation --voiceover :: PASS: 18 activation checks",
+    "drawn listbox --compiled :: PASS: 15 drawn list box checks (arm64, compiled)",
+    "drawn listbox --voiceover :: PASS: 19 drawn list box checks (arm64, interpreted, VoiceOver)",
+    "area :: PASS: ordinary application exits cleanly",
+    "tabs :: PASS: closed bridge group and owned children retire",
+    "area pixels :: PASS: lifecycle areas preserve every rendered window pixel; no masks or tolerance"
+  ]
+}

@@ -10,6 +10,9 @@ AXB Status:
   published and a button pressed through accessibility runs the form's method;
 - off: reading the window's contents leaves it dormant and publishes nothing;
 - on: the form is active before any client reads it;
+- the plugin observes 4D's drawing from load on a validated 4D version, never when off, and
+  AXB_HOOKS=off withholds that observation while a form with an area is still published and
+  operated;
 - with --voiceover, starting VoiceOver wakes a dormant process, and a process launched while
   VoiceOver runs starts active.
 """
@@ -19,6 +22,7 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import re
 import subprocess
 import sys
 import tempfile
@@ -113,14 +117,17 @@ def main():
         print(("PASS: " if condition else "FAIL: ") + message, flush=True)
         assert condition, message
 
-    def launch(mode):
+    def launch(mode, hooks=None):
         (FIXTURE / "Resources").mkdir(exist_ok=True)
         status_file.unlink(missing_ok=True)
         (FIXTURE / "Resources/error.json").unlink(missing_ok=True)
         environment = dict(os.environ)
         environment.pop("AXB_ACTIVATION", None)
+        environment.pop("AXB_HOOKS", None)
         if mode != "auto":
             environment["AXB_ACTIVATION"] = mode
+        if hooks:
+            environment["AXB_HOOKS"] = hooks
         command = [APPLICATION, "--project", str(project), "--dataless", "--opening-mode", "compiled", "--webadmin-auto-start", "false"]
         if args.intel:
             command = ["arch", "-x86_64", *command]
@@ -166,6 +173,9 @@ def main():
             state = settle(process)
             check(state["active"] == 0 and state["status"].endswith("auto; dormant"),
                   "auto: reading the window's title and frame leaves the process dormant")
+            report["dormantStatus"] = state["status"]
+            check(re.search(r"; 4D \d+(\.\d+| R\d+(\.\d+)?); ", state["status"]) and "; hooks installed;" in state["status"],
+                  "auto: a dormant process reports the 4D version and observes 4D's drawing from load")
             started = time.monotonic()
             alpha = ax.wait_for(lambda: window(process).find("/Alpha"), "auto: the form was not published after its contents were read", timeout=10)
             report["autoWakeSeconds"] = round(time.monotonic() - started, 2)
@@ -192,6 +202,21 @@ def main():
             state = status(process)
             check(state["active"] == 0 and state["status"].endswith("off; dormant") and published is None,
                   "off: reading the window's contents leaves the process dormant and publishes nothing")
+            check("; hooks not installed;" in state["status"], "off: the process installs no drawing observation")
+        finally:
+            stop(process)
+
+        process = launch("auto", hooks="off")
+        try:
+            settle(process)
+            alpha = ax.wait_for(lambda: window(process).find("/Alpha"), "hooks off: the form was not published", timeout=10)
+            state = ax.wait_for(lambda: (lambda value: value if value["active"] == 1 else None)(status(process)),
+                                "hooks off: the process did not report activation", timeout=3)
+            check("; hooks off;" in state["status"] and alpha.read("AXDescription") == "Alpha",
+                  "hooks off: a woken form with an area is published without drawing observation")
+            check(alpha.press() == 0, "hooks off: Alpha accepts a press")
+            ax.wait_for(lambda: status(process)["pressed"] == "Alpha", "hooks off: the press did not reach the form's method", timeout=10)
+            check(True, "hooks off: a press runs the form's own method")
         finally:
             stop(process)
 
