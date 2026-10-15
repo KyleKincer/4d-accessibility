@@ -1,3 +1,40 @@
+# 0.36.0, an active form costs almost nothing until it changes, and forms in archives and remote clients
+
+- **An active form is described only once it changes, and only where it changed.**
+  - Before, a form was described whole every 0.1–1 second, whether or not it changed. On a compiled form with 600 buttons and a 2,000-row list box, that took about 100 ms on the form's own process each time.
+  - **When:** a form is described again when 4D draws one of its objects with a different image, hides, shows or moves one, the user types, clicks or scrolls, a window gains or loses key status, the form changes page or loads a record, or an assistive technology acts. Changes still under way, such as a list scrolling, are described once they pause for a quarter second, and at least once a second while they continue.
+  - **What:** only the objects that changed are described again; the others' nodes are reused. Each new image is compared with the object's last one by a hash of its pixels, since 4D draws every object of a form again after many changes. A change that can alter other controls' nodes, such as a caption or a control appearing, still describes the form whole.
+  - **Backstop:** an unchanged form is described whole every 30 seconds, or every 5 without the plugin's observation of 4D's drawing. A form can choose its own interval with `$options.idleRefresh` (1 to 60 seconds).
+  - **Unchanged trees:** when a description finds the form unchanged, only its revision is passed to the plugin.
+  - **Measured on that form:**
+
+    | | No bridge | 0.35.0, active | 0.36.0, active |
+    | --- | --- | --- | --- |
+    | Quiet form | 3.4% | 24% | 4.1% |
+    | Pauses over 100 ms in 30 s | 0 | 47 | 1, when an assistive technology first reads it |
+    | Scrolling a list box every tick | 28% | 39% | 31% |
+
+    A description of a few changed objects takes about 8 ms, and a whole description about 60 ms.
+  - [Performance and activation](PERFORMANCE.md); [incremental acceptance](test_incremental_fixture.py).
+- **A dormant process uses 7 MB more memory than without the bridge, instead of 30 MB.** The drawing observation kept CoreText's framesetters and frames alive.
+- **The plugin checks the 4D version before observing its drawing.**
+  - The observation depends on how 4D renders. By default it runs on 4D 20, its LTS and R releases.
+  - The `Hooks` setting in the same domain overrides it: `on` observes on any version, `off` never observes. The `AXB_HOOKS` environment variable overrides the setting for one process.
+  - Without the observation, forms with the area are still published and operated, but forms without one, 4D's standard messages and editors, and list boxes without a grid entry are not.
+  - `AXB Status` reports the 4D version and whether drawing is observed, for example `4D 20.8; hooks installed; auto; dormant`.
+- **Forms without an area are published when 4D runs the project from its archive.** This covers a built application, 4D opening a `.4DZ`, and a 4D remote client, which runs its server's project from an archive in its cache folder. Before, their forms without an area were published as nothing. [Archived projects](test_archived_project_fixture.py).
+- **The release page says which download to use.** `4d-accessibility.zip`, whose name 4D's Dependency Manager requires, holds only the component.
+- **Windows needs nothing installed.** A project with areas and host methods compiles and runs without the plugin and component, and an area without its plugin does nothing. This was checked on macOS with the packages removed, not on Windows.
+
+For developers:
+- `AXB Refresh due` and `AXB Changes` are new plugin commands. `AXB_Host("changes")` returns the objects whose drawing changed since the last description. `AXB_Form("diagnostics")` counts `wholeDescriptions` and `partialDescriptions`.
+- The exchange accepts `{"version": 1, "revision": n, "unchanged": true}` for the session's current revision.
+- `AXB_Discover` can describe only named objects, with known captions and entry order. `AXB_View` keeps each view's last description and replaces changed objects' nodes in place.
+- Unloading the plugin no longer waits on the main thread without bound.
+- New fixtures: `test_incremental_fixture.py`, `test_archived_project_fixture.py`, `test_first_click_fixture.py`, and `test_area_pixels.py --missing plugin|all`.
+
+Upgrade the plugin, component and host helpers together: the component's pulse uses `AXB Refresh due`, and the host's description uses `AXB_Host("changes")`.
+
 # 0.35.0, accessibility only when it is needed, and list boxes in every form with the area
 
 - **A 4D process now pays for the bridge only when an assistive technology uses it.**
