@@ -165,6 +165,13 @@ If ($context.editorInput#Null)
  $envelope.editorInput:=$context.editorInput
 End if
 $reply:=AXB_Host("exchange"; New object("session"; $context.session; "envelope"; $envelope))
+If (Not($reply.ok=True) && ($snapshot.changed#Null))
+ // A plugin that does not take changed nodes, or holds another tree, gets the whole tree.
+ OB REMOVE($snapshot; "base")
+ OB REMOVE($snapshot; "changed")
+ $snapshot.nodes:=$tree.nodes
+ $reply:=AXB_Host("exchange"; New object("session"; $context.session; "envelope"; $envelope))
+End if
 If (Not($reply.ok=True))
  $context.exchanged:=False
  AXB_FormFailed($context; New object("error"; $reply.error))
