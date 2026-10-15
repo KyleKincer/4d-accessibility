@@ -58,12 +58,12 @@ Lifecycle areas also follow `AXB_Configure`'s `enabled` per form, as before.
 | 0.34.1, area in every form | 22.6% | 322 MB | 48 | 191 ms | 39% | 226 ms |
 | 0.35.0, area in every form, dormant | 3.8% | 309 MB | 0 | 64 ms | 27% | 199 ms |
 | 0.35.0, area in every form, active | 24.2% | 323 MB | 47 | 200 ms | 39% | 213 ms |
-| Development, no bridge | 3.4% | 280 MB | 0 | 58 ms | 28% | 190 ms |
-| Development, area in every form, dormant | 3.6% | 310 MB | 0 | 60 ms | 29% | 197 ms |
-| Development, area in every form, active | 4.0% | 325 MB | 1 | 126 ms | 32% | 232 ms |
+| Development, no bridge | 3.4% | 279 MB | 0 | 62 ms | 28% | 201 ms |
+| Development, area in every form, dormant | 3.4% | 286 MB | 0 | 55 ms | 29% | 198 ms |
+| Development, area in every form, active | 4.1% | 300 MB | 1 | 139 ms | 31% | 227 ms |
 
 Dormant, a form with an area costs what the same form costs without the bridge. Two costs remain:
-- about 30 MB, the loaded plugin and component;
+- about 7 MB, the loaded plugin and component and the text the plugin records. It was 30 MB until the plugin stopped keeping CoreText's framesetters and frames alive;
 - 2–4 points of CPU while 4D redraws continuously, here a list box scrolling every tick. The plugin records the text 4D draws from load, so that a window open when an assistive technology arrives can be described: see [observing 4D's drawing](#observing-4ds-drawing).
 
 Active, the bridge describes a form again only when what it shows can have changed: 4D draws one of its objects with a different image, or hides, shows or moves one; the user types, clicks or scrolls; a window gains or loses key status; the form changes page or loads a record; or an assistive technology acts or reads a grid's rows. Changes still under way, such as a list scrolling or a field being typed in, are described once they pause for a quarter second, and at least once a second while they continue.
@@ -78,7 +78,7 @@ Building the plugin with `-O2` instead of `-O1` changed none of these figures be
 
 The small dialog opens in 40–80 ms in every variant, with no pattern between them.
 
-Records: [0.34.1](validation/cost-0.34.1.json), [0.35.0](validation/cost-0.35.0-development.json), [refresh on change](validation/cost-refresh-development.json), [changed objects only](validation/cost-incremental-development.json), [in place](validation/cost-in-place-development.json); [activation acceptance](validation/activation-development.json); [drawing observation and first clicks](validation/hooks-policy-development.json).
+Records: [0.34.1](validation/cost-0.34.1.json), [0.35.0](validation/cost-0.35.0-development.json), [refresh on change](validation/cost-refresh-development.json), [changed objects only](validation/cost-incremental-development.json), [in place](validation/cost-in-place-development.json), [memory](validation/memory-development.json); [activation acceptance](validation/activation-development.json); [drawing observation and first clicks](validation/hooks-policy-development.json).
 
 ## Reproduce
 

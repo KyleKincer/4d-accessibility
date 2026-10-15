@@ -1,0 +1,479 @@
+{
+  "date": "2026-10-14",
+  "host": "4D 20.8, macOS 26, compiled, native Apple Silicon",
+  "method": "heap and vmmap --summary of 4D during measure_cost.py's scroll phase, with no bridge and with a dormant area; the dormant 'before' heap had 7,831 CTFramesetter and 3,879 CTFrame live objects more than without the bridge, and a physical footprint of about 198 MB",
+  "heapAfter": {
+    "CTFramesetter": null,
+    "CTFrame": {
+      "count": 1,
+      "bytes": 256
+    },
+    "CTLine": {
+      "count": 60,
+      "bytes": 19200
+    },
+    "CTRun": {
+      "count": 60,
+      "bytes": 26880
+    },
+    "CTTextTab": {
+      "count": 36,
+      "bytes": 2880
+    },
+    "CGImage": {
+      "count": 848,
+      "bytes": 271360
+    },
+    "CALayer": {
+      "count": 713,
+      "bytes": 22816
+    }
+  },
+  "heapNoBridge": {
+    "CTFramesetter": null,
+    "CTFrame": {
+      "count": 1,
+      "bytes": 256
+    },
+    "CTLine": {
+      "count": 60,
+      "bytes": 19200
+    },
+    "CTRun": {
+      "count": 60,
+      "bytes": 26880
+    },
+    "CTTextTab": {
+      "count": 36,
+      "bytes": 2880
+    },
+    "CGImage": {
+      "count": 847,
+      "bytes": 271040
+    },
+    "CALayer": {
+      "count": 712,
+      "bytes": 22784
+    }
+  },
+  "footprint": {
+    "noBridge": "159.5M",
+    "dormantAfter": "158.8M"
+  },
+  "runs": [
+    {
+      "variant": "none",
+      "wake": false,
+      "intel": false,
+      "phases": {
+        "quiet": {
+          "cpuPercent": 3.2,
+          "seconds": 31.0,
+          "rssMB": 279
+        },
+        "idle": {
+          "cpuPercent": 24.3,
+          "seconds": 30.1,
+          "rssMB": 284,
+          "ticks": 869,
+          "medianMs": 39,
+          "p99Ms": 47,
+          "maxMs": 65,
+          "over50Ms": 2,
+          "over100Ms": 0
+        },
+        "scroll": {
+          "cpuPercent": 27.1,
+          "seconds": 30.1,
+          "rssMB": 286,
+          "ticks": 856,
+          "medianMs": 30.0,
+          "p99Ms": 50,
+          "maxMs": 50,
+          "over50Ms": 0,
+          "over100Ms": 0
+        }
+      },
+      "startupSeconds": 3.78,
+      "compiled": true,
+      "openSmallMs": {
+        "median": 56,
+        "max": 67,
+        "runs": [
+          67,
+          39,
+          57,
+          41,
+          56
+        ]
+      },
+      "closeSmallMs": 81,
+      "openLargeMs": {
+        "median": 209,
+        "max": 220,
+        "runs": [
+          220,
+          209,
+          188
+        ]
+      },
+      "closeLargeMs": 246,
+      "attempt": 1,
+      "nativeSha256": null,
+      "componentSha256": null
+    },
+    {
+      "variant": "none",
+      "wake": false,
+      "intel": false,
+      "phases": {
+        "quiet": {
+          "cpuPercent": 3.5,
+          "seconds": 30.1,
+          "rssMB": 279
+        },
+        "idle": {
+          "cpuPercent": 24.1,
+          "seconds": 30.0,
+          "rssMB": 284,
+          "ticks": 875,
+          "medianMs": 38,
+          "p99Ms": 46,
+          "maxMs": 59,
+          "over50Ms": 1,
+          "over100Ms": 0
+        },
+        "scroll": {
+          "cpuPercent": 27.9,
+          "seconds": 30.0,
+          "rssMB": 285,
+          "ticks": 854,
+          "medianMs": 30.0,
+          "p99Ms": 50,
+          "maxMs": 53,
+          "over50Ms": 2,
+          "over100Ms": 0
+        }
+      },
+      "startupSeconds": 2.92,
+      "compiled": true,
+      "openSmallMs": {
+        "median": 60,
+        "max": 70,
+        "runs": [
+          70,
+          55,
+          60,
+          69,
+          53
+        ]
+      },
+      "closeSmallMs": 101,
+      "openLargeMs": {
+        "median": 193,
+        "max": 222,
+        "runs": [
+          222,
+          193,
+          182
+        ]
+      },
+      "closeLargeMs": 266,
+      "attempt": 2,
+      "nativeSha256": null,
+      "componentSha256": null
+    },
+    {
+      "variant": "area",
+      "wake": false,
+      "intel": false,
+      "phases": {
+        "quiet": {
+          "cpuPercent": 3.4,
+          "seconds": 30.1,
+          "rssMB": 285
+        },
+        "idle": {
+          "cpuPercent": 24.5,
+          "seconds": 30.0,
+          "rssMB": 289,
+          "ticks": 871,
+          "medianMs": 38,
+          "p99Ms": 48,
+          "maxMs": 59,
+          "over50Ms": 1,
+          "over100Ms": 0
+        },
+        "scroll": {
+          "cpuPercent": 29.1,
+          "seconds": 30.1,
+          "rssMB": 291,
+          "ticks": 859,
+          "medianMs": 30,
+          "p99Ms": 49,
+          "maxMs": 50,
+          "over50Ms": 0,
+          "over100Ms": 0
+        }
+      },
+      "startupSeconds": 3.94,
+      "compiled": true,
+      "openSmallMs": {
+        "median": 58,
+        "max": 69,
+        "runs": [
+          69,
+          33,
+          58,
+          60,
+          51
+        ]
+      },
+      "closeSmallMs": 80,
+      "openLargeMs": {
+        "median": 196,
+        "max": 197,
+        "runs": [
+          197,
+          192,
+          196
+        ]
+      },
+      "closeLargeMs": 246,
+      "attempt": 1,
+      "nativeSha256": "3f34998f5b9174d015fe64aebf891e5b1e7421faa721bd0f064a0dbac377536d",
+      "componentSha256": "fa76e676ccaeab7810de903c0facdea9ca5b41b7d623a2fb5f978ecb6f5a0cb2"
+    },
+    {
+      "variant": "area",
+      "wake": false,
+      "intel": false,
+      "phases": {
+        "quiet": {
+          "cpuPercent": 3.3,
+          "seconds": 31.1,
+          "rssMB": 287
+        },
+        "idle": {
+          "cpuPercent": 24.9,
+          "seconds": 30.0,
+          "rssMB": 292,
+          "ticks": 870,
+          "medianMs": 39.0,
+          "p99Ms": 47,
+          "maxMs": 50,
+          "over50Ms": 0,
+          "over100Ms": 0
+        },
+        "scroll": {
+          "cpuPercent": 28.0,
+          "seconds": 30.0,
+          "rssMB": 294,
+          "ticks": 868,
+          "medianMs": 30.0,
+          "p99Ms": 50,
+          "maxMs": 51,
+          "over50Ms": 5,
+          "over100Ms": 0
+        }
+      },
+      "startupSeconds": 2.92,
+      "compiled": true,
+      "openSmallMs": {
+        "median": 61,
+        "max": 86,
+        "runs": [
+          86,
+          58,
+          58,
+          68,
+          61
+        ]
+      },
+      "closeSmallMs": 104,
+      "openLargeMs": {
+        "median": 199,
+        "max": 206,
+        "runs": [
+          199,
+          206,
+          189
+        ]
+      },
+      "closeLargeMs": 267,
+      "attempt": 2,
+      "nativeSha256": "3f34998f5b9174d015fe64aebf891e5b1e7421faa721bd0f064a0dbac377536d",
+      "componentSha256": "fa76e676ccaeab7810de903c0facdea9ca5b41b7d623a2fb5f978ecb6f5a0cb2"
+    },
+    {
+      "variant": "area",
+      "wake": true,
+      "intel": false,
+      "phases": {
+        "quiet": {
+          "wakeElements": 799,
+          "wakeSeconds": 0.24,
+          "cpuPercent": 4.0,
+          "seconds": 30.3,
+          "rssMB": 300
+        },
+        "idle": {
+          "wakeElements": 6,
+          "wakeSeconds": 0.0,
+          "cpuPercent": 24.4,
+          "seconds": 30.0,
+          "rssMB": 304,
+          "ticks": 874,
+          "medianMs": 37.0,
+          "p99Ms": 47,
+          "maxMs": 138,
+          "over50Ms": 3,
+          "over100Ms": 1
+        },
+        "scroll": {
+          "wakeElements": 6,
+          "wakeSeconds": 0.01,
+          "cpuPercent": 31.3,
+          "seconds": 30.0,
+          "rssMB": 305,
+          "ticks": 869,
+          "medianMs": 29,
+          "p99Ms": 50,
+          "maxMs": 137,
+          "over50Ms": 8,
+          "over100Ms": 1
+        }
+      },
+      "startupSeconds": 4.03,
+      "compiled": true,
+      "openSmallMs": {
+        "median": 72,
+        "max": 79,
+        "runs": [
+          70,
+          52,
+          78,
+          79,
+          72
+        ]
+      },
+      "closeSmallMs": 117,
+      "openLargeMs": {
+        "median": 231,
+        "max": 278,
+        "runs": [
+          278,
+          217,
+          231
+        ]
+      },
+      "closeLargeMs": 276,
+      "attempt": 1,
+      "nativeSha256": "3f34998f5b9174d015fe64aebf891e5b1e7421faa721bd0f064a0dbac377536d",
+      "componentSha256": "fa76e676ccaeab7810de903c0facdea9ca5b41b7d623a2fb5f978ecb6f5a0cb2"
+    },
+    {
+      "variant": "area",
+      "wake": true,
+      "intel": false,
+      "phases": {
+        "quiet": {
+          "wakeElements": 799,
+          "wakeSeconds": 0.24,
+          "cpuPercent": 4.1,
+          "seconds": 30.3,
+          "rssMB": 300
+        },
+        "idle": {
+          "wakeElements": 6,
+          "wakeSeconds": 0.0,
+          "cpuPercent": 24.8,
+          "seconds": 30.1,
+          "rssMB": 304,
+          "ticks": 868,
+          "medianMs": 38.0,
+          "p99Ms": 47,
+          "maxMs": 139,
+          "over50Ms": 2,
+          "over100Ms": 1
+        },
+        "scroll": {
+          "wakeElements": 6,
+          "wakeSeconds": 0.01,
+          "cpuPercent": 31.6,
+          "seconds": 30.1,
+          "rssMB": 305,
+          "ticks": 866,
+          "medianMs": 29.0,
+          "p99Ms": 59,
+          "maxMs": 145,
+          "over50Ms": 12,
+          "over100Ms": 1
+        }
+      },
+      "startupSeconds": 2.91,
+      "compiled": true,
+      "openSmallMs": {
+        "median": 66,
+        "max": 81,
+        "runs": [
+          74,
+          44,
+          56,
+          81,
+          66
+        ]
+      },
+      "closeSmallMs": 102,
+      "openLargeMs": {
+        "median": 222,
+        "max": 242,
+        "runs": [
+          242,
+          216,
+          222
+        ]
+      },
+      "closeLargeMs": 317,
+      "attempt": 2,
+      "nativeSha256": "3f34998f5b9174d015fe64aebf891e5b1e7421faa721bd0f064a0dbac377536d",
+      "componentSha256": "fa76e676ccaeab7810de903c0facdea9ca5b41b7d623a2fb5f978ecb6f5a0cb2"
+    }
+  ],
+  "regression": [
+    "picture :: PASS: 29 picture control checks (arm64, interpreted)",
+    "picture voiceover :: PASS: 25 picture control checks (arm64, interpreted, VoiceOver)",
+    "splitter :: PASS: 9 splitter checks (arm64, interpreted)",
+    "splitter voiceover :: PASS: 8 splitter checks (arm64, interpreted, VoiceOver)",
+    "hlist :: PASS: 33 hierarchical list checks (arm64, interpreted)",
+    "hlist voiceover :: PASS: 12 hierarchical list checks (arm64, interpreted, VoiceOver)",
+    "progress :: PASS: 9 progress checks (arm64, interpreted)",
+    "progress voiceover :: PASS: 10 progress checks (arm64, interpreted, VoiceOver)",
+    "button_menu :: PASS: 15 button menu checks (arm64, interpreted)",
+    "button_menu voiceover :: PASS: 12 button menu checks (arm64, interpreted, VoiceOver)",
+    "query_editor :: PASS: 17 Query editor checks (arm64, interpreted)",
+    "query_editor voiceover :: PASS: 13 Query editor checks (arm64, interpreted, VoiceOver)",
+    "quick_report :: PASS: 16 Quick Report checks (arm64, interpreted)",
+    "quick_report voiceover :: PASS: 16 Quick Report checks (arm64, interpreted, VoiceOver)",
+    "generic_form :: PASS: 24 generic form checks (arm64, interpreted)",
+    "generic_form voiceover :: PASS: 23 generic form checks (arm64, interpreted, VoiceOver)",
+    "order_by :: PASS: 9 Order By editor checks (arm64, interpreted)",
+    "order_by voiceover :: PASS: 13 Order By editor checks (arm64, interpreted, VoiceOver)",
+    "formula_editor :: PASS: 19 formula editor checks (arm64, interpreted)",
+    "formula_editor voiceover :: PASS: 19 formula editor checks (arm64, interpreted, VoiceOver)",
+    "list_subform  :: PASS: 51 list-subform AX checks",
+    "list_subform --voiceover --compiled :: PASS: VO-Space runs the row button's own On Clicked once",
+    "messages  :: PASS: 37 standard-message checks (arm64, interpreted)",
+    "messages --voiceover :: PASS: 32 standard-message checks (arm64, interpreted, VoiceOver)",
+    "selection_fixture :: PASS: 34 classic-selection AX checks",
+    "combo_fixture :: PASS: owned combo fixture closes normally",
+    "dropdown_fixture :: PASS: owned dropdown fixture closes normally",
+    "activation  :: PASS: 14 activation checks",
+    "activation --voiceover :: PASS: 18 activation checks",
+    "drawn listbox --compiled :: PASS: 15 drawn list box checks (arm64, compiled)",
+    "drawn listbox --voiceover :: PASS: 19 drawn list box checks (arm64, interpreted, VoiceOver)",
+    "area :: PASS: ordinary application exits cleanly",
+    "tabs :: PASS: closed bridge group and owned children retire",
+    "area pixels :: PASS: lifecycle areas preserve every rendered window pixel; no masks or tolerance"
+  ]
+}
