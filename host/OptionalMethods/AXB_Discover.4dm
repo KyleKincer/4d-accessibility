@@ -3,7 +3,9 @@
 // With $only, discover only the objects it names; $knownLabels are the form's
 // captions and $knownEntry its entry order, from an earlier complete discovery.
 // A complete discovery returns its entry order as $result.entry.
-#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection; $only : Object; $knownLabels : Collection; $knownEntry : Object) -> $result : Object
+// $static keeps, for one form, what its objects cannot change: their types, and the
+// pop-up menu setting of buttons that have not changed since it was read.
+#DECLARE($options : Object; $tabState : Object; $paintOffset : Collection; $only : Object; $knownLabels : Collection; $knownEntry : Object; $static : Object) -> $result : Object
 var $name; $role; $label; $font : Text
 var $detailForm; $listForm : Text
 var $subformTable : Pointer
@@ -18,6 +20,7 @@ var $windowLeft; $windowTop; $windowRight; $windowBottom : Integer
 var $node; $other; $metadata; $popup; $styledText; $tabs; $cells; $choices : Object
 var $value : Variant
 var $protected : Boolean
+var $menu : Text
 var $picture : Picture
 ARRAY TEXT($names; 0)
 ARRAY TEXT($entry; 0)
@@ -46,7 +49,16 @@ For ($i; 1; Size of array($names))
   continue
  End if
  If (OBJECT Get visible(*; $name))
-  $type:=OBJECT Get type(*; $name)
+  // 4D finds an object by searching the form for its name: on a large form, each
+  // property read costs more than describing it. Read only what can change.
+  If (($static#Null) && OB Is defined($static.types; $name))
+   $type:=$static.types[$name]
+  Else
+   $type:=OBJECT Get type(*; $name)
+   If ($static#Null)
+    $static.types[$name]:=$type
+   End if
+  End if
   $role:=""
   $label:=""
   $value:=""
@@ -256,17 +268,31 @@ For ($i; 1; Size of array($names))
      // A button with a pop-up menu (item 11 of its format). Any click on a linked
      // button runs its On Alternative Click; a separated one's runs from the arrow
      // that the bevel, custom and rounded bevel styles draw at its corner.
-     $parts:=Split string(OBJECT Get format(*; $name); ";")
-     If ($parts.length>=11)
-      Case of
-       : (Num($parts[10])=1)
-        $node.menu:="linked"
-       : ((Num($parts[10])=2) & (New collection(4; 8; 9).indexOf(Num($parts[6]))>=0))
-        $node.menu:="separated"
-       : (Num($parts[10])=2)
-        $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "buttonMenuArrowPending"))
-      End case
+     If (($static#Null) && OB Is defined($static.menus; $name))
+      $menu:=$static.menus[$name]
+     Else
+      $menu:=""
+      $parts:=Split string(OBJECT Get format(*; $name); ";")
+      If ($parts.length>=11)
+       Case of
+        : (Num($parts[10])=1)
+         $menu:="linked"
+        : ((Num($parts[10])=2) & (New collection(4; 8; 9).indexOf(Num($parts[6]))>=0))
+         $menu:="separated"
+        : (Num($parts[10])=2)
+         $menu:="pending"
+       End case
+      End if
+      If ($static#Null)
+       $static.menus[$name]:=$menu
+      End if
      End if
+     Case of
+      : ($menu="pending")
+       $result.unsupported.push(New object("object"; $name; "type"; $type; "reason"; "buttonMenuArrowPending"))
+      : ($menu#"")
+       $node.menu:=$menu
+     End case
     End if
     If (New collection("group"; "image"; "progress"; "splitter").indexOf($role)>=0)
      $node.focusable:=False
@@ -401,7 +427,12 @@ End for
 $result.nodes:=AXB_ControlLayers($result.nodes; $options)
 $labels:=New collection
 If ($knownLabels#Null)
- $labels:=$knownLabels.slice(0)
+ // A caption described again replaces its earlier node.
+ For each ($other; $knownLabels)
+  If (($only=Null) || Not(OB Is defined($only; $other.objectName)))
+   $labels.push($other)
+  End if
+ End for each
 End if
 For each ($node; $result.nodes)
  If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))

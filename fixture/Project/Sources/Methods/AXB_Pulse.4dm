@@ -15,7 +15,8 @@ While ($token.active)
  // unchanged form makes its user wait for nothing. A staged operation always continues.
  $due:=False
  If (Not($dormant) & Not($token.pending))
-  $due:=($token.fast=True) | (AXB Refresh due($token.session)=1)
+  // So is the backstop's check of every object, a few at a time.
+  $due:=($token.fast=True) | ($token.verify=True) | (AXB Refresh due($token.session)=1)
  End if
  Use ($token)
   If ($token.active)

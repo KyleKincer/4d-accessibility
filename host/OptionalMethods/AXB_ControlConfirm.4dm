@@ -42,7 +42,8 @@ If (New collection("increment"; "decrement").indexOf($request.operation)>=0)
    return
   End if
  End if
- $description:=AXB_Discover($request.options)
+ // Only the adjusted control: on a large form, discovering all of them costs far more.
+ $description:=AXB_Discover($request.options; Null; Null; New object($request.objectName; True); New collection; New object)
  For each ($node; $description.nodes)
   If (Compare strings($node.objectName; $request.objectName; sk char codes)=0)
    $target:=$node

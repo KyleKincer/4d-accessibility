@@ -260,6 +260,54 @@ NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     return AXBValidateEnvelopeParts(envelope, byID);
 }
 
+BOOL AXBEnvelopeIsBrief(id envelope) {
+    NSDictionary *brief = [envelope isKindOfClass:NSDictionary.class] ? envelope[@"snapshot"] : nil;
+    return [brief isKindOfClass:NSDictionary.class] && ([brief[@"unchanged"] isEqual:@YES] || brief[@"base"] != nil);
+}
+
+NSDictionary *AXBExpandEnvelope(NSDictionary *envelope, NSDictionary *known, NSString **error) {
+    NSDictionary *brief = envelope[@"snapshot"];
+    NSMutableDictionary *expanded = [envelope mutableCopy];
+    if ([brief[@"unchanged"] isEqual:@YES]) {
+        if (!known || brief.count != 3 || ![brief[@"version"] isEqual:@1] || ![brief[@"revision"] isEqual:known[@"revision"]]) {
+            *error = @"unchanged snapshot does not match the session's";
+            return nil;
+        }
+        NSMutableDictionary *byID = [NSMutableDictionary new];
+        if (envelope[@"gridPages"]) for (NSDictionary *node in known[@"nodes"]) byID[node[@"id"]] = node;
+        expanded[@"snapshot"] = known;
+        *error = AXBValidateEnvelopeParts(expanded, byID);
+        return *error ? nil : [expanded copy];
+    }
+    NSArray *changed = brief[@"changed"], *nodes = known[@"nodes"];
+    if (!known || brief[@"unchanged"] || brief[@"nodes"] || ![brief[@"base"] isEqual:known[@"revision"]] ||
+        ![changed isKindOfClass:NSArray.class] || changed.count > nodes.count) {
+        *error = @"changed nodes do not match the session's snapshot";
+        return nil;
+    }
+    NSMutableDictionary<NSString *, NSNumber *> *positions = [NSMutableDictionary dictionaryWithCapacity:nodes.count];
+    for (NSUInteger i = 0; i < nodes.count; i++) positions[nodes[i][@"id"]] = @(i);
+    NSMutableArray *next = [nodes mutableCopy];
+    NSMutableSet *replaced = [NSMutableSet new];
+    for (id node in changed) {
+        id identifier = [node isKindOfClass:NSDictionary.class] ? node[@"id"] : nil;
+        NSNumber *position = [identifier isKindOfClass:NSString.class] ? positions[identifier] : nil;
+        if (!position || [replaced containsObject:identifier]) {
+            *error = @"a changed node is not in the session's snapshot";
+            return nil;
+        }
+        [replaced addObject:identifier];
+        next[position.unsignedIntegerValue] = node;
+    }
+    NSMutableDictionary *snapshot = [brief mutableCopy];
+    [snapshot removeObjectForKey:@"base"];
+    [snapshot removeObjectForKey:@"changed"];
+    snapshot[@"nodes"] = [next copy];
+    expanded[@"snapshot"] = [snapshot copy];
+    *error = AXBValidateEnvelope(expanded);
+    return *error ? nil : [expanded copy];
+}
+
 NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
     if (envelope[@"gridPages"]) {
         NSArray *pages = envelope[@"gridPages"];
@@ -378,8 +426,8 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
             (!drawingObserved && minor != _claimedMinor && since >= 1);
         if (!due) for (AXBGrid *grid in _grids.allValues) if (grid.hasQueuedRequests) { due = YES; break; }
         if (!due) return NO;
-        // The backstop describes the whole form, catching anything no signal reported.
-        if (_claimed && since >= idle) self.wholeDescriptionDue = YES;
+        // The backstop checks every object again, catching anything no signal reported.
+        if (_claimed && since >= idle) self.verificationDue = YES;
         _claimed = YES; _claimedSignificant = significant; _claimedMinor = minor; _claimedAt = now;
         return YES;
     }
