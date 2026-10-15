@@ -1,3 +1,33 @@
+# 0.37.0, faster whole descriptions, a backstop without a whole description, and only changed nodes sent
+
+- **A whole description reads only what can change.**
+  - 4D finds a form object by searching the form for its name, so each property read costs more on a larger form, and a whole description's cost grows with the square of the form's size.
+  - An object's type and variable, a button's pop-up menu setting and the page's entry order are now read once per form. A button's menu setting is read again once 4D reports that the button changed.
+  - On a compiled form with 600 buttons and a 2,000-row list box, a whole description takes about 46 ms on the form's own process, instead of 80 ms.
+  - An action on a control discovers the form once, instead of twice.
+- **The 30-second backstop no longer describes the form whole.** It reads about 60 objects on each of the next pulses and compares them with what was published. It describes the form whole only if an object changed in a way that can alter other controls' nodes. On that form, the check takes 11 steps of 2–11 ms. A change 4D does not draw, such as a new help tip, is still published.
+- **Only the nodes that changed are passed to the plugin.** The plugin rebuilds the whole tree from the one it holds, and validates it as if it had been sent whole. A changed button title sends one node, where 0.36.0 sent the whole tree: about 215 KB on that form.
+- **A changed caption no longer describes the form whole.** A caption that keeps its place is described with the controls it labels, which take its new text.
+- **Measured on that form:**
+
+  | | No bridge | 0.36.0, active | 0.37.0, active |
+  | --- | --- | --- | --- |
+  | Quiet form | 3.0% | 4.1% | 4.0% |
+  | Pauses over 100 ms in 30 s | 0 | 1, when an assistive technology first reads it | 1, the same |
+  | Scrolling a list box every tick | 25% | 31% | 30% |
+  | A whole description | | 80 ms | 46 ms |
+  | The 30-second backstop | | one whole description | 11 steps of 2–11 ms |
+
+  [Performance and activation](PERFORMANCE.md); [incremental acceptance](test_incremental_fixture.py).
+
+For developers:
+- The exchange accepts `{"version": 1, "revision": n, "base": m, "label": …, "enabled": …, "changed": [nodes]}`, where `m` is the revision the session holds. Each changed node replaces the node with its id; `changed` can be empty when only the window's metadata changed.
+- For the backstop, `AXB Changes` returns `"verify": true` with `"whole": true` and the changed names. An earlier host describes the form whole. `AXB Status` advertises `changedObjects 2`.
+- `AXB_Form("diagnostics")` adds `verifiedObjects`, the objects the backstop read again, and `sentNodes`, the nodes the last exchange that changed the tree passed to the plugin.
+- `AXB_Discover` takes a seventh parameter, what a form's objects cannot change. `AXB_ControlAction` takes a fifth, the discovery the action was checked against.
+
+Upgrade the plugin, component and host helpers together: the pulse continues the backstop's check, and the plugin accepts changed nodes.
+
 # 0.36.0, an active form costs almost nothing until it changes, and forms in archives and remote clients
 
 - **An active form is described only once it changes, and only where it changed.**

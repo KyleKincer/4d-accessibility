@@ -61,9 +61,9 @@ Lifecycle areas also follow `AXB_Configure`'s `enabled` per form, as before.
 | 0.36.0, no bridge | 3.4% | 279 MB | 0 | 62 ms | 28% | 201 ms |
 | 0.36.0, area in every form, dormant | 3.4% | 286 MB | 0 | 55 ms | 29% | 198 ms |
 | 0.36.0, area in every form, active | 4.1% | 300 MB | 1 | 139 ms | 31% | 227 ms |
-| Development, no bridge | 3.0% | 280 MB | 0 | 57 ms | 25% | 193 ms |
-| Development, area in every form, dormant | 3.2% | 286 MB | 0 | 55 ms | 26% | 203 ms |
-| Development, area in every form, active | 4.0% | 299 MB | 1 | 128 ms | 30% | 232 ms |
+| 0.37.0, no bridge | 3.0% | 280 MB | 0 | 57 ms | 25% | 193 ms |
+| 0.37.0, area in every form, dormant | 3.2% | 286 MB | 0 | 55 ms | 26% | 203 ms |
+| 0.37.0, area in every form, active | 4.0% | 299 MB | 1 | 128 ms | 30% | 232 ms |
 
 Dormant, a form with an area costs what the same form costs without the bridge. Two costs remain:
 - about 7 MB, the loaded plugin and component and the text the plugin records. It was 30 MB until the plugin stopped keeping CoreText's framesetters and frames alive;
