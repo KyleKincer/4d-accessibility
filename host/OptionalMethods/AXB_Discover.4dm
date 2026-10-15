@@ -427,7 +427,12 @@ End for
 $result.nodes:=AXB_ControlLayers($result.nodes; $options)
 $labels:=New collection
 If ($knownLabels#Null)
- $labels:=$knownLabels.slice(0)
+ // A caption described again replaces its earlier node.
+ For each ($other; $knownLabels)
+  If (($only=Null) || Not(OB Is defined($only; $other.objectName)))
+   $labels.push($other)
+  End if
+ End for each
 End if
 For each ($node; $result.nodes)
  If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))

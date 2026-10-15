@@ -1,6 +1,10 @@
 // Own all snapshot/revision/receipt bookkeeping in one place.
 var $context; $tree; $snapshot; $envelope; $reply; $action; $route; $rowRoute; $local; $result; $node; $packet; $pending; $token; $native; $focusTree; $changes : Object
-var $state; $rowID : Text
+var $rowID; $metaState; $nodeState : Text
+var $sent; $sentIDs; $changed; $touched : Collection
+var $nodeStates; $registry : Object
+var $index : Integer
+var $sameOrder : Boolean
 var $selection; $frame; $viewport : Collection
 var $left; $top; $right; $bottom : Real
 var $allowed; $unchanged : Boolean
@@ -68,7 +72,7 @@ Use ($token)
  $token.fast:=$context.pending#Null
  $token.verify:=AXB_FormRoots[String(Current form window)].verifying=True
 End use
-$snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current form window=Frontmost window; "nodes"; $tree.nodes)
+$snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current form window=Frontmost window)
 If (Value type($context.view.options.automationKey)=Is text)
  $snapshot.automationKey:=$context.view.options.automationKey
 End if
@@ -80,18 +84,74 @@ End if
 If (Value type($context.view.options.idleRefresh)=Is real)
  $snapshot.idleRefresh:=$context.view.options.idleRefresh
 End if
-$state:=JSON Stringify($snapshot)
-$unchanged:=Compare strings($state; $context.state; sk char codes)=0
+$metaState:=JSON Stringify($snapshot)
+// A node the last exchange sent, at the same place and with no change of focus since, is the
+// same: a description reuses the nodes of unchanged objects. Only the others are compared, each
+// with what was sent for its id.
+$registry:=AXB_FormRoots[String(Current form window)]
+$touched:=$registry.touched
+If ($touched=Null)
+ $touched:=New collection
+End if
+$registry.touched:=New collection
+$sent:=$context.sentNodes
+$sentIDs:=$context.sentIDs
+$sameOrder:=($sent#Null) && ($sent.length=$tree.nodes.length)
+$nodeStates:=$context.nodeStates
+If (Not($sameOrder) | ($nodeStates=Null))
+ $sameOrder:=False
+ $nodeStates:=New object
+End if
+$changed:=New collection
+If ($sameOrder)
+ For ($index; 0; $tree.nodes.length-1)
+  $node:=$tree.nodes[$index]
+  // The same object, not an equal one: 4D compares objects in a collection by reference.
+  If ((New collection($sent[$index]).indexOf($node)=0) && ($touched.indexOf($node)<0))
+   continue
+  End if
+  If (Compare strings($node.id; $sentIDs[$index]; sk char codes)#0)
+   $sameOrder:=False
+   break
+  End if
+  $nodeState:=JSON Stringify($node)
+  If (Compare strings($nodeState; String($nodeStates[$node.id]); sk char codes)#0)
+   $changed.push($node)
+   $nodeStates[$node.id]:=$nodeState
+  End if
+ End for
+End if
+If (Not($sameOrder))
+ // Nodes were added, removed or moved: every node's state is what this exchange sends.
+ $nodeStates:=New object
+ For each ($node; $tree.nodes)
+  $nodeStates[$node.id]:=JSON Stringify($node)
+ End for each
+End if
+$unchanged:=$sameOrder && ($changed.length=0) && (Compare strings($metaState; String($context.metaState); sk char codes)=0)
 If (Not($unchanged))
  $context.revision:=$context.revision+1
- $context.state:=$state
 End if
+$context.metaState:=$metaState
+$context.nodeStates:=$nodeStates
+// The description reuses its collections: keep the nodes themselves, as sent.
+$context.sentNodes:=$tree.nodes.slice(0)
+$context.sentIDs:=$tree.nodes.extract("id")
 $snapshot.revision:=$context.revision
 $envelope:=New object("snapshot"; $snapshot)
-// The plugin holds an unchanged form's tree: send only its revision.
-If ($unchanged & ($context.exchanged=True))
- $envelope.snapshot:=New object("version"; 1; "revision"; $context.revision; "unchanged"; True)
-End if
+Case of
+ : ($context.exchanged#True)
+  $snapshot.nodes:=$tree.nodes
+ : ($unchanged)
+  // The plugin holds an unchanged form's tree: send only its revision.
+  $envelope.snapshot:=New object("version"; 1; "revision"; $context.revision; "unchanged"; True)
+ : ($sameOrder)
+  // Only the nodes that changed, each replacing the node with its id in the tree the plugin holds.
+  $snapshot.base:=$context.revision-1
+  $snapshot.changed:=$changed
+ Else
+  $snapshot.nodes:=$tree.nodes
+End case
 If ($context.gridPages#Null)
  $envelope.gridPages:=$context.gridPages
 End if
@@ -117,6 +177,11 @@ $context.diagnostics.wholeDescriptions:=Num(AXB_FormRoots[String(Current form wi
 $context.diagnostics.partialDescriptions:=Num(AXB_FormRoots[String(Current form window)].partialDescriptions)
 // How many objects the backstop checked again, a few at a time.
 $context.diagnostics.verifiedObjects:=Num(AXB_FormRoots[String(Current form window)].verifiedObjects)
+// How many nodes the last exchange that changed the tree sent: all of them, or only the changed ones.
+If (Not($unchanged))
+ $context.sentNodeCount:=Choose($snapshot.nodes#Null; $tree.nodes.length; $changed.length)
+End if
+$context.diagnostics.sentNodes:=Num($context.sentNodeCount)
 OB REMOVE($context; "receipt")
 OB REMOVE($context; "controlInput")
 $context.controlInputResult:=$reply.controlInputResult

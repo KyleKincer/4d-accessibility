@@ -1463,10 +1463,9 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
     if (data.length > AXBLimits::payload) return JSON(@{@"ok": @NO, @"error": @"payload too large"});
     // Parsed here, immutable, and validated once: the session neither validates nor copies it again.
     id envelope = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
-    // A description that found its form unchanged sends only the revision the session holds.
-    NSDictionary *brief = [envelope isKindOfClass:NSDictionary.class] ? envelope[@"snapshot"] : nil;
-    BOOL unchanged = [brief isKindOfClass:NSDictionary.class] && [brief[@"unchanged"] isEqual:@YES];
-    NSString *error = unchanged ? nil : AXBValidateEnvelope(envelope);
+    // A description that found its form unchanged, or changed in a few nodes, sends only those.
+    BOOL brief = AXBEnvelopeIsBrief(envelope);
+    NSString *error = brief ? nil : AXBValidateEnvelope(envelope);
     if (error) return JSON(@{@"ok": @NO, @"error": error});
     AXBSession *session;
     @synchronized(registryLock) {
@@ -1477,17 +1476,9 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
             return JSON(@{@"ok": @NO, @"error": @"session window or process mismatch"});
         if (bindings[sessionID][@"error"]) return JSON(@{@"ok": @NO, @"error": bindings[sessionID][@"error"]});
     }
-    if (unchanged) {
-        NSDictionary *known = session.snapshot;
-        if (!known || brief.count != 3 || ![brief[@"version"] isEqual:@1] || ![brief[@"revision"] isEqual:known[@"revision"]])
-            return JSON(@{@"ok": @NO, @"error": @"unchanged snapshot does not match the session's"});
-        NSMutableDictionary *byID = [NSMutableDictionary new];
-        if (envelope[@"gridPages"]) for (NSDictionary *node in known[@"nodes"]) byID[node[@"id"]] = node;
-        NSMutableDictionary *expanded = [envelope mutableCopy];
-        expanded[@"snapshot"] = known;
-        envelope = [expanded copy];
-        error = AXBValidateEnvelopeParts(envelope, byID);
-        if (error) return JSON(@{@"ok": @NO, @"error": error});
+    if (brief) {
+        envelope = AXBExpandEnvelope(envelope, session.snapshot, &error);
+        if (!envelope) return JSON(@{@"ok": @NO, @"error": error});
     }
     NSMutableDictionary *response = [[session exchangeParsed:envelope now:Now()] mutableCopy];
     @synchronized(registryLock) { response[@"binding"] = bindings[sessionID][@"state"] ?: @"closed"; }

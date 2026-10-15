@@ -5,8 +5,9 @@ The fixture is a compiled form with a lifecycle area. Its own code, run from a t
 the ways an application does: a field's value, a button's title, its position and its visibility,
 and a caption that labels a field. After each change the test reads the form through
 accessibility, and requires the change within a few seconds, well before the bridge's 30-second
-backstop. It also requires that some descriptions reused the unchanged controls, and that the form
-was described whole when the change could affect other controls. Last, it changes a help tip that
+backstop. It also requires that some descriptions reused the unchanged controls, that the form
+was described whole when a control appeared, that a new caption relabelled its field without a
+whole description, and that only the changed nodes were sent to the plugin. Last, it changes a help tip that
 names a checkbox, which 4D does not draw: the backstop finds it by checking the form's objects a
 few at a time, without describing the form whole.
 """
@@ -161,20 +162,33 @@ def main():
             check(True, message)
 
         change("value", lambda: element("inputName").read("AXValue") == "Changed by code", "a field's value set by code is published")
+        def diagnostics_where(condition, message):
+            return ax.wait_for(lambda: (lambda d: d if d and condition(d) else None)(state().get("diagnostics")), message, timeout=5)
+
+        def settled():
+            # Let the descriptions of a change finish before counting them.
+            time.sleep(1.5)
+            return state()["diagnostics"]
+
         change("title", lambda: element("btnTarget") and element("btnTarget").read("AXDescription") == "Renamed", "a button's new title is published")
+        report["sentNodes"] = {"title": diagnostics_where(lambda d: d.get("sentNodes") == 1, "The title change sent more than its node")["sentNodes"]}
+        check(True, "only the renamed button's node was sent to the plugin")
         change("move", lambda: element("btnTarget") and element("btnTarget").read("AXPosition")[0] == position[0] + 40, "a moved button is published at its new place")
         change("hide", lambda: element("btnTarget") is None, "a hidden button leaves the form")
+        whole = settled()["wholeDescriptions"]
         change("show", lambda: element("btnTarget") is not None, "a shown button returns")
+        diagnostics_where(lambda d: d.get("wholeDescriptions", 0) > whole, "A control that appeared did not describe the form whole")
+        check(True, "a control that appears describes the form whole")
+        whole = settled()["wholeDescriptions"]
         change("caption", lambda: element("inputName").read("AXDescription") == "Full name", "a new caption relabels its field")
+        report["sentNodes"]["caption"] = diagnostics_where(lambda d: d.get("sentNodes") == 2, "The caption change sent more than its and its field's nodes")["sentNodes"]
+        check(settled()["wholeDescriptions"] == whole, "a new caption is described with only the controls it labels, sending only their nodes")
         check(element("btnOther").read("AXDescription") == "Other" and element("Item39").read("AXDescription") == "Item 39",
               "unchanged controls stay published")
         diagnostics = ax.wait_for(lambda: state().get("diagnostics"), "No diagnostics", timeout=5)
         report["diagnostics"] = {k: diagnostics.get(k) for k in ("wholeDescriptions", "partialDescriptions", "verifiedObjects", "revision", "nodeCount")}
         check(diagnostics.get("partialDescriptions", 0) > 0, "descriptions reused the unchanged controls")
-        check(diagnostics.get("wholeDescriptions", 0) > 1, "a change that relabels another control described the form whole")
-        # Let the descriptions of the changes above finish before counting.
-        time.sleep(3)
-        whole = state()["diagnostics"]["wholeDescriptions"]
+        whole = settled()["wholeDescriptions"]
         report["beforeBackstop"] = whole
         change("tip", lambda: element("chkUpdates") and element("chkUpdates").read("AXDescription") == "Send news",
                "a change 4D does not draw is published by the backstop", timeout=50)

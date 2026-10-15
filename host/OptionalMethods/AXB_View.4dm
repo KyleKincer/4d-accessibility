@@ -15,7 +15,8 @@ var $cacheKey; $last : Text
 var $reusable; $storing : Boolean
 var $static; $positions; $discovered; $controls; $nodeContext : Object
 var $relations : Collection
-var $checked : Object
+var $checked; $captions; $raw; $route : Object
+var $caption : Text
 var $verify; $same : Boolean
 var $verifyEnd : Integer
 var $fresh; $entryKnown : Object
@@ -140,6 +141,7 @@ If ($view.automatic=True)
      $cache:=$view.described
      $only:=New object
      $checked:=New object
+     $captions:=New object
      For each ($name; $request.changes.names)
       If (OB Is defined($cache.owners; $name))
        $name:=$cache.owners[$name]
@@ -147,6 +149,10 @@ If ($view.automatic=True)
       Case of
        : (OB Is defined($cache.subforms; $name))
         // A subform's own form describes its objects.
+       : (OB Is defined($cache.captions; $name))
+        // A caption that keeps its place relabels only the controls it labels.
+        $only[$name]:=True
+        $captions[$name]:=True
        : (OB Is defined($cache.structural; $name))
         $cache:=Null
        : (OB Is defined($cache.known; $name))
@@ -630,11 +636,50 @@ For each ($node; $description.nodes)
  End if
 End for each
 If ($cache#Null)
+ // A changed caption keeps its place and still names something, or the whole form is described:
+ // other controls' labels come from captions' places. Each control it labels takes its new text.
+ For each ($name; $captions)
+  If (OB Is defined($counts; $name) && ($counts[$name]=1) && ($cache.counts[$name]=1))
+   $copy:=$result.nodes[$first[$name]]
+   $other:=$cache.nodes[$cache.first[$name]]
+   $raw:=Null
+   For each ($node; $description.nodes)
+    If (Compare strings($node.objectName; $name; sk char codes)=0)
+     $raw:=$node
+    End if
+   End for each
+   If (($raw=Null) || ($raw.role#"text") || Not(Match regex("(?s).*[[:alnum:]].*"; $raw.label)) || (Compare strings(JSON Stringify($copy.frame); JSON Stringify($other.frame); sk char codes)#0))
+    $reusable:=False
+   Else
+    If (Compare strings($copy.label; $other.label; sk char codes)#0)
+     $caption:=$raw.label
+     If ($request.depth>0)
+      $caption:=Substring($view.label+": "+$raw.label; 1; 512)
+     End if
+     For ($position; 0; $cache.nodes.length-1)
+      $node:=$cache.nodes[$position]
+      If ((Value type($node.labelledBy)=Is text) && (Compare strings($node.labelledBy; $copy.id; sk char codes)=0) && Not(OB Is defined($counts; $node.objectName)))
+       $node:=OB Copy($node)
+       $node.label:=$caption
+       $route:=$cache.routes[$node.id]
+       $route:=New object("path"; $route.path; "lineage"; $route.lineage; "instance"; $route.instance; "scope"; $route.scope; "localID"; $route.localID; "node"; $node)
+       $cache.nodes[$position]:=$node
+       $cache.routes[$node.id]:=$route
+      End if
+     End for
+    End if
+    $cache.labels:=$cache.labels.filter(Formula(Compare strings($1.value.objectName; $2; sk char codes)#0); $name)
+    $cache.labels.push($raw)
+   End if
+  Else
+   $reusable:=False
+  End if
+ End for each
  // A checked caption, radio button, tab or group relates to other objects: it is kept as
  // published if it did not change, and the whole form is described if it did. A page tab's
  // linked controls are those of the whole form, never only the ones described here.
  For each ($name; $checked)
-  If (OB Is defined($cache.structural; $name) && OB Is defined($counts; $name) && ($cache.counts[$name]=$counts[$name]))
+  If (OB Is defined($cache.structural; $name) && Not(OB Is defined($captions; $name)) && OB Is defined($counts; $name) && ($cache.counts[$name]=$counts[$name]))
    $same:=True
    For ($part; 0; $counts[$name]-1)
     $copy:=OB Copy($result.nodes[$first[$name]+$part])
@@ -694,7 +739,7 @@ If ($storing)
  $registry.wholeDescriptions:=Num($registry.wholeDescriptions)+1
  OB REMOVE($view; "described")
  If ($reusable)
-  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "entry"; $description.entry; "objectCount"; Size of array($objects); "nodes"; $result.nodes; "routes"; $result.routes; "first"; $first; "counts"; $counts; "known"; $positions; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "issues"; $result.issues.copy())
+  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "entry"; $description.entry; "objectCount"; Size of array($objects); "nodes"; $result.nodes; "routes"; $result.routes; "first"; $first; "counts"; $counts; "known"; $positions; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "captions"; New object; "issues"; $result.issues.copy())
   If (Value type($description.subforms)=Is collection)
    If ($description.subforms.length>0)
     // Subforms add their routes to this view's: keep this view's own apart.
@@ -718,6 +763,9 @@ If ($storing)
     End if
     If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))
      $described.labels.push($node)
+     If ($described.counts[$node.objectName]=1)
+      $described.captions[$node.objectName]:=True
+     End if
     End if
     If ((($node.role="drawnTable") | ($node.grid#Null)) && (OBJECT Get type(*; $node.objectName)=Object type listbox))
      // 4D draws a list box's columns and headers in layers of their own.

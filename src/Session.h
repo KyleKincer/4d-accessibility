@@ -25,7 +25,7 @@
 - (void)noteMenuForControlInput:(NSString *)action;
 - (AXBGrid *)gridForNode:(NSString *)nodeID;
 // What the host last took of the changes since its last description: the significant-change and
-// whole-form counts. A description due to the idle interval is a whole one. Guarded by the session.
+// whole-form counts, and whether the idle interval asks to check every object again. Guarded by the session.
 @property(atomic) uint64_t takenChanges, takenStructure;
 @property(atomic) BOOL verificationDue;
 // Whether the host should describe its form again now: before its first description, while an
@@ -44,4 +44,13 @@
 NSString *AXBValidateEnvelope(NSDictionary *envelope);
 // The envelope's parts other than its snapshot, against the snapshot's nodes by identifier.
 NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID);
+// A host that holds the tree it last sent sends less: for an unchanged form, the revision the
+// session holds ({"version":1,"revision":n,"unchanged":true}); otherwise the window's metadata
+// with the next revision, the one it replaces as "base", and as "changed" only the nodes that
+// changed (none, when only the window's metadata did), each replacing the node with its id.
+// Whether an envelope is such a brief one.
+BOOL AXBEnvelopeIsBrief(id envelope);
+// The complete envelope a brief one stands for, from the snapshot the session holds, validated as
+// if it had been sent whole; nil, with the reason, when it does not apply to that snapshot.
+NSDictionary *AXBExpandEnvelope(NSDictionary *envelope, NSDictionary *known, NSString **error);
 BOOL AXBTextRangeValid(NSString *text, NSRange range);

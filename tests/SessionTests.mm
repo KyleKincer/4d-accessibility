@@ -69,6 +69,49 @@ int main(void) {
             [s invalidate];
             Check(!claim(s, 9, 1, 0, 0, NO, 300), "a closed session is never described");
         }
+        {
+            // A host sends only the nodes that changed, or only the revision when nothing did.
+            AXBSession *d = [[AXBSession alloc] initWithIdentifier:@"delta" windowID:4];
+            Check([[d exchange:Envelope(1) now:0][@"ok"] boolValue], "a whole tree is accepted first");
+            NSString *error = nil;
+            NSDictionary *field = @{@"id": @"field", @"role": @"textfield", @"label": @"Name", @"value": @"Ada", @"enabled": @YES, @"visible": @YES, @"frame": @[@10, @60, @120, @30]};
+            NSDictionary *brief = @{@"snapshot": @{@"version": @1, @"revision": @2, @"base": @1, @"label": @"Fixture", @"enabled": @YES, @"changed": @[field]}};
+            Check(AXBEnvelopeIsBrief(brief) && !AXBEnvelopeIsBrief(Envelope(2)), "a brief envelope is told from a whole one");
+            NSDictionary *expanded = AXBExpandEnvelope(brief, d.snapshot, &error);
+            Check(expanded && !error && [expanded[@"snapshot"][@"nodes"][1] isEqual:field] && [expanded[@"snapshot"][@"nodes"][0] isEqual:d.snapshot[@"nodes"][0]] &&
+                  !expanded[@"snapshot"][@"base"] && !expanded[@"snapshot"][@"changed"] && [expanded[@"snapshot"][@"revision"] isEqual:@2],
+                  "a changed node replaces the node with its id, in its place, and the others stay");
+            Check([[d exchangeParsed:expanded now:1][@"ok"] boolValue] && [d.snapshot[@"nodes"][1][@"value"] isEqual:@"Ada"], "the session holds the complete tree");
+            NSMutableDictionary *stale = MutableCopy(brief);
+            stale[@"snapshot"][@"revision"] = @3;
+            Check(!AXBExpandEnvelope(stale, d.snapshot, &error) && error, "changes from a revision the session does not hold are refused");
+            stale[@"snapshot"][@"base"] = @2;
+            stale[@"snapshot"][@"changed"] = @[@{@"id": @"other", @"role": @"button", @"label": @"Other", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@1, @1, @1, @1]}];
+            Check(!AXBExpandEnvelope(stale, d.snapshot, &error) && error, "a node the tree does not have cannot be added");
+            stale[@"snapshot"][@"changed"] = @[field, field];
+            Check(!AXBExpandEnvelope(stale, d.snapshot, &error) && error, "a node cannot change twice");
+            NSMutableDictionary *window = MutableCopy(brief);
+            window[@"snapshot"][@"revision"] = @3;
+            window[@"snapshot"][@"base"] = @2;
+            window[@"snapshot"][@"enabled"] = @NO;
+            window[@"snapshot"][@"changed"] = @[];
+            expanded = AXBExpandEnvelope(window, d.snapshot, &error);
+            Check(expanded && [expanded[@"snapshot"][@"enabled"] isEqual:@NO] && [expanded[@"snapshot"][@"nodes"] isEqual:d.snapshot[@"nodes"]],
+                  "only the window's metadata can change");
+            NSMutableDictionary *invalid = [field mutableCopy];
+            invalid[@"frame"] = @[@10, @60, @0, @30];
+            stale[@"snapshot"][@"changed"] = @[invalid];
+            Check(!AXBExpandEnvelope(stale, d.snapshot, &error) && [error isEqual:@"empty frame"], "the complete tree is validated as if sent whole");
+            stale[@"snapshot"][@"changed"] = @[field];
+            stale[@"snapshot"][@"nodes"] = @[];
+            Check(!AXBExpandEnvelope(stale, d.snapshot, &error) && error, "a brief envelope cannot also carry a whole tree");
+            Check(!AXBExpandEnvelope(brief, nil, &error) && error, "a session without a tree takes no changes");
+            NSDictionary *same = @{@"snapshot": @{@"version": @1, @"revision": @2, @"unchanged": @YES}};
+            expanded = AXBExpandEnvelope(same, d.snapshot, &error);
+            Check(expanded && [expanded[@"snapshot"] isEqual:d.snapshot], "an unchanged form stands for the tree the session holds");
+            Check(!AXBExpandEnvelope(@{@"snapshot": @{@"version": @1, @"revision": @1, @"unchanged": @YES}}, d.snapshot, &error) && error,
+                  "an unchanged form must name the revision the session holds");
+        }
         NSMutableDictionary *stable = MutableCopy(Envelope(1));
         stable[@"snapshot"][@"automationKey"] = @"records.main";
         stable[@"snapshot"][@"nodes"][0][@"automationPath"] = @[@"LeftChild", @"Search/É%"];

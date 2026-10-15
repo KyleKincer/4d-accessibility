@@ -26,8 +26,14 @@ If (($registry.observedFocus#Null) && ($registry.observedFocus.id=Null))
 End if
 CONVERT COORDINATES($x; $y; XY Current form; XY Current window)
 $registry.origin:=New collection($x; $y)
-// A reused node keeps no state from the last description: only one node is focused.
+// A reused node keeps no state from the last description: only one node is focused. The nodes
+// whose focus changes are noted until the next exchange: only they, and new nodes, can differ
+// from the nodes the plugin holds.
+If ($registry.touched=Null)
+ $registry.touched:=New collection
+End if
 If ($registry.focusedNode#Null)
+ $registry.touched.push($registry.focusedNode)
  $registry.focusedNode.focused:=False
  $registry.focusedNode.value:=$registry.focusedValue
  $registry.focusedNode.editable:=$registry.focusedEditable
@@ -55,6 +61,7 @@ If ($result.ok=True)
   End if
   If ($focus.node#Null)
    $node:=$focus.node
+   $registry.touched.push($node)
    $registry.focusedNode:=$node
    $registry.focusedValue:=$node.value
    $registry.focusedEditable:=$node.editable
