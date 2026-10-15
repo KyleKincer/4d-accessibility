@@ -210,6 +210,7 @@ If ($view.automatic=True)
     $entryKnown:=$static.entry
    End if
    $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; Null; Null; $entryKnown; $static)
+   $view.discovery:=$description
    If ($description.entry=Null)
     $description.entry:=$entryKnown
    Else
