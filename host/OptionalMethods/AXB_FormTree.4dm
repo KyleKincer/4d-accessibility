@@ -17,6 +17,8 @@ If ($registry.controlPointers=Null)
  $registry.cellPointers:=New object
 End if
 $registry.formContexts:=New object
+// Views still checking their objects for the backstop ask to be described again soon.
+$registry.verifying:=False
 $registry.focusPointerOwners:=New collection
 $registry.focusPointerName:=""
 If (($registry.observedFocus#Null) && ($registry.observedFocus.id=Null))

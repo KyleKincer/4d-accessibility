@@ -66,6 +66,7 @@ End if
 $token:=$context.token
 Use ($token)
  $token.fast:=$context.pending#Null
+ $token.verify:=AXB_FormRoots[String(Current form window)].verifying=True
 End use
 $snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current form window=Frontmost window; "nodes"; $tree.nodes)
 If (Value type($context.view.options.automationKey)=Is text)
@@ -114,6 +115,8 @@ $context.diagnostics:=New object("ok"; True; "ready"; True; "revision"; $context
 // How many form and subform views were described whole, and how many only where they changed.
 $context.diagnostics.wholeDescriptions:=Num(AXB_FormRoots[String(Current form window)].wholeDescriptions)
 $context.diagnostics.partialDescriptions:=Num(AXB_FormRoots[String(Current form window)].partialDescriptions)
+// How many objects the backstop checked again, a few at a time.
+$context.diagnostics.verifiedObjects:=Num(AXB_FormRoots[String(Current form window)].verifiedObjects)
 OB REMOVE($context; "receipt")
 OB REMOVE($context; "controlInput")
 $context.controlInputResult:=$reply.controlInputResult

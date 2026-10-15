@@ -63,9 +63,9 @@ int main(void) {
             Check(!claim(t, 0, 5, 0, 0, YES, 229) && claim(t, 0, 5, 0, 0, YES, 230.1), "an unchanged form is described after thirty idle seconds while drawing is observed");
             Check(claim(t, 0, 6, 0, 0, NO, 231.5), "it is, at most once a second, when drawing is not observed");
             AXBSession *u = [[AXBSession alloc] initWithIdentifier:@"refresh-whole" windowID:3];
-            Check(claim(u, 0, 0, 0, 0, YES, 400) && [[u exchange:Envelope(1) now:400][@"ok"] boolValue] && !u.wholeDescriptionDue, "a first description is not a backstop");
-            Check(claim(u, 1, 0, 400.5, 0, YES, 401) && !u.wholeDescriptionDue, "a change is described where it happened");
-            Check(claim(u, 1, 0, 400.5, 0, YES, 431.1) && u.wholeDescriptionDue, "the idle backstop describes the whole form");
+            Check(claim(u, 0, 0, 0, 0, YES, 400) && [[u exchange:Envelope(1) now:400][@"ok"] boolValue] && !u.verificationDue, "a first description is not a backstop");
+            Check(claim(u, 1, 0, 400.5, 0, YES, 401) && !u.verificationDue, "a change is described where it happened");
+            Check(claim(u, 1, 0, 400.5, 0, YES, 431.1) && u.verificationDue, "the idle backstop checks every object again");
             [s invalidate];
             Check(!claim(s, 9, 1, 0, 0, NO, 300), "a closed session is never described");
         }

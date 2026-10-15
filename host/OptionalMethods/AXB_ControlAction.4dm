@@ -1,12 +1,17 @@
 // Use native events or an explicitly configured shared application controller.
-#DECLARE($action : Object; $options : Object; $tabState : Object; $paintOffset : Collection) -> $result : Object
+// $discovered, when given, is the form's discovery for this action, made just before.
+#DECLARE($action : Object; $options : Object; $tabState : Object; $paintOffset : Collection; $discovered : Object) -> $result : Object
 var $description; $node; $target; $metadata : Object
 var $ignored; $value : Variant
 var $valueType : Integer
 var $left; $top; $right; $bottom; $x; $y : Integer
 var $point : Collection
 $result:=New object("status"; "rejected"; "message"; "Control is unavailable")
-$description:=AXB_Discover($options; $tabState; $paintOffset)
+If ($discovered#Null)
+ $description:=$discovered
+Else
+ $description:=AXB_Discover($options; $tabState; $paintOffset)
+End if
 For each ($node; $description.nodes)
  If (Compare strings($node.id; $action.node; sk char codes)=0)
   $target:=$node

@@ -6,18 +6,25 @@ var $pageByObject : Object
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
 var $detailForm; $listForm : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames; $kept : Collection
-var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY; $part : Integer
+var $left; $top; $right; $bottom; $originX; $originY; $position; $scrollX; $scrollY; $part; $type : Integer
 var $x; $y; $r; $b : Real
 var $allowed; $replace; $reading; $readOnly; $aliases : Boolean
 var $pointer; $focusPointer : Pointer
-var $only; $cache; $buckets; $bucket; $described; $full : Object
+var $only; $cache; $first; $counts; $described; $full : Object
 var $cacheKey; $last : Text
 var $reusable; $storing : Boolean
+var $static; $positions; $discovered; $controls; $nodeContext : Object
+var $relations : Collection
+var $checked : Object
+var $verify; $same : Boolean
+var $verifyEnd : Integer
+var $fresh; $entryKnown : Object
 var $subformTable : Pointer
 ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 ARRAY TEXT($parts; 0)
+ARRAY TEXT($entry; 0)
 $result:=New object("ok"; False; "error"; "invalidView"; "status"; "rejected"; "message"; "Form instance is unavailable")
 If ($request.paintOffset=Null)
  $request.paintOffset:=New collection(0; 0)
@@ -107,6 +114,17 @@ If ($view.automatic=True)
    End if
   End if
  Else
+  // What a form's objects cannot change is read once per form, and its entry order once per
+  // page. A button's menu setting is read again once the plugin reports that the button changed.
+  If (($view.static=Null) || (Compare strings($view.static.form; Current form name; sk char codes)#0))
+   $view.static:=New object("form"; Current form name; "types"; New object; "menus"; New object)
+  End if
+  $static:=$view.static
+  If (($request.changes#Null) && (Value type($request.changes.names)=Is collection))
+   For each ($name; $request.changes.names)
+    OB REMOVE($static.menus; $name)
+   End for each
+  End if
   // A form described before is described again only where its drawing changed: the objects
   // the plugin names. Anything that could change other objects' nodes describes it whole.
   $cache:=Null
@@ -115,10 +133,13 @@ If ($view.automatic=True)
    $originY:=0
    CONVERT COORDINATES($originX; $originY; XY Current form; XY Current window)
    $cacheKey:=JSON Stringify(New collection(Current form name; FORM Get current page; $request.path; $request.ancestors; $request.enabled; $request.nativeEnabled; $request.clip; $request.paintOffset; $request.navigation; $request.rootOrigin; $originX; $originY; $view.instance))
-   If (($request.changes#Null) && Not($request.changes.whole=True) && ($view.described#Null))
+   // The backstop asks to check every object again, a few at a time, against what was published.
+   $verify:=($request.changes#Null) && ($request.changes.verify=True)
+   If (($request.changes#Null) && (Not($request.changes.whole=True) | $verify) && ($view.described#Null))
     If (Compare strings($view.described.key; $cacheKey; sk char codes)=0)
      $cache:=$view.described
      $only:=New object
+     $checked:=New object
      For each ($name; $request.changes.names)
       If (OB Is defined($cache.owners; $name))
        $name:=$cache.owners[$name]
@@ -138,16 +159,69 @@ If ($view.automatic=True)
        break
       End if
      End for each
+     If ($cache#Null)
+      If ($verify & ($cache.verifyAt=Null))
+       $cache.verifyAt:=1
+       // Once per check, the entry order: which objects take focus.
+       FORM GET ENTRY ORDER($entry; *)
+       $fresh:=New object
+       For ($position; 1; Size of array($entry))
+        $fresh[$entry{$position}]:=True
+       End for
+       If (Compare strings(JSON Stringify($fresh); JSON Stringify($cache.entry); sk char codes)#0)
+        OB REMOVE($static; "entry")
+        $cache:=Null
+       End if
+      End if
+      If ($cache#Null)
+       If ($cache.verifyAt#Null)
+        If (Size of array($objects)#$cache.objectCount)
+         // Objects were added since the form was described.
+         $cache:=Null
+        Else
+         $verifyEnd:=New collection($cache.verifyAt+59; Size of array($objects)).min()
+         For ($position; $cache.verifyAt; $verifyEnd)
+          $name:=$objects{$position}
+          If (OB Is defined($cache.owners; $name))
+           $name:=$cache.owners[$name]
+          End if
+          If (Not(OB Is defined($cache.subforms; $name)))
+           $only[$name]:=True
+           $checked[$name]:=True
+          End if
+         End for
+         $registry.verifiedObjects:=Num($registry.verifiedObjects)+($verifyEnd-$cache.verifyAt+1)
+         $cache.verifyAt:=$verifyEnd+1
+         If ($cache.verifyAt>Size of array($objects))
+          OB REMOVE($cache; "verifyAt")
+         Else
+          $registry.verifying:=True
+         End if
+        End if
+       End if
+      End if
+     End if
     End if
    End if
   End if
   If ($cache=Null)
-   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset)
-   $view.discovery:=$description
+   $entryKnown:=Null
+   If (($static.entry#Null) && ($static.entryPage=FORM Get current page))
+    $entryKnown:=$static.entry
+   End if
+   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; Null; Null; $entryKnown; $static)
+   If ($description.entry=Null)
+    $description.entry:=$entryKnown
+   Else
+    $static.entry:=$description.entry
+    $static.entryPage:=FORM Get current page
+   End if
   Else
-   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; $only; $cache.labels; $cache.entry)
+   $description:=AXB_Discover($view.options; $view.tabs; $request.paintOffset; $only; $cache.labels; $cache.entry; $static)
    $description.subforms:=$cache.subformList.copy()
   End if
+  // An action checks what covers its control in the same discovery.
+  $discovered:=New object("nodes"; $description.nodes; "subforms"; $description.subforms; "unsupported"; $description.unsupported)
  End if
  $grids:=AXB_Grids($view; New object("operation"; "describe"))
  If (Not($grids.ok=True))
@@ -332,7 +406,7 @@ If (($request.operation="apply") | ($request.operation="confirm") | ($request.op
     If (Position("grid."; $request.action.node)=1)
      $result:=AXB_Grids($view; New object("operation"; "apply"; "node"; $request.action.node; "action"; $request.action))
     Else
-     $result:=AXB_ControlAction($request.action; $view.options; $view.tabs; $request.paintOffset)
+     $result:=AXB_ControlAction($request.action; $view.options; $view.tabs; $request.paintOffset; $discovered)
     End if
    Else
     $result:=$view.apply.call(Null; $request.action)
@@ -370,7 +444,8 @@ If ($cache#Null)
 End if
 // Record what each object produces, to reuse it while the object does not change.
 $storing:=($view.automatic=True) & ($request.operation="describe") & ($cache=Null)
-$buckets:=New object
+$first:=New object
+$counts:=New object
 $reusable:=True
 $last:=""
 $result:=New object("ok"; True; "nodes"; New collection; "routes"; New object; "issues"; New collection)
@@ -407,7 +482,12 @@ If ($request.operation="describe")
      $registry.focusPointerOwners.push($view.bindingKey)
     End if
    End if
-   If (OBJECT Get type(*; $name)=Object type listbox)
+   If (($static#Null) && OB Is defined($static.types; $name))
+    $type:=$static.types[$name]
+   Else
+    $type:=OBJECT Get type(*; $name)
+   End if
+   If ($type=Object type listbox)
     LISTBOX GET OBJECTS(*; $name; $parts)
     For ($part; 1; Size of array($parts))
      $focusNames.push($parts{$part})
@@ -426,6 +506,15 @@ If ($request.operation="describe")
  AXB_FormObserver("bind"; New object("bindingKey"; $view.bindingKey; "formName"; $view.formName; "origin"; $view.origin; "path"; $request.path; "data"; Form))
 End if
 $offset:=New collection($originX-$request.rootOrigin[0]; $originY-$request.rootOrigin[1])
+// FORM GET OBJECTS already returned each object's variable: finding it by name again
+// would search the form once per node.
+$positions:=New object
+For ($position; 1; Size of array($objects))
+ $positions[$objects{$position}]:=$position
+End for
+$controls:=$view.options.controls
+// Every control of this view shares one context; nothing changes it.
+$nodeContext:=New object("formName"; $view.formName; "origin"; $view.origin; "bindingKey"; $view.bindingKey; "path"; $request.path)
 For each ($node; $description.nodes)
  $copy:=OB Copy($node)
  If ($request.depth>0)
@@ -437,10 +526,10 @@ For each ($node; $description.nodes)
  $key:=$node.id
  If (Value type($node.objectName)=Is text)
   $key:=$node.objectName
-  If ($view.options.controls#Null)
-   If ($view.options.controls[$key]#Null)
-    If (Value type($view.options.controls[$key].automationKey)=Is text)
-     $key:=$view.options.controls[$key].automationKey
+  If ($controls#Null)
+   If ($controls[$key]#Null)
+    If (Value type($controls[$key].automationKey)=Is text)
+     $key:=$controls[$key].automationKey
     End if
    End if
   End if
@@ -448,15 +537,24 @@ For each ($node; $description.nodes)
  If (Value type($node.automationKey)=Is text)
   $key:=$node.automationKey
  End if
- $copy.automationPath:=$request.path.concat(New collection($key))
+ If ($request.path.length=0)
+  $copy.automationPath:=New collection($key)
+ Else
+  $copy.automationPath:=$request.path.concat(New collection($key))
+ End if
  If ($node.automationChild#Null)
   $copy.automationPath:=$copy.automationPath.concat($node.automationChild)
  End if
  If (Value type($node.objectName)=Is text)
-  $registry.controlContexts[$id]:=New object("formName"; $view.formName; "origin"; $view.origin; "bindingKey"; $view.bindingKey; "path"; $request.path)
+  $registry.controlContexts[$id]:=$nodeContext
   // Keep host pointers outside the serializable tree. An unnamed button has
   // its own dynamic variable even in repeated instances of the same form.
-  $pointer:=OBJECT Get pointer(Object named; $node.objectName)
+  If (OB Is defined($positions; $node.objectName))
+   $part:=$positions[$node.objectName]
+   $pointer:=$variables{$part}
+  Else
+   $pointer:=OBJECT Get pointer(Object named; $node.objectName)
+  End if
   If (Not(Is nil pointer($pointer)))
    $registry.controlPointers[$id]:=$pointer
   End if
@@ -483,7 +581,11 @@ For each ($node; $description.nodes)
  $copy.revealable:=$view.automatic=True
  $frame:=$node.frame
  // Navigation follows the form layout, independently of its scroll offsets.
- $copy.navigation:=$request.navigation.concat(New collection($frame[1]; $frame[0]))
+ If ($request.navigation.length=0)
+  $copy.navigation:=New collection($frame[1]; $frame[0])
+ Else
+  $copy.navigation:=$request.navigation.concat(New collection($frame[1]; $frame[0]))
+ End if
  $copy.frame:=New collection($frame[0]+$offset[0]; $frame[1]+$offset[1]; $frame[2]; $frame[3])
  $clip:=$request.clip
  If (Value type($node.clip)=Is collection)
@@ -513,29 +615,50 @@ For each ($node; $description.nodes)
  End if
  $result.routes[$id]:=New object("path"; $request.path; "lineage"; $lineage; "instance"; $view.instance; "scope"; $view.scope; "localID"; $node.id; "node"; $copy)
  If (Value type($node.objectName)=Is text)
-  If ($buckets[$node.objectName]=Null)
-   $buckets[$node.objectName]:=New object("nodes"; New collection; "first"; $result.nodes.length-1)
-  Else
+  If (OB Is defined($counts; $node.objectName))
    // An object whose nodes are not together cannot be replaced in place.
    $reusable:=$reusable & (Compare strings($last; $node.objectName; sk char codes)=0)
+   $counts[$node.objectName]:=$counts[$node.objectName]+1
+  Else
+   $first[$node.objectName]:=$result.nodes.length-1
+   $counts[$node.objectName]:=1
   End if
   $last:=$node.objectName
-  $bucket:=$buckets[$node.objectName]
-  $bucket.nodes.push($copy)
  Else
   $reusable:=False
  End if
 End for each
 If ($cache#Null)
+ // A checked caption, radio button, tab or group relates to other objects: it is kept as
+ // published if it did not change, and the whole form is described if it did. A page tab's
+ // linked controls are those of the whole form, never only the ones described here.
+ For each ($name; $checked)
+  If (OB Is defined($cache.structural; $name) && OB Is defined($counts; $name) && ($cache.counts[$name]=$counts[$name]))
+   $same:=True
+   For ($part; 0; $counts[$name]-1)
+    $copy:=OB Copy($result.nodes[$first[$name]+$part])
+    $other:=OB Copy($cache.nodes[$cache.first[$name]+$part])
+    OB REMOVE($copy; "linked")
+    OB REMOVE($other; "linked")
+    $same:=$same && (Compare strings(JSON Stringify($copy); JSON Stringify($other); sk char codes)=0)
+   End for
+   If ($same)
+    OB REMOVE($counts; $name)
+    OB REMOVE($only; $name)
+   Else
+    $reusable:=False
+   End if
+  End if
+ End for each
  // Replace each changed object's nodes in place. An object that appeared, disappeared or
  // changed shape describes the whole form.
- For each ($name; $buckets)
-  If ((Not(OB Is defined($cache.counts; $name))) || ($cache.counts[$name]#$buckets[$name].nodes.length))
+ For each ($name; $counts)
+  If ((Not(OB Is defined($cache.counts; $name))) || ($cache.counts[$name]#$counts[$name]))
    $reusable:=False
   End if
  End for each
  For each ($name; $only)
-  If (Not(OB Is defined($buckets; $name)) && (Num($cache.counts[$name])>0))
+  If (Not(OB Is defined($counts; $name)) && (Num($cache.counts[$name])>0))
    $reusable:=False
   End if
  End for each
@@ -547,13 +670,12 @@ If ($cache#Null)
   OB REMOVE($full; "changes")
   return AXB_View($full)
  End if
- For each ($name; $buckets)
-  $position:=$cache.first[$name]
-  For each ($node; $buckets[$name].nodes)
-   $cache.nodes[$position]:=$node
+ For each ($name; $counts)
+  For ($part; 0; $counts[$name]-1)
+   $node:=$result.nodes[$first[$name]+$part]
+   $cache.nodes[$cache.first[$name]+$part]:=$node
    $cache.routes[$node.id]:=$result.routes[$node.id]
-   $position:=$position+1
-  End for each
+  End for
  End for each
  $result.nodes:=$cache.nodes
  $result.routes:=$cache.routes
@@ -571,28 +693,26 @@ If ($storing)
  $registry.wholeDescriptions:=Num($registry.wholeDescriptions)+1
  OB REMOVE($view; "described")
  If ($reusable)
-  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "entry"; $description.entry; "nodes"; $result.nodes; "routes"; New object; "first"; New object; "counts"; New object; "known"; New object; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "issues"; $result.issues.copy())
-  For each ($key; $result.routes)
-   $described.routes[$key]:=$result.routes[$key]
-  End for each
-  For each ($name; $buckets)
-   $described.first[$name]:=$buckets[$name].first
-   $described.counts[$name]:=$buckets[$name].nodes.length
-  End for each
-  For ($position; 1; Size of array($objects))
-   $described.known[$objects{$position}]:=True
-  End for
+  $described:=New object("key"; $cacheKey; "prefix"; $prefix; "entry"; $description.entry; "objectCount"; Size of array($objects); "nodes"; $result.nodes; "routes"; $result.routes; "first"; $first; "counts"; $counts; "known"; $positions; "structural"; New object; "owners"; New object; "subforms"; New object; "subformList"; New collection; "labels"; New collection; "issues"; $result.issues.copy())
   If (Value type($description.subforms)=Is collection)
+   If ($description.subforms.length>0)
+    // Subforms add their routes to this view's: keep this view's own apart.
+    $described.routes:=New object
+    For each ($key; $result.routes)
+     $described.routes[$key]:=$result.routes[$key]
+    End for each
+   End if
    $described.subformList:=$description.subforms.copy()
    For each ($name; $description.subforms)
     $described.subforms[$name]:=True
    End for each
   End if
+  $relations:=New collection("text"; "radio"; "tab"; "tabgroup"; "group")
   For each ($node; $description.nodes)
    If (Value type($node.objectName)=Is text)
     // Captions label their neighbours, and radio buttons, tabs and groups relate to other
     // objects: changing one describes the whole form.
-    If ((New collection("text"; "radio"; "tab"; "tabgroup"; "group").indexOf($node.role)>=0) | ($buckets[$node.objectName].nodes.length>1))
+    If (($relations.indexOf($node.role)>=0) | ($described.counts[$node.objectName]>1))
      $described.structural[$node.objectName]:=True
     End if
     If (($node.role="text") && Match regex("(?s).*[[:alnum:]].*"; $node.label))

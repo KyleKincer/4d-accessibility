@@ -27,7 +27,7 @@
 // What the host last took of the changes since its last description: the significant-change and
 // whole-form counts. A description due to the idle interval is a whole one. Guarded by the session.
 @property(atomic) uint64_t takenChanges, takenStructure;
-@property(atomic) BOOL wholeDescriptionDue;
+@property(atomic) BOOL verificationDue;
 // Whether the host should describe its form again now: before its first description, while an
 // action or a grid's rows wait for it, after significant changes once they pause for a quarter
 // second (or a second after the last description while they continue: describing a list in

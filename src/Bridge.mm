@@ -1636,11 +1636,15 @@ NSString *AXBTakeChanges(NSString *sessionID) {
     @synchronized(session) {
         uint64_t latest = 0, structure = AXBStructureGeneration();
         NSArray *names = AXBObjectsChangedSince(session.takenChanges, 256, &latest);
-        BOOL whole = !session.takenChanges || session.wholeDescriptionDue || structure != session.takenStructure || !names || !AXBDrawnTextAvailable();
+        BOOL whole = !session.takenChanges || structure != session.takenStructure || !names || !AXBDrawnTextAvailable();
+        BOOL verify = session.verificationDue;
         session.takenChanges = latest;
         session.takenStructure = structure;
-        session.wholeDescriptionDue = NO;
-        return JSON(whole ? @{@"whole": @YES} : @{@"whole": @NO, @"names": names});
+        session.verificationDue = NO;
+        if (whole) return JSON(@{@"whole": @YES});
+        // The backstop: a host that checks its objects a few at a time does so with the changed
+        // names; an earlier host describes the whole form.
+        return JSON(verify ? @{@"whole": @YES, @"verify": @YES, @"names": names} : @{@"whole": @NO, @"names": names});
     }
 }
 

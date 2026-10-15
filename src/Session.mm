@@ -378,8 +378,8 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
             (!drawingObserved && minor != _claimedMinor && since >= 1);
         if (!due) for (AXBGrid *grid in _grids.allValues) if (grid.hasQueuedRequests) { due = YES; break; }
         if (!due) return NO;
-        // The backstop describes the whole form, catching anything no signal reported.
-        if (_claimed && since >= idle) self.wholeDescriptionDue = YES;
+        // The backstop checks every object again, catching anything no signal reported.
+        if (_claimed && since >= idle) self.verificationDue = YES;
         _claimed = YES; _claimedSignificant = significant; _claimedMinor = minor; _claimedAt = now;
         return YES;
     }

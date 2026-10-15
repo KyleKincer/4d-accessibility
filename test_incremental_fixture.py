@@ -6,7 +6,9 @@ the ways an application does: a field's value, a button's title, its position an
 and a caption that labels a field. After each change the test reads the form through
 accessibility, and requires the change within a few seconds, well before the bridge's 30-second
 backstop. It also requires that some descriptions reused the unchanged controls, and that the form
-was described whole when the change could affect other controls.
+was described whole when the change could affect other controls. Last, it changes a help tip that
+names a checkbox, which 4D does not draw: the backstop finds it by checking the form's objects a
+few at a time, without describing the form whole.
 """
 
 import argparse
@@ -37,6 +39,7 @@ COMMANDS = {
     "hide": 'OBJECT SET VISIBLE(*; "btnTarget"; False)',
     "show": 'OBJECT SET VISIBLE(*; "btnTarget"; True)',
     "caption": 'OBJECT SET TITLE(*; "labelName"; "Full name")',
+    "tip": 'OBJECT SET HELP TIP(*; "chkUpdates"; "Send news")',
 }
 
 
@@ -80,6 +83,8 @@ End case
         "inputName": {"type": "input", "dataSource": "Form.name", "left": 110, "top": 20, "width": 200, "height": 20},
         "btnTarget": {"type": "button", "text": "Target", "left": 20, "top": 60, "width": 100, "height": 24},
         "btnOther": {"type": "button", "text": "Other", "left": 200, "top": 60, "width": 100, "height": 24},
+        "chkUpdates": {"type": "checkbox", "text": "", "tooltip": "Send updates", "dataSource": "Form.updates", "left": 330, "top": 62,
+                       "width": 20, "height": 20},
     }
     for index in range(40):
         objects[f"Item{index:02}"] = {"type": "button", "text": f"Item {index}", "left": 20 + (index % 8) * 50, "top": 100 + (index // 8) * 26,
@@ -148,10 +153,10 @@ def main():
               "the form is published with its labels")
         position = element("btnTarget").read("AXPosition")
 
-        def change(command, condition, message):
+        def change(command, condition, message, timeout=8):
             (resources / "command.txt").write_text(command)
             started = time.monotonic()
-            ax.wait_for(condition, f"{command}: {message}", timeout=8)
+            ax.wait_for(condition, f"{command}: {message}", timeout=timeout)
             report["latencySeconds"][command] = round(time.monotonic() - started, 2)
             check(True, message)
 
@@ -164,9 +169,19 @@ def main():
         check(element("btnOther").read("AXDescription") == "Other" and element("Item39").read("AXDescription") == "Item 39",
               "unchanged controls stay published")
         diagnostics = ax.wait_for(lambda: state().get("diagnostics"), "No diagnostics", timeout=5)
-        report["diagnostics"] = {k: diagnostics.get(k) for k in ("wholeDescriptions", "partialDescriptions", "revision", "nodeCount")}
+        report["diagnostics"] = {k: diagnostics.get(k) for k in ("wholeDescriptions", "partialDescriptions", "verifiedObjects", "revision", "nodeCount")}
         check(diagnostics.get("partialDescriptions", 0) > 0, "descriptions reused the unchanged controls")
         check(diagnostics.get("wholeDescriptions", 0) > 1, "a change that relabels another control described the form whole")
+        # Let the descriptions of the changes above finish before counting.
+        time.sleep(3)
+        whole = state()["diagnostics"]["wholeDescriptions"]
+        report["beforeBackstop"] = whole
+        change("tip", lambda: element("chkUpdates") and element("chkUpdates").read("AXDescription") == "Send news",
+               "a change 4D does not draw is published by the backstop", timeout=50)
+        diagnostics = ax.wait_for(lambda: (lambda d: d if d.get("verifiedObjects", 0) >= 46 else None)(state().get("diagnostics") or {}),
+                                  "The backstop did not check every object", timeout=10)
+        report["backstop"] = {k: diagnostics.get(k) for k in ("wholeDescriptions", "partialDescriptions", "verifiedObjects")}
+        check(diagnostics["wholeDescriptions"] == whole, "the backstop checked the objects a few at a time, without a whole description")
         report["passed"] = True
     finally:
         if process.poll() is None:
