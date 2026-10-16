@@ -90,6 +90,16 @@ int main(void) {
                   "once it completes, the waiting action runs against the new tree, though focus moved");
             Check([[q exchange:completed(next, 3, nil) now:4][@"ok"] boolValue] && ![q.activity[@"busy"] boolValue], "and completes in turn");
 
+            NSMutableDictionary *revealable = MutableCopy(Envelope(1));
+            for (NSMutableDictionary *node in revealable[@"snapshot"][@"nodes"]) node[@"revealable"] = @YES;
+            AXBSession *reveal = [[AXBSession alloc] initWithIdentifier:@"reveal" windowID:5];
+            Check([[reveal exchange:revealable now:0][@"ok"] boolValue], "a form with revealable controls is described");
+            Check([reveal enqueueNode:@"button" revision:@1 operation:@"reveal" value:nil now:1] && !Press(reveal, 1) && !setName(reveal, @"Ada", 1),
+                  "nothing waits behind a reveal, as VoiceOver follows one with requests of its own");
+            AXBSession *later = [[AXBSession alloc] initWithIdentifier:@"later" windowID:6];
+            Check([[later exchange:revealable now:0][@"ok"] boolValue] && Press(later, 1) &&
+                  ![later enqueueNode:@"field" revision:@1 operation:@"reveal" value:nil now:1], "a reveal never waits");
+
             AXBSession *changed = Fresh();
             Check(Press(changed, 1) && setName(changed, @"Ada", 1), "a second action waits");
             first = [changed exchange:Envelope(1) now:2][@"action"];

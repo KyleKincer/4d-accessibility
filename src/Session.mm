@@ -760,7 +760,8 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
 }
 // An action requested while another is under way waits for it, at most eight at a time and for
 // fifteen seconds. The same action as one under way or waiting is refused: a repeated press must
-// not run twice. Each request is validated now, and again when its turn comes.
+// not run twice. Reveals neither wait nor are waited for. Each request is validated now, and again
+// when its turn comes.
 - (BOOL)enqueueNode:(NSString *)nodeID revision:(NSNumber *)revision operation:(NSString *)operation value:(id)value observedSnapshot:(NSDictionary *)observed now:(NSTimeInterval)now {
     @synchronized(self) {
         NSDictionary *gridValue = nil;
@@ -770,6 +771,11 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
             [self startAction:action gridValue:gridValue now:now];
             return YES;
         }
+        // VoiceOver reveals what its cursor reaches, and follows a reveal with requests of its own
+        // that a user never made, such as selecting the row it reached. As before, those are
+        // refused while a reveal is under way, and a reveal never waits: the latest one is what counts.
+        NSArray *reveals = @[@"reveal", @"gridReveal", @"gridHeaderReveal"];
+        if ([reveals containsObject:operation] || [reveals containsObject:_pending[@"operation"] ?: @""]) return NO;
         NSDictionary *request = @{@"node": nodeID, @"operation": operation, @"value": value ?: NSNull.null};
         NSDictionary *current = @{@"node": _pending[@"node"], @"operation": _pending[@"operation"], @"value": _pending[@"requestValue"] ?: NSNull.null};
         if (_waiting.count >= 8 || [request isEqual:current]) return NO;
