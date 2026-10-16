@@ -66,6 +66,22 @@ static NSDictionary *ActionState(NSDictionary *snapshot, NSDictionary *action) {
         @"focused": focused, @"nodes": dependencies, @"rows": rows};
 }
 
+// What a client acted on: its target, with the target's ancestors and labels, and the window,
+// apart from focus and selection. An action waiting behind another runs only if these are unchanged
+// once that one completes, as a click made meanwhile would land on the same control.
+static NSDictionary *TargetState(NSDictionary *snapshot, NSDictionary *action) {
+    NSDictionary *state = ActionState(snapshot, action);
+    if (!state) return nil;
+    NSMutableDictionary *nodes = [NSMutableDictionary new];
+    for (NSString *key in state[@"nodes"]) {
+        NSMutableDictionary *node = [state[@"nodes"][key] mutableCopy];
+        [node removeObjectForKey:@"focused"];
+        [node removeObjectForKey:@"selection"];
+        nodes[key] = node;
+    }
+    return @{@"label": state[@"label"], @"enabled": state[@"enabled"], @"automationKey": state[@"automationKey"], @"nodes": nodes, @"rows": state[@"rows"]};
+}
+
 // A newly activated 4D form can assign initial focus after the action was
 // queued. Accept only focus arriving on that exact target with every other
 // dependency unchanged. A text field gains its editor's selection with focus;
@@ -373,6 +389,9 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
     NSTimeInterval _lastExchangeAt;
     NSTimeInterval _exchangeInterval;
     NSTimeInterval _queuedInterval;
+    // Requests made while another action is under way, oldest first: each its node, operation,
+    // value, request time and TargetState.
+    NSMutableArray<NSDictionary *> *_waiting;
     NSString *_lastReceiptID;
     NSDictionary *_lastReceipt;
     NSDictionary *_lastResult;
@@ -388,7 +407,7 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
     NSTimeInterval _claimedAt;
 }
 - (instancetype)initWithIdentifier:(NSString *)identifier windowID:(NSInteger)windowID {
-    if ((self = [super init])) { _identifier = [identifier copy]; _windowID = windowID; _active = YES; _grids = [NSMutableDictionary new]; }
+    if ((self = [super init])) { _identifier = [identifier copy]; _windowID = windowID; _active = YES; _grids = [NSMutableDictionary new]; _waiting = [NSMutableArray new]; }
     return self;
 }
 - (NSString *)identifier { return _identifier; }
@@ -434,7 +453,7 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
 }
 - (void)invalidate {
     @synchronized(self) {
-        _active = NO; _pending = nil; _pendingState = nil; _pendingGridValue = nil; _pendingSelectionGeneration = nil; _delivered = NO; _snapshot = nil; _lastInput = nil; _inputResult = nil; _controlInput = nil; _controlInputState = nil; _controlInputResult = nil;
+        _active = NO; [_waiting removeAllObjects]; _pending = nil; _pendingState = nil; _pendingGridValue = nil; _pendingSelectionGeneration = nil; _delivered = NO; _snapshot = nil; _lastInput = nil; _inputResult = nil; _controlInput = nil; _controlInputState = nil; _controlInputResult = nil;
         for (AXBGrid *grid in _grids.allValues) [grid invalidate];
         [_grids removeAllObjects];
     }
@@ -698,6 +717,7 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
         if (_controlInputResult) result[@"controlInputResult"] = _controlInputResult;
         if (_inputResult) result[@"editorInputResult"] = _inputResult;
         if (_lastResult) result[@"result"] = _lastResult;
+        [self startWaitingAt:now];
         if (_pending && !_delivered) {
             BOOL changedGridValue = _pendingGridValue && !SameGridDispatchValue(_pendingGridValue,
                 [_grids[_pending[@"node"]] cellForRow:_pending[@"value"][@"row"] column:_pending[@"value"][@"column"] now:now], _pending);
@@ -723,100 +743,157 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
                     current[@"revision"] = next[@"revision"];
                     _pending = [current copy];
                 }
-                result[@"action"] = _pending;
+                NSMutableDictionary *delivered = [_pending mutableCopy];
+                [delivered removeObjectForKey:@"requestValue"];
+                result[@"action"] = [delivered copy];
                 _delivered = YES;
                 _pendingState = nil;
                 _pendingGridValue = nil;
             }
         }
-        result[@"busy"] = @(_pending != nil);
+        result[@"busy"] = @(_pending != nil || _waiting.count > 0);
         return result;
     }
 }
 - (BOOL)enqueueNode:(NSString *)nodeID revision:(NSNumber *)revision operation:(NSString *)operation value:(id)value now:(NSTimeInterval)now {
     return [self enqueueNode:nodeID revision:revision operation:operation value:value observedSnapshot:nil now:now];
 }
+// An action requested while another is under way waits for it, at most eight at a time and for
+// fifteen seconds. The same action as one under way or waiting is refused: a repeated press must
+// not run twice. Each request is validated now, and again when its turn comes.
 - (BOOL)enqueueNode:(NSString *)nodeID revision:(NSNumber *)revision operation:(NSString *)operation value:(id)value observedSnapshot:(NSDictionary *)observed now:(NSTimeInterval)now {
     @synchronized(self) {
-        if (!_active || _pending || ![_snapshot[@"enabled"] boolValue]) return NO;
+        NSDictionary *gridValue = nil;
+        NSDictionary *action = [self actionForNode:nodeID revision:revision operation:operation value:value observedSnapshot:observed now:now gridValue:&gridValue];
+        if (!action) return NO;
+        if (!_pending) {
+            [self startAction:action gridValue:gridValue now:now];
+            return YES;
+        }
+        NSDictionary *request = @{@"node": nodeID, @"operation": operation, @"value": value ?: NSNull.null};
+        NSDictionary *current = @{@"node": _pending[@"node"], @"operation": _pending[@"operation"], @"value": _pending[@"requestValue"] ?: NSNull.null};
+        if (_waiting.count >= 8 || [request isEqual:current]) return NO;
+        for (NSDictionary *entry in _waiting)
+            if ([request isEqual:@{@"node": entry[@"node"], @"operation": entry[@"operation"], @"value": entry[@"value"]}]) return NO;
+        NSMutableDictionary *entry = [request mutableCopy];
+        entry[@"at"] = @(now);
+        entry[@"target"] = TargetState(_snapshot, action);
+        [_waiting addObject:entry];
+        return YES;
+    }
+}
+// The next waiting action, once none is under way: validated again against the current tree, and
+// started only if what the client acted on is unchanged. Others are dropped.
+- (void)startWaitingAt:(NSTimeInterval)now {
+    while (!_pending && _waiting.count) {
+        NSDictionary *entry = _waiting.firstObject;
+        [_waiting removeObjectAtIndex:0];
+        if (now - [entry[@"at"] doubleValue] > 15) continue;
+        id value = entry[@"value"] == NSNull.null ? nil : entry[@"value"];
+        NSDictionary *gridValue = nil;
+        NSDictionary *action = [self actionForNode:entry[@"node"] revision:_snapshot[@"revision"] operation:entry[@"operation"] value:value
+                                  observedSnapshot:nil now:now gridValue:&gridValue];
+        if (action && [TargetState(_snapshot, action) isEqual:entry[@"target"]]) [self startAction:action gridValue:gridValue now:now];
+    }
+}
+- (void)startAction:(NSDictionary *)action gridValue:(NSDictionary *)gridValue now:(NSTimeInterval)now {
+    _pending = action;
+    _pendingState = ActionState(_snapshot, _pending);
+    NSDictionary *node = nil;
+    for (NSDictionary *candidate in _snapshot[@"nodes"]) if ([candidate[@"id"] isEqual:action[@"node"]]) { node = candidate; break; }
+    _pendingSelectionGeneration = [action[@"operation"] isEqual:@"gridSelect"] ? node[@"grid"][@"generation"] : nil;
+    _pendingGridValue = gridValue;
+    _lastInputSerial = 0;
+    _lastInput = nil;
+    _inputResult = nil;
+    _queuedAt = now;
+    _queuedInterval = _exchangeInterval;
+    _delivered = NO;
+}
+// The action a request stands for against the current tree, or nil if it does not apply. Changes nothing.
+- (NSDictionary *)actionForNode:(NSString *)nodeID revision:(NSNumber *)revision operation:(NSString *)operation value:(id)value
+               observedSnapshot:(NSDictionary *)observed now:(NSTimeInterval)now gridValue:(NSDictionary **)gridValueOut {
+    id requestValue = value;
+    {
+        if (!_active || ![_snapshot[@"enabled"] boolValue]) return nil;
         if (![revision isEqual:_snapshot[@"revision"]]) {
             NSDictionary *request = @{@"node": nodeID, @"operation": operation};
             if (!observed || ![observed[@"revision"] isEqual:revision] || [revision compare:_snapshot[@"revision"]] != NSOrderedAscending ||
-                !SameDispatchState(ActionState(observed, request), ActionState(_snapshot, request), nodeID)) return NO;
+                !SameDispatchState(ActionState(observed, request), ActionState(_snapshot, request), nodeID)) return nil;
         }
         NSDictionary *node = nil;
         for (NSDictionary *candidate in _snapshot[@"nodes"]) if ([candidate[@"id"] isEqual:nodeID]) { node = candidate; break; }
-        if (!node || (![node[@"enabled"] boolValue] && ![operation isEqual:@"reveal"]) || ![node[@"visible"] boolValue]) return NO;
+        if (!node || (![node[@"enabled"] boolValue] && ![operation isEqual:@"reveal"]) || ![node[@"visible"] boolValue]) return nil;
         NSString *role = node[@"role"];
         NSDictionary *gridValue = nil;
         if ([operation isEqual:@"press"]) {
-            if (![@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:role]) return NO;
+            if (![@[@"button", @"checkbox", @"radio", @"popup", @"tab"] containsObject:role]) return nil;
         } else if ([operation isEqual:@"showMenu"] && node[@"menu"]) {
-            if (value) return NO;
+            if (value) return nil;
         } else if ([@[@"showMenu", @"confirm", @"dismissMenu"] containsObject:operation]) {
-            if (![node[@"combo"] boolValue]) return NO;
+            if (![node[@"combo"] boolValue]) return nil;
         } else if ([@[@"increment", @"decrement"] containsObject:operation]) {
-            if (![@[@"slider", @"stepper", @"splitter"] containsObject:role] || ![node[@"adjustable"] boolValue] || value) return NO;
+            if (![@[@"slider", @"stepper", @"splitter"] containsObject:role] || ![node[@"adjustable"] boolValue] || value) return nil;
         } else if ([operation isEqual:@"pictureEdit"]) {
-            if (![node[@"pictureActions"] containsObject:value ?: @""]) return NO;
+            if (![node[@"pictureActions"] containsObject:value ?: @""]) return nil;
         } else if ([operation isEqual:@"choose"]) {
             if (!node[@"choices"] || !Number(value) || [value doubleValue] < 1 || [value doubleValue] > [node[@"choices"] count] ||
-                floor([value doubleValue]) != [value doubleValue]) return NO;
+                floor([value doubleValue]) != [value doubleValue]) return nil;
         } else if ([operation isEqual:@"reveal"]) {
-            if (![node[@"revealable"] boolValue] || value) return NO;
+            if (![node[@"revealable"] boolValue] || value) return nil;
         } else if ([operation isEqual:@"focus"]) {
-            if (![node[@"focusable"] boolValue] || !Bool(value) || ![value boolValue]) return NO;
+            if (![node[@"focusable"] boolValue] || !Bool(value) || ![value boolValue]) return nil;
         } else if ([operation isEqual:@"setValue"] && [role isEqual:@"splitter"]) {
-            if (![node[@"adjustable"] boolValue] || !Number(value) || fabs([value doubleValue]) > 100000) return NO;
+            if (![node[@"adjustable"] boolValue] || !Number(value) || fabs([value doubleValue]) > 100000) return nil;
         } else if ([operation isEqual:@"setValue"] || [operation isEqual:@"replaceSelection"]) {
-            if (![role isEqual:@"textfield"] || !Text(value, AXBLimits::text) || (node[@"editable"] && ![node[@"editable"] boolValue])) return NO;
-            if ([operation isEqual:@"replaceSelection"] && (!node[@"selection"] || [node[@"protected"] boolValue])) return NO;
+            if (![role isEqual:@"textfield"] || !Text(value, AXBLimits::text) || (node[@"editable"] && ![node[@"editable"] boolValue])) return nil;
+            if ([operation isEqual:@"replaceSelection"] && (!node[@"selection"] || [node[@"protected"] boolValue])) return nil;
         } else if ([operation isEqual:@"setSelection"]) {
-            if (![role isEqual:@"textfield"] || ![node[@"editable"] boolValue] || [node[@"protected"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] != 2) return NO;
-            for (id part in value) if (!Number(part) || [part doubleValue] < 0 || floor([part doubleValue]) != [part doubleValue]) return NO;
-            if ([value[0] doubleValue] + [value[1] doubleValue] > [node[@"value"] length]) return NO;
-            if (!AXBTextRangeValid(node[@"value"], NSMakeRange([value[0] unsignedIntegerValue], [value[1] unsignedIntegerValue]))) return NO;
+            if (![role isEqual:@"textfield"] || ![node[@"editable"] boolValue] || [node[@"protected"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] != 2) return nil;
+            for (id part in value) if (!Number(part) || [part doubleValue] < 0 || floor([part doubleValue]) != [part doubleValue]) return nil;
+            if ([value[0] doubleValue] + [value[1] doubleValue] > [node[@"value"] length]) return nil;
+            if (!AXBTextRangeValid(node[@"value"], NSMakeRange([value[0] unsignedIntegerValue], [value[1] unsignedIntegerValue]))) return nil;
         } else if ([@[@"gridHeaderPress", @"gridHeaderReveal"] containsObject:operation]) {
             AXBGrid *grid = _grids[nodeID];
             if (![role isEqual:@"table"] || ![value isKindOfClass:NSDictionary.class] || !Text(value[@"column"], 256) ||
-                [grid indexOfColumn:value[@"column"]] == NSNotFound) return NO;
+                [grid indexOfColumn:value[@"column"]] == NSNotFound) return nil;
             NSDictionary *header = grid.descriptor[@"columns"][[grid indexOfColumn:value[@"column"]]][@"header"];
             if (![header[@"visible"] boolValue] ||
                 ([operation isEqual:@"gridHeaderReveal"] && ![grid.descriptor[@"actions"][@"reveal"] boolValue]) ||
-                ([operation isEqual:@"gridHeaderPress"] && (![header[@"enabled"] boolValue] || ![header[@"press"] boolValue]))) return NO;
+                ([operation isEqual:@"gridHeaderPress"] && (![header[@"enabled"] boolValue] || ![header[@"press"] boolValue]))) return nil;
             value = @{@"column": value[@"column"], @"generation": grid.descriptor[@"generation"], @"expectedHeader": header};
         } else if ([operation isEqual:@"gridSetExpanded"]) {
             AXBGrid *grid = _grids[nodeID];
             if (![role isEqual:@"table"] || ![value isKindOfClass:NSDictionary.class] || !Text(value[@"row"], 256) ||
                 !Bool(value[@"expanded"]) || [grid indexOfRow:value[@"row"]] == NSNotFound ||
-                !AXBGridRowAllowsDisclosure(grid.descriptor, value[@"row"])) return NO;
+                !AXBGridRowAllowsDisclosure(grid.descriptor, value[@"row"])) return nil;
             // Discard all caller-supplied guards, coordinates and callback data.
             value = @{@"row": value[@"row"], @"expanded": value[@"expanded"], @"generation": grid.descriptor[@"generation"],
                 @"expectedGroup": AXBGridGroupActionState(grid.descriptor, value[@"row"])};
         } else if ([operation isEqual:@"gridSelect"]) {
             AXBGrid *grid = _grids[nodeID];
-            if (![role isEqual:@"table"] || !AXBGridSelectionKnown(grid.descriptor) || ![grid.descriptor[@"actions"][@"select"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] > [grid.descriptor[@"rows"] count]) return NO;
+            if (![role isEqual:@"table"] || !AXBGridSelectionKnown(grid.descriptor) || ![grid.descriptor[@"actions"][@"select"] boolValue] || ![value isKindOfClass:NSArray.class] || [value count] > [grid.descriptor[@"rows"] count]) return nil;
             NSMutableSet *selected = [NSMutableSet new];
             for (id key in value) {
                 if (!Text(key, 256) || [selected containsObject:key] || [grid indexOfRow:key] == NSNotFound ||
-                    (![grid.descriptor[@"selected"] containsObject:key] && !AXBGridRowAllowsSelection(grid.descriptor, key))) return NO;
+                    (![grid.descriptor[@"selected"] containsObject:key] && !AXBGridRowAllowsSelection(grid.descriptor, key))) return nil;
                 [selected addObject:key];
             }
         } else if ([@[@"gridReveal", @"gridEdit", @"gridPress", @"gridSetValue", @"gridSetSelection", @"gridReplaceSelection"] containsObject:operation]) {
             AXBGrid *grid = _grids[nodeID];
             BOOL edit = ![operation isEqual:@"gridReveal"];
             if (![role isEqual:@"table"] || ![grid.descriptor[@"actions"][edit ? @"edit" : @"reveal"] boolValue] || ![value isKindOfClass:NSDictionary.class] ||
-                !Text(value[@"row"], 256) || !Text(value[@"column"], 256) || [grid indexOfRow:value[@"row"]] == NSNotFound || [grid indexOfColumn:value[@"column"]] == NSNotFound) return NO;
+                !Text(value[@"row"], 256) || !Text(value[@"column"], 256) || [grid indexOfRow:value[@"row"]] == NSNotFound || [grid indexOfColumn:value[@"column"]] == NSNotFound) return nil;
             NSMutableDictionary *target = [value mutableCopy]; target[@"generation"] = grid.descriptor[@"generation"]; value = target;
             if (edit) {
-                if (!AXBGridRowAllowsEditing(grid.descriptor, value[@"row"])) return NO;
+                if (!AXBGridRowAllowsEditing(grid.descriptor, value[@"row"])) return nil;
                 NSDictionary *column = grid.descriptor[@"columns"][[grid indexOfColumn:value[@"column"]]];
                 gridValue = [grid cellForRow:value[@"row"] column:value[@"column"] now:now];
-                if (![column[@"editable"] boolValue] || ![column[@"enabled"] boolValue] || ![gridValue[@"editable"] boolValue] || ![gridValue[@"enabled"] boolValue]) return NO;
+                if (![column[@"editable"] boolValue] || ![column[@"enabled"] boolValue] || ![gridValue[@"editable"] boolValue] || ![gridValue[@"enabled"] boolValue]) return nil;
                 BOOL widget = [@[@"checkbox", @"popup", @"button"] containsObject:gridValue[@"role"] ?: @""];
-                if ([operation isEqual:@"gridPress"] && !widget) return NO;
-                if ([operation isEqual:@"gridEdit"] && gridValue[@"focusable"] && ![gridValue[@"focusable"] boolValue]) return NO;
-                if (widget && ![@[@"gridPress", @"gridEdit"] containsObject:operation]) return NO;
+                if ([operation isEqual:@"gridPress"] && !widget) return nil;
+                if ([operation isEqual:@"gridEdit"] && gridValue[@"focusable"] && ![gridValue[@"focusable"] boolValue]) return nil;
+                if (widget && ![@[@"gridPress", @"gridEdit"] containsObject:operation]) return nil;
                 if (widget) {
                     target[@"expectedCell"] = gridValue;
                     // Non-text controls have focus without a text selection.
@@ -824,21 +901,21 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
                 }
                 NSDictionary *focus = grid.descriptor[@"focused"];
                 BOOL focused = !widget && [focus[@"row"] isEqual:value[@"row"]] && [focus[@"column"] isEqual:value[@"column"]] && focus[@"value"];
-                if (focused && !focus[@"selection"]) return NO;
+                if (focused && !focus[@"selection"]) return nil;
                 if ([operation isEqual:@"gridSetValue"] || [operation isEqual:@"gridReplaceSelection"]) {
-                    if (!Text(value[@"text"], AXBLimits::text)) return NO;
+                    if (!Text(value[@"text"], AXBLimits::text)) return nil;
                     // The provider must compare this to its live rendered value
                     // before entering the real editor, then use normal editing.
                     target[@"expectedValue"] = focused ? focus[@"value"] : gridValue[@"value"];
                 }
                 if ([@[@"gridSetSelection", @"gridReplaceSelection"] containsObject:operation]) {
-                    if (!focused || !focus[@"selection"]) return NO;
+                    if (!focused || !focus[@"selection"]) return nil;
                     if ([operation isEqual:@"gridSetSelection"]) {
                         id range = value[@"selection"];
-                        if (![range isKindOfClass:NSArray.class] || [range count] != 2) return NO;
-                        for (id part in range) if (!Number(part) || [part doubleValue] < 0 || floor([part doubleValue]) != [part doubleValue]) return NO;
+                        if (![range isKindOfClass:NSArray.class] || [range count] != 2) return nil;
+                        for (id part in range) if (!Number(part) || [part doubleValue] < 0 || floor([part doubleValue]) != [part doubleValue]) return nil;
                         if ([range[0] doubleValue] + [range[1] doubleValue] > [focus[@"value"] length] ||
-                            !AXBTextRangeValid(focus[@"value"], NSMakeRange([range[0] unsignedIntegerValue], [range[1] unsignedIntegerValue]))) return NO;
+                            !AXBTextRangeValid(focus[@"value"], NSMakeRange([range[0] unsignedIntegerValue], [range[1] unsignedIntegerValue]))) return nil;
                     }
                 }
                 if (focused) {
@@ -847,35 +924,29 @@ NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID) {
                 }
             }
         } else if ([operation isEqual:@"selectRows"]) {
-            if (![role isEqual:@"table"] || ![value isKindOfClass:NSArray.class] || [value count] > 100) return NO;
+            if (![role isEqual:@"table"] || ![value isKindOfClass:NSArray.class] || [value count] > 100) return nil;
             NSMutableSet *selected = [NSMutableSet new];
             for (id rowID in value) {
-                if (!Text(rowID, 128) || [selected containsObject:rowID]) return NO;
+                if (!Text(rowID, 128) || [selected containsObject:rowID]) return nil;
                 [selected addObject:rowID];
                 BOOL valid = NO;
                 for (NSDictionary *row in _snapshot[@"nodes"]) if ([row[@"id"] isEqual:rowID] && [row[@"parent"] isEqual:nodeID] &&
                     [row[@"role"] isEqual:@"row"] && [row[@"visible"] boolValue] && [row[@"enabled"] boolValue]) { valid = YES; break; }
-                if (!valid) return NO;
+                if (!valid) return nil;
             }
-        } else return NO;
+        } else return nil;
         NSMutableDictionary *action = [@{@"id": NSUUID.UUID.UUIDString, @"session": _identifier,
             @"node": nodeID, @"revision": _snapshot[@"revision"], @"operation": operation} mutableCopy];
         if (![revision isEqual:_snapshot[@"revision"]]) action[@"requestedRevision"] = revision;
         if (value) action[@"value"] = value;
-        if (![NSJSONSerialization isValidJSONObject:action]) return NO;
+        if (![NSJSONSerialization isValidJSONObject:action]) return nil;
         NSData *actionBytes = [NSJSONSerialization dataWithJSONObject:action options:0 error:nil];
-        if (!actionBytes || actionBytes.length > AXBLimits::payload) return NO;
-        _pending = [NSJSONSerialization JSONObjectWithData:actionBytes options:0 error:nil];
-        _pendingState = ActionState(_snapshot, _pending);
-        _pendingSelectionGeneration = [operation isEqual:@"gridSelect"] ? node[@"grid"][@"generation"] : nil;
-        _pendingGridValue = gridValue;
-        _lastInputSerial = 0;
-        _lastInput = nil;
-        _inputResult = nil;
-        _queuedAt = now;
-        _queuedInterval = _exchangeInterval;
-        _delivered = NO;
-        return YES;
+        if (!actionBytes || actionBytes.length > AXBLimits::payload) return nil;
+        NSMutableDictionary *parsed = [[NSJSONSerialization JSONObjectWithData:actionBytes options:0 error:nil] mutableCopy];
+        // What the client asked, to recognize the same request again; never sent to the host.
+        if (requestValue) parsed[@"requestValue"] = requestValue;
+        if (gridValueOut) *gridValueOut = gridValue;
+        return [parsed copy];
     }
 }
 @end

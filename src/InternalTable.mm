@@ -1,4 +1,5 @@
 #import "InternalTable.h"
+#import "Inactive.h"
 
 @class AXBInternalRow, AXBInternalColumn, AXBInternalCell;
 
@@ -89,6 +90,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
                                        secondary:YES movingPointer:table.pointer];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformShowMenu)) return self.column.table.menus;
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -135,6 +137,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
     if (self.isEditable && [value isKindOfClass:NSString.class]) (void)[table.owner editText:value inArea:self.area ofLayer:table.layer movingPointer:table.pointer];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilityValue:)) return self.isAccessibilityElement && self.isEditable;
     if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilitySelected:)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement;
@@ -150,6 +153,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 - (BOOL)accessibilityPerformPress { return [self.cell accessibilityPerformPress]; }
 - (BOOL)accessibilityPerformShowMenu { return [self.cell accessibilityPerformShowMenu]; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement;
     if (selector == @selector(accessibilityPerformShowMenu)) return [self.cell isAccessibilitySelectorAllowed:selector];
     return [super isAccessibilitySelectorAllowed:selector];
@@ -173,6 +177,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
     return [self.table.owner clickArea:self.area inLayer:self.table.layer];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilitySelected:) || selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement;
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -265,6 +270,7 @@ static NSRect TableArea(AXBInternalTable *table, NSRect area) {
 - (id)accessibilityValue { return nil; }
 - (BOOL)accessibilityPerformPress { return NO; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilitySelectedRows:)) return self.isAccessibilityElement && self.rows.count > 0;
     if (selector == @selector(accessibilityPerformPress) || selector == @selector(setAccessibilityValue:)) return NO;
     return [super isAccessibilitySelectorAllowed:selector];

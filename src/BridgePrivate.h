@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import "Session.h"
+#import "Inactive.h"
 @class AXBWindowView;
 @class AXBNativeRoot;
 BOOL AXBAttributeIsSettable(id<NSAccessibility> element, NSString *attribute);

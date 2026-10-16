@@ -101,6 +101,8 @@ BOOL AXBGridElementBelongsToView(id element, AXBWindowView *view) {
 @property(nonatomic, strong) id<AXBGridContentElement> content;
 @property(nonatomic, copy) NSString *contentRole;
 - (NSDictionary *)value;
+// The cell holding 4D's focus, also while 4D is in the background: its editor's text is what it shows.
+- (BOOL)holdsFocus;
 - (BOOL)canEdit;
 - (BOOL)canDisclose;
 - (BOOL)canFocus;
@@ -143,6 +145,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 - (id)accessibilityTopLevelUIElement { return self.table.accessibilityTopLevelUIElement; }
 - (BOOL)isAccessibilityEnabled { return self.isAccessibilityElement && self.table.isAccessibilityEnabled; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilityValue:) || selector == @selector(setAccessibilityFocused:) ||
         selector == @selector(setAccessibilitySelected:) || selector == @selector(accessibilityPerformPress)) return NO;
     return [super isAccessibilitySelectorAllowed:selector];
@@ -194,7 +197,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     return [self.table.grid cellForRow:self.row.key column:self.columnKey now:NSProcessInfo.processInfo.systemUptime];
 }
 - (id)accessibilityValue {
-    NSDictionary *focus = self.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
+    NSDictionary *focus = self.holdsFocus ? self.table.grid.descriptor[@"focused"] : nil;
     id value = focus[@"value"] ?: self.value[@"value"];
     if (!value && self.isAccessibilityElement) {
         self.waitingForValue = YES;
@@ -215,10 +218,11 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 - (BOOL)isWidget { return [@[@"checkbox", @"popup", @"button"] containsObject:self.value[@"role"] ?: @""]; }
 - (BOOL)canFocus { return [self canEdit] && (!self.value[@"focusable"] || [self.value[@"focusable"] boolValue]); }
 - (BOOL)canDisclose { return self.isAccessibilityEnabled && [self.row canDisclose]; }
-- (BOOL)isAccessibilityFocused {
+- (BOOL)holdsFocus {
     NSDictionary *focused = self.table.grid.descriptor[@"focused"];
-    return self.isAccessibilityElement && self.table.owner.window.isKeyWindow && [focused[@"row"] isEqual:self.row.key] && [focused[@"column"] isEqual:self.columnKey];
+    return self.isAccessibilityElement && [focused[@"row"] isEqual:self.row.key] && [focused[@"column"] isEqual:self.columnKey];
 }
+- (BOOL)isAccessibilityFocused { return self.holdsFocus && self.table.owner.window.isKeyWindow; }
 - (void)setAccessibilityFocused:(BOOL)focused {
     if (focused && [self.table synchronizeForAction] && [self canFocus]) (void)[self.table queue:@"gridEdit" value:@{@"row": self.row.key, @"column": self.columnKey}];
 }
@@ -230,7 +234,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     NSMutableArray *actions = [NSMutableArray new];
     if ([self isAccessibilitySelectorAllowed:@selector(accessibilityPerformPress)]) [actions addObject:NSAccessibilityPressAction];
     if (@available(macOS 26.0, *)) {
-        if (self.isAccessibilityElement && self.table.isAccessibilityEnabled && [self.table.grid.descriptor[@"actions"][@"reveal"] boolValue])
+        if (self.isAccessibilityElement && self.table.isAccessibilityEnabled && NSApp.isActive && [self.table.grid.descriptor[@"actions"][@"reveal"] boolValue])
             [actions addObject:NSAccessibilityScrollToVisibleAction];
     }
     return actions;
@@ -263,6 +267,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     return [self.table queue:@"gridSelect" value:@[self.row.key]];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(isAccessibilitySelected) && !AXBGridSelectionKnown(self.table.grid.descriptor)) return NO;
     if (selector == @selector(setAccessibilityFocused:)) return [self canFocus];
     if (selector == @selector(setAccessibilityValue:)) return ![self isWidget] && [self canEdit];
@@ -333,6 +338,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 }
 #pragma clang diagnostic pop
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilityFocused:)) return self.isAccessibilityElement && [self.cell canFocus];
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled;
     if (selector == @selector(accessibilityPerformShowMenu)) return self.isAccessibilityEnabled && [self.role isEqual:@"popup"];
@@ -356,6 +362,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     return [self.table synchronizeForAction] && self.isAccessibilityElement && self.isAccessibilityEnabled && [self.cell accessibilityPerformPress];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled;
     if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilityValue:) ||
         selector == @selector(setAccessibilitySelected:) || selector == @selector(setAccessibilitySelectedText:) ||
@@ -396,7 +403,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 #pragma clang diagnostic pop
 - (AXBWindowView *)owner { return self.table.owner; }
 - (NSDictionary *)data {
-    NSDictionary *focus = self.cell.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
+    NSDictionary *focus = self.cell.holdsFocus ? self.table.grid.descriptor[@"focused"] : nil;
     NSMutableDictionary *data = [@{@"editable": @([self.cell canEdit] && focus[@"selection"]), @"protected": @NO} mutableCopy];
     if (focus[@"selection"]) data[@"selection"] = focus[@"selection"];
     return data;
@@ -411,7 +418,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
 }
 - (NSString *)accessibilityLabel { return [self.accessibilityRole isEqual:NSAccessibilityTextFieldRole] ? [self.table column:self.cell.columnKey].accessibilityLabel : nil; }
 - (id)accessibilityValue {
-    NSDictionary *focus = self.cell.isAccessibilityFocused ? self.table.grid.descriptor[@"focused"] : nil;
+    NSDictionary *focus = self.cell.holdsFocus ? self.table.grid.descriptor[@"focused"] : nil;
     return focus[@"value"] ?: self.cell.accessibilityValue;
 }
 - (id)accessibilityWindow { return self.table.owner.window; }
@@ -429,6 +436,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
         [operation isEqual:@"setSelection"] ? @"selection" : @"text": value}];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(isAccessibilitySelected) && !AXBGridSelectionKnown(self.table.grid.descriptor)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement && ([self.cell canDisclose] || [self.cell canEdit]);
     if (selector == @selector(setAccessibilityFocused:) || selector == @selector(setAccessibilityValue:)) return self.isAccessibilityElement && [self.cell canEdit];
@@ -485,6 +493,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     (void)[self.table queue:@"gridSelect" value:keys];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(isAccessibilitySelected) || selector == @selector(setAccessibilitySelected:))
         if (!AXBGridSelectionKnown(self.table.grid.descriptor)) return NO;
     if (selector == @selector(accessibilityDisclosureLevel) || selector == @selector(accessibilityDisclosedByRow))
@@ -578,6 +587,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
         [self.table queue:@"gridHeaderPress" value:@{@"column": self.column.key}];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled && [self.metadata[@"press"] boolValue];
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -790,6 +800,7 @@ BOOL AXBGridRevealMatchesElement(id element, NSDictionary *activity) {
     return self;
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if ((selector == @selector(accessibilitySelectedRows) || selector == @selector(setAccessibilitySelectedRows:)) &&
         !AXBGridSelectionKnown(self.grid.descriptor)) return NO;
     if (selector == @selector(setAccessibilitySelectedRows:)) return self.isAccessibilityEnabled && [self.grid.descriptor[@"actions"][@"select"] boolValue];

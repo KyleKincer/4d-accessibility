@@ -1,7 +1,9 @@
 // Resolve one live control across the entire form, including repeated names.
 // Native caret geometry comes from the public input-client API, on the UI
 // thread through the SDK. No accessibility getter calls back into 4D.
-#DECLARE() -> $result : Object
+// With $background, describing the form also resolves focus while another application is in
+// front: 4D keeps its editor and its typed text. Actions never act on an inactive application.
+#DECLARE($background : Boolean) -> $result : Object
 var $registry; $native; $node; $definition : Object
 var $name; $row; $column : Text
 var $matches; $bindings; $names; $frame; $exact : Collection
@@ -15,12 +17,34 @@ If (($registry=Null) || ($registry.controls=Null))
 End if
 $native:=AXB_Host("focus"; New object)
 If (Not($native.ok=True))
- return
+ If ($background && ($native.error="inactiveApplication"))
+  $native.ok:=True
+  $native.inactive:=True
+ Else
+  return
+ End if
 End if
 $name:=OBJECT Get name(Object with focus)
 $uncertain:=($registry.observedFocus#Null) && ($registry.observedFocus.uncertain=True) && (Compare strings($registry.observedFocus.name; $name; sk char codes)=0)
 $editing:=Is editing text
 $pointer:=OBJECT Get pointer(Object with focus)
+// In the background, a list box's editor reports no usable caret, but nothing can move 4D's focus
+// or caret without bringing 4D to the front. The focus last resolved in front still holds while
+// 4D reports the same focused object.
+If (($native.inactive=True) && ($registry.lastFocus#Null))
+ If (Compare strings($registry.lastFocus.name; $name; sk char codes)=0)
+  For each ($node; $registry.controls)
+   If ((Compare strings($node.id; $registry.lastFocus.id; sk char codes)=0) && $node.visible && $node.enabled)
+    $result:=New object("node"; $node; "editing"; $editing | ($node.editor#Null))
+    $result.native:=New object("ok"; True; "inactive"; True; "selection"; $registry.lastFocus.selection)
+    If ($registry.lastFocus.cell#Null)
+     $result.cell:=OB Copy($registry.lastFocus.cell)
+    End if
+    return
+   End if
+  End for each
+ End if
+End if
 $matches:=New collection
 $bindings:=New collection
 $names:=New collection
@@ -175,7 +199,16 @@ If ($matches.length=1)
  End if
  $result.native:=$native
  $result.editing:=$editing | ($result.node.editor#Null)
+ If (Not($native.inactive=True))
+  $registry.lastFocus:=New object("id"; $result.node.id; "name"; $name; "selection"; $native.selection)
+  If ($result.cell#Null)
+   $registry.lastFocus.cell:=OB Copy($result.cell)
+  End if
+ End if
 Else
+ If (Not($native.inactive=True))
+  OB REMOVE($registry; "lastFocus")
+ End if
  If ($names.length>1)
   $result.error:="ambiguousFocus"
   $result.object:=$name

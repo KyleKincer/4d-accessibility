@@ -51,7 +51,8 @@ If ($result.ok=True)
  $observed:=AXB_FormEvent("resolve")
  OB REMOVE($registry; "focusGeometryChanged")
  If ($registry.controls.length>0)
-  $focus:=AXB_Focus
+  // A field typed in keeps its text while 4D is in the background: publish what it shows.
+  $focus:=AXB_Focus(True)
   If ($focus.error#Null)
    For each ($node; $registry.controls)
     If ((Compare strings($node.objectName; $focus.object; sk char codes)=0) & $node.visible & $node.enabled)
@@ -71,7 +72,8 @@ If ($result.ok=True)
     For each ($column; $node.grid.columns)
      If (($column.id=$focus.cell.column) & $column.editable & ($node.editor=Null) & $focus.editing)
       $node.grid.focused.value:=Get edited text
-      If ($focus.native.selection#Null)
+      // A selection read earlier, while 4D was in front, must still fit text code changed since.
+      If (($focus.native.selection#Null) && (($focus.native.selection[0]+$focus.native.selection[1])<=Length($node.grid.focused.value)))
        $node.grid.focused.selection:=$focus.native.selection
       End if
      End if
@@ -84,7 +86,7 @@ If ($result.ok=True)
      $node.value:=$styledText.text
      $node.editable:=$node.editable & $styledText.ok & Not($styledText.references)
     End if
-    If (($focus.native.selection#Null) & (Not($node.styled=True) | $node.editable))
+    If (($focus.native.selection#Null) && (Not($node.styled=True) | $node.editable) && (($focus.native.selection[0]+$focus.native.selection[1])<=Length($node.value)))
      $node.selection:=$focus.native.selection
     End if
    End if
