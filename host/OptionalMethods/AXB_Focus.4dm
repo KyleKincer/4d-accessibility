@@ -1,8 +1,8 @@
 // Resolve one live control across the entire form, including repeated names.
 // Native caret geometry comes from the public input-client API, on the UI
 // thread through the SDK. No accessibility getter calls back into 4D.
-// With $background, describing the form also resolves focus while another application is in
-// front: 4D keeps its editor and its typed text. Actions never act on an inactive application.
+// With $background, describing the form also resolves focus while another application or another
+// 4D window is in front: 4D keeps the window's editor and its typed text. Actions never use it.
 #DECLARE($background : Boolean) -> $result : Object
 var $registry; $native; $node; $definition : Object
 var $name; $row; $column : Text
@@ -17,7 +17,7 @@ If (($registry=Null) || ($registry.controls=Null))
 End if
 $native:=AXB_Host("focus"; New object)
 If (Not($native.ok=True))
- If ($background && ($native.error="inactiveApplication"))
+ If ($background && ($native.error="backgroundWindow"))
   $native.ok:=True
   $native.inactive:=True
  Else

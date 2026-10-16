@@ -95,18 +95,16 @@ NSString *AXBNativeFocus(void *nativeWindow) {
     NSWindow *window = nil;
     for (NSWindow *candidate in NSApp.windows) if ((__bridge void *)candidate == nativeWindow) { window = candidate; break; }
     if (!window.contentView) return JSON(@{@"ok": @NO, @"error": @"inactiveWindow"});
-    // With another application in front, 4D's front window keeps its editor, its typed text and
-    // its selection: it is reported, as "inactiveApplication", for describing the form only.
+    // Behind another application or another 4D window, a window keeps its editor, its typed text
+    // and its selection: it is reported, as "backgroundWindow", for describing the form only.
     BOOL background = NO;
     if (!window.isKeyWindow || !NSApp.isActive) {
-        NSWindow *front = nil;
-        for (NSWindow *candidate in NSApp.orderedWindows) if (candidate.isVisible && candidate.canBecomeKeyWindow) { front = candidate; break; }
-        if (NSApp.isActive || front != window) return JSON(@{@"ok": @NO, @"error": @"inactiveWindow"});
+        if (!window.isVisible) return JSON(@{@"ok": @NO, @"error": @"inactiveWindow"});
         background = YES;
     }
     NSResponder *responder = window.firstResponder;
     NSMutableDictionary *result = [@{@"ok": @(!background), @"textInput": @([responder conformsToProtocol:@protocol(NSTextInputClient)])} mutableCopy];
-    if (background) result[@"error"] = @"inactiveApplication";
+    if (background) result[@"error"] = @"backgroundWindow";
     result[@"viewport"] = @[@0, @0, @(NSWidth(window.contentView.bounds)), @(NSHeight(window.contentView.bounds))];
     if (!background) for (AXBWindowView *view in views.allValues) if (view.window == window && view.live) {
         [view refreshComboPopup];

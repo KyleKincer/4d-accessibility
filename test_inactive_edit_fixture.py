@@ -65,6 +65,7 @@ QUIT 4D
     (methods / "AXB_Configure.4dm").write_text("#DECLARE($formName : Text) -> $options : Object\n"
         '$options:=New object("grids"; New object("Items"; New object("kind"; "collection"; "keyProperty"; "lineID"; "selection"; Formula(Form.selectedLines); "label"; "Items")))\n')
     (methods / "InactiveCount.4dm").write_text("Form.presses:=Form.presses+1\n")
+    (methods / "InactiveOther.4dm").write_text('var $window : Integer\n$window:=Open form window("Other"; Plain form window)\nDIALOG("Other"; New object("note"; ""))\nCLOSE WINDOW($window)\n')
     (methods / "Compiler_Inactive.4dm").write_text("C_TEXT(AXB_Configure; $1)\nC_OBJECT(AXB_Configure; $0)\n")
     (methods / "InactiveError.4dm").write_text('File("/RESOURCES/error.json").setText(JSON Stringify(New object("error"; Error; "method"; Error method; "line"; Error line)))\nQUIT 4D\nABORT\n')
     # What 4D itself reports about the focused editor, from the form's own process.
@@ -86,6 +87,10 @@ Case of
   $state.lines:=Form.lines.extract("description")
   $state.diagnostics:=AXB_Form("diagnostics"; New object)
   $state.status:=AXB Status
+  If (File("/RESOURCES/other.txt").exists)
+   File("/RESOURCES/other.txt").delete()
+   $state.other:=New process("InactiveOther"; 0; "Other window")
+  End if
   File("/RESOURCES/state.json").setText(JSON Stringify($state))
 End case
 ''')
@@ -102,6 +107,10 @@ End case
                       {"name": "colDescription", "dataSource": "This.description", "width": 280, "enterable": True,
                        "header": {"name": "headerDescription", "text": "Description"}}]},
     }
+    other = sources / "Forms/Other"
+    other.mkdir(parents=True)
+    (other / "form.4DForm").write_text(json.dumps({"windowTitle": "AXB other window", "width": 240, "height": 60, "pages": [None, {"objects": {
+        "inputNote": {"type": "input", "dataSource": "Form.note", "left": 20, "top": 20, "width": 200, "height": 20}}}]}, indent=2) + "\n")
     form = sources / "Forms/Probe"
     form.mkdir(parents=True)
     (form / "form.4DForm").write_text(json.dumps({"windowTitle": TITLE, "width": 340, "height": 240, "method": "InactiveForm",
@@ -127,6 +136,8 @@ def main():
     parser.add_argument("--server", required=True, type=Path)
     parser.add_argument("--compiled", action="store_true", help="Open the project compiled instead of interpreted")
     parser.add_argument("--intel", action="store_true", help="Run 4D under Rosetta")
+    parser.add_argument("--other-window", action="store_true",
+                        help="Put another 4D window in front instead of another application")
     parser.add_argument("--dormant", action="store_true",
                         help="Type before anything reads the window, so the bridge first wakes with 4D in the background")
     args = parser.parse_args()
@@ -176,6 +187,24 @@ def main():
             time.sleep(3)
             report["states"][label] = state()
 
+        if args.other_window:
+            ax.wait_for(lambda: element("inputName"), "The form was not published", timeout=20)
+            activate(process, project)
+            keys.set_guard(keys.guard_frontmost(process.pid, ax))
+            ax.wait_for(lambda: app.read("AXFocusedUIElement") and app.read("AXFocusedUIElement").read("AXIdentifier") == "axb/Probe/inputName",
+                        "Name did not take the form's first focus", timeout=10)
+            keys.type_text("Alex")
+            ax.wait_for(lambda: value("inputName") == "Alex", "The typed text was not published", timeout=8)
+            (resources / "other.txt").write_text("open")
+            ax.wait_for(lambda: any(w.read("AXTitle") == "AXB other window" for w in app.read("AXWindows") or []), "The other window did not open", timeout=15)
+            time.sleep(3)
+            report["states"]["otherWindow"] = state()
+            report["otherWindow"] = {"value": value("inputName"), "focused": app.read("AXFocusedWindow").read("AXTitle") if app.read("AXFocusedWindow") else None}
+            check(report["otherWindow"]["focused"] == "AXB other window", "another 4D window is in front")
+            check(value("inputName") == ("Alex" if state().get("editing") else state().get("name")),
+                  "the first window's field publishes what it shows: its typed text while 4D keeps the edit, else its committed value")
+            report["passed"] = True
+            return
         if args.dormant:
             # Nothing reads the window yet: the bridge stays dormant while the user types.
             subprocess.run(["/usr/bin/osascript", "-e", f'tell application "System Events" to set frontmost of (first process whose unix id is {process.pid}) to true'],
@@ -298,7 +327,7 @@ def main():
         if process.poll() is None:
             process.terminate()
             process.wait(timeout=30)
-        (BUILD / ("inactive-edit-dormant.json" if args.dormant else "inactive-edit.json")).write_text(json.dumps(report, indent=2) + "\n")
+        (BUILD / ("inactive-edit-other.json" if args.other_window else "inactive-edit-dormant.json" if args.dormant else "inactive-edit.json")).write_text(json.dumps(report, indent=2) + "\n")
         if report["passed"]:
             print(f"PASS: {len(checks)} inactive-edit checks" + (" (woken in the background)" if args.dormant else ""))
 

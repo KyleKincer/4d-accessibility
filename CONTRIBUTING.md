@@ -204,9 +204,10 @@ For 4D in the background, with typed but uncommitted text in a field, a password
 python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app
 python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app --compiled
 python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app --intel --dormant
+python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app --other-window
 ```
 
-The test brings Finder to the front to put 4D in the background. With `--dormant`, nothing reads the window while it types, so the bridge first wakes with 4D in the background, as when an inspector brings itself to the front and then reads 4D.
+The test brings Finder to the front to put 4D in the background. With `--dormant`, nothing reads the window while it types, so the bridge first wakes with 4D in the background, as when an inspector brings itself to the front and then reads 4D. With `--other-window`, a second 4D window in another process comes to the front instead.
 
 For a search field that submits after one second without a keystroke:
 
