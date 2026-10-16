@@ -170,7 +170,7 @@ def main():
 
         def background(label):
             # Finder takes the foreground, as an inspector or another application does.
-            subprocess.run(["/usr/bin/open", "-a", "Finder"], check=True, timeout=10)
+            subprocess.run(["/usr/bin/osascript", "-e", 'tell application "Finder" to activate'], check=True, capture_output=True, timeout=10)
             ax.wait_for(lambda: app.read("AXFrontmost") is False, "4D stayed in the foreground", timeout=10)
             # Several descriptions, and the form's own ticks, pass while 4D is in the background.
             time.sleep(3)
@@ -188,7 +188,7 @@ def main():
             check(state().get("status", "").endswith("dormant"), "the bridge stayed dormant while the user typed")
             check(state().get("name") == "", "the typed text is not in the field's data source yet")
             # An inspector brings itself to the front, then reads the window: the bridge wakes now.
-            subprocess.run(["/usr/bin/open", "-a", "Finder"], check=True, timeout=10)
+            subprocess.run(["/usr/bin/osascript", "-e", 'tell application "Finder" to activate'], check=True, capture_output=True, timeout=10)
             ax.wait_for(lambda: app.read("AXFrontmost") is False, "4D stayed in the foreground", timeout=10)
             ax.wait_for(lambda: value("inputName") == "Alex", "Woken in the background, the bridge did not publish the typed text", timeout=15)
             report["states"]["wokenInactive"] = state()
