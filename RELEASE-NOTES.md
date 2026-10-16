@@ -1,3 +1,20 @@
+# 0.38.0, typed text published while 4D is in the background, and no lost actions
+
+- **A field keeps publishing the text typed into it while another application or another 4D window is in front.** This covers fields, styled and multi-line text, and a list box cell's editor, until the edit is committed or cancelled. Before, an accessibility client that brought itself to the front read the field's stored value, often empty. Password fields still publish no text, and accessibility focus still follows 4D's key window. This also holds when the bridge first wakes with 4D already in the background, as when an inspector brings itself to the front and then reads 4D.
+- **While 4D is in the background, actions are refused instead of being accepted and then dropped.** 4D's editors and the input that drives them need its key window. No action is offered and no value is settable, on forms with or without the area. macOS reports success for any attribute write regardless, so check the action list or `AXIsAttributeSettable`, or bring 4D to the front first.
+- **An action requested while another is under way waits for it, instead of being dropped.**
+  - Up to eight wait, for at most fifteen seconds each.
+  - Each runs only if the control it targets, with that control's ancestors and label, is unchanged apart from focus and selection.
+  - A request identical to one under way or waiting is refused, so a press repeated before the first completes runs once.
+  - Reveals, such as those VoiceOver sends as its cursor moves, never wait, and nothing waits behind one.
+- [Integration guide](skills/4d-accessibility/references/INTEGRATION.md); [background acceptance](test_inactive_edit_fixture.py).
+
+For developers:
+- `AXB Native focus` reports a visible window that is not key, behind another application or another 4D window, as `backgroundWindow`, with its caret and selection. `AXB_Focus(True)` resolves focus from it for describing the form. Actions use `AXB_Focus` without it, as before.
+- New fixture: `test_inactive_edit_fixture.py`, with `--compiled`, `--intel`, `--dormant` and `--other-window`.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.37.0, faster whole descriptions, a backstop without a whole description, and only changed nodes sent
 
 - **A whole description reads only what can change.**
