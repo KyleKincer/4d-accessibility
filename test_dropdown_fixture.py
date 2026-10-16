@@ -120,7 +120,7 @@ def main():
         time.sleep(.5)
         check(state()["hierarchy"]["expanded"] == expanded, "discovery does not change shared list expansion")
         (FIXTURE / "Resources/command.json").write_text(json.dumps({"action": "replace", "sequence": 1}))
-        ax.wait_for(lambda: state()["sequence"] == 1 and control("ObjectChoice").read("AXValue") == "Birch", "Rebound object was not discovered")
+        ax.wait_for(lambda: state().get("sequence") == 1 and control("ObjectChoice").read("AXValue") == "Birch", "Rebound object was not discovered")
         check(True, "existing application replacement refreshes the displayed choice")
 
         if args.voiceover:

@@ -245,6 +245,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isButton || self.isPopup;
     if (selector == @selector(accessibilityPerformShowMenu)) return self.isPopup;
     if (selector == @selector(setAccessibilityValue:)) return self.isField && self.editable && self.isAccessibilityElement;

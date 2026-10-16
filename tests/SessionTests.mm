@@ -70,6 +70,56 @@ int main(void) {
             Check(!claim(s, 9, 1, 0, 0, NO, 300), "a closed session is never described");
         }
         {
+            // An action requested while another is under way waits for it, unless it repeats it.
+            auto setName = [](AXBSession *session, NSString *text, NSTimeInterval now) {
+                return [session enqueueNode:@"field" revision:session.snapshot[@"revision"] operation:@"setValue" value:text now:now];
+            };
+            auto completed = [](NSDictionary *action, NSInteger revision, NSDictionary *(^change)(NSMutableDictionary *)) {
+                NSMutableDictionary *envelope = MutableCopy(Envelope(revision));
+                envelope[@"receipt"] = @{@"id": action[@"id"], @"status": @"completed", @"message": @"done"};
+                if (change) change(envelope);
+                return envelope;
+            };
+            AXBSession *q = Fresh();
+            Check(Press(q, 1) && setName(q, @"Ada", 1), "another action is accepted while one is under way");
+            Check(!Press(q, 1) && !setName(q, @"Ada", 1), "the same action as one under way or waiting is refused");
+            NSDictionary *first = [q exchange:Envelope(1) now:2][@"action"];
+            Check([first[@"operation"] isEqual:@"press"] && !first[@"requestValue"], "the first action is delivered alone, without its request bookkeeping");
+            NSDictionary *next = [q exchange:completed(first, 2, ^NSDictionary *(NSMutableDictionary *e) { e[@"snapshot"][@"nodes"][0][@"focused"] = @YES; return e; }) now:3][@"action"];
+            Check([next[@"operation"] isEqual:@"setValue"] && [next[@"value"] isEqual:@"Ada"] && [next[@"node"] isEqual:@"field"] && [next[@"revision"] isEqual:@2],
+                  "once it completes, the waiting action runs against the new tree, though focus moved");
+            Check([[q exchange:completed(next, 3, nil) now:4][@"ok"] boolValue] && ![q.activity[@"busy"] boolValue], "and completes in turn");
+
+            NSMutableDictionary *revealable = MutableCopy(Envelope(1));
+            for (NSMutableDictionary *node in revealable[@"snapshot"][@"nodes"]) node[@"revealable"] = @YES;
+            AXBSession *reveal = [[AXBSession alloc] initWithIdentifier:@"reveal" windowID:5];
+            Check([[reveal exchange:revealable now:0][@"ok"] boolValue], "a form with revealable controls is described");
+            Check([reveal enqueueNode:@"button" revision:@1 operation:@"reveal" value:nil now:1] && !Press(reveal, 1) && !setName(reveal, @"Ada", 1),
+                  "nothing waits behind a reveal, as VoiceOver follows one with requests of its own");
+            AXBSession *later = [[AXBSession alloc] initWithIdentifier:@"later" windowID:6];
+            Check([[later exchange:revealable now:0][@"ok"] boolValue] && Press(later, 1) &&
+                  ![later enqueueNode:@"field" revision:@1 operation:@"reveal" value:nil now:1], "a reveal never waits");
+
+            AXBSession *changed = Fresh();
+            Check(Press(changed, 1) && setName(changed, @"Ada", 1), "a second action waits");
+            first = [changed exchange:Envelope(1) now:2][@"action"];
+            NSDictionary *reply = [changed exchange:completed(first, 2, ^NSDictionary *(NSMutableDictionary *e) { e[@"snapshot"][@"nodes"][1][@"label"] = @"Company"; return e; }) now:3];
+            Check(!reply[@"action"] && ![changed.activity[@"busy"] boolValue], "a waiting action whose control changed meanwhile is dropped, as a click would miss it");
+
+            AXBSession *full = Fresh();
+            Check(Press(full, 1), "an action is under way");
+            BOOL accepted = YES;
+            for (int i = 0; i < 8; i++) accepted = accepted && setName(full, [NSString stringWithFormat:@"Name %d", i], 1);
+            Check(accepted && !setName(full, @"Name 8", 1), "eight actions wait at most");
+            [full invalidate];
+            Check(![full.activity[@"busy"] boolValue], "closing the session drops the waiting actions");
+
+            AXBSession *late = Fresh();
+            Check(Press(late, 1) && setName(late, @"Ada", 1), "a second action waits again");
+            first = [late exchange:Envelope(1) now:2][@"action"];
+            Check(![late exchange:completed(first, 2, nil) now:20][@"action"], "a waiting action expires after fifteen seconds");
+        }
+        {
             // A host sends only the nodes that changed, or only the revision when nothing did.
             AXBSession *d = [[AXBSession alloc] initWithIdentifier:@"delta" windowID:4];
             Check([[d exchange:Envelope(1) now:0][@"ok"] boolValue], "a whole tree is accepted first");

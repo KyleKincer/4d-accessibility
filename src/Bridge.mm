@@ -94,11 +94,19 @@ NSString *AXBNativeFocus(void *nativeWindow) {
     if (!NSThread.isMainThread) return JSON(@{@"ok": @NO, @"error": @"notMainThread"});
     NSWindow *window = nil;
     for (NSWindow *candidate in NSApp.windows) if ((__bridge void *)candidate == nativeWindow) { window = candidate; break; }
-    if (!window.contentView || !window.isKeyWindow || !NSApp.isActive) return JSON(@{@"ok": @NO, @"error": @"inactiveWindow"});
+    if (!window.contentView) return JSON(@{@"ok": @NO, @"error": @"inactiveWindow"});
+    // Behind another application or another 4D window, a window keeps its editor, its typed text
+    // and its selection: it is reported, as "backgroundWindow", for describing the form only.
+    BOOL background = NO;
+    if (!window.isKeyWindow || !NSApp.isActive) {
+        if (!window.isVisible) return JSON(@{@"ok": @NO, @"error": @"inactiveWindow"});
+        background = YES;
+    }
     NSResponder *responder = window.firstResponder;
-    NSMutableDictionary *result = [@{@"ok": @YES, @"textInput": @([responder conformsToProtocol:@protocol(NSTextInputClient)])} mutableCopy];
+    NSMutableDictionary *result = [@{@"ok": @(!background), @"textInput": @([responder conformsToProtocol:@protocol(NSTextInputClient)])} mutableCopy];
+    if (background) result[@"error"] = @"backgroundWindow";
     result[@"viewport"] = @[@0, @0, @(NSWidth(window.contentView.bounds)), @(NSHeight(window.contentView.bounds))];
-    for (AXBWindowView *view in views.allValues) if (view.window == window && view.live) {
+    if (!background) for (AXBWindowView *view in views.allValues) if (view.window == window && view.live) {
         [view refreshComboPopup];
         result[@"comboExpanded"] = @(view.comboOwner != nil && view.comboList.window.isVisible);
     }
@@ -144,6 +152,7 @@ NSString *AXBNativeFocus(void *nativeWindow) {
 }
 - (BOOL)accessibilityPerformPress { return [self.combo accessibilityPerformShowMenu]; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityElement && self.isAccessibilityEnabled;
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -289,14 +298,16 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 }
 - (BOOL)queue:(NSString *)operation value:(id)value {
     BOOL readable = [operation isEqual:@"reveal"] && [self.owner canAct];
-    if (!NSThread.isMainThread || (!self.isAccessibilityEnabled && !readable) || ![self isAccessibilityElement]) return NO;
+    if (!NSThread.isMainThread || !NSApp.isActive || (!self.isAccessibilityEnabled && !readable) || ![self isAccessibilityElement]) return NO;
     BOOL accepted = [self.owner.session enqueueNode:self.data[@"id"] revision:self.revision operation:operation value:value observedSnapshot:self.owner.publishedSnapshot now:Now()];
     if (accepted) {
         if (!AXBGridRevealMatchesElement(self.owner.actionFeedback[@"control"], self.owner.session.activity))
             self.owner.actionFeedback = nil;
         // VoiceOver can read the old value before 4D applies an action. These
         // controls need feedback after the exact host completion receipt.
-        NSString *action = self.owner.session.activity[@"id"];
+        // An action waiting behind another has no completion of its own yet.
+        NSDictionary *activity = self.owner.session.activity;
+        NSString *action = [activity[@"node"] isEqual:self.data[@"id"]] && [activity[@"operation"] isEqual:operation] ? activity[@"id"] : nil;
         BOOL checkbox = [operation isEqual:@"press"] && [self.data[@"role"] isEqual:@"checkbox"] && ![self.data[@"focusable"] boolValue];
         BOOL tab = [operation isEqual:@"press"] && [self.data[@"role"] isEqual:@"tab"];
         BOOL slider = [@[@"increment", @"decrement"] containsObject:operation] && [self.data[@"role"] isEqual:@"slider"];
@@ -318,7 +329,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     if ([self isAccessibilitySelectorAllowed:@selector(accessibilityPerformConfirm)]) [actions addObject:NSAccessibilityConfirmAction];
     if ([self isAccessibilitySelectorAllowed:@selector(accessibilityPerformCancel)]) [actions addObject:NSAccessibilityCancelAction];
     if (@available(macOS 26.0, *)) {
-        if ([self.data[@"revealable"] boolValue] && self.isAccessibilityElement && [self.owner canAct])
+        if ([self.data[@"revealable"] boolValue] && self.isAccessibilityElement && [self.owner canAct] && NSApp.isActive)
             [actions addObject:NSAccessibilityScrollToVisibleAction];
     }
     return actions;
@@ -371,6 +382,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     return self.isAccessibilityExpanded && [self queue:@"dismissMenu" value:nil];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformIncrement) || selector == @selector(accessibilityPerformDecrement))
         return [@[@"slider", @"stepper", @"splitter"] containsObject:self.data[@"role"]] && [self.data[@"adjustable"] boolValue] && self.isAccessibilityEnabled && self.isAccessibilityElement;
     if (selector == @selector(setAccessibilityFocused:)) return [self.data[@"focusable"] boolValue] && self.isAccessibilityEnabled;
@@ -416,6 +428,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 }
 - (BOOL)accessibilityPerformPress { return [self.row accessibilityPerformPress]; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilityValue:) || selector == @selector(setAccessibilitySelected:) || selector == @selector(setAccessibilityFocused:)) return NO;
     if (selector == @selector(accessibilityPerformPress)) return self.isAccessibilityEnabled && self.isAccessibilityElement;
     return [super isAccessibilitySelectorAllowed:selector];
@@ -426,6 +439,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 @end
 @implementation AXBTableNode
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     // NSAccessibilityElement asks accessibilityIsAttributeSettable again for
     // this setter. Answer here so the two compatibility APIs cannot recurse.
     if (selector == @selector(setAccessibilitySelectedRows:)) return self.isAccessibilityElement && self.isAccessibilityEnabled;
@@ -500,6 +514,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     [table setAccessibilitySelectedRows:remaining];
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(accessibilityPerformPress) || selector == @selector(setAccessibilitySelected:)) return self.isAccessibilityEnabled;
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -549,6 +564,7 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
 }
 - (NSInteger)accessibilityInsertionPointLineNumber { return [self accessibilityLineForIndex:self.accessibilitySelectedTextRange.location]; }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
+    if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilitySelectedText:) || selector == @selector(setAccessibilitySelectedTextRange:))
         return [self.data[@"editable"] boolValue] && ![self.data[@"protected"] boolValue] && self.isAccessibilityEnabled;
     // Exact glyph geometry is a separate capability. Do not report the whole

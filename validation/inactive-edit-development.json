@@ -1,0 +1,74 @@
+{
+  "date": "2026-10-16",
+  "host": "4D 20.8, macOS 26, Apple Silicon; --intel runs 4D under Rosetta",
+  "command": "python3 test_inactive_edit_fixture.py --server /path/to/4D\\ Server.app [--compiled | --intel] [--dormant | --other-window]",
+  "variants": {
+    "interpreted": "24 checks",
+    "compiled": "24 checks",
+    "interpreted under Rosetta": "24 checks",
+    "dormant, woken in the background": "4 checks",
+    "dormant under Rosetta": "4 checks",
+    "another 4D window in front": "2 checks"
+  },
+  "checks": {
+    "background": [
+      "the typed text is not in the field's data source yet",
+      "with 4D in the background, the field still publishes its typed text",
+      "the other fields still publish their own values",
+      "with 4D in the background, a field's value is not settable",
+      "a value written anyway is refused and leaves the typed text",
+      "back in 4D, the field publishes its typed text",
+      "leaving Name commits its text",
+      "the password field publishes no text while 4D is in the foreground",
+      "the password field publishes no text while 4D is in the background",
+      "the committed field keeps its value in the background",
+      "a second field's typed text also stays published in the background",
+      "and the first field keeps its committed value",
+      "a press in the background is refused, and the button's method does not run",
+      "a value written in the background is refused",
+      "no action is offered while 4D is in the background",
+      "back in front, a press is accepted",
+      "and runs the button's method once",
+      "a press repeated while it runs runs once",
+      "a value written right after a press waits for it and is entered",
+      "a grid cell takes keyboard focus through accessibility",
+      "the cell's typed text is not in its collection yet",
+      "with 4D in the background, the cell still publishes its typed text",
+      "and the other row its own value",
+      "back in front, the committed cell publishes its value"
+    ],
+    "dormant": [
+      "the bridge stayed dormant while the user typed",
+      "the typed text is not in the field's data source yet",
+      "woken with 4D in the background, the bridge publishes the field's typed text",
+      "and the other fields their own values"
+    ],
+    "otherWindow": [
+      "another 4D window is in front",
+      "the first window's field publishes what it shows: its typed text while 4D keeps the edit, else its committed value"
+    ]
+  },
+  "observed": {
+    "backgroundActionCodes": {
+      "actions": [],
+      "press": 0,
+      "write": 0
+    },
+    "burst": {
+      "codes": [
+        0,
+        0,
+        0
+      ],
+      "presses": 1,
+      "secondPressAfterSeconds": 0.001
+    },
+    "otherWindow": {
+      "value": "Alex",
+      "focused": "AXB other window"
+    }
+  },
+  "regression": "Full live regression of the branch: 42 of 43 passed; the failure was this fixture's own timing assumption under Rosetta, since corrected and rerun",
+  "nativeSha256": "1cb4d1d567d1bc32e68db81be3aac265fe60cca89f16baea111882244877aa53",
+  "componentSha256": "2f30feab1f6c957c52746199928cc2c521c6c83eb7ac488f25e3f1a118fbd35b"
+}
