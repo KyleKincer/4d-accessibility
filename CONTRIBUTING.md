@@ -198,6 +198,16 @@ python3 test_activation_fixture.py --server /path/to/4D\ Server.app --voiceover
 
 To measure what the bridge costs a form, with and without an assistive technology, see [performance](PERFORMANCE.md#reproduce).
 
+For 4D in the background, with typed but uncommitted text in a field, a password field and a list box cell, and actions requested there or in quick succession:
+
+```sh
+python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app
+python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app --compiled
+python3 test_inactive_edit_fixture.py --server /path/to/4D\ Server.app --intel --dormant
+```
+
+The test brings Finder to the front to put 4D in the background. With `--dormant`, nothing reads the window while it types, so the bridge first wakes with 4D in the background, as when an inspector brings itself to the front and then reads 4D.
+
 For a search field that submits after one second without a keystroke:
 
 ```sh
