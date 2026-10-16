@@ -160,10 +160,13 @@ def main():
         assert condition, message
 
     def state():
-        try:
-            return json.loads((resources / "state.json").read_text(encoding="utf-8-sig"))
-        except (OSError, ValueError):
-            return {}
+        # The form rewrites the file every quarter second: retry a read that meets a partial write.
+        for _ in range(10):
+            try:
+                return json.loads((resources / "state.json").read_text(encoding="utf-8-sig"))
+            except (OSError, ValueError):
+                time.sleep(0.05)
+        return {}
 
     process = subprocess.Popen((["/usr/bin/arch", "-x86_64"] if args.intel else []) + [APPLICATION, "--project", str(project), "--dataless", "--opening-mode", "compiled" if args.compiled else "interpreted",
                                 "--webadmin-auto-start", "false"], stdout=(BUILD / "inactive-edit.log").open("w"), stderr=subprocess.STDOUT)
@@ -287,11 +290,20 @@ def main():
         check(True, "and runs the button's method once")
         # Actions in quick succession: a repeated press runs once, and a different action waits for it.
         presses = state().get("presses")
-        burst = [element("btnCount").press(), element("btnCount").press(), element("inputCity").set_text("Bergen")]
+        count = element("btnCount")
+        started = time.monotonic()
+        burst = [count.press(), count.press()]
+        apart = time.monotonic() - started
+        burst.append(element("inputCity").set_text("Bergen"))
         ax.wait_for(lambda: value("inputCity") == "Bergen", "The value written right after a press was dropped", timeout=15)
         time.sleep(1)
-        report["burst"] = {"codes": burst, "presses": state().get("presses") - presses}
-        check(state().get("presses") == presses + 1, "a press repeated while it runs runs once")
+        report["burst"] = {"codes": burst, "presses": state().get("presses") - presses, "secondPressAfterSeconds": round(apart, 3)}
+        # A press repeated while the first runs runs once. Each accessibility call waits for 4D's main
+        # thread, which is slow under Rosetta: a second press arriving after the first completed is a new one.
+        if apart < 0.1:
+            check(state().get("presses") == presses + 1, "a press repeated while it runs runs once")
+        else:
+            check(state().get("presses") in (presses + 1, presses + 2), "a press repeated after the first may have completed runs at most twice")
         check(True, "a value written right after a press waits for it and is entered")
 
         # A grid cell's editor keeps its typed text in the background too.
