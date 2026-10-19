@@ -23,9 +23,21 @@ Remaining scope:
 - 4D Server and remote clients;
 - VoiceOver speech for caret moves: the published caret follows 4D's, but VoiceOver does not yet read the characters a Left/Right move passes;
 - long, wrapped and localized messages;
-- other built-in windows. The Progress component's windows and the Query and Quick Report editors are covered separately: [Progress windows](../../../tests/PROGRESS-WINDOWS.md), [Query editor](../../../tests/QUERY-EDITOR.md), [Quick Report editor](../../../tests/QUICK-REPORT.md).
+- other built-in windows, apart from the error window above. The Progress component's windows and the Query and Quick Report editors are covered separately: [Progress windows](../../../tests/PROGRESS-WINDOWS.md), [Query editor](../../../tests/QUERY-EDITOR.md), [Quick Report editor](../../../tests/QUICK-REPORT.md).
 
 The window also publishes an empty title text element. That is AppKit's own: any window with an empty title publishes one, so the plugin leaves it in place. Continue to integrate application dialog forms as below; those integrations do not depend on this recognition.
+
+## 4D's error window
+
+When a method fails and no error handler takes the error, 4D shows its own error window, titled "Syntax Error". The plugin publishes it the same way, with no host change. Its objects are named layers (`Texte1`, `Text`, `MES_C_mess1`, `Expand_Btn`, `bEdit`, `bTrace`, `bContinue`, `bAbort`, and the `Plus.Error.*` parts of Details). Identifiers start with `axb/error/`. It publishes:
+
+- the message, with the method and line, the error's description and the failing line, as static text;
+- Details as a disclosure triangle. Once open, it also publishes the process, the list of errors and their Save and Copy buttons;
+- Edit, Trace, Continue and Abort by their drawn titles. In a compiled application, 4D draws Edit and Trace dimmed and does nothing for them: they are published unavailable.
+
+Focus starts on Abort, 4D's default button. VoiceOver reads a dialog's text only if it is there when VoiceOver arrives, and 4D can draw the error's text after that, so the message and description are also announced once, about a second after the window opens. A press is an ordinary, unmodified click: 4D takes Option-Continue as Ignore. 4D can miss the release of VoiceOver's keys when the window before it closes, and then draws Continue as Ignore. The plugin gives a newly key error window the keyboard's actual modifier state, but 4D may still draw Ignore until the next modifier change; the button keeps its key, `axb/error/bContinue`, and either title resumes the method.
+
+[Acceptance](../../../test_error_window_fixture.py): two methods fail in their own processes. The first error is read, its Details opened, and Abort stops the method at the failing line. Continue resumes the second after it. It passes interpreted and compiled, native and under Rosetta, with and without VoiceOver.
 
 ## Use an existing application dialog
 

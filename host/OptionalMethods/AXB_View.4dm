@@ -2,7 +2,8 @@
 // Every path comes from the application's describe callback, never an AX request.
 #DECLARE($request : Object) -> $result : Object
 var $view; $description; $node; $other; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
-var $pageByObject; $registered : Object
+var $pageByObject; $registered; $now : Object
+var $currentIssues : Collection
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
 var $detailForm; $listForm : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames; $kept : Collection
@@ -735,7 +736,17 @@ If ($cache#Null)
    $result.routes[$key]:=$cache.routes[$key]
   End for each
  End if
- $result.issues:=$cache.issues.copy()
+ // The objects described now, and the grids, which are described every time, report their
+ // issues afresh; the others keep those of the description that last described them.
+ $currentIssues:=$result.issues
+ $now:=OB Copy($only)
+ For each ($node; $grids.nodes)
+  $now[$node.objectName]:=True
+ End for each
+ For each ($copy; $currentIssues)
+  $now[$copy.object]:=True
+ End for each
+ $result.issues:=$cache.issues.filter(Formula(Not(OB Is defined($2; $1.value.object))); $now).concat($currentIssues)
  $registry.partialDescriptions:=Num($registry.partialDescriptions)+1
 End if
 If ($storing)

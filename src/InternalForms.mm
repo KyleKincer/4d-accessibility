@@ -133,7 +133,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 - (NSAccessibilityOrientation)accessibilityOrientation { return self.isList ? NSAccessibilityOrientationVertical : NSAccessibilityOrientationUnknown; }
 - (NSString *)accessibilityIdentifier { return [self.owner.identifierPrefix stringByAppendingString:self.key]; }
 - (BOOL)isAccessibilityElement { return self.layer != nil && !self.layer.hidden; }
-- (BOOL)isAccessibilityEnabled { return YES; }
+- (BOOL)isAccessibilityEnabled { return !self.disabled; }
 - (NSString *)accessibilityLabel {
     if (self.isButton) return self.label.length ? self.label : [self currentText];
     return self.label;
@@ -145,7 +145,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
     return [self currentText] ?: @"";
 }
 - (BOOL)accessibilityPerformPress {
-    if (!self.isButton && !self.isPopup) return NO;
+    if ((!self.isButton && !self.isPopup) || self.disabled) return NO;
     return [self.owner clickElement:self];
 }
 - (BOOL)accessibilityPerformShowMenu { return self.isPopup && [self.owner clickElement:self]; }
@@ -246,7 +246,7 @@ CALayer *AXBInternalSubformContext(CALayer *subform) { return AXBInternalFormChi
 }
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
     if (AXBActionWhileInactive(selector)) return NO;
-    if (selector == @selector(accessibilityPerformPress)) return self.isButton || self.isPopup;
+    if (selector == @selector(accessibilityPerformPress)) return (self.isButton || self.isPopup) && !self.disabled;
     if (selector == @selector(accessibilityPerformShowMenu)) return self.isPopup;
     if (selector == @selector(setAccessibilityValue:)) return self.isField && self.editable && self.isAccessibilityElement;
     if (selector == @selector(setAccessibilityFocused:)) return self.isField && self.editable && !self.caret && self.isAccessibilityElement;
@@ -382,6 +382,12 @@ static void PostClick(NSWindow *window, NSPoint point, NSInteger clicks = 1, BOO
     // An ordinary click, double click or secondary click, queued so 4D's own loop handles it
     // exactly as for the mouse.
     NSTimeInterval now = NSProcessInfo.processInfo.systemUptime;
+    // An assistive technology's press is an unmodified click. 4D keeps its own modifier state from
+    // the events it receives, and can miss a release, as when VoiceOver's keys are let go while
+    // the window closes; it would then take the click as Option-click. Tell it none are held.
+    NSEvent *flags = [NSEvent keyEventWithType:NSEventTypeFlagsChanged location:point modifierFlags:0 timestamp:now windowNumber:window.windowNumber
+                                       context:nil characters:@"" charactersIgnoringModifiers:@"" isARepeat:NO keyCode:58];
+    if (flags) [NSApp postEvent:flags atStart:NO];
     NSEventType down = secondary ? NSEventTypeRightMouseDown : NSEventTypeLeftMouseDown, up = secondary ? NSEventTypeRightMouseUp : NSEventTypeLeftMouseUp;
     for (NSInteger count = 1; count <= MAX(clicks, 1); count++)
         for (NSEventType type : {down, up}) {
@@ -684,6 +690,7 @@ static CALayer *ListLayer(AXBInternalFormElement *list) {
             element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
             element.pressArea = entry[@"pressArea"] ? [entry[@"pressArea"] rectValue] : NSZeroRect;
             element.clicks = [entry[@"clicks"] integerValue];
+            element.disabled = [entry[@"disabled"] boolValue];
             element.checked = [entry[@"checked"] boolValue];
             element.stateUnknown = entry[@"checked"] == nil;
             element.publishedText = text;
@@ -704,6 +711,7 @@ static CALayer *ListLayer(AXBInternalFormElement *list) {
         element.pressLayer = entry[@"press"]; element.pressInset = [entry[@"pressInset"] doubleValue];
         element.pressArea = entry[@"pressArea"] ? [entry[@"pressArea"] rectValue] : NSZeroRect;
         element.clicks = [entry[@"clicks"] integerValue];
+        element.disabled = [entry[@"disabled"] boolValue];
         element.stateUnknown = entry[@"checked"] == nil;
         if (element.checked != [entry[@"checked"] boolValue]) {
             element.checked = [entry[@"checked"] boolValue];

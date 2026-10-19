@@ -20,6 +20,8 @@ $changes:=AXB_Host("changes"; New object("session"; $context.session))
 If (Not($changes.ok=True))
  $changes:=Null
 End if
+// This description also serves a grid page read that asked for one.
+OB REMOVE(AXB_FormRoots[String(Current form window)]; "describeAgain")
 $tree:=AXB_FormTree($changes)
 If (Not($tree.ok=True))
  AXB_FormFailed($context; New object("error"; $tree.error))
@@ -71,6 +73,7 @@ $token:=$context.token
 Use ($token)
  $token.fast:=$context.pending#Null
  $token.verify:=AXB_FormRoots[String(Current form window)].verifying=True
+ $token.again:=False
 End use
 $snapshot:=New object("version"; 1; "label"; $context.label; "enabled"; Current form window=Frontmost window)
 If (Value type($context.view.options.automationKey)=Is text)
@@ -190,8 +193,10 @@ If (Not($unchanged))
  $context.sentNodeCount:=Choose($snapshot.nodes#Null; $tree.nodes.length; $changed.length)
 End if
 $context.diagnostics.sentNodes:=Num($context.sentNodeCount)
-// How many labels, values and controls the plugin had to shorten, mend or leave out to publish the form.
-$context.diagnostics.repairs:=Num($reply.repairs)
+// How many times, since the form opened, the plugin had to shorten or mend a label or value, or
+// leave out or rename a control, to publish the form.
+$context.repairCount:=Num($context.repairCount)+Num($reply.repairs)
+$context.diagnostics.repairs:=$context.repairCount
 OB REMOVE($context; "receipt")
 OB REMOVE($context; "controlInput")
 $context.controlInputResult:=$reply.controlInputResult

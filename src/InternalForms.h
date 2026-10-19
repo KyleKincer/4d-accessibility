@@ -34,6 +34,7 @@
 //             be NSAccessibilityScrollBarRole with the list's vertical_scrollbar layer: its lines
 //             stay the overlay's own, for a window that holds one list, and the scroll bar reports
 //             its thumb and pages with Increment and Decrement
+//   disabled  @YES for a button 4D draws but does not operate, which is published unavailable
 //   focused   @YES for the object 4D draws with its keyboard focus ring, which becomes the
 //             application's focused element when it moves, as AppKit reports a Tab
 // An entry without drawn text is published only when it has a fixed label or is a text field.
@@ -57,6 +58,7 @@
 @property(nonatomic) CGFloat pressInset;
 @property(nonatomic) NSRect pressArea;
 @property(nonatomic) NSInteger clicks;
+@property(nonatomic) BOOL disabled;
 // The element that holds this one in another provider's tree, such as a bridge session's, when
 // its overlay is not in the view hierarchy.
 @property(nonatomic, weak) id embeddingParent;

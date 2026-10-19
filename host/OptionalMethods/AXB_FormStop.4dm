@@ -17,8 +17,10 @@ End if
 $data:=$registry.data
 $reply:=AXB_Host("stop"; New object("window"; $window; "session"; $context.session))
 OB REMOVE(AXB_FormRoots; String($window))
-// The window's root and registered children leave the registry together.
-AXB_FormViewSet(Null; Null; $window)
+// A child registered in this window keeps its view: a restarted root describes it again.
+If (New collection(AXB_FormView($data)).indexOf($context.view)=0)
+ AXB_FormViewSet($data; Null)
+End if
 If (Not($context.aliases=True))
  return
 End if

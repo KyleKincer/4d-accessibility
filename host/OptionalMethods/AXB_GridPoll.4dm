@@ -38,4 +38,5 @@ Use ($token)
  // Background cache requests must not keep full-form discovery in the fast
  // editor loop. They continue on the ordinary bounded polling schedule.
  $token.fast:=($context.pending#Null)
+ $token.again:=AXB_FormRoots[String(Current form window)].describeAgain=True
 End use

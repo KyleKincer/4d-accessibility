@@ -6,6 +6,7 @@
 #import "NativeLayout.h"
 #import "GenericForms.h"
 #import "Activation.h"
+#import "MessageDialogs.h"
 #include <vector>
 
 static NSString *TextParameter(PA_PluginParameters parameters, short index, NSUInteger limit) {
@@ -53,6 +54,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
         switch (selector) {
             case kInitPlugin: {
                 AXBHooksConfigure(PA_Get4DVersion());
+                AXBMessagesSetCompiled(PA_IsCompiled(1) != 0);
                 AXBInitialize();
                 NSString *structure = StructurePath();
                 AXBWhenActive(^{ AXBGenericFormsInitialize(structure); });
