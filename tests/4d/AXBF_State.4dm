@@ -1,4 +1,4 @@
-var $state; $control; $request : Object
+var $state; $control; $request; $view : Object
 var $name : Text
 var $i; $left; $top; $right; $bottom; $x; $y : Integer
 ARRAY TEXT($names; 0)
@@ -15,9 +15,10 @@ $state.notes:=Form.notes
 $state.validationError:=Form.validationError
 $state.secretAccepted:=Form.secret="AX synthetic password"
 $state.summaryEnterable:=OBJECT Get enterable(*; "Summary")
-If (Form.axbView#Null)
- If (Form.axbView.discovery#Null)
-  For each ($control; Form.axbView.discovery.nodes)
+$view:=AXB_FormView(Form)
+If ($view#Null)
+ If ($view.discovery#Null)
+  For each ($control; $view.discovery.nodes)
    If ($control.objectName="Summary")
     $state.summaryDescriptor:=$control
    End if

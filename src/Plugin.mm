@@ -47,6 +47,9 @@ static void ReadNativeFocus(void *parameter) {
 }
 extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
     @autoreleasepool {
+      // An exception must not unwind into 4D, which would end it. The command then returns its
+      // default result, as an unknown one does.
+      @try {
         switch (selector) {
             case kInitPlugin: {
                 AXBHooksConfigure(PA_Get4DVersion());
@@ -110,5 +113,8 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
             case 10: ReturnText(parameters, AXBTakeChanges(TextParameter(parameters, 1, 128))); break;
             default: break;
         }
+      } @catch (NSException *exception) {
+        (void)exception;
+      }
     }
 }

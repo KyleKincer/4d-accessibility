@@ -56,8 +56,8 @@ If ($operation="stop")
   // intentionally shares that root's data object.
   If ($aliases)
    $registry:=AXB_FormRoots[String(Current form window)]
-   If (($registry=Null) || (New collection($registry.context.view).indexOf(Form.axbView)#0))
-    OB REMOVE(Form; "axbView")
+   If (($registry=Null) || (New collection($registry.context.view).indexOf(AXB_FormView(Form))#0))
+    AXB_FormViewSet(Form; Null)
    End if
   End if
  End if
@@ -180,16 +180,13 @@ $reply:=AXB_Form("stop"; New object)
 If ($aliases)
  OB REMOVE(Form; "axbError")
  OB REMOVE(Form; "axbFailure")
- Form.axbView:=$view
+ AXB_FormViewSet(Form; $view)
 End if
 If ($operation="start")
  $view.root:=True
  $context:=New object("active"; True; "window"; Current form window; "revision"; 0; "state"; ""; "label"; $options.label; "view"; $view)
  $context.nativeInsertion:=Position("; input 2;"; $result.nativeStatus)>0
  $context.aliases:=$aliases
- If ($aliases)
-  Form.axbForm:=$context
- End if
  If (OB Is defined($options; "onError"))
   $context.onError:=$options.onError
  End if

@@ -85,9 +85,9 @@ Case of
   AXBR_Status.diagnostics:=AXB_Form("diagnostics"; New object)
   $context:=AXB_FormContext
   AXBR_Status.active:=$context#Null
-  If (($context#Null) && ($context.state#Null) && (Length($context.state)>0))
-   AXBR_Status.windowActive:=JSON Parse($context.state).enabled
-   AXBR_Status.focused:=JSON Parse($context.state).nodes.query("focused = :1"; True).extract("id")
+  If (($context#Null) && ($context.sentNodes#Null))
+   AXBR_Status.windowActive:=$context.sentEnabled
+   AXBR_Status.focused:=$context.sentNodes.query("focused = :1"; True).extract("id")
   End if
   File("/RESOURCES/state.json").setText(JSON Stringify(AXBR_Status))
   If (File("/RESOURCES/close.json").exists)

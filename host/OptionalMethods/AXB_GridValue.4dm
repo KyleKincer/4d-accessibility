@@ -6,7 +6,7 @@ var $value : Variant
 var $issue : Text
 var $type; $checked : Integer
 $result:=New object("ok"; True; "value"; ""; "editable"; False; "enabled"; True)
-If ($column.protected | ($column.blank=True))
+If (($column.protected=True) | ($column.blank=True))
  return
 End if
 If ($column.controlRole="button")

@@ -2,7 +2,7 @@
 // Every path comes from the application's describe callback, never an AX request.
 #DECLARE($request : Object) -> $result : Object
 var $view; $description; $node; $other; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
-var $pageByObject : Object
+var $pageByObject; $registered : Object
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
 var $detailForm; $listForm : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames; $kept : Collection
@@ -52,9 +52,12 @@ If ($request.autoParent#Null)
  $name:=$request.container
  $options:=New object("label"; $name)
  $registration:=""
- If ($aliases && (Form.axbView#Null) && Not(Form.axbView.root=True))
-  $options:=Form.axbView.options
-  $registration:=Form.axbView.instance
+ If ($aliases)
+  $registered:=AXB_FormView(Form)
+  If (($registered#Null) && Not($registered.root=True))
+   $options:=$registered.options
+   $registration:=$registered.instance
+  End if
  End if
  If ($request.autoParent.options.children#Null)
   If ($request.autoParent.options.children[$name]#Null)
@@ -93,7 +96,7 @@ Else
   $view:=$request.rootView
  Else
   If ($aliases)
-   $view:=Form.axbView
+   $view:=AXB_FormView(Form)
   End if
  End if
 End if

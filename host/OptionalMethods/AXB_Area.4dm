@@ -53,6 +53,14 @@ $record:=AXB_Areas[$id]
 If ($record=Null)
  return
 End if
+If ($operation="retry")
+ // AXB_FormFailed scheduled this, after a pause: start again as when the form loaded.
+ If (($record.state#"retrying") | ($record.window#Current form window))
+  return
+ End if
+ $record.state:="queued"
+ $operation:="start"
+End if
 If ($operation="stop")
  // Remove first: a callback can close a dialog or create a replacement.
  OB REMOVE(AXB_Areas; $id)
@@ -146,6 +154,7 @@ Else
  End if
  If ($result.ok=True)
   $record.state:="active"
+  $record.startedAt:=Milliseconds
  Else
   $record.state:="failed"
   $record.failure:=$result

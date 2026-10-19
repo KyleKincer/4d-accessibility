@@ -137,6 +137,7 @@ $context.nodeStates:=$nodeStates
 // The description reuses its collections: keep the nodes themselves, as sent.
 $context.sentNodes:=$tree.nodes.slice(0)
 $context.sentIDs:=$tree.nodes.extract("id")
+$context.sentEnabled:=$snapshot.enabled
 $snapshot.revision:=$context.revision
 $envelope:=New object("snapshot"; $snapshot)
 Case of
@@ -189,6 +190,8 @@ If (Not($unchanged))
  $context.sentNodeCount:=Choose($snapshot.nodes#Null; $tree.nodes.length; $changed.length)
 End if
 $context.diagnostics.sentNodes:=Num($context.sentNodeCount)
+// How many labels, values and controls the plugin had to shorten, mend or leave out to publish the form.
+$context.diagnostics.repairs:=Num($reply.repairs)
 OB REMOVE($context; "receipt")
 OB REMOVE($context; "controlInput")
 $context.controlInputResult:=$reply.controlInputResult

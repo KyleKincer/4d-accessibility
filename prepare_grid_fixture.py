@@ -428,7 +428,7 @@ End if
                 continue
             objects[name] = {"type": "button", "text": name, "left": 20 + index * 200, "top": 490, "width": 190, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
     state_method = methods / "AXBG_State.4dm"
-    state_method.write_text('var $context; $snapshot : Object\n' + state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$context:=AXB_FormContext\nIf (($context#Null) && ($context.state#Null) && (Length($context.state)>0))\n $snapshot:=JSON Parse($context.state)\n $state.windowActive:=$snapshot.enabled\n $state.focused:=$snapshot.nodes.query("focused = :1"; True).extract("id")\nEnd if\n$state.diagnostics:='))
+    state_method.write_text('var $context; $snapshot : Object\n' + state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$context:=AXB_FormContext\nIf (($context#Null) && ($context.sentNodes#Null))\n $state.windowActive:=$context.sentEnabled\n $state.focused:=$context.sentNodes.query("focused = :1"; True).extract("id")\nEnd if\n$state.diagnostics:='))
     form = {"windowTitle": TITLE, "width": 645, "height": 550 if args.row_states else 465 if args.described else 425, "method": "AXBG_Form", "events": ["onLoad", "onTimer", "onUnload"], "pages": [None, {"objects": objects}]}
     folder = sources / "Forms/Grid"
     folder.mkdir(parents=True)
@@ -447,7 +447,7 @@ End if
         state_method = methods / "AXBG_State.4dm"
         # The child has no root registration. Its read-only observer consumes
         # the snapshot captured by the owning root, just like diagnostics.
-        state_method.write_text(state_method.read_text().replace('"bridgeError"; Form.axbError', '"bridgeError"; Form.rootBridgeError').replace('"failure"; Form.failure', '"failure"; Form.rootFailure').replace('AXB_Form("diagnostics"; New object)', 'Form.rootCoverage').replace('$context:=AXB_FormContext', '$context:=New object("state"; Form.rootSnapshot)'))
+        state_method.write_text(state_method.read_text().replace('"bridgeError"; Form.axbError', '"bridgeError"; Form.rootBridgeError').replace('"failure"; Form.failure', '"failure"; Form.rootFailure').replace('AXB_Form("diagnostics"; New object)', 'Form.rootCoverage').replace('$context:=AXB_FormContext', '$context:=Form.rootSnapshot'))
         (methods / "AXBG_Root.4dm").write_text('''var $options; $reply : Object
 var $context : Object
 Case of
@@ -472,7 +472,7 @@ Case of
    Form.grid.rootFailure:=Form.axbFailure
    Form.grid.rootCoverage:=AXB_Form("diagnostics"; New object)
    $context:=AXB_FormContext
-   Form.grid.rootSnapshot:=$context.state
+   Form.grid.rootSnapshot:=New object("sentEnabled"; $context.sentEnabled; "sentNodes"; $context.sentNodes)
    EXECUTE METHOD IN SUBFORM("Grid"; "AXBG_State")
   End if
  : (Form event code=On Unload)

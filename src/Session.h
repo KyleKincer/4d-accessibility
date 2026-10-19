@@ -54,3 +54,12 @@ BOOL AXBEnvelopeIsBrief(id envelope);
 // if it had been sent whole; nil, with the reason, when it does not apply to that snapshot.
 NSDictionary *AXBExpandEnvelope(NSDictionary *envelope, NSDictionary *known, NSString **error);
 BOOL AXBTextRangeValid(NSString *text, NSRange range);
+// What a real form can hold that the bridge's bounds do not, made publishable node by node rather
+// than refusing the whole window: a label longer than 512 characters or a value longer than the
+// text bound is shortened, with an ellipsis, and such a value is no longer editable; a character
+// cut in half, as by Substring through an emoji, becomes U+FFFD; a second control with the same
+// identifier is left out, and one with the same locator gets "~2", "~3" on its last segment;
+// controls beyond the node bound are left out, with any whose parent was. Counts each repair.
+NSDictionary *AXBRepairEnvelope(id envelope, NSUInteger *repairs);
+// The text with each unpaired surrogate replaced by U+FFFD.
+NSString *AXBRepairUnicode(NSString *text);

@@ -1,5 +1,6 @@
 #import "Session.h"
 #import "Identifiers.h"
+#include "Limits.h"
 #include <atomic>
 #include <cstdio>
 #include <cstdlib>
@@ -118,6 +119,63 @@ int main(void) {
             Check(Press(late, 1) && setName(late, @"Ada", 1), "a second action waits again");
             first = [late exchange:Envelope(1) now:2][@"action"];
             Check(![late exchange:completed(first, 2, nil) now:20][@"action"], "a waiting action expires after fifteen seconds");
+        }
+        {
+            // What a real form holds beyond the bridge's bounds costs a node's detail, never the window.
+            NSUInteger repairs = 0;
+            Check(AXBRepairEnvelope(Envelope(1), &repairs) && repairs == 0, "a form within bounds is left as it is");
+            NSMutableDictionary *big = MutableCopy(Envelope(1));
+            NSString *instructions = [@"" stringByPaddingToLength:800 withString:@"Fill every field. " startingAtIndex:0];
+            big[@"snapshot"][@"nodes"][0][@"label"] = instructions;
+            big[@"snapshot"][@"nodes"][1][@"value"] = [@"" stringByPaddingToLength:AXBLimits::text + 10 withString:@"x" startingAtIndex:0];
+            big[@"snapshot"][@"nodes"][1][@"editable"] = @YES;
+            big[@"snapshot"][@"nodes"][1][@"selection"] = @[@0, @0];
+            Check(AXBValidateEnvelope(big) != nil, "unrepaired, such a form would be refused whole");
+            NSDictionary *repaired = AXBRepairEnvelope(big, &repairs);
+            NSArray *nodes = repaired[@"snapshot"][@"nodes"];
+            Check(!AXBValidateEnvelope(repaired) && repairs == 2, "repaired, it is published");
+            Check([nodes[0][@"label"] length] == 512 && [nodes[0][@"label"] hasSuffix:@"\u2026"] && [instructions hasPrefix:[nodes[0][@"label"] substringToIndex:511]],
+                  "a long label is shortened to its first 511 characters and an ellipsis");
+            Check([nodes[1][@"value"] length] == AXBLimits::text && [nodes[1][@"editable"] isEqual:@NO] && !nodes[1][@"selection"],
+                  "a value beyond the text bound is shortened, and can no longer be edited");
+            NSMutableDictionary *cut = MutableCopy(Envelope(1));
+            cut[@"snapshot"][@"nodes"][1][@"value"] = [NSString stringWithFormat:@"Smile %C", (unichar)0xD83D];
+            cut[@"snapshot"][@"nodes"][0][@"label"] = [@"" stringByPaddingToLength:511 withString:@"a" startingAtIndex:0];
+            cut[@"snapshot"][@"nodes"][0][@"label"] = [cut[@"snapshot"][@"nodes"][0][@"label"] stringByAppendingString:@"\U0001F600"];
+            repaired = AXBRepairEnvelope(cut, &repairs);
+            nodes = repaired[@"snapshot"][@"nodes"];
+            Check(!AXBValidateEnvelope(repaired) && [nodes[1][@"value"] isEqual:@"Smile \uFFFD"], "a character cut in half becomes U+FFFD");
+            Check([nodes[0][@"label"] length] == 512 && AXBTextRangeValid(nodes[0][@"label"], NSMakeRange(0, [nodes[0][@"label"] length])),
+                  "shortening never cuts a character in half");
+            Check([AXBRepairUnicode([NSString stringWithFormat:@"a%Cb", (unichar)0xDE00]) isEqual:@"a\uFFFDb"] && [AXBRepairUnicode(@"ok \U0001F600") isEqual:@"ok \U0001F600"],
+                  "an unpaired low surrogate is replaced, and a pair is kept");
+            NSMutableDictionary *twice = MutableCopy(Envelope(1));
+            NSMutableDictionary *again = [twice[@"snapshot"][@"nodes"][0] mutableCopy];
+            again[@"label"] = @"Inherited";
+            NSMutableDictionary *same = [twice[@"snapshot"][@"nodes"][1] mutableCopy];
+            same[@"id"] = @"field2";
+            same[@"automationPath"] = @[@"field"];
+            [twice[@"snapshot"][@"nodes"] addObject:again];
+            [twice[@"snapshot"][@"nodes"] addObject:same];
+            Check(AXBValidateEnvelope(twice) != nil, "duplicate identifiers and locators would be refused whole");
+            repaired = AXBRepairEnvelope(twice, &repairs);
+            nodes = repaired[@"snapshot"][@"nodes"];
+            Check(!AXBValidateEnvelope(repaired) && nodes.count == 3 && [nodes[0][@"label"] isEqual:@"Submit"] && [nodes[2][@"automationPath"] isEqual:@[@"field~2"]],
+                  "the first control with an identifier is kept, and a second locator gets a suffix");
+            NSMutableDictionary *many = MutableCopy(Envelope(1));
+            NSMutableArray *list = many[@"snapshot"][@"nodes"];
+            [list removeAllObjects];
+            [list addObject:@{@"id": @"group", @"role": @"group", @"label": @"Lines", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@0, @0, @10, @10]}];
+            for (NSUInteger i = 0; i < AXBLimits::nodes + 5; i++)
+                [list addObject:@{@"id": [NSString stringWithFormat:@"b%lu", (unsigned long)i], @"role": @"button", @"label": @"Line", @"value": @"", @"enabled": @YES, @"visible": @YES,
+                                  @"frame": @[@0, @0, @10, @10], @"parent": i < AXBLimits::nodes - 1 ? @"group" : @"last"}];
+            NSMutableDictionary *labelled = [list[1] mutableCopy];
+            labelled[@"labelledBy"] = @"gone";
+            list[1] = labelled;
+            [list insertObject:@{@"id": @"lead", @"role": @"text", @"label": @"Lead", @"value": @"", @"enabled": @YES, @"visible": @YES, @"frame": @[@0, @0, @10, @10]} atIndex:0];
+            repaired = AXBRepairEnvelope(many, &repairs);
+            nodes = repaired[@"snapshot"][@"nodes"];
+            Check(!AXBValidateEnvelope(repaired) && nodes.count == AXBLimits::nodes && !nodes[2][@"labelledBy"], "controls beyond the node bound are left out, with references to them");
         }
         {
             // A host sends only the nodes that changed, or only the revision when nothing did.

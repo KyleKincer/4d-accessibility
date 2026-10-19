@@ -14,7 +14,7 @@ For ($i; 1; Size of array($selected))
  $row:=$selected{$i}
  $right.push(aRightKey{$row})
 End for
-$state:=New object("registration"; Form.registration; "phase"; "ready"; "runId"; Form.runId; "compiled"; Is compiled mode; "timerTicks"; Form.timerTicks; "startResult"; Form.startResult; "leftSelected"; $left; "rightSelected"; $right; "leftSelections"; Form.left.selections; "rightSelections"; Form.right.selections; "leftFirst"; aLeftKey{1}; "leftTop"; AL_GetAreaLongProperty(Form.left.area; ALP_Area_TopRow); "rightTop"; AL_GetAreaLongProperty(Form.right.area; ALP_Area_TopRow); "leftError"; AL_GetAreaLongProperty(Form.left.area; ALP_Area_LastError); "rightError"; AL_GetAreaLongProperty(Form.right.area; ALP_Area_LastError); "receipt"; Form.axbForm.receipt; "bridgeError"; Form.axbError; "failure"; Form.axbFailure)
+$state:=New object("registration"; Form.registration; "phase"; "ready"; "runId"; Form.runId; "compiled"; Is compiled mode; "timerTicks"; Form.timerTicks; "startResult"; Form.startResult; "leftSelected"; $left; "rightSelected"; $right; "leftSelections"; Form.left.selections; "rightSelections"; Form.right.selections; "leftFirst"; aLeftKey{1}; "leftTop"; AL_GetAreaLongProperty(Form.left.area; ALP_Area_TopRow); "rightTop"; AL_GetAreaLongProperty(Form.right.area; ALP_Area_TopRow); "leftError"; AL_GetAreaLongProperty(Form.left.area; ALP_Area_LastError); "rightError"; AL_GetAreaLongProperty(Form.right.area; ALP_Area_LastError); "receipt"; AXB_FormRoots[String(Current form window)].context.receipt; "bridgeError"; Form.axbError; "failure"; Form.axbFailure)
 $state.leftStarts:=Form.left.starts
 $state.leftEnds:=Form.left.ends
 $state.leftRejections:=Form.left.rejections

@@ -3,6 +3,7 @@
 #include "Limits.h"
 #import "Identifiers.h"
 #include <cmath>
+#include <vector>
 
 static BOOL Text(id value, NSUInteger limit) {
     if (![value isKindOfClass:NSString.class] || [value length] > limit) return NO;
@@ -119,6 +120,141 @@ static BOOL SameGridDispatchValue(NSDictionary *before, NSDictionary *after, NSD
 }
 
 NSString *AXBValidateEnvelopeParts(NSDictionary *envelope, NSDictionary *byID);
+
+NSString *AXBRepairUnicode(NSString *text) {
+    NSUInteger length = text.length;
+    std::vector<unichar> units(length);
+    [text getCharacters:units.data() range:NSMakeRange(0, length)];
+    BOOL changed = NO;
+    for (NSUInteger i = 0; i < length; i++) {
+        if (CFStringIsSurrogateHighCharacter(units[i]) && i + 1 < length && CFStringIsSurrogateLowCharacter(units[i + 1])) { i++; continue; }
+        if (CFStringIsSurrogateHighCharacter(units[i]) || CFStringIsSurrogateLowCharacter(units[i])) { units[i] = 0xFFFD; changed = YES; }
+    }
+    return changed ? [NSString stringWithCharacters:units.data() length:length] : text;
+}
+static id RepairText(id value, NSUInteger limit, NSUInteger *repairs) {
+    if (![value isKindOfClass:NSString.class]) return value;
+    NSString *text = Text(value, NSUIntegerMax) ? value : AXBRepairUnicode(value);
+    if (text.length > limit) {
+        NSUInteger end = limit - 1;
+        if (end && CFStringIsSurrogateHighCharacter([text characterAtIndex:end - 1])) end--;
+        text = [[text substringToIndex:end] stringByAppendingString:@"\u2026"];
+    }
+    if (text != value) (*repairs)++;
+    return text;
+}
+static NSDictionary *RepairNode(id raw, NSUInteger *repairs) {
+    if (![raw isKindOfClass:NSDictionary.class]) return raw;
+    NSDictionary *node = raw;
+    NSMutableDictionary *n = nil;
+    NSUInteger before = *repairs;
+    auto set = [&](NSString *key, id value) { if (value == node[key]) return; if (!n) n = [node mutableCopy]; n[key] = value; };
+    for (NSString *key in @[@"label", @"placeholder"]) if (node[key]) set(key, RepairText(node[key], 512, repairs));
+    if (node[@"valueDescription"]) set(@"valueDescription", RepairText(node[@"valueDescription"], AXBLimits::text, repairs));
+    NSString *value = node[@"value"];
+    if ([value isKindOfClass:NSString.class] && ![node[@"role"] isEqual:@"stepper"]) {
+        NSString *repaired = RepairText(value, AXBLimits::text, repairs);
+        if (repaired != value) {
+            set(@"value", repaired);
+            [n removeObjectForKey:@"selection"];
+            // A client that wrote a shortened value back would delete the rest.
+            if (repaired.length != value.length && node[@"editable"]) n[@"editable"] = @NO;
+        }
+    }
+    NSArray *choices = node[@"choices"];
+    if ([choices isKindOfClass:NSArray.class]) {
+        NSMutableArray *next = [NSMutableArray arrayWithCapacity:choices.count];
+        for (id choice in choices) [next addObject:RepairText(choice, 512, repairs)];
+        if (*repairs != before) set(@"choices", next);
+    }
+    NSDictionary *table = node[@"table"];
+    if ([table isKindOfClass:NSDictionary.class] && [table[@"columns"] isKindOfClass:NSArray.class]) {
+        NSUInteger at = *repairs;
+        NSMutableArray *columns = [NSMutableArray new];
+        for (id column in table[@"columns"]) {
+            if ([column isKindOfClass:NSDictionary.class] && column[@"header"]) {
+                id header = RepairText(column[@"header"], 512, repairs);
+                if (header != column[@"header"]) { NSMutableDictionary *copy = [column mutableCopy]; copy[@"header"] = header; [columns addObject:copy]; continue; }
+            }
+            [columns addObject:column];
+        }
+        if (*repairs != at) { NSMutableDictionary *copy = [table mutableCopy]; copy[@"columns"] = columns; set(@"table", copy); }
+    }
+    return n ?: node;
+}
+static BOOL LocatorReady(NSDictionary *node) {
+    if (![node[@"id"] isKindOfClass:NSString.class]) return NO;
+    NSArray *path = node[@"automationPath"];
+    if (!path) return YES;
+    if (![path isKindOfClass:NSArray.class] || !path.count) return NO;
+    for (id segment in path) if (![segment isKindOfClass:NSString.class]) return NO;
+    return YES;
+}
+static NSArray *RepairStructure(NSDictionary *snapshot, NSArray *nodes, NSUInteger *repairs) {
+    NSMutableArray *kept = [NSMutableArray arrayWithCapacity:MIN(nodes.count, AXBLimits::nodes)];
+    NSMutableSet *ids = [NSMutableSet new], *locators = [NSMutableSet new];
+    BOOL dropped = NO;
+    for (id raw in nodes) {
+        if (kept.count >= AXBLimits::nodes) { (*repairs)++; dropped = YES; continue; }
+        if (![raw isKindOfClass:NSDictionary.class] || !LocatorReady(raw)) { [kept addObject:raw]; continue; }
+        NSDictionary *node = raw;
+        if ([ids containsObject:node[@"id"]]) { (*repairs)++; dropped = YES; continue; }
+        [ids addObject:node[@"id"]];
+        if ([locators containsObject:AXBNodeIdentifier(snapshot, node)]) {
+            NSArray *base = node[@"automationPath"] ?: @[node[@"id"]];
+            for (NSUInteger copy = 2;; copy++) {
+                NSMutableArray *path = [base mutableCopy];
+                path[path.count - 1] = [NSString stringWithFormat:@"%@~%lu", base.lastObject, (unsigned long)copy];
+                NSMutableDictionary *renamed = [node mutableCopy];
+                renamed[@"automationPath"] = path;
+                if ([locators containsObject:AXBNodeIdentifier(snapshot, renamed)]) continue;
+                node = renamed;
+                break;
+            }
+            (*repairs)++;
+        }
+        [locators addObject:AXBNodeIdentifier(snapshot, node)];
+        [kept addObject:node];
+    }
+    if (!dropped) return kept;
+    // Leave out controls whose parent was left out, and references to controls that were.
+    for (BOOL again = YES; again;) {
+        again = NO;
+        NSMutableSet *present = [NSMutableSet new];
+        for (NSDictionary *node in kept) if ([node isKindOfClass:NSDictionary.class] && node[@"id"]) [present addObject:node[@"id"]];
+        for (NSInteger i = (NSInteger)kept.count - 1; i >= 0; i--) {
+            NSDictionary *node = kept[i];
+            if (![node isKindOfClass:NSDictionary.class]) continue;
+            if ([node[@"parent"] isKindOfClass:NSString.class] && ![present containsObject:node[@"parent"]]) { [kept removeObjectAtIndex:i]; (*repairs)++; again = YES; continue; }
+            NSMutableDictionary *copy = nil;
+            if ([node[@"labelledBy"] isKindOfClass:NSString.class] && ![present containsObject:node[@"labelledBy"]]) { copy = [node mutableCopy]; [copy removeObjectForKey:@"labelledBy"]; }
+            if ([node[@"linked"] isKindOfClass:NSArray.class]) {
+                NSArray *linked = [node[@"linked"] filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id item, NSDictionary *bindings) { (void)bindings; return [present containsObject:item]; }]];
+                if (linked.count != [node[@"linked"] count]) { if (!copy) copy = [node mutableCopy]; copy[@"linked"] = linked; }
+            }
+            if (copy) kept[i] = copy;
+        }
+    }
+    return kept;
+}
+NSDictionary *AXBRepairEnvelope(id envelope, NSUInteger *repairs) {
+    *repairs = 0;
+    if (![envelope isKindOfClass:NSDictionary.class] || ![envelope[@"snapshot"] isKindOfClass:NSDictionary.class]) return envelope;
+    NSDictionary *snapshot = envelope[@"snapshot"];
+    NSMutableDictionary *next = [snapshot mutableCopy];
+    if (snapshot[@"label"]) next[@"label"] = RepairText(snapshot[@"label"], 512, repairs);
+    for (NSString *key in @[@"nodes", @"changed"]) {
+        NSArray *nodes = snapshot[key];
+        if (![nodes isKindOfClass:NSArray.class]) continue;
+        NSMutableArray *repaired = [NSMutableArray arrayWithCapacity:nodes.count];
+        for (id node in nodes) [repaired addObject:RepairNode(node, repairs)];
+        next[key] = [key isEqual:@"nodes"] ? RepairStructure(snapshot, repaired, repairs) : repaired;
+    }
+    if (!*repairs) return envelope;
+    NSMutableDictionary *result = [envelope mutableCopy];
+    result[@"snapshot"] = [next copy];
+    return [result copy];
+}
 
 NSString *AXBValidateEnvelope(NSDictionary *envelope) {
     if (![envelope isKindOfClass:NSDictionary.class]) return @"envelope must be an object";

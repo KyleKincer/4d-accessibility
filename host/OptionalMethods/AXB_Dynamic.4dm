@@ -29,7 +29,7 @@ While (True)
    break
   End if
  End if
- If (($data.axbForm#Null) | ($data.axbView#Null))
+ If (AXB_FormView($data)#Null)
   $result.error:="dynamicDataInUse"
   break
  End if

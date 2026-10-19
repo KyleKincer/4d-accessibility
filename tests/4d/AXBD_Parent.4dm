@@ -15,7 +15,7 @@ Case of
   $builder.setSubformWithTemplate("Right"; Form.right)
   Form.rightPrepared:=$builder.accessibilityResult.ok
   Form.originalLoad:=True
-  Form.bridgeAbsentDuringLoad:=Form.axbView=Null
+  Form.bridgeAbsentDuringLoad:=AXB_FormView(Form)=Null
   Form.timerFirings:=0
   Form.screenCenters:=New object
   For each ($name; New collection("Close"; "Replace"))
@@ -31,7 +31,7 @@ Case of
   Form.timerFirings:=Form.timerFirings+1
   AXBD_State(Form)
  : (Form event code=On Unload)
-  Form.stoppedBeforeUnload:=Form.axbView=Null
+  Form.stoppedBeforeUnload:=AXB_FormView(Form)=Null
   Form.closed:=True
   SET TIMER(0)
   If (Form.config.nonblocking & (Form.kind#"child"))

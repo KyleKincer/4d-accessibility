@@ -1,4 +1,4 @@
-var $reply; $left; $right; $panel; $scroll : Object
+var $reply; $left; $right; $panel; $scroll; $root : Object
 var $name : Text
 var $x; $y : Integer
 Case of
@@ -21,8 +21,9 @@ Case of
    OBJECT GET SCROLL POSITION(*; $name; $y; $x)
    $scroll[$name]:=New collection($x; $y)
   End for each
-  If (Form.axbForm.receipt#Null)
-   Form.lastReceipt:=Form.axbForm.receipt
+  $root:=AXB_FormContext
+  If ($root.receipt#Null)
+   Form.lastReceipt:=$root.receipt
   End if
   File("/RESOURCES/state.json").setText(JSON Stringify(New object("runId"; Form.runId; "start"; Form.start; "left"; $left; "right"; $right; "panel"; $panel; "scroll"; $scroll; "timerCalls"; Form.timerCalls; "receipt"; Form.lastReceipt; "error"; Form.axbError)))
  : (Form event code=On Unload)

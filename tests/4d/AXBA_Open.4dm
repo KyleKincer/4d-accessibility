@@ -28,5 +28,5 @@ $data:=New object("config"; $config; "left"; New object("side"; "Left"; "recordI
 $window:=Open form window("Parent"; Plain form window)
 DIALOG("Parent"; $data)
 CLOSE WINDOW($window)
-File("/RESOURCES/closed.json").setText(JSON Stringify(New object("runId"; $config.runId; "closed"; True; "stopped"; $data.axbView=Null)))
+File("/RESOURCES/closed.json").setText(JSON Stringify(New object("runId"; $config.runId; "closed"; True; "stopped"; (AXB_FormView($data)=Null) & Not(OB Is defined($data; "axbView")))))
 QUIT 4D

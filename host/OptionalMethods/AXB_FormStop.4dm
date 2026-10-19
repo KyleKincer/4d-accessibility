@@ -17,9 +17,12 @@ End if
 $data:=$registry.data
 $reply:=AXB_Host("stop"; New object("window"; $window; "session"; $context.session))
 OB REMOVE(AXB_FormRoots; String($window))
+// The window's root and registered children leave the registry together.
+AXB_FormViewSet(Null; Null; $window)
 If (Not($context.aliases=True))
  return
 End if
+// Earlier versions kept these aliases on the form's data.
 If ($data.axb.token.session=$context.session)
  OB REMOVE($data; "axb")
 End if

@@ -35,7 +35,7 @@ def prepare(server):
     source = path.read_text().replace('var $same : Boolean', 'var $same : Boolean\nForm.bridgeMetaCalls:=Form.bridgeMetaCalls+1\nIf (Form.throwMeta=True)\n $meta:=JSON Parse("{")\nEnd if')
     path.write_text(source)
     path = methods / "AXBG_State.4dm"
-    source = path.read_text().replace('$state.diagnostics:=', '$state.commandSequence:=Form.commandSequence\n$state.bridgeMetaCalls:=Form.bridgeMetaCalls\n$state.axbFailure:=Form.axbFailure\n$state.active:=Form.axbForm.active\n$state.diagnostics:=')
+    source = path.read_text().replace('$state.diagnostics:=', '$state.commandSequence:=Form.commandSequence\n$state.bridgeMetaCalls:=Form.bridgeMetaCalls\n$state.axbFailure:=Form.axbFailure\n$state.active:=AXB_FormContext#Null\n$state.diagnostics:=')
     path.write_text(source)
     (methods / "AXBG_MetaLifecycle.4dm").write_text('''var $command; $reply : Object
 If (Not(File("/RESOURCES/meta-command.json").exists))
