@@ -1,3 +1,30 @@
+# 0.39.0, forms that stay accessible through real applications, and 4D's error window
+
+- **The application's form data is its own again.** The bridge kept its state in properties of the form's data object, one of them circular, so `JSON Stringify(Form)` failed and `OB Copy(Form)` copied the bridge. It now keeps that state in process registries. After a failure, `axbError` and `axbFailure` are still set on plain local data, as before.
+- **One control no longer costs the whole window.** The plugin refused a form's whole description for a single value outside its bounds, so the window stayed empty. It now repairs such a control and publishes the rest:
+  - a label longer than 512 characters, such as a static text's instructions, is shortened with an ellipsis; a static text's value stays whole;
+  - a value longer than the text bound, 1 MB, is shortened, and can no longer be written back;
+  - a character cut in half, as `Substring` leaves of an emoji, becomes U+FFFD;
+  - a second control with the same identifier is left out, and one with the same locator gets `~2`, `~3` on its last segment;
+  - controls beyond 4,096 are left out, with their children.
+
+  `AXB_Form("diagnostics")` reports the repairs since the form opened as `repairs`.
+- **A window recovers from a failure by itself.** An error in a callback, or a description the plugin refuses, stopped the window's session until the window was reopened. A window the bridge's area serves now starts again after a pause of one second, doubling after each failure that follows a start, up to a minute. Its area reports `retrying` meanwhile.
+- **An action behind a floating palette runs.** With a palette that has the keyboard, a button behind it offered Press and reported success, but 4D, which sends its input to its key window, dropped the click. An action now makes its window key first, as a click does.
+- **4D's error window is published.** When a method fails and no error handler takes the error, 4D shows its own window. The plugin publishes its message, the error's description, the failing line, Details with the process and error list, and Edit, Trace, Continue and Abort, with no host change. In a compiled application, Edit and Trace are unavailable. Focus starts on Abort, and the error is announced as the window opens. [Error window](skills/4d-accessibility/references/MESSAGES.md#4ds-error-window).
+- **The field being edited reports where each character is.** `AXBoundsForRange` and `AXRangeForPosition` answer from 4D's own editor, so Zoom and VoiceOver follow the caret.
+- **Coverage reports issues found while reading a grid's pages.** Since 0.37.0, an issue found while reading values, such as a column whose value needs a description, did not reach `AXB_Form("diagnostics")`.
+- **A press on 4D's own windows is an ordinary click.** 4D keeps its own modifier state and can miss the release of VoiceOver's keys; a press now tells it no modifier is held.
+- **Exceptions no longer reach 4D.** An Objective-C exception in a plugin command or in posted input ends the call, instead of ending 4D.
+- [Real-world acceptance](test_real_world_fixture.py); [error window acceptance](test_error_window_fixture.py).
+
+For developers:
+- `AXB_FormView` and `AXB_FormViewSet` hold registered views; `Form.axbView`, `Form.axbForm` and `Form.axb` are gone. Read a root's receipt from `AXB_FormRoots[String(Current form window)].context.receipt`.
+- Binary (`.4DB`) databases must be converted to projects for the installer and for forms without an area: see [coverage](COVERAGE.md).
+- Fixtures that read `$context.state`, removed in 0.37.0, read `$context.sentNodes` and `$context.sentEnabled`. Area-owned fixtures read the window while they wait for startup.
+
+Upgrade the plugin, component and host helpers together.
+
 # 0.38.0, typed text published while 4D is in the background, and no lost actions
 
 - **A field keeps publishing the text typed into it while another application or another 4D window is in front.** This covers fields, styled and multi-line text, and a list box cell's editor, until the edit is committed or cancelled. Before, an accessibility client that brought itself to the front read the field's stored value, often empty. Password fields still publish no text, and accessibility focus still follows 4D's key window. This also holds when the bridge first wakes with 4D already in the background, as when an inspector brings itself to the front and then reads 4D.
