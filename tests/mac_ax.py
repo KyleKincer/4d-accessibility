@@ -163,6 +163,26 @@ class Element:
             if value.value:
                 release(value.value)
 
+    def bounds(self, location, length):
+        """The screen rectangle (x, y, width, height) of a text range, from AXBoundsForRange, or None."""
+        function = signature(AX, "AXUIElementCopyParameterizedAttributeValue", c.c_int, c.c_void_p, c.c_void_p, c.c_void_p, c.POINTER(c.c_void_p))
+        create = signature(AX, "AXValueCreate", c.c_void_p, c.c_int, c.c_void_p)
+        get = signature(AX, "AXValueGetValue", c.c_bool, c.c_void_p, c.c_int, c.c_void_p)
+        pair = (c.c_long * 2)(location, length)
+        argument = create(4, c.byref(pair))
+        key = make_string(None, b"AXBoundsForRange", UTF8)
+        value = c.c_void_p()
+        try:
+            if function(self.pointer, key, argument, c.byref(value)) != 0 or not value.value:
+                return None
+            rect = (c.c_double * 4)()
+            return tuple(rect) if get(value.value, 3, c.byref(rect)) else None
+        finally:
+            release(key)
+            release(argument)
+            if value.value:
+                release(value.value)
+
     def actions(self):
         value = c.c_void_p()
         error = copy_actions(self.pointer, c.byref(value))

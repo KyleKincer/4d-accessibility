@@ -13,7 +13,7 @@ from prepare_grid_fixture import BUILD, FIXTURE, ROOT, TITLE
 sys.path.insert(0, str(ROOT / "tests"))
 import mac_ax as ax
 import doctor
-from fixture_desktop import activate_fixture, press_key, wait_for_start
+from fixture_desktop import activate_fixture, press_key, wait_for_start, wake
 
 
 def main():
@@ -81,8 +81,12 @@ def main():
         process = subprocess.Popen(command, stdout=log, stderr=log)
     close = None
     try:
-        ready, report["application_mode_notice_acknowledged"] = wait_for_start(
-            process, project, lambda: state() if state().get("runId") == config["runId"] and state().get("start", {}).get("ok") else None, BUILD)
+        def started():
+            # An area-owned bridge starts only once an assistive technology reads the window.
+            wake(process)
+            current = state()
+            return current if current.get("runId") == config["runId"] and current.get("start", {}).get("ok") else None
+        ready, report["application_mode_notice_acknowledged"] = wait_for_start(process, project, started, BUILD)
         check(ready.get("start", {}).get("ok") is True and ready["compiled"] is args.compiled, "automatic form starts in the requested desktop mode")
         report["architecture"] = ax.process_architecture(process.pid)
         check(report["architecture"].replace("-", "").startswith("ARM64"), "actual native ARM execution")

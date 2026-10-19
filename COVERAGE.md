@@ -10,7 +10,7 @@ A form gets a bridge area from the installer (`--form` or `--all-forms`), or fro
 
 | Family | Accessible | Not yet |
 | --- | --- | --- |
-| Buttons, texts, inputs, checkboxes, radio buttons, drop-down lists, combo boxes, styled text | Read, edit and press through the form's own editors and events | Input methods (IME) and complex scripts, wrapped-text geometry, spoken errors and status |
+| Buttons, texts, inputs, checkboxes, radio buttons, drop-down lists, combo boxes, styled text | Read, edit and press through the form's own editors and events; the bounds of each character of the field being edited, which Zoom and VoiceOver follow | Input methods (IME) and complex scripts, character bounds of a field not being edited, spoken errors and status |
 | Tab controls | Named tabs, selection | 4D's tab scroll arrows |
 | Rulers, steppers, progress indicators, spinners | Values and increment/decrement | Dials |
 | Picture buttons, picture popup menus, editable pictures, button grids | Named cells, presses, Cut/Copy/Paste/Clear | |
@@ -43,6 +43,7 @@ The plugin publishes these with no application change.
 | Window | Accessible | Not yet |
 | --- | --- | --- |
 | `ALERT`, `CONFIRM`, `Request` | Message, field and buttons, with typing echo | |
+| The error window, for a method's error with no handler | Message, description, failing line, Details, and its buttons, announced as it opens | The debugger that Trace opens |
 | Progress component | Each progress as an indicator with its message and Stop | Localized titles |
 | Query editor (`QUERY`) | Criteria, fields, comparisons, values, buttons | Formula criteria on its second page, related tables' fields |
 | Order By editor (`ORDER BY`) | Available and ordered fields, direction, Sort | Ordering by a formula end to end, related tables' fields |
@@ -56,6 +57,7 @@ Lists in 4D's own windows publish the lines they draw. Paging actions reach the 
 
 - 4D Server with remote clients on other machines: one test connects a 4D client to 4D Server on the same Mac, and its forms without an area are published from the client's cached archive ([archived projects](validation/archived-projects-development.json)). Remote data volume, latency and clients on other Macs are untested.
 - Windows: there is no implementation.
+- Binary (`.4DB`) databases: the installer and the description of forms without an area read a project's source files, so a binary database must be converted to a project first. 4D's own windows, such as messages and editors, need only the plugin.
 - Voice Control, Switch Control and Full Keyboard Access.
 - Physical Intel Macs: Intel code runs only under Rosetta.
 - macOS other than 26, 4D other than 20.8, localized 4D.

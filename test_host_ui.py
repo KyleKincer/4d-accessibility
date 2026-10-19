@@ -99,8 +99,12 @@ def main():
         processes = wait_for(pids, "4D did not start", 15)
         check(len(processes) == 1, "one isolated 4D process available")
         owned_pid = processes[0]
-        ready = wait_for(lambda: state() if state().get("phase") == "ready" else None,
-                         "Fixture did not become ready", 30)
+        def started():
+            # The bridge starts only once an assistive technology reads the window.
+            for window in application(owned_pid).read("AXWindows") or []:
+                window.read("AXChildren")
+            return state() if state().get("phase") == "ready" else None
+        ready = wait_for(started, "Fixture did not become ready", 30)
         check(ready.get("runId") == run_id, "runtime belongs to this launch")
         check(ready.get("compiled") is (args.mode == "compiled"), "actual host mode matches request")
         component = ready.get("componentInfo", {})

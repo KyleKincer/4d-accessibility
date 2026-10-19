@@ -300,6 +300,12 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     BOOL readable = [operation isEqual:@"reveal"] && [self.owner canAct];
     if (!NSThread.isMainThread || !NSApp.isActive || (!self.isAccessibilityEnabled && !readable) || ![self isAccessibilityElement]) return NO;
     BOOL accepted = [self.owner.session enqueueNode:self.data[@"id"] revision:self.revision operation:operation value:value observedSnapshot:self.owner.publishedSnapshot now:Now()];
+    // 4D sends its input to its key window. Behind a floating palette that has the keyboard, a
+    // click first makes the window key; an action does the same, or 4D would drop it. A reveal,
+    // as VoiceOver's cursor moving, leaves the keyboard where it is.
+    NSWindow *window = self.owner.window;
+    if (accepted && !window.isKeyWindow && window.canBecomeKeyWindow && ![@[@"reveal", @"gridReveal", @"gridHeaderReveal"] containsObject:operation])
+        [window makeKeyWindow];
     if (accepted) {
         if (!AXBGridRevealMatchesElement(self.owner.actionFeedback[@"control"], self.owner.session.activity))
             self.owner.actionFeedback = nil;
@@ -563,13 +569,36 @@ static BOOL AXBParked(NSDictionary *data, AXBWindowView *view) {
     return NSMakeRange(NSNotFound, 0);
 }
 - (NSInteger)accessibilityInsertionPointLineNumber { return [self accessibilityLineForIndex:self.accessibilitySelectedTextRange.location]; }
+// While 4D edits this field, its editor is the key window's text-input client and knows where
+// each character lies, as an AppKit field does: Zoom and VoiceOver follow the caret with it. 4D
+// shares that editor between its fields, so it answers only within this field's frame.
+- (id<NSTextInputClient>)editor {
+    if (![self.data[@"focused"] boolValue] || !self.data[@"selection"] || [self.data[@"protected"] boolValue] ||
+        !NSApp.isActive || !self.owner.window.isKeyWindow) return nil;
+    NSResponder *responder = self.owner.window.firstResponder;
+    return [responder conformsToProtocol:@protocol(NSTextInputClient)] ? (id<NSTextInputClient>)responder : nil;
+}
+- (NSRect)accessibilityFrameForRange:(NSRange)range {
+    id<NSTextInputClient> editor = [self editor];
+    if (!editor || !AXBTextRangeValid(self.accessibilityValue, range)) return NSZeroRect;
+    NSRange actual = NSMakeRange(NSNotFound, 0);
+    NSRect rect = [editor firstRectForCharacterRange:range actualRange:&actual];
+    return rect.size.height > 0 && NSIntersectsRect(NSInsetRect(rect, -1, 0), self.accessibilityFrame) ? rect : NSZeroRect;
+}
+- (NSRange)accessibilityRangeForPosition:(NSPoint)point {
+    id<NSTextInputClient> editor = [self editor];
+    NSString *text = self.accessibilityValue;
+    if (!editor || !NSPointInRect(point, self.accessibilityFrame)) return NSMakeRange(NSNotFound, 0);
+    NSUInteger index = [editor characterIndexForPoint:point];
+    if (index == NSNotFound || index > text.length) return NSMakeRange(NSNotFound, 0);
+    return index < text.length ? [text rangeOfComposedCharacterSequenceAtIndex:index] : NSMakeRange(index, 0);
+}
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector {
     if (AXBActionWhileInactive(selector)) return NO;
     if (selector == @selector(setAccessibilitySelectedText:) || selector == @selector(setAccessibilitySelectedTextRange:))
         return [self.data[@"editable"] boolValue] && ![self.data[@"protected"] boolValue] && self.isAccessibilityEnabled;
-    // Exact glyph geometry is a separate capability. Do not report the whole
-    // control as if it were the bounds of each character range.
-    if (selector == @selector(accessibilityFrameForRange:) || selector == @selector(accessibilityRangeForPosition:)) return NO;
+    // Never the whole control as the bounds of each character range: only the editor's own.
+    if (selector == @selector(accessibilityFrameForRange:) || selector == @selector(accessibilityRangeForPosition:)) return [self editor] != nil;
     return [super isAccessibilitySelectorAllowed:selector];
 }
 @end
@@ -1475,10 +1504,14 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
     if (windowID <= 0 || processID <= 0 || !nativeWindow || compactID.length != 32 || [compactID rangeOfCharacterFromSet:invalidID].location != NSNotFound || json.length > AXBLimits::payload)
         return JSON(@{@"ok": @NO, @"error": @"invalid window, session, or payload size"});
     NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
+    // A character cut in half, as Substring through an emoji leaves, must not cost the window.
+    if (!data) data = [AXBRepairUnicode(json) dataUsingEncoding:NSUTF8StringEncoding];
     if (!data) return JSON(@{@"ok": @NO, @"error": @"payload contains invalid Unicode"});
     if (data.length > AXBLimits::payload) return JSON(@{@"ok": @NO, @"error": @"payload too large"});
     // Parsed here, immutable, and validated once: the session neither validates nor copies it again.
     id envelope = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
+    NSUInteger repairs = 0;
+    envelope = AXBRepairEnvelope(envelope, &repairs);
     // A description that found its form unchanged, or changed in a few nodes, sends only those.
     BOOL brief = AXBEnvelopeIsBrief(envelope);
     NSString *error = brief ? nil : AXBValidateEnvelope(envelope);
@@ -1497,6 +1530,7 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
         if (!envelope) return JSON(@{@"ok": @NO, @"error": error});
     }
     NSMutableDictionary *response = [[session exchangeParsed:envelope now:Now()] mutableCopy];
+    if (repairs) response[@"repairs"] = @(repairs);
     @synchronized(registryLock) { response[@"binding"] = bindings[sessionID][@"state"] ?: @"closed"; }
     if ([response[@"ok"] boolValue]) {
         ScheduleRefresh(session, nativeWindow);
@@ -1567,6 +1601,10 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                 if (button) [session finishControlInput:controlInput accepted:YES];
                 [NSApp sendEvent:down];
                 accepted = YES;
+            } @catch (NSException *exception) {
+                // An exception must not unwind through the main queue, which would end 4D. The
+                // input counts as not delivered.
+                (void)exception;
             } @finally {
                 [session finishControlInput:controlInput accepted:accepted];
             }
@@ -1617,6 +1655,10 @@ NSString *AXBExchange(NSInteger windowID, NSInteger processID, void *nativeWindo
                     CFRelease(keyboard);
                 }
                 accepted = YES;
+            } @catch (NSException *exception) {
+                // An exception must not unwind through the main queue, which would end 4D. The
+                // input counts as not delivered.
+                (void)exception;
             } @finally {
                 [session finishEditorInput:input accepted:accepted];
             }

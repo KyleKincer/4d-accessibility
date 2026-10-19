@@ -1,8 +1,10 @@
+var $view : Object
 LinePicker_Form
 If (Form event code=On Load)
  // Use the exact documented adapter, with fixture-only observation wrappers.
- Form.axbView.describe:=Formula(AXBA_Describe)
- Form.axbView.apply:=Formula(AXBA_Apply($1))
+ $view:=AXB_FormView(Form)
+ $view.describe:=Formula(AXBA_Describe)
+ $view.apply:=Formula(AXBA_Apply($1))
  Form.nativeEvents:=0
  // Prove the existing human cell editor still works alongside AX selection.
  AL_SetAreaLongProperty(Form.area; ALP_Area_ReadOnly; 6)

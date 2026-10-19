@@ -12,7 +12,7 @@ Case of
   Form.acceptedName:=Form.name
   Form.message:="Ready"
   Form.originalLoad:=True
-  Form.bridgeAbsentDuringLoad:=Form.axbView=Null
+  Form.bridgeAbsentDuringLoad:=AXB_FormView(Form)=Null
   Form.timerFirings:=0
   Form.screenCenters:=New object
   For each ($name; New collection("Greet"; "Close"))
@@ -32,7 +32,7 @@ Case of
   End if
   AXBD_State(Form)
  : (Form event code=On Unload)
-  $stopped:=Form.axbView=Null
+  $stopped:=AXB_FormView(Form)=Null
   AXBD_ChildClose
   Form.stoppedBeforeUnload:=$stopped
   If (Form.config.nonblocking & (Form.kind#"child"))

@@ -182,7 +182,7 @@ Case of
   $state.ticks:=Form.ticks
   $state.bridgeError:=Form.axbError
   $state.bridgeFailure:=Form.axbFailure
-  $state.discovery:=Form.axbView.discovery
+  $state.discovery:=AXB_FormView(Form).discovery
   $state.diagnostics:=AXB_Form("diagnostics"; New object)
   ARRAY TO COLLECTION($state.order; $order)
   For each ($name; New collection("UnconfiguredProgress"; "Stepper"; "DateStepper"; "TimeStepper"; "LongStepper"; "Ruler"; "DateRuler"; "DateProgress"; "ReadOnlyDateProgress"; "ReadOnlyTimeProgress"; "Progress"; "Vertical"; "TimeProgress"; "FractionalProgress"; "DenseProgress"; "DisabledProgress"; "ReadOnlyProgress"; "RejectedProgress"; "Disabled"; "ReadOnly"; "Rejected"))

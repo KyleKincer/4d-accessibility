@@ -1,5 +1,5 @@
 #DECLARE -> $description : Object
-var $array; $collection : Object
+var $array; $collection; $root : Object
 var $definitions; $selection : Collection
 var $name : Text
 var $i : Integer
@@ -23,7 +23,10 @@ For ($i; 1; Size of array(aListSelected))
  End if
 End for
 // Fixture-only receipt recorder; production describe callbacks remain read-only.
-If ((Value type(Form.axbForm.receipt)=Is object) & (Form.axbForm.receipt#Null))
- Form.lastReceipt:=Form.axbForm.receipt
+$root:=AXB_FormContext
+If ($root#Null)
+ If ((Value type($root.receipt)=Is object) & ($root.receipt#Null))
+  Form.lastReceipt:=$root.receipt
+ End if
 End if
-File("/RESOURCES/runtime-status.json").setText(JSON Stringify(New object("phase"; "ready"; "runId"; Form.runId; "compiled"; Is compiled mode; "entity"; Form.entity; "bufferPreserved"; Form.bufferPreserved; "bridgeError"; Form.axbError; "arraySelected"; $selection; "collectionSelected"; Form.selected.extract("id"); "arrayFirst"; aListID{1}; "collectionFirst"; Form.rows[0].id; "arrayNodes"; $array.nodes; "collectionNodes"; $collection.nodes; "lastResult"; Form.lastResult; "hooks"; Form.hooks; "nativeEvents"; Form.nativeEvents; "keyTest"; Form.keyTest; "receipt"; Form.lastReceipt; "revision"; Form.axbForm.revision; "leftSelected"; Form.leftPicker.selectedItems.extract("id"); "rightSelected"; Form.rightPicker.selectedItems.extract("id"); "leftSummary"; Form.leftPicker.selectionSummary; "rightSummary"; Form.rightPicker.selectionSummary)))
+File("/RESOURCES/runtime-status.json").setText(JSON Stringify(New object("phase"; "ready"; "runId"; Form.runId; "compiled"; Is compiled mode; "entity"; Form.entity; "bufferPreserved"; Form.bufferPreserved; "bridgeError"; Form.axbError; "arraySelected"; $selection; "collectionSelected"; Form.selected.extract("id"); "arrayFirst"; aListID{1}; "collectionFirst"; Form.rows[0].id; "arrayNodes"; $array.nodes; "collectionNodes"; $collection.nodes; "lastResult"; Form.lastResult; "hooks"; Form.hooks; "nativeEvents"; Form.nativeEvents; "keyTest"; Form.keyTest; "receipt"; Form.lastReceipt; "revision"; $root.revision; "leftSelected"; Form.leftPicker.selectedItems.extract("id"); "rightSelected"; Form.rightPicker.selectedItems.extract("id"); "leftSummary"; Form.leftPicker.selectionSummary; "rightSummary"; Form.rightPicker.selectionSummary)))

@@ -18,6 +18,7 @@ If ($context#Null)
  OB REMOVE(AXB_CoreWindows; String($window))
  $data:=$context.data
  If (($data#Null) && (New collection(4D.Object).indexOf(OB Class($data))=0) && Not(OB Is shared($data)))
+  // Earlier versions kept an alias on the form's data.
   If (New collection($data.axb).indexOf($context)=0)
    OB REMOVE($data; "axb")
   End if

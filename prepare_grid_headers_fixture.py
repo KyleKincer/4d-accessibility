@@ -119,8 +119,8 @@ $context:=AXB_FormContext
 If ($context#Null)
  $state.bridgeActive:=$context.active
  $state.token:=New object("active"; $context.token.active; "pending"; $context.token.pending; "fast"; $context.token.fast)
- If (($context.state#Null) && (Length($context.state)>0))
-  $state.snapshot:=JSON Parse($context.state)
+ If ($context.sentNodes#Null)
+  $state.snapshot:=New object("enabled"; $context.sentEnabled; "nodes"; $context.sentNodes)
  End if
 End if
 ''')

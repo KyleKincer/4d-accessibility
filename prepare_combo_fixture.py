@@ -105,7 +105,7 @@ Case of
  : (Form event code=On Timer)
   Form.ticks:=Form.ticks+1
   $state:=New object("ready"; True; "start"; Form.start; "ticks"; Form.ticks; "saved"; Form.saved; "events"; Form.events; "bridgeError"; Form.axbError; "failure"; Form.axbFailure)
-  $state.discovery:=Form.axbView.discovery
+  $state.discovery:=AXB_FormView(Form).discovery
   $state.instrument:=ComboChoices{0}
   $state.wood:=Form.wood.currentValue
   $state.woodChoices:=Form.wood.values

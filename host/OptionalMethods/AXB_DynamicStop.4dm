@@ -1,6 +1,6 @@
 // Stop the captured window lifetime even if another form shares its data.
 #DECLARE($data : Object; $owner : Object)
-var $current : Object
+var $current; $view : Object
 If ($data=Null)
  return
 End if
@@ -14,6 +14,7 @@ Else
   End if
  End if
 End if
-If ((New collection(4D.Object).indexOf(OB Class($data))=0) && Not(OB Is shared($data)) && ($data.axbView#Null) && Not($data.axbView.root=True))
- OB REMOVE($data; "axbView")
+$view:=AXB_FormView($data)
+If (($view#Null) && Not($view.root=True))
+ AXB_FormViewSet($data; Null)
 End if

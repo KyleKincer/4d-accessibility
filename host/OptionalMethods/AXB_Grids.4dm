@@ -7,7 +7,7 @@ var $options; $state; $reply; $action; $configured : Object
 var $table : Pointer
 var $detail; $list : Text
 var $position; $type : Integer
-var $formKey : Text
+var $formKey; $issues : Text
 var $ready : Boolean
 ARRAY TEXT($objects; 0)
 ARRAY TEXT($methods; 0)
@@ -209,7 +209,16 @@ For each ($name; $configured)
     End if
    Else
     If ($request.node=$id)
-     return AXB_GridListbox($request.operation; $options; $state; $request)
+     $issues:=JSON Stringify($state.valueIssues)
+     $result:=AXB_GridListbox($request.operation; $options; $state; $request)
+     // Reading a page can find a value that needs a description, or no longer does. Coverage
+     // is gathered when the form is described: describe it again, even if nothing is redrawn.
+     If (($request.operation="readGrid") && (Compare strings(JSON Stringify($state.valueIssues); $issues; sk char codes)#0) && (AXB_FormRoots#Null))
+      If (AXB_FormRoots[String(Current form window)]#Null)
+       AXB_FormRoots[String(Current form window)].describeAgain:=True
+      End if
+     End if
+     return $result
     End if
    End if
   End if

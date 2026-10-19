@@ -129,7 +129,7 @@ For each ($item; Form.rows)
   $far:=$item.name
  End if
 End for each
-$state:=New object("phase"; "ready"; "runId"; Form.runId; "compiled"; Is compiled mode; "start"; Form.startResult; "bridgeError"; Form.axbError; "failure"; Form.failure; "selected"; Form.selected.extract("id"); "hooks"; Form.hooks; "hookSelection"; Form.hookSelection; "timerTicks"; Form.timerTicks; "note"; Form.note; "first"; Form.rows[0].id; "rows"; Form.rows.length; "receipt"; Form.axbForm.receipt; "edited"; $edited; "focus"; OBJECT Get name(Object with focus); "farValue"; $far; "changes"; Form.changes; "edits"; Form.edits; "filtered"; Form.filtered)
+$state:=New object("phase"; "ready"; "runId"; Form.runId; "compiled"; Is compiled mode; "start"; Form.startResult; "bridgeError"; Form.axbError; "failure"; Form.failure; "selected"; Form.selected.extract("id"); "hooks"; Form.hooks; "hookSelection"; Form.hookSelection; "timerTicks"; Form.timerTicks; "note"; Form.note; "first"; Form.rows[0].id; "rows"; Form.rows.length; "receipt"; AXB_FormRoots[String(Current form window)].context.receipt; "edited"; $edited; "focus"; OBJECT Get name(Object with focus); "farValue"; $far; "changes"; Form.changes; "edits"; Form.edits; "filtered"; Form.filtered)
 $state.diagnostics:=AXB_Form("diagnostics"; New object)
 File("/RESOURCES/runtime-status.json").setText(JSON Stringify($state))
 """)
@@ -162,7 +162,7 @@ File("/RESOURCES/runtime-status.json").setText(JSON Stringify($state))
         start, end = click.index('  $copy:=New collection'), click.index(' : (OBJECT Get name(Object current)="Reject selection")')
         click = click[:start] + '  Form.rows:=ds.AXBGOther.all().orderBy("id desc")\n  Form.selected:=ds.AXBGOther.newSelection()\n' + click[end:]
         start, end = click.index('  If (Form.originalSecondKey=Null)'), click.index(' : (OBJECT Get name(Object current)="Sort")')
-        click = click[:start] + '  If (Form.axbView.options.grids.Items.keyProperty=Null)\n   Form.axbView.options.grids.Items.keyProperty:="duplicateKey"\n  Else\n   OB REMOVE(Form.axbView.options.grids.Items; "keyProperty")\n  End if\n' + click[end:]
+        click = click[:start] + '  var $axbView : Object\n  $axbView:=AXB_FormView(Form)\n  If ($axbView.options.grids.Items.keyProperty=Null)\n   $axbView.options.grids.Items.keyProperty:="duplicateKey"\n  Else\n   OB REMOVE($axbView.options.grids.Items; "keyProperty")\n  End if\n' + click[end:]
         click = click.replace('Form.rows.remove(0)\n  Form.rows:=Form.rows', 'Form.rows:=Form.rows.slice(1)')
         (methods / "AXBG_Click.4dm").write_text(click)
         (methods / "AXBG_SeedError.4dm").write_text('File("/RESOURCES/seed.json").setText(JSON Stringify(New object("passed"; False; "error"; Error; "method"; Error method; "line"; Error line)))\nQUIT 4D\nABORT\n')
@@ -402,7 +402,7 @@ End if
   Form.invalidMeta:=Not(Form.invalidMeta)
 ''', 1))
         if args.entity:
-            click.write_text(click.read_text().replace('Form.axbView.options.grids.Items.keyProperty:="duplicateKey"', 'Form.axbView.options.grids.Items.keyProperty:="duplicateKey"\n   Form.expectedMetaKey:="duplicateKey"').replace('OB REMOVE(Form.axbView.options.grids.Items; "keyProperty")', 'OB REMOVE(Form.axbView.options.grids.Items; "keyProperty")\n   Form.expectedMetaKey:="id"'))
+            click.write_text(click.read_text().replace('$axbView.options.grids.Items.keyProperty:="duplicateKey"', '$axbView.options.grids.Items.keyProperty:="duplicateKey"\n   Form.expectedMetaKey:="duplicateKey"').replace('OB REMOVE($axbView.options.grids.Items; "keyProperty")', 'OB REMOVE($axbView.options.grids.Items; "keyProperty")\n   Form.expectedMetaKey:="id"'))
         (methods / "AXBG_RowFlags.4dm").write_text('''var $item : Object
 If (Form.rows=Null)
  aGridControl{Find in array(aGridKey; "line-0600")}:=Choose(Form.disableFar; lk row is disabled; 0)+Choose(Form.unselectFar; lk row is not selectable; 0)
@@ -428,7 +428,7 @@ End if
                 continue
             objects[name] = {"type": "button", "text": name, "left": 20 + index * 200, "top": 490, "width": 190, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
     state_method = methods / "AXBG_State.4dm"
-    state_method.write_text('var $context; $snapshot : Object\n' + state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$context:=AXB_FormContext\nIf (($context#Null) && ($context.state#Null) && (Length($context.state)>0))\n $snapshot:=JSON Parse($context.state)\n $state.windowActive:=$snapshot.enabled\n $state.focused:=$snapshot.nodes.query("focused = :1"; True).extract("id")\nEnd if\n$state.diagnostics:='))
+    state_method.write_text('var $context; $snapshot : Object\n' + state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$context:=AXB_FormContext\nIf (($context#Null) && ($context.sentNodes#Null))\n $state.windowActive:=$context.sentEnabled\n $state.focused:=$context.sentNodes.query("focused = :1"; True).extract("id")\nEnd if\n$state.diagnostics:='))
     form = {"windowTitle": TITLE, "width": 645, "height": 550 if args.row_states else 465 if args.described else 425, "method": "AXBG_Form", "events": ["onLoad", "onTimer", "onUnload"], "pages": [None, {"objects": objects}]}
     folder = sources / "Forms/Grid"
     folder.mkdir(parents=True)
@@ -440,14 +440,14 @@ End if
         child_method.write_text(child_method.read_text().replace('  $result:=AXB_Form("start"; $options)', '  $options.label:="Grid"\n  Form.providerOptions:=$options\n  Form.fixtureSubform:=True\n  OBJECT SET VISIBLE(*; "Close"; False)').replace('  Form.startResult:=$result\n', '').replace('  SET TIMER(6)\n', '').replace('  AXBG_State\n', '').replace('  $result:=AXB_Form("stop"; New object)', '  // The root owns bridge cleanup.'))
         if args.entity:
             click = methods / "AXBG_Click.4dm"
-            source = click.read_text().replace("Form.axbView.options", "Form.providerOptions")
+            source = click.read_text().replace("$axbView.options", "Form.providerOptions")
             boundary = source.index(' : (OBJECT Get name(Object current)="Sort")')
             source = source[:boundary] + '  Form.restartRequested:=True\n' + source[boundary:]
             click.write_text(source)
         state_method = methods / "AXBG_State.4dm"
         # The child has no root registration. Its read-only observer consumes
         # the snapshot captured by the owning root, just like diagnostics.
-        state_method.write_text(state_method.read_text().replace('"bridgeError"; Form.axbError', '"bridgeError"; Form.rootBridgeError').replace('"failure"; Form.failure', '"failure"; Form.rootFailure').replace('AXB_Form("diagnostics"; New object)', 'Form.rootCoverage').replace('$context:=AXB_FormContext', '$context:=New object("state"; Form.rootSnapshot)'))
+        state_method.write_text(state_method.read_text().replace('"bridgeError"; Form.axbError', '"bridgeError"; Form.rootBridgeError').replace('"failure"; Form.failure', '"failure"; Form.rootFailure').replace('AXB_Form("diagnostics"; New object)', 'Form.rootCoverage').replace('$context:=AXB_FormContext', '$context:=Form.rootSnapshot'))
         (methods / "AXBG_Root.4dm").write_text('''var $options; $reply : Object
 var $context : Object
 Case of
@@ -472,7 +472,7 @@ Case of
    Form.grid.rootFailure:=Form.axbFailure
    Form.grid.rootCoverage:=AXB_Form("diagnostics"; New object)
    $context:=AXB_FormContext
-   Form.grid.rootSnapshot:=$context.state
+   Form.grid.rootSnapshot:=New object("sentEnabled"; $context.sentEnabled; "sentNodes"; $context.sentNodes)
    EXECUTE METHOD IN SUBFORM("Grid"; "AXBG_State")
   End if
  : (Form event code=On Unload)
@@ -514,7 +514,9 @@ End case
         form_method.write_text(form_method.read_text().replace('Formula(Form.scope)', 'Formula(AXBG_SlowScope)').replace('; "onSelection"; Formula(AXBG_Selected)', ''))
         (methods / "AXBG_SlowScope.4dm").write_text('''// Simulate an expensive application callback while a selection is pending.
 #DECLARE() -> $scope : Text
-If ((Form.axbForm#Null) && (Form.axbForm.pending#Null))
+var $root : Object
+$root:=AXB_FormContext
+If (($root#Null) && ($root.pending#Null))
  DELAY PROCESS(Current process; 70)
 End if
 $scope:=Form.scope

@@ -70,9 +70,12 @@ C_OBJECT(oAppTraces)
 C_TEXT(AppTrace_Start; $1)
 C_BOOLEAN(AppTrace_End; $1)
 C_TEXT(AppTrace_End; $2)
+C_OBJECT(ReportAccessibilityFailure; $1)
 ''')
     (methods / 'AppTrace_Start.4dm').write_text('#DECLARE($name : Text)\n')
     (methods / 'AppTrace_End.4dm').write_text('#DECLARE($success : Boolean; $message : Text)\n')
+    # The walkthrough reports failures through the application's own diagnostic method.
+    (methods / 'ReportAccessibilityFailure.4dm').write_text('#DECLARE($failure : Object)\nFile("/RESOURCES/failure.json").setText(JSON Stringify($failure))\n')
     for path in (ROOT / 'tests/4d').glob('AXBA_*.4dm'):
         shutil.copy2(path, methods / path.name)
     walkthrough = ROOT / 'skills/4d-accessibility/references/examples/AREALIST-SUBFORM.md'

@@ -2,7 +2,8 @@
 // Every path comes from the application's describe callback, never an AX request.
 #DECLARE($request : Object) -> $result : Object
 var $view; $description; $node; $other; $copy; $route; $child; $packet; $options; $created; $registry; $grids; $issue : Object
-var $pageByObject : Object
+var $pageByObject; $registered; $now : Object
+var $currentIssues : Collection
 var $name; $prefix; $id; $key; $registration; $standardAction : Text
 var $detailForm; $listForm : Text
 var $frame; $clip; $offset; $path; $lineage; $unsupported; $focusNames; $kept : Collection
@@ -52,9 +53,12 @@ If ($request.autoParent#Null)
  $name:=$request.container
  $options:=New object("label"; $name)
  $registration:=""
- If ($aliases && (Form.axbView#Null) && Not(Form.axbView.root=True))
-  $options:=Form.axbView.options
-  $registration:=Form.axbView.instance
+ If ($aliases)
+  $registered:=AXB_FormView(Form)
+  If (($registered#Null) && Not($registered.root=True))
+   $options:=$registered.options
+   $registration:=$registered.instance
+  End if
  End if
  If ($request.autoParent.options.children#Null)
   If ($request.autoParent.options.children[$name]#Null)
@@ -93,7 +97,7 @@ Else
   $view:=$request.rootView
  Else
   If ($aliases)
-   $view:=Form.axbView
+   $view:=AXB_FormView(Form)
   End if
  End if
 End if
@@ -732,7 +736,17 @@ If ($cache#Null)
    $result.routes[$key]:=$cache.routes[$key]
   End for each
  End if
- $result.issues:=$cache.issues.copy()
+ // The objects described now, and the grids, which are described every time, report their
+ // issues afresh; the others keep those of the description that last described them.
+ $currentIssues:=$result.issues
+ $now:=OB Copy($only)
+ For each ($node; $grids.nodes)
+  $now[$node.objectName]:=True
+ End for each
+ For each ($copy; $currentIssues)
+  $now[$copy.object]:=True
+ End for each
+ $result.issues:=$cache.issues.filter(Formula(Not(OB Is defined($2; $1.value.object))); $now).concat($currentIssues)
  $registry.partialDescriptions:=Num($registry.partialDescriptions)+1
 End if
 If ($storing)

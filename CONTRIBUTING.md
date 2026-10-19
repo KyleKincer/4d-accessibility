@@ -83,6 +83,16 @@ python3 test_native_messages.py --run --voiceover
 
 `--baseline` records the plugin-free windows, advancing with Return only as setup. `--run` then requires identical pixels before acting through AX. `--voiceover` navigates, types and activates with VoiceOver and records only the fixture's speech. It reads speech through VoiceOver's AppleScript `last phrase`, so "Allow VoiceOver to be controlled with AppleScript" must be enabled. Add `--intel` for Rosetta, or `--compiled --server /path/to/4D\ Server.app` to compile the copy first. Reports stay under ignored `build/`.
 
+For 4D's error window, shown when a method fails with no error handler:
+
+```sh
+python3 test_error_window_fixture.py --server /path/to/4D\ Server.app
+python3 test_error_window_fixture.py --server /path/to/4D\ Server.app --compiled
+python3 test_error_window_fixture.py --server /path/to/4D\ Server.app --voiceover
+```
+
+Abort must stop the failing method, and Continue resume it. `--compiled` also requires Edit and Trace to be unavailable. Add `--intel` for Rosetta.
+
 For focus after a host mode change, without a 4D installation:
 
 ```sh
