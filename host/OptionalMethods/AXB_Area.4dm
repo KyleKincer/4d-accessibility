@@ -1,7 +1,7 @@
 // Fixed area lifecycle entry point. Root startup is queued after application load.
 // A form-owned dynamic pointer distinguishes repeated/shared child instances.
 #DECLARE($operation : Text; $id : Text; $name : Text) -> $result : Object
-var $record; $context; $options; $reply; $guard; $item; $failure : Object
+var $record; $context; $options; $reply; $guard; $item; $failure; $stored : Object
 var $label; $configuration : Text
 var $registered : Boolean
 ARRAY TEXT($methods; 0)
@@ -102,7 +102,17 @@ If ($configuration="")
  $configuration:=Current form name
 End if
 $record.configuration:=$configuration
-$label:=Get window title(Current form window)
+// The form's definition may store its own label ("axb"), ahead of its window title.
+$stored:=AXB_FormStored("options")
+$label:=""
+If ($stored#Null)
+ If (Value type($stored.label)=Is text)
+  $label:=$stored.label
+ End if
+End if
+If ($label="")
+ $label:=Get window title(Current form window)
+End if
 If ($label="")
  $label:=$configuration
 End if
@@ -130,6 +140,17 @@ End if
 If (($options#Null) && (Value type($options)=Is object) && Not(OB Is defined($options; "automationKey")) && ($configuration#""))
  $options:=OB Copy($options)
  $options.automationKey:=$configuration
+ If ($stored#Null)
+  If (Value type($stored.automationKey)=Is text)
+   $options.automationKey:=$stored.automationKey
+  End if
+ End if
+End if
+If (($options#Null) && (Value type($options)=Is object) && Not(OB Is defined($options; "enabled")) && ($stored#Null))
+ If ($stored.enabled=False)
+  $options:=OB Copy($options)
+  $options.enabled:=False
+ End if
 End if
 $record.options:=$options
 If (($options#Null) && ($options.enabled=False))

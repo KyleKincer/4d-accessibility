@@ -172,10 +172,11 @@ End if
     elif args.configuration == "invalid":
         (methods / "AXB_Configure.4dm").write_text('#DECLARE($name : Text) -> $options : Object\n$options:=New object("label"; "")\n')
     elif args.configuration == "form-labels":
-        # The root's and the child's field labels live in their definitions ("axb"). The
-        # callback still names the Remember button, over a different stored label.
+        # The root's own label and automation key, and the root's and the child's field
+        # labels, live in their definitions ("axb"). The callback still names the
+        # Remember button, over a different stored label.
         (methods / "AXB_Configure.4dm").write_text('''#DECLARE($formName : Text) -> $options : Object
-$options:=New object("label"; "Area lifecycle"; "controls"; New object("Remember"; New object("label"; "Remember root")); "children"; New object("Child"; New object("label"; "Child")))
+$options:=New object("controls"; New object("Remember"; New object("label"; "Remember root")); "children"; New object("Child"; New object("label"; "Child")))
 If (Not(Form.loaded=True))
  $options:=Null
 End if
@@ -207,6 +208,8 @@ End if
                 form["pages"][1]["objects"][object_name]["axb"] = {"label": label}
             # Only the stored label can name the child's field.
             form["pages"][1]["objects"]["Name"].pop("tooltip", None)
+            if name == "Root":
+                form["axb"] = {"label": "Area lifecycle", "automationKey": "stored.root"}
             path.write_text(json.dumps(form, indent=2) + "\n")
     if args.compound:
         configuration = methods / "AXB_Configure.4dm"

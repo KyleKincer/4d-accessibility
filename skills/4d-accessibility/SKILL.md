@@ -5,7 +5,7 @@ description: Integrate or extend the 4D Accessibility bridge in 4D projects, inc
 
 # Integrate 4D accessibility
 
-Prefer an installer-added lifecycle area and automatic discovery. Give every detail form the area (`--all-forms`), and give each new detail form one when it is created: a process starts dormant, so an area costs nothing until an assistive technology uses it ([performance](../../PERFORMANCE.md)). Keep business methods and timers. Keep a fixed label or flag on its object in the form definition (`axb`), and return computed labels and provider configuration from application-owned `AXB_Configure`; map a shared controller only where the adapter needs application intent it cannot infer.
+Prefer an installer-added lifecycle area and automatic discovery. Give every detail form the area (`--all-forms`), and give each new detail form one when it is created: a process starts dormant, so an area costs nothing until an assistive technology uses it ([performance](../../PERFORMANCE.md)). Keep business methods and timers. Keep everything static in the form definition under `axb`: an object's label or flag on the object, a grid's kind, key column and labels on the list box and its columns, and the form's own label and options at the top of the form. Return only behavior from application-owned `AXB_Configure`: formulas, pointers, labels computed at run time and objects created at run time; map a shared controller only where the adapter needs application intent it cannot infer.
 
 ## 1. Establish the integration boundary
 
@@ -27,7 +27,7 @@ Use `install_host_methods.py --help` from the checkout or complete kit, then ins
 
 Add `--area-list` only for AreaList hosts. Keep the same `--compiler-method` target on refresh. Generated methods and their marked compiler block are installer-owned; application configuration methods remain application-owned. If an existing generated method was edited, inspect the change and reconcile it with canonical source before refreshing.
 
-Matching 0.22.0 kits also own `Resources/AXB.FormMetadata.json` next to `Project`; 0.40.0 kits add objects' `axb` metadata to it. Area installation can generate it even when the selected form has no list. Commit and ship that resource. Refresh it after form changes and reopen affected forms, following the [metadata contract](references/LIST-SUBFORMS.md#install-a-parent-form).
+Matching 0.22.0 kits also own `Resources/AXB.FormMetadata.json` next to `Project`; 0.40.0 kits add objects' `axb` metadata to it, and 0.41.0 kits forms' own options and grids. Area installation can generate it even when the selected form has no list. Commit and ship that resource. Refresh it after form changes and reopen affected forms, following the [metadata contract](references/LIST-SUBFORMS.md#install-a-parent-form).
 
 Verify the installed parts from any host method:
 
@@ -38,7 +38,7 @@ Complete when the installed package checks and host compiler pass. The next step
 
 ## 3. Choose the smallest form integration
 
-For named forms, rerun the installer with the step 2 options plus repeatable `--form <name>` or `--all-forms`, and `--dry-run`. Resolve conflicts, rerun without `--dry-run`, and review the form diff. Bulk installation skips list/print forms and referenced list-row forms. Named inheritance shares one base area unless that base also serves a list row; detail branches then own their area locally. Bulk migration removes exact installer-owned areas from row forms and shared row bases. Existing objects, layout, methods and events must remain equivalent. The page-zero area owns startup/shutdown. Ordinary forms need no business-method hooks. For a missing label on one object, add `axb` to that object in the form definition. Add optional `AXB_Configure` for computed labels, `scope`, grids or existing providers, including its application compiler declarations.
+For named forms, rerun the installer with the step 2 options plus repeatable `--form <name>` or `--all-forms`, and `--dry-run`. Resolve conflicts, rerun without `--dry-run`, and review the form diff. Bulk installation skips list/print forms and referenced list-row forms. Named inheritance shares one base area unless that base also serves a list row; detail branches then own their area locally. Bulk migration removes exact installer-owned areas from row forms and shared row bases. Existing objects, layout, methods and events must remain equivalent. The page-zero area owns startup/shutdown. Ordinary forms need no business-method hooks. For a missing label on one object, add `axb` to that object in the form definition. Add optional `AXB_Configure` for computed labels, `scope`, grid formulas or existing providers, including its application compiler declarations.
 
 When migrating a manual registration, preserve it until area configuration covers the same providers and failure handling. Follow the [migration ordering and ownership rules](references/AREA-INTEGRATION.md#migrate-and-verify), then remove validated one-shot start/stop calls. Keep intentional restart, explicit child registration, invalidation and focus observation where their lifecycle reason remains. The [manual interface](references/MANUAL-LIFECYCLE.md) remains for deliberately application-owned registrations.
 

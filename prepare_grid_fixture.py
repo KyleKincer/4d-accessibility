@@ -35,6 +35,7 @@ def main():
     parser.add_argument("--stored-meta", action="store_true", help="Read the collection's existing This.meta objects automatically")
     parser.add_argument("--slow-visible-selection", action="store_true", help="Reproduce visible-row confirmation under expensive application callbacks")
     parser.add_argument("--slow-distant-selection", action="store_true", help="Reproduce a distant row reveal with an expensive selection controller")
+    parser.add_argument("--stored-grid", action="store_true", help="Keep the grid's kind, key column, label and a column label on the list box in its form definition (\"axb\")")
     parser.add_argument("--boolean-hidden", action="store_true", help="Use the legacy Boolean hidden-row array without changing the host binding")
     args = parser.parse_args()
     if args.boolean_hidden and (args.collection or args.entity or args.subform or args.described or args.row_states or args.cell_controls or args.slow_visible_selection or args.slow_distant_selection or args.key_type != "text"):
@@ -51,6 +52,8 @@ def main():
         parser.error("--object-description requires --described with an array grid")
     if args.styled_description and (not args.described or not (args.collection or args.entity)):
         parser.error("--styled-description requires --described with a collection or entity grid")
+    if args.stored_grid and (args.collection or args.entity or args.subform or args.described):
+        parser.error("--stored-grid uses the root array fixture")
     if args.stored_meta and (not args.row_states or not args.collection):
         parser.error("--stored-meta requires --row-states --collection")
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
@@ -429,6 +432,14 @@ End if
             objects[name] = {"type": "button", "text": name, "left": 20 + index * 200, "top": 490, "width": 190, "height": 28, "method": "AXBG_Click", "events": ["onClick"]}
     state_method = methods / "AXBG_State.4dm"
     state_method.write_text('var $context; $snapshot : Object\n' + state_method.read_text().replace('$state.diagnostics:=', '$state.rejectSelection:=Form.rejectSelection\n$context:=AXB_FormContext\nIf (($context#Null) && ($context.sentNodes#Null))\n $state.windowActive:=$context.sentEnabled\n $state.focused:=$context.sentNodes.query("focused = :1"; True).extract("id")\nEnd if\n$state.diagnostics:='))
+    if args.stored_grid:
+        # Only the callbacks stay in the form method; the static grid lives on the list box.
+        form_method = methods / "AXBG_Form.4dm"
+        source = form_method.read_text()
+        assert '"kind"; "array"; "keyColumn"; "RowID"; "label"; "Invoice lines"; ' in source
+        form_method.write_text(source.replace('"kind"; "array"; "keyColumn"; "RowID"; "label"; "Invoice lines"; ', ''))
+        objects["Items"]["axb"] = {"grid": {"kind": "array", "keyColumn": "RowID", "label": "Invoice lines"}}
+        next(c for c in objects["Items"]["columns"] if c["name"] == "ItemAmount")["axb"] = {"label": "Line amount"}
     form = {"windowTitle": TITLE, "width": 645, "height": 550 if args.row_states else 465 if args.described else 425, "method": "AXBG_Form", "events": ["onLoad", "onTimer", "onUnload"], "pages": [None, {"objects": objects}]}
     folder = sources / "Forms/Grid"
     folder.mkdir(parents=True)
@@ -550,6 +561,11 @@ $scope:=Form.scope
             if args.repeated:
                 configuration = methods / "AXB_Configure.4dm"
                 configuration.write_text(configuration.read_text().replace(' : ($formName="Root")', ' : ($formName="Root")\n  Form.peer.providerOptions.label:="Peer"'))
+    if args.stored_grid:
+        from install_host_methods import form_metadata_changes
+        for target, content in form_metadata_changes(FIXTURE / "Project", True).items():
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content)
     hashes = {str(p.relative_to(FIXTURE)): sha(p) for p in sources.rglob("*") if p.is_file()}
     with tempfile.TemporaryDirectory(prefix="logical-grid-compile-", dir=BUILD) as temporary:
         driver = Path(temporary)
@@ -562,7 +578,7 @@ $scope:=Form.scope
     passed = compiled.get("success") is True and not compiled.get("errors")
     (BUILD / "logical-grid-compile-report.json").write_text(json.dumps({"passed": passed, "area": args.area, "compiler": compiled, "sources_sha256": hashes,
         "native_sha256": sha(FIXTURE / "Plugins/AccessibilityBridge.bundle/Contents/MacOS/AccessibilityBridge"),
-        "component_sha256": sha(PACKAGE / "AccessibilityBridge.4DZ")}, indent=2) + "\n")
+        "component_sha256": sha(PACKAGE / "AccessibilityBridge.4DZ"), "storedGrid": args.stored_grid}, indent=2) + "\n")
     print(f"{'PASS' if passed else 'FAIL'}: logical-grid fixture compilation")
     raise SystemExit(0 if passed else 1)
 

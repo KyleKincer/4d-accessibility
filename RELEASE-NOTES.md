@@ -1,3 +1,12 @@
+# Unreleased, form options and grids stored in the form definition
+
+- **A form's own options can live in its definition.** Put `"axb": {"label": "Customers", "automationKey": "customers.main", "omitOutsideWindow": true}` at the top level of the form. It takes `label`, `automationKey`, `omitOutsideWindow`, `idleRefresh` and `enabled`; a derived form does not inherit it. A form whose `AXB_Configure` returns no label uses the stored one ahead of its window title. [Static metadata](skills/4d-accessibility/references/INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects).
+- **So can a grid's static configuration.** A list box or AreaList area takes `axb.grid` with `kind`, `label`, `keyColumn`, `keyProperty` and `columns`, and a list box column takes its own `axb` label, `decorative` or `automationKey`. `AXB_Configure` keeps only the formulas and pointers (`ready`, `onSelection`, a column's `value`, an AreaList grid's `keys`); its entries override stored ones key by key, and columns merge column by column. A stored grid with a `kind` needs no `AXB_Configure` entry, except an AreaList grid.
+- **The installer packages both** into `Resources/AXB.FormMetadata.json` as `options` and `grids`, refuses unknown keys and wrong types, naming the form and object, and leaves the digest of a resource without them unchanged.
+- [Area acceptance](prepare_area_fixture.py) (`--configuration form-labels`) now takes the root's label and automation key from its definition; [grid acceptance](prepare_grid_fixture.py) gains `--stored-grid`; installer tests.
+
+For developers: the new host helper `AXB_FormStored` reads the current form's stored sections; `AXB_FormControls` and `AXB_Area` use it. Refresh host helpers with the plugin and component.
+
 # 0.40.0, labels stored on the form's objects
 
 - **A form object can carry its own accessibility metadata.** Put `"axb": {"label": "Save contact"}` on the object in its form definition, beside 4D's properties. 4D ignores the key, the project compiles, and the Form Editor keeps it when it saves. The label follows the object through a rename, where a `controls` entry in `AXB_Configure` stays behind. `axb` takes `label`, `description`, `automationKey`, `protected`, `decorative`, `multiline`, `layer`, `step` and `cells`; formulas and form-level options stay in `AXB_Configure`, whose `controls` entries override stored values key by key. [Static control metadata](skills/4d-accessibility/references/INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects).
