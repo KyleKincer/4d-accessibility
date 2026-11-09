@@ -289,6 +289,74 @@ class InstallTests(unittest.TestCase):
             json.loads(resource.read_text())["forms"]["1"]["Rows"]["body"], 56
         )
 
+    def test_object_metadata_in_definitions_is_packaged_with_inheritance(self):
+        base, base_value = self.form("Base")
+        base_value["pages"][1]["objects"]["Name"]["axb"] = {"label": "Customer name"}
+        base.write_text(json.dumps(base_value))
+        derived, value = self.form("Customer")
+        value["inheritedForm"] = "Base"
+        value["pages"][1]["objects"] = {"SaveIcon": {"type": "button", "left": 5, "top": 5, "width": 20, "height": 20,
+                                                     "axb": {"label": "Save customer", "automationKey": "save"}},
+                                        "Logo": {"type": "picture", "axb": {"decorative": True, "layer": -1}}}
+        derived.write_text(json.dumps(value))
+        table, table_value = self.form("Input", table=True)
+        table_value["pages"][1]["objects"]["Name"]["axb"] = {"label": "Record name", "protected": True}
+        table.write_text(json.dumps(table_value))
+        originals = {path: path.read_bytes() for path in (base, derived, table)}
+        self.run_installer("--form-metadata")
+        resource = self.project.parent / "Resources" / METADATA_NAME
+        content = json.loads(resource.read_text())
+        self.assertEqual(content["controls"], {
+            "0": {"Base": {"Name": {"label": "Customer name"}},
+                  "Customer": {"Name": {"label": "Customer name"},
+                               "SaveIcon": {"label": "Save customer", "automationKey": "save"},
+                               "Logo": {"decorative": True, "layer": -1}}},
+            "1": {"Input": {"Name": {"label": "Record name", "protected": True}}}})
+        self.assertEqual(content["forms"], {})
+        self.assertEqual({path: path.read_bytes() for path in originals}, originals)
+        first = resource.read_bytes()
+        self.run_installer()
+        self.assertEqual(resource.read_bytes(), first)
+        # A changed label regenerates; a removed one leaves no stale entry.
+        table_value["pages"][1]["objects"]["Name"].pop("axb")
+        table.write_text(json.dumps(table_value))
+        self.run_installer()
+        self.assertNotIn("1", json.loads(resource.read_text())["controls"])
+
+    def test_metadata_without_object_labels_keeps_its_earlier_digest(self):
+        row, value = self.form("Rows", table=True)
+        value.update(destination="listScreen", markerHeader=28, markerBody=52)
+        row.write_text(json.dumps(value))
+        self.run_installer("--form-metadata")
+        content = json.loads((self.project.parent / "Resources" / METADATA_NAME).read_text())
+        self.assertNotIn("controls", content)
+        from install_host_methods import metadata_digest
+        import hashlib
+        self.assertEqual(content["sha256"], hashlib.sha256(json.dumps(content["forms"], sort_keys=True, separators=(",", ":")).encode()).hexdigest())
+        self.assertEqual(content["sha256"], metadata_digest(content["forms"]))
+
+    def test_invalid_object_metadata_stops_every_write(self):
+        cases = {"lable": "unknown axb.lable", "label": "axb.label must be non-empty text"}
+        for key, message in cases.items():
+            with self.subTest(key=key):
+                path, value = self.form()
+                value["pages"][1]["objects"]["Name"]["axb"] = {key: "" if key == "label" else "Name"}
+                path.write_text(json.dumps(value))
+                before = self.snapshot()
+                result = self.run_installer("--form-metadata", success=False)
+                self.assertIn("Sources/Forms/Customer: Name", result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertEqual(before, self.snapshot())
+
+    def test_copied_object_metadata_is_reported(self):
+        path, value = self.form()
+        objects = value["pages"][1]["objects"]
+        objects["Name"]["axb"] = {"label": "Customer name"}
+        objects["Name1"] = dict(objects["Name"], top=60)
+        path.write_text(json.dumps(value))
+        result = self.run_installer("--form-metadata")
+        self.assertIn("Warning: Sources/Forms/Customer: objects Name, Name1 share axb.label \"Customer name\"", result.stderr)
+
     def test_current_project_directory_places_metadata_beside_project(self):
         self.form()
         row, value = self.form("Rows", table=True)

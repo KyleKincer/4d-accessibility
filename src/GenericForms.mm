@@ -44,6 +44,9 @@ static NSDictionary<NSString *, NSDictionary *> *ObjectsOf(NSDictionary *definit
             for (NSString *key in @[@"type", @"text", @"tooltip", @"placeholder", @"enterable", @"width", @"height", @"style", @"showHeaders", @"headerHeight", @"detailForm", @"listForm", @"display", @"picture", @"icon",
                                     @"pluginAreaKind"])
                 if (object[key] && ![object[key] isKindOfClass:NSDictionary.class] && ![object[key] isKindOfClass:NSArray.class]) info[key] = object[key];
+            // The object's own accessibility label, kept in its definition beside 4D's properties.
+            NSDictionary *metadata = [object[@"axb"] isKindOfClass:NSDictionary.class] ? object[@"axb"] : nil;
+            if ([metadata[@"label"] isKindOfClass:NSString.class] && [metadata[@"label"] length]) info[@"label"] = metadata[@"label"];
             // A list box's columns: their titles and widths, as defined.
             if ([object[@"columns"] isKindOfClass:NSArray.class]) {
                 NSMutableArray *columns = [NSMutableArray new];
@@ -668,6 +671,8 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
         NSString *drawn = [AXBDrawnTextForLayer(layer) componentsJoinedByString:@" "];
         NSString *title = Plain(drawn) ?: Plain(info[@"text"]);
         NSString *help = Plain(info[@"tooltip"]);
+        // A label the definition gives the object names it before anything drawn or inferred.
+        NSString *stored = Plain(info[@"label"]);
         NSRect area = ObjectArea(layer, info);
         NSMutableDictionary *entry = [@{@"key": [prefix stringByAppendingString:layer.name], @"layer": layer} mutableCopy];
         if (!NSEqualRects(area, layer.bounds)) entry[@"area"] = [NSValue valueWithRect:area];
@@ -681,15 +686,15 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             continue;
         } else if ([@[@"button", @"pictureButton"] containsObject:type]) {
             // An invisible button draws nothing; it is a shortcut or a click area over a picture.
-            if ([info[@"display"] isEqual:@NO] && !help) continue;
-            NSString *name = title ?: help ?: ObjectName(layer.name, AXBNameButton) ?: PictureName(info[@"picture"] ?: info[@"icon"]);
+            if ([info[@"display"] isEqual:@NO] && !help && !stored) continue;
+            NSString *name = stored ?: title ?: help ?: ObjectName(layer.name, AXBNameButton) ?: PictureName(info[@"picture"] ?: info[@"icon"]);
             if (!name) continue; // An unlabelled button cannot be named.
             entry[@"role"] = NSAccessibilityButtonRole;
-            if (!Plain(drawn)) entry[@"label"] = name;
+            if (stored || !Plain(drawn)) entry[@"label"] = name;
         } else if ([type isEqual:@"checkbox"] || [type isEqual:@"radio"]) {
-            if (!title && !help) continue;
+            if (!stored && !title && !help) continue;
             entry[@"role"] = [type isEqual:@"radio"] ? NSAccessibilityRadioButtonRole : NSAccessibilityCheckBoxRole;
-            entry[@"label"] = title ?: help;
+            entry[@"label"] = stored ?: title ?: help;
             // Only the standard look draws its state as macOS does.
             if (!info[@"style"] || [info[@"style"] isEqual:@"regular"]) {
                 NSNumber *state = DrawnState(layer, NSMinX(area));
@@ -707,21 +712,21 @@ static NSArray<NSDictionary *> *FormEntries(CALayer *form, NSDictionary<NSString
             entry[@"table"] = ListboxModel(layer, info, area);
             if (FocusRing(layer, area, AXBRingField)) entry[@"focused"] = @YES;
             entry[@"caption"] = @YES;
-            if (help) entry[@"label"] = help;
+            if (stored ?: help) entry[@"label"] = stored ?: help;
         } else if ([type isEqual:@"tab"]) {
             [entries addObjectsFromArray:TabEntries(layer, [prefix stringByAppendingString:layer.name])];
             continue;
         } else if ([type isEqual:@"dropdown"]) {
             entry[@"role"] = NSAccessibilityPopUpButtonRole;
             if (FocusRing(layer, area, AXBRingDropDown)) entry[@"focused"] = @YES;
-            if (help) entry[@"label"] = help;
+            if (stored ?: help) entry[@"label"] = stored ?: help;
         } else if ([type isEqual:@"input"] || [type isEqual:@"combo"]) {
             entry[@"role"] = NSAccessibilityTextFieldRole;
             entry[@"editable"] = @(![info[@"enterable"] isEqual:@NO]);
             if (FocusRing(layer, area, AXBRingField)) entry[@"focused"] = @YES;
             if (Plain(info[@"placeholder"])) entry[@"placeholders"] = [NSSet setWithObject:Plain(info[@"placeholder"])];
             entry[@"caption"] = @YES;
-            if (help) entry[@"label"] = help;
+            if (stored ?: help) entry[@"label"] = stored ?: help;
         } else continue;
         [entries addObject:entry];
     }
