@@ -23,6 +23,15 @@ $controls.AccountNumber:=New object("label"; "Account number")
 $options:=New object("label"; "Contact details"; "controls"; $controls)
 ```
 
+Or keep a fixed label on the object itself, in the form's definition, and leave `AXB_Configure` for what is computed or depends on the record:
+
+```json
+"AccountNumber": {"type": "input", "dataSource": "Form.account", "left": 120, "top": 40, "width": 160, "height": 22,
+	"axb": {"label": "Account number"}}
+```
+
+Refresh the generated form metadata after the edit (`install_host_methods.py … --form-metadata`). See [static control metadata](../INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects) for the keys, precedence and limits.
+
 Keys in `controls` are the form's existing object names. Labels should describe the user-visible purpose, in the application's language. They are not method names or expressions to execute.
 
 Read `AXB_Form("diagnostics"; New object)` from the running root form to find unsupported objects and missing labels, including the exact path to a nested child. It needs no added event hook. See [coverage checks](../INTEGRATION.md#check-the-forms-coverage) for the report fields and limits.

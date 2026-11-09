@@ -1431,6 +1431,29 @@ static void GenericFormsTest(void) {
     Check([[active accessibilityRole] isEqual:NSAccessibilityCheckBoxRole] && [active accessibilityValue] == nil,
           "a checkbox whose state is drawn in a custom style reports no value");
     Check([[ProgressElement(form, @"axb/form/btnHelp") accessibilityLabel] isEqual:@"Help"], "an untitled button is labelled by its help tip");
+    // A label the definition stores on an object ("axb") names it before its title, help tip,
+    // caption or object name, and publishes an object 4D's default name would leave unnamed.
+    NSMutableDictionary *labelled = [objects mutableCopy];
+    labelled[@"Button1"] = @{@"type": @"button", @"width": @24, @"height": @24, @"axb": @{@"label": @"Refresh orders"}};
+    labelled[@"inputName"] = @{@"type": @"input", @"placeholder": @"Full name", @"width": @200, @"height": @18, @"axb": @{@"label": @"Customer name"}};
+    labelled[@"btnSave"] = @{@"type": @"button", @"text": @"Save", @"width": @90, @"height": @24, @"axb": @{@"label": @"Save customer"}};
+    labelled[@"checkActive"] = @{@"type": @"checkbox", @"text": @"Active", @"style": @"custom", @"width": @120, @"height": @20, @"axb": @{@"label": @"Active customer", @"protected": @YES}};
+    NSDictionary *others = @{@"Other": @{@"pages": @[@{@"objects": @{@"btnSave": @{@"type": @"button"}}}]},
+                             @"SearchBox": @{@"pages": @[[NSNull null], @{@"objects": @{@"btnGo": @{@"type": @"button", @"text": @"Go", @"width": @36, @"height": @24}}}]}};
+    NSMutableDictionary *definitions = [others mutableCopy];
+    definitions[@"Customer"] = @{@"pages": @[[NSNull null], @{@"objects": labelled}]};
+    AXBGenericFormsEnableForTesting(definitions);
+    AXBGenericFormsRefreshWindow(window);
+    Check([[ProgressElement(form, @"axb/form/Button1") accessibilityLabel] isEqual:@"Refresh orders"] &&
+          [[ProgressElement(form, @"axb/form/inputName") accessibilityLabel] isEqual:@"Customer name"] &&
+          [[ProgressElement(form, @"axb/form/btnSave") accessibilityLabel] isEqual:@"Save customer"] &&
+          [[ProgressElement(form, @"axb/form/checkActive") accessibilityLabel] isEqual:@"Active customer"],
+          "a label stored on the object in its definition names it before anything drawn or inferred");
+    definitions[@"Customer"] = withSubform;
+    AXBGenericFormsEnableForTesting(definitions);
+    AXBGenericFormsRefreshWindow(window);
+    Check([[ProgressElement(form, @"axb/form/inputName") accessibilityLabel] isEqual:@"Name"] && ProgressElement(form, @"axb/form/Button1") == nil,
+          "without a stored label, the drawn and inferred names return");
     // A page subform: its own form's objects take its place, under its name.
     CALayer *subform = MessageLayer(context, @"search", NSMakeRect(300, top - 12 - 26, 110, 26), nil);
     CALayer *inner = [CALayer layer]; inner.name = @"formContext"; inner.frame = subform.bounds;

@@ -22,7 +22,8 @@ def main():
     parser.add_argument("--no-area", action="store_true", help="Pixel/control baseline with no bridge registration")
     parser.add_argument("--manual", action="store_true", help="Compare the same form using the existing manual lifecycle")
     parser.add_argument("--inherited", action="store_true", help="Inherit the root area from an unchanged shared base")
-    parser.add_argument("--configuration", choices=["normal", "absent", "null", "disabled", "invalid", "error"], default="normal")
+    parser.add_argument("--configuration", choices=["normal", "absent", "null", "disabled", "invalid", "error", "form-labels"], default="normal",
+                        help="form-labels keeps control labels on the objects in their form definitions")
     parser.add_argument("--no-component", action="store_true", help="Exercise optional component absence")
     parser.add_argument("--no-plugin", action="store_true", help="Exercise optional native plugin absence")
     parser.add_argument("--pixel-focus", action="store_true", help="Start on a button for a caret-free pixel comparison")
@@ -170,6 +171,15 @@ End if
         (methods / "AXB_Configure.4dm").write_text('#DECLARE($name : Text) -> $options : Object\n$options:=New object("enabled"; False)\n')
     elif args.configuration == "invalid":
         (methods / "AXB_Configure.4dm").write_text('#DECLARE($name : Text) -> $options : Object\n$options:=New object("label"; "")\n')
+    elif args.configuration == "form-labels":
+        # The root's and the child's field labels live in their definitions ("axb"). The
+        # callback still names the Remember button, over a different stored label.
+        (methods / "AXB_Configure.4dm").write_text('''#DECLARE($formName : Text) -> $options : Object
+$options:=New object("label"; "Area lifecycle"; "controls"; New object("Remember"; New object("label"; "Remember root")); "children"; New object("Child"; New object("label"; "Child")))
+If (Not(Form.loaded=True))
+ $options:=Null
+End if
+''')
     elif args.configuration == "error":
         (methods / "AXB_Configure.4dm").write_text('#DECLARE($name : Text) -> $options : Object\nvar $missing : Text\n$missing:=File("/RESOURCES/intentional-missing-config").getText()\n$options:=New object\n')
     startup = sources / "DatabaseMethods/onStartup.4dm"
@@ -189,6 +199,15 @@ End if
         "Close": {"type": "button", "text": "Close", "action": "cancel", "left": 20, "top": 200, "width": 150, "height": 25},
         "Restart": {"type": "button", "text": "Restart", "method": "AreaRestart", "events": ["onClick"], "left": 200, "top": 200, "width": 150, "height": 25},
     }}]})
+    if args.configuration == "form-labels":
+        for name, labels in (("Root", {"Name": "Root name", "Remember": "Stored label the callback replaces"}), ("Child", {"Name": "Name"})):
+            path = sources / "Forms" / name / "form.4DForm"
+            form = json.loads(path.read_text())
+            for object_name, label in labels.items():
+                form["pages"][1]["objects"][object_name]["axb"] = {"label": label}
+            # Only the stored label can name the child's field.
+            form["pages"][1]["objects"]["Name"].pop("tooltip", None)
+            path.write_text(json.dumps(form, indent=2) + "\n")
     if args.compound:
         configuration = methods / "AXB_Configure.4dm"
         configuration.write_text(configuration.read_text().replace('If (Not(Form.loaded=True))', '$options.controls.Status:=New object("label"; "Status")\nIf (Not(Form.loaded=True))'))

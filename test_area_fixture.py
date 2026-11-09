@@ -123,6 +123,10 @@ def main():
             root_label = "Name" if compiled.get("configuration") in ("absent", "null") else "Root name"
             root_name = find(root_label, "AXTextField")
             child_name = find("Child: Name", "AXTextField")
+            if compiled.get("configuration") == "form-labels":
+                check(root_name and child_name, "labels stored on root and child objects in their form definitions name them")
+                check(find("Remember root", "AXButton") and not any(x.read("AXDescription") == "Stored label the callback replaces" for x in group.read("AXChildren") or []),
+                      "the configuration callback's label replaces a stored label")
             if compiled.get("sharedPointerGuard"):
                 ax.wait_for(lambda: state().get("focus", {}).get("error") == "ambiguousFocus", "Shared native pointer was incorrectly accepted", timeout=15)
                 check(root_name.read("AXFocused") is not True and child_name.read("AXFocused") is not True, "two native pointer owners publish no guessed editor focus")

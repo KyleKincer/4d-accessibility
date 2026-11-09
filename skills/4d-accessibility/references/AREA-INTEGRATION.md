@@ -34,7 +34,7 @@ Matching 0.22.0 development kits generate `Resources/AXB.FormMetadata.json` besi
 
 ## One optional configuration method
 
-Create application-owned `AXB_Configure` when discovery needs labels or providers. The bridge calls it once in the actual root's form context after initialization. It passes the named root's `Current form name`, or the generated configuration key described below. Return an options object; an omitted label defaults to the window title, then that name/key, then `Application form`. Return Null or an empty object to leave an unconfigured form on automatic defaults. Keep this callback fast, in memory and free of business mutations. Use readiness formulas for asynchronous loading.
+A fixed label or flag for one object can instead live on that object in the form definition; see [static control metadata](INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects). Create application-owned `AXB_Configure` when discovery needs computed labels, record scope or providers. The bridge calls it once in the actual root's form context after initialization. It passes the named root's `Current form name`, or the generated configuration key described below. Return an options object; an omitted label defaults to the window title, then that name/key, then `Application form`. Return Null or an empty object to leave an unconfigured form on automatic defaults. Keep this callback fast, in memory and free of business mutations. Use readiness formulas for asynchronous loading.
 
 ```4d
 // Application method: AXB_Configure

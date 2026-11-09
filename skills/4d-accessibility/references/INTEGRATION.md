@@ -108,6 +108,27 @@ Three-state checkboxes need no extra configuration. Discovery reads their curren
 
 Numeric, date and time steppers and rulers need no extra application hooks. They use the control's existing mouse or keyboard handling. Existing handlers and validation decide the result. Dates and times are spoken using 4D's default date/time format. Date rulers expose an incrementor because 4D's keyboard path can move beyond the configured minimum and maximum. Disabled and read-only controls remain readable.
 
+### Keep static control metadata on the form's objects
+
+A label or other fixed fact about one object can live on that object in its form definition, under the key `axb`, beside 4D's own properties. 4D ignores the key: the project compiles, forms load, and 4D 20.8's Form Editor keeps it when it saves the form. Because it travels with the object, a renamed object keeps its label, and a deleted object takes it along, where a `controls` entry in `AXB_Configure` would be left behind.
+
+```json
+"SaveIcon": {
+	"type": "pictureButton",
+	"picture": "/RESOURCES/Icons/save.png",
+	"left": 20, "top": 10, "width": 24, "height": 24,
+	"axb": {"label": "Save contact"}
+}
+```
+
+`axb` takes the static parts of `controls.<object>`: `label`, `description` (text), `automationKey`, `protected`, `decorative`, `multiline`, `layer`, `step` and `cells`. Formulas, such as an `adjust` controller or a computed `description`, and the form-level options (`label`, `scope`, `grids`, `children`, `onError`) stay in `AXB_Configure`. For each key, `AXB_Configure` wins: a `controls.<object>` entry overrides that object's stored values key by key and keeps the rest.
+
+A compiled application cannot read its form definitions, so the installer packages every object's `axb` into the generated `Resources/AXB.FormMetadata.json`, with list-subform metadata. Refresh it after changing a form, with any area install or `--form-metadata`, and commit and ship it. The installer refuses an unknown key or a value of the wrong type, naming the form and object, and warns when two objects on a form share a `label` or `automationKey`: copying or duplicating an object in the Form Editor copies its `axb` with it. An object in an inherited base carries its metadata into each derived form. A page subform's form keeps its own objects' metadata for every instance; `children.<container>.controls` still overrides it per instance.
+
+Forms without a bridge area use a stored `label` directly from the definition, ahead of titles, help tips, captions and object names. [Forms without a bridge area](../../../tests/GENERIC-FORMS.md).
+
+Limits: 4D's Property List does not show `axb`, so edit the form's JSON. A stored label is published as written; a `:xliff:` reference is not resolved, so put a localized label in `AXB_Configure`. Forms generated from JSON at run time have no form name to look up; describe their objects in `AXB_Configure` or in the generated JSON's own builder options.
+
 ### Controls drawn over other controls
 
 Keep the existing form layout. If a form has a background button behind its other controls, describe that existing layer in its start options:

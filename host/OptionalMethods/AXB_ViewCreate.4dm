@@ -7,6 +7,8 @@ $result:=New object("ok"; False; "error"; "invalidOptions")
 If (($options=Null) | (Value type($options)#Is object))
  return
 End if
+// Metadata stored on the form's objects, under anything the application supplied.
+$options:=AXB_FormControls($options)
 For each ($key; New collection("describe"; "apply"; "onError"))
  If (OB Is defined($options; $key))
   $result.error:="invalid"+Uppercase(Substring($key; 1; 1))+Substring($key; 2)
