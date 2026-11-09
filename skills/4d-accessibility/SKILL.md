@@ -27,7 +27,7 @@ Use `install_host_methods.py --help` from the checkout or complete kit, then ins
 
 Add `--area-list` only for AreaList hosts. Keep the same `--compiler-method` target on refresh. Generated methods and their marked compiler block are installer-owned; application configuration methods remain application-owned. If an existing generated method was edited, inspect the change and reconcile it with canonical source before refreshing.
 
-Matching 0.22.0 kits also own `Resources/AXB.FormMetadata.json` next to `Project`; kits after 0.39.0 add objects' `axb` metadata to it. Area installation can generate it even when the selected form has no list. Commit and ship that resource. Refresh it after form changes and reopen affected forms, following the [metadata contract](references/LIST-SUBFORMS.md#install-a-parent-form).
+Matching 0.22.0 kits also own `Resources/AXB.FormMetadata.json` next to `Project`; 0.40.0 kits add objects' `axb` metadata to it. Area installation can generate it even when the selected form has no list. Commit and ship that resource. Refresh it after form changes and reopen affected forms, following the [metadata contract](references/LIST-SUBFORMS.md#install-a-parent-form).
 
 Verify the installed parts from any host method:
 

@@ -1,4 +1,4 @@
-# Unreleased, labels stored on the form's objects
+# 0.40.0, labels stored on the form's objects
 
 - **A form object can carry its own accessibility metadata.** Put `"axb": {"label": "Save contact"}` on the object in its form definition, beside 4D's properties. 4D ignores the key, the project compiles, and the Form Editor keeps it when it saves. The label follows the object through a rename, where a `controls` entry in `AXB_Configure` stays behind. `axb` takes `label`, `description`, `automationKey`, `protected`, `decorative`, `multiline`, `layer`, `step` and `cells`; formulas and form-level options stay in `AXB_Configure`, whose `controls` entries override stored values key by key. [Static control metadata](skills/4d-accessibility/references/INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects).
 - **The installer packages it.** `Resources/AXB.FormMetadata.json` gains a `controls` section, generated with the list-subform metadata (`--form-metadata` or any area install), so compiled applications read it too. An unknown key or a wrong type stops the install, naming the form and object, and two objects sharing a label or `automationKey`, as a copied object does, are reported. A resource without stored metadata keeps its earlier digest.
@@ -6,6 +6,8 @@
 - [Area acceptance with stored labels](prepare_area_fixture.py) (`--configuration form-labels`); native provider and installer tests.
 
 For developers: the new host helper `AXB_FormControls` merges stored metadata into the options `AXB_ViewCreate` receives; refresh host helpers with the plugin and component.
+
+Upgrade the plugin, component and host helpers together.
 
 # 0.39.0, forms that stay accessible through real applications, and 4D's error window
 
