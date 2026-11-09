@@ -257,6 +257,10 @@ def main():
         table = ax.wait_for(lambda: find("Invoice lines"), "Restored grid not published")
         check(table.count("AXRows") == 599, "all 599 non-hidden logical rows are accessible")
         check(table.count("AXColumns") == (4 if config.get("described") else 2), "hidden identity and decorative columns stay out of readable columns")
+        if compiled.get("storedGrid"):
+            column = table.slice("AXColumns", 1, 1)[0]
+            check("Line amount" in (column.read("AXDescription") or column.read("AXTitle") or ""),
+                  "a grid's kind, key column and label, and a column's label, stored on the list box and its column describe the grid")
         described = None
         if config.get("described"):
             described = table.cell(2, 598)

@@ -26,6 +26,8 @@ $options.grids:=New object("Items"; New object(\
  "kind"; "array"; "keyColumn"; "LineID"; "label"; "Record rows"))
 ```
 
+The static part, `kind`, `keyColumn`, `label` and column labels, can instead live on the list box and its columns in the form definition, with only formulas such as `ready` and `onSelection` left here: [grids in the form definition](INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects).
+
 `Items` is the list box's form-object name. `LineID` is a column bound to the existing Text, Integer or LongInt identity array, with one unique key per source row. Text keys must be nonempty and at most 256 UTF-16 units. Negative integer keys and zero are valid. The column can be hidden. Use a line-record ID, not the displayed row position or a product number that can repeat. The scope changes when the form changes records. All ordinary controls and automatic child forms remain part of the tree because these options omit `describe` and `apply`. Add the [loading guard](#gate-loading-and-record-changes) when rows load after On Load, and [temporary keys](#give-unsaved-rows-temporary-keys) when unsaved rows share a placeholder ID.
 
 The list box's own variable must be its Boolean selection array, with the same row count as the key array. Keep unique numeric IDs in their original array. The bridge converts them to Text only for accessibility identity; callbacks receive the original numeric key. An already unique identity array needs no parallel array. Real-array keys are unsupported.

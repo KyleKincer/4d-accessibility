@@ -110,7 +110,7 @@ Numeric, date and time steppers and rulers need no extra application hooks. They
 
 ### Keep static control metadata on the form's objects
 
-A label or other fixed fact about one object can live on that object in its form definition, under the key `axb`, beside 4D's own properties. 4D ignores the key: the project compiles, forms load, and 4D 20.8's Form Editor keeps it when it saves the form. Because it travels with the object, a renamed object keeps its label, and a deleted object takes it along, where a `controls` entry in `AXB_Configure` would be left behind.
+A label or other fixed fact about one object can live on that object in its form definition, under the key `axb`, beside 4D's own properties. 4D ignores the key: the project compiles, forms load, and 4D 20.8's Form Editor keeps it when it saves the form. Because it travels with the object, a renamed object keeps its label, and a deleted object takes it along, where a `controls` entry in `AXB_Configure` would be left behind. Keep as much as possible here, and keep `AXB_Configure` for behavior: formulas, pointers, labels computed at run time and objects created at run time.
 
 ```json
 "SaveIcon": {
@@ -121,13 +121,40 @@ A label or other fixed fact about one object can live on that object in its form
 }
 ```
 
-`axb` takes the static parts of `controls.<object>`: `label`, `description` (text), `automationKey`, `protected`, `decorative`, `multiline`, `layer`, `step` and `cells`. Formulas, such as an `adjust` controller or a computed `description`, and the form-level options (`label`, `scope`, `grids`, `children`, `onError`) stay in `AXB_Configure`. For each key, `AXB_Configure` wins: a `controls.<object>` entry overrides that object's stored values key by key and keeps the rest.
+An object's `axb` takes the static parts of `controls.<object>`: `label`, `description` (text), `automationKey`, `protected`, `decorative`, `multiline`, `layer`, `step` and `cells`. Formulas, such as an `adjust` controller or a computed `description`, stay in `AXB_Configure`.
 
-A compiled application cannot read its form definitions, so the installer packages every object's `axb` into the generated `Resources/AXB.FormMetadata.json`, with list-subform metadata. Refresh it after changing a form, with any area install or `--form-metadata`, and commit and ship it. The installer refuses an unknown key or a value of the wrong type, naming the form and object, and warns when two objects on a form share a `label` or `automationKey`: copying or duplicating an object in the Form Editor copies its `axb` with it. An object in an inherited base carries its metadata into each derived form. A page subform's form keeps its own objects' metadata for every instance; `children.<container>.controls` still overrides it per instance.
+**The form's own options.** An `axb` at the top level of the form definition takes the static form-level options: `label`, `automationKey`, `omitOutsideWindow`, `idleRefresh` (seconds, 1 to 60) and `enabled`. A form whose configuration returns no `label` uses the stored one ahead of its window title, and a stored `automationKey` ahead of the form's name. A derived form does not inherit its base's options. `scope`, `children`, `onError` and the other formulas stay in `AXB_Configure`.
 
-Forms without a bridge area use a stored `label` directly from the definition, ahead of titles, help tips, captions and object names. [Forms without a bridge area](../../../tests/GENERIC-FORMS.md).
+```json
+{
+	"windowTitle": "Customer",
+	"axb": {"label": "Customers", "automationKey": "customers.main", "omitOutsideWindow": true},
+	"pages": [...]
+}
+```
 
-Limits: 4D's Property List does not show `axb`, so edit the form's JSON. A stored label is published as written; a `:xliff:` reference is not resolved, so put a localized label in `AXB_Configure`. Forms generated from JSON at run time have no form name to look up; describe their objects in `AXB_Configure` or in the generated JSON's own builder options.
+**Grids.** A list box, AreaList area or other grid object takes the static part of its `grids.<object>` entry as `axb.grid`: `kind`, `label`, `keyColumn`, `keyProperty` and `columns`. A list box column takes its own `label`, `decorative` and `automationKey` as `axb` on the column; an AreaList area, whose columns are numbers, lists them in `axb.grid.columns`.
+
+```json
+"Items": {
+	"type": "listbox",
+	"axb": {"grid": {"kind": "array", "keyColumn": "LineID", "label": "Invoice lines"}},
+	"columns": [
+		{"name": "LineID", "dataSource": "aLineID"},
+		{"name": "LineAmount", "dataSource": "aAmount", "axb": {"label": "Line amount"}}
+	]
+}
+```
+
+A stored grid with a `kind` is used even when `AXB_Configure` does not mention it, except an AreaList grid, which needs its `keys` pointer. `ready`, `onSelection`, `selection`, `meta`, `setExpanded`, a column's `value` and an AreaList grid's `keys` stay in `AXB_Configure`, in a `grids.<object>` entry that names only them.
+
+**Precedence.** For each key, `AXB_Configure` wins: a `controls.<object>` entry overrides that object's stored values key by key and keeps the rest; a `grids.<object>` entry overrides its stored grid key by key, and its `columns` merge column by column, key by key; a form-level option it sets replaces the stored one.
+
+A compiled application cannot read its form definitions, so the installer packages every form's and object's `axb` into the generated `Resources/AXB.FormMetadata.json`, with list-subform metadata. Refresh it after changing a form, with any area install or `--form-metadata`, and commit and ship it. The installer refuses an unknown key or a value of the wrong type, naming the form and object, and warns when two objects on a form share a `label` or `automationKey`: copying or duplicating an object in the Form Editor copies its `axb` with it. An object in an inherited base, and its grid, carry their metadata into each derived form. A page subform's form keeps its own objects' metadata for every instance; `children.<container>.controls` still overrides it per instance.
+
+Forms without a bridge area use an object's stored `label` directly from the definition, ahead of titles, help tips, captions and object names. They do not use stored form options or grids. [Forms without a bridge area](../../../tests/GENERIC-FORMS.md).
+
+Limits: 4D's Property List does not show `axb`, so edit the form's JSON. A stored label is published as written; a `:xliff:` reference is not resolved, so put a localized label in `AXB_Configure`. Forms generated from JSON at run time have no form name to look up; describe them in `AXB_Configure` or in the generated JSON's own builder options. A changed resource takes effect in a new process.
 
 ### Controls drawn over other controls
 

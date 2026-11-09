@@ -357,6 +357,68 @@ class InstallTests(unittest.TestCase):
         result = self.run_installer("--form-metadata")
         self.assertIn("Warning: Sources/Forms/Customer: objects Name, Name1 share axb.label \"Customer name\"", result.stderr)
 
+    def test_form_options_and_grids_are_packaged(self):
+        base, base_value = self.form("Base")
+        base_value["axb"] = {"label": "Shared base"}
+        base_value["pages"][1]["objects"]["Lines"] = {
+            "type": "listbox", "left": 5, "top": 50, "width": 300, "height": 200,
+            "axb": {"label": "Ignored for a grid", "grid": {"kind": "array", "keyColumn": "LineID", "label": "Invoice lines"}},
+            "columns": [{"name": "LineID", "dataSource": "aID"},
+                        {"name": "LineAmount", "dataSource": "aAmount", "axb": {"label": "Line amount"}},
+                        {"name": "LineIcon", "dataSource": "aIcon", "axb": {"decorative": True}}]}
+        base.write_text(json.dumps(base_value))
+        derived, value = self.form("Customer")
+        value["inheritedForm"] = "Base"
+        value["axb"] = {"label": "Customers", "automationKey": "customers", "omitOutsideWindow": True, "idleRefresh": 2}
+        value["pages"][1]["objects"] = {"Payments": {"type": "plugin", "pluginAreaKind": "AreaList", "left": 5, "top": 260, "width": 300, "height": 100,
+                                                     "axb": {"grid": {"kind": "areaList", "label": "Payments", "keyColumn": 2,
+                                                                      "columns": {"1": {"label": "Date"}}}}}}
+        derived.write_text(json.dumps(value))
+        self.run_installer("--form-metadata")
+        content = json.loads((self.project.parent / "Resources" / METADATA_NAME).read_text())
+        # A form's own options are not inherited; its base's objects and grids are.
+        self.assertEqual(content["options"], {"0": {"Base": {"label": "Shared base"},
+                                                    "Customer": {"label": "Customers", "automationKey": "customers", "omitOutsideWindow": True, "idleRefresh": 2}}})
+        lines = {"kind": "array", "keyColumn": "LineID", "label": "Invoice lines",
+                 "columns": {"LineAmount": {"label": "Line amount"}, "LineIcon": {"decorative": True}}}
+        self.assertEqual(content["grids"], {"0": {"Base": {"Lines": lines},
+                                                  "Customer": {"Lines": lines, "Payments": {"kind": "areaList", "label": "Payments", "keyColumn": 2, "columns": {"1": {"label": "Date"}}}}}})
+        self.assertEqual(content["controls"]["0"]["Base"], {"Lines": {"label": "Ignored for a grid"}})
+        from install_host_methods import metadata_digest
+        self.assertEqual(content["sha256"], metadata_digest(content["forms"], content["controls"], content["options"], content["grids"]))
+        # Only the sections a project uses enter the digest, so 0.40.0 resources still verify.
+        import hashlib
+        legacy = {"controls": content["controls"], "forms": content["forms"]}
+        self.assertEqual(metadata_digest(content["forms"], content["controls"]),
+                         hashlib.sha256(json.dumps(legacy, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
+        self.run_installer()
+        self.assertEqual(json.loads((self.project.parent / "Resources" / METADATA_NAME).read_text()), content)
+
+    def test_invalid_form_options_and_grids_stop_every_write(self):
+        cases = [
+            ({"axb": {"scope": "x"}}, None, "unknown form axb.scope"),
+            ({"axb": {"idleRefresh": 90}}, None, "idleRefresh must be a number of seconds from 1 to 60"),
+            ({"axb": {"automationKey": "k" * 129}}, None, "automationKey must be non-empty text of at most 128"),
+            ({}, {"axb": {"grid": {"kind": "table"}}}, "axb.grid.kind must be one of"),
+            ({}, {"axb": {"grid": {"kind": "array", "ready": True}}}, "unknown axb.grid.ready"),
+            ({}, {"axb": {"grid": {"kind": "array", "keyColumn": 3}}}, "keyColumn names a column for an array grid"),
+            ({}, {"axb": {"grid": {"kind": "array"}}, "columns": [{"name": "C", "axb": {"value": "x"}}]}, "unknown column key value"),
+            ({}, {"axb": {"grid": {"kind": "array", "columns": {"C": {"label": "A"}}}}, "columns": [{"name": "C", "axb": {"label": "B"}}]},
+             "column C is described both on the column and in axb.grid.columns"),
+        ]
+        for form_keys, listbox, message in cases:
+            with self.subTest(message=message):
+                path, value = self.form()
+                value.update(form_keys)
+                if listbox:
+                    value["pages"][1]["objects"]["Lines"] = {"type": "listbox", "left": 5, "top": 50, "width": 300, "height": 200, **listbox}
+                path.write_text(json.dumps(value))
+                before = self.snapshot()
+                result = self.run_installer("--form-metadata", success=False)
+                self.assertIn("Sources/Forms/Customer", result.stderr)
+                self.assertIn(message, result.stderr)
+                self.assertEqual(before, self.snapshot())
+
     def test_current_project_directory_places_metadata_beside_project(self):
         self.form()
         row, value = self.form("Rows", table=True)
