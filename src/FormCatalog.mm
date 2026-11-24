@@ -272,17 +272,27 @@ static void RefreshAuxiliaryFiles(void) {
 }
 
 static NSString *ResolveTooltip(id raw) {
-    if (![raw isKindOfClass:NSString.class]) return nil;
-    NSString *text = (NSString *)raw;
-    if ([text hasPrefix:@":/tips.json#/"]) {
-        NSString *key = [text substringFromIndex:13];
+    NSString *text = nil;
+    if ([raw isKindOfClass:NSString.class]) {
+        text = (NSString *)raw;
+    } else if ([raw isKindOfClass:NSDictionary.class]) {
+        id ref = ((NSDictionary *)raw)[@"$ref"];
+        if ([ref isKindOfClass:NSString.class]) text = (NSString *)ref;
+    }
+    if (!text) return nil;
+    NSRange tipsRange = [text rangeOfString:@"tips.json#/"];
+    if (tipsRange.location != NSNotFound) {
+        NSString *key = [text substringFromIndex:NSMaxRange(tipsRange)];
         text = State.tips[key];
-    } else if ([text hasPrefix:@":/tips.json#"]) {
-        NSString *key = [text substringFromIndex:12];
-        text = State.tips[key];
+    } else {
+        NSRange tipsHash = [text rangeOfString:@"tips.json#"];
+        if (tipsHash.location != NSNotFound) {
+            NSString *key = [text substringFromIndex:NSMaxRange(tipsHash)];
+            text = State.tips[key];
+        }
     }
     if (![text isKindOfClass:NSString.class] || text.length == 0) return nil;
-    if ([text hasPrefix:@":xliff:"] || [text hasPrefix:@":/tips.json"]) return nil;
+    if ([text hasPrefix:@":xliff:"] || [text hasPrefix:@":/tips.json"] || [text containsString:@"tips.json#"]) return nil;
     NSString *trimmed = [text stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
     if (!trimmed.length) return nil;
     return trimmed.length > 512 ? [trimmed substringToIndex:512] : trimmed;

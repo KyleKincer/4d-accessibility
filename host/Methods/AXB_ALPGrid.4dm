@@ -246,7 +246,10 @@ For ($i; 1; Size of array($grid))
   If ($label="")
    $label:="Column "+String($columns.length+1)
   End if
-  $kind:=Choose(Is nil pointer($sources{$number}); -1; Type($sources{$number}->))
+  $kind:=-1
+  If (Not(Is nil pointer($sources{$number})))
+   $kind:=Type($sources{$number}->)
+  End if
   $display:=AL_GetColumnLongProperty($area; $number; ALP_Column_DisplayControl)
   $entry:=AL_GetColumnLongProperty($area; $number; ALP_Column_EntryControl)
   $checkbox:=Not($fallbackEmpty) & Not($calculated) & (New collection(Boolean array; Integer array; LongInt array).indexOf($kind)>=0) & (New collection(0; 1; 2; 4).indexOf($display)>=0) & (New collection(0; 1).indexOf($entry)>=0) & ($metadata.value=Null)

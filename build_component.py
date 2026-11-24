@@ -141,7 +141,6 @@ def prepare_fixture():
     if subprocess.run(["pgrep", "-x", "4D"], capture_output=True).returncode == 0:
         raise RuntimeError("Close 4D before preparing the disposable component fixture")
     source = ROOT / "fixture"
-    # Preserve previous generated fixtures for diagnosis; never replace loaded files.
     if FIXTURE.exists():
         FIXTURE.rename(BUILD / ("component-fixture-previous-" + uuid.uuid4().hex))
     (FIXTURE / "Project").mkdir(parents=True)
@@ -157,7 +156,7 @@ def prepare_fixture():
     license_file = source / "Resources/alp.license"
     if license_file.exists():
         shutil.copy2(license_file, FIXTURE / "Resources/alp.license")
-        os.chmod(FIXTURE / "Resources/alp.license", 0o600)
+        os.chmod(license_file, 0o600)
     for name in CORE:
         (FIXTURE / f"Project/Sources/Methods/{name}.4dm").unlink(missing_ok=True)
     compiler = FIXTURE / "Project/Sources/Methods/Compiler_AXB.4dm"
@@ -172,63 +171,61 @@ def prepare_fixture():
     print(f"Prepared disposable fixture: {FIXTURE}")
 
 
-def build_alp_component(executable, app, alp_plugin, version, timeout):
+def build_alp_component(executable, info, alp_plugin, version, timeout):
     if not alp_plugin.is_dir():
         raise RuntimeError(f"AreaList Pro plugin not found: {alp_plugin}")
-    with tempfile.TemporaryDirectory(prefix="axb-alp-component-") as temp_dir:
-        temp = Path(temp_dir).resolve()
-        driver = temp / "driver"
-        source = temp / "source"
-        output = temp / "AccessibilityBridge_ALP.4dbase"
-        project_at(driver, "Driver")
-        project = project_at(source, "AccessibilityBridge_ALP")
-        methods = source / "Project/Sources/Methods"
+    BUILD.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="alp-component-build-", dir=BUILD) as temporary:
+        stage = Path(temporary).resolve()
+        matrix = stage / "matrix"
+        project = project_at(matrix, "AccessibilityBridge_ALP")
+        methods = matrix / "Project/Sources/Methods"
         source_hashes = {}
         for name in ALP_CORE:
             src = ROOT / f"host/Methods/{name}.4dm"
             source_hashes[f"host/Methods/{name}.4dm"] = sha(src)
-            header = '//%attributes = {"shared":true}\n' if name in ALP_PUBLIC else '//%attributes = {"shared":false}\n'
-            (methods / f"{name}.4dm").write_text(header + src.read_text())
+            text = src.read_text()
+            if name in ALP_PUBLIC:
+                text = '//%attributes = {"shared":true}\n' + text
+            (methods / f"{name}.4dm").write_text(text)
         compiler_lines = [line for line in (ROOT / "host/Methods/Compiler_AXB.4dm").read_text().splitlines() if "AXB_ALP" in line]
         (methods / "Compiler_AXBALP.4dm").write_text("\n".join(compiler_lines) + "\n")
-        shutil.copytree(alp_plugin, source / "Plugins" / alp_plugin.name)
-
-        compile_result = run_utility(executable, driver,
-            '$options:=New object("targets"; New collection("arm64_macOS_lib"; "x86_64_generic"); "typeInference"; "none"; "generateTypingMethods"; "keep"; "generateSymbols"; False)\n'
-            f'$result:=Compile project(File({literal(project)}; fk platform path); $options)', timeout)
-        if not compile_result.get("success"):
-            ALP_REPORT.write_text(json.dumps({"passed": False, "compile": compile_result}, indent=2) + "\n")
+        shutil.copytree(alp_plugin, matrix / "Plugins" / alp_plugin.name)
+        driver = stage / "driver"
+        project_at(driver, "Driver")
+        compiled = run_utility(executable, driver,
+            '$options:=New object("targets"; New collection("arm64_macOS_lib"; "x86_64_generic"); "typeInference"; "none")\n'
+            f'$options.plugins:=Folder({literal(matrix / "Plugins")})\n'
+            f'$result:=Compile project(File({literal(project)}); $options)', timeout)
+        if compiled.get("success") is not True or compiled.get("errors"):
+            ALP_REPORT.write_text(json.dumps({"passed": False, "compiler": compiled}, indent=2) + "\n")
             raise RuntimeError("ALP component compilation failed; inspect alp-component-build-report.json")
-
-        shutil.copytree(source / "Project", output / "Project")
-        shutil.copytree(source / "Libraries", output / "Libraries")
-        shutil.copytree(source / "Resources", output / "Resources")
+        output = stage / "AccessibilityBridge_ALP.4dbase"
+        output.mkdir()
+        shutil.copytree(matrix / "Project", output / "Project")
         shutil.rmtree(output / "Project/Sources/Methods")
-        for path in list((output / "Project/DerivedData/CompiledCode").glob("*.json")):
-            if path.name != "map.json":
-                path.unlink()
-        zip_result = run_utility(executable, driver,
-            f'$result:=ZIP Create archive(Folder({literal(output / "Project")}; fk platform path); File({literal(output / "AccessibilityBridge_ALP.4DZ")}; fk platform path); New object("compression"; ZIP Compression standard; "level"; 6))',
-            timeout)
-        if not zip_result.get("success"):
+        shutil.copytree(matrix / "Libraries", output / "Libraries")
+        archive = output / "AccessibilityBridge_ALP.4DZ"
+        archived = run_utility(executable, driver,
+            f'$options:=New object("files"; New collection(Folder({literal(output / "Project")})); "encryption"; ZIP Encryption none)\n'
+            f'$result:=ZIP Create archive($options; File({literal(archive)}))', timeout)
+        if archived.get("success") is not True:
+            ALP_REPORT.write_text(json.dumps({"passed": False, "archive": archived}, indent=2) + "\n")
             raise RuntimeError("ALP component packaging failed")
         shutil.rmtree(output / "Project")
         verification = verify_alp_package(output)
         if ALP_PACKAGE.exists():
-            shutil.rmtree(ALP_PACKAGE)
+            ALP_PACKAGE.rename(BUILD / ("AccessibilityBridge_ALP-previous-" + uuid.uuid4().hex + ".4dbase"))
         shutil.copytree(output, ALP_PACKAGE)
-        ALP_REPORT.write_text(json.dumps({
-            "passed": True,
-            "version": version,
-            "compiler": str(app),
-            "alpPlugin": alp_plugin.name,
-            "sources": source_hashes,
-            "publicMethods": list(ALP_PUBLIC),
-            "compile": compile_result,
-            "verification": verification,
-            "archiveSHA256": sha(ALP_PACKAGE / "AccessibilityBridge_ALP.4DZ"),
-        }, indent=2) + "\n")
-        print(f"Built ALP component: {ALP_PACKAGE}")
+    ALP_REPORT.write_text(json.dumps({
+        "passed": True, "state": "built", "version": version,
+        "serverVersion": info.get("CFBundleShortVersionString"),
+        "alpPlugin": alp_plugin.name, "publicMethods": list(ALP_PUBLIC),
+        "sources_sha256": source_hashes,
+        "package_sha256": {str(p.relative_to(ALP_PACKAGE)): sha(p) for p in ALP_PACKAGE.rglob("*") if p.is_file()},
+        "compiler": compiled, "archive": archived, "verification": verification,
+    }, indent=2) + "\n")
+    print(f"PASS: compiled ALP component packaged for ARM and Intel: {ALP_PACKAGE}")
 
 
 def main():
@@ -243,100 +240,105 @@ def main():
     args = parser.parse_args()
     if args.timeout < 1:
         raise SystemExit("timeout must be positive")
-    app = args.server or args.tool4d
+    app = (args.server or args.tool4d).resolve()
     executable = app / ("Contents/MacOS/4D Server" if args.server else "Contents/MacOS/tool4d")
     if not executable.is_file():
         raise SystemExit(f"4D compiler executable not found: {executable}")
-    plugin = BUILD / "AccessibilityBridge.bundle"
+    info = plistlib.loads((app / "Contents/Info.plist").read_bytes())
+    plugin = (BUILD / "AccessibilityBridge.bundle").resolve()
     if not plugin.is_dir():
         raise SystemExit(f"Build the native plugin first: {plugin}")
-    version = plistlib.loads((plugin / "Contents/Info.plist").read_bytes())["CFBundleShortVersionString"]
     opt_names = optional_methods()
-    with tempfile.TemporaryDirectory(prefix="axb-component-") as temp_dir:
-        temp = Path(temp_dir).resolve()
-        driver = temp / "driver"
-        source = temp / "source"
-        output = temp / "AccessibilityBridge.4dbase"
-        project_at(driver, "Driver")
-        project = project_at(source, "AccessibilityBridge")
-        methods = source / "Project/Sources/Methods"
-        source_hashes = {}
+    inputs = (
+        [ROOT / f"host/Methods/{name}.4dm" for name in CORE]
+        + [ROOT / f"host/OptionalMethods/{name}.4dm" for name in opt_names]
+        + [ROOT / "host/Methods/Compiler_AXB.4dm", ROOT / "host/OptionalMethods/Compiler_AXBHost.4dm", ROOT / "VERSION"]
+    )
+    hashes = {str(p.relative_to(ROOT)): sha(p) for p in inputs}
+    version = (ROOT / "VERSION").read_text().strip()
+    BUILD.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="component-build-", dir=BUILD) as temporary:
+        stage = Path(temporary).resolve()
+        matrix = stage / "matrix"
+        project = project_at(matrix, "AccessibilityBridge")
+        methods = matrix / "Project/Sources/Methods"
         for name in CORE:
-            src = ROOT / f"host/Methods/{name}.4dm"
-            source_hashes[f"host/Methods/{name}.4dm"] = sha(src)
-            header = '//%attributes = {"shared":true}\n' if name in PUBLIC else '//%attributes = {"shared":false}\n'
-            (methods / f"{name}.4dm").write_text(header + src.read_text())
+            text = (ROOT / f"host/Methods/{name}.4dm").read_text()
+            if name in PUBLIC:
+                text = '//%attributes = {"shared":true}\n' + text
+            (methods / f"{name}.4dm").write_text(text)
         for name in opt_names:
-            src = ROOT / f"host/OptionalMethods/{name}.4dm"
-            source_hashes[f"host/OptionalMethods/{name}.4dm"] = sha(src)
-            header = '//%attributes = {"shared":true}\n' if name in PUBLIC else '//%attributes = {"shared":false}\n'
-            (methods / f"{name}.4dm").write_text(header + src.read_text())
+            text = (ROOT / f"host/OptionalMethods/{name}.4dm").read_text()
+            if name in PUBLIC:
+                text = '//%attributes = {"shared":true}\n' + text
+            (methods / f"{name}.4dm").write_text(text)
         (methods / "AXB_ComponentInfo.4dm").write_text(
-            '//%attributes = {"shared":true}\n'
-            '#DECLARE() -> $info : Object\n'
-            f'$info:=New object("version"; {literal(version)}; "hostAPI"; 1; "consolidated"; True; "autoWatch"; True; "compiled"; Is compiled mode; "component"; "AccessibilityBridge")\n'
+            '//%attributes = {"shared":true}\n#DECLARE -> $info : Object\n'
+            f'$info:=New object("version"; {literal(version)}; "protocol"; 1; "hostAPI"; 1; "automaticControls"; 1; "nativeFocus"; 1; "formOwnership"; 1; "rootDataOwnership"; 1; "sessionAllocation"; 1; "capturedStop"; 1; "consolidated"; True; "autoWatch"; True; "compiled"; Is compiled mode; "hostCompiled"; Is compiled mode(*))\n'
         )
-        compiler_lines = [line for line in (ROOT / "host/Methods/Compiler_AXB.4dm").read_text().splitlines() if "AXB_ALP" not in line]
-        host_compiler_lines = (ROOT / "host/OptionalMethods/Compiler_AXBHost.4dm").read_text().splitlines()
+        declarations = (ROOT / "host/Methods/Compiler_AXB.4dm").read_text().splitlines()
+        host_declarations = (ROOT / "host/OptionalMethods/Compiler_AXBHost.4dm").read_text().splitlines()
         (methods / "Compiler_AXBCore.4dm").write_text(
-            "\n".join(compiler_lines)
+            "\n".join(line for line in declarations if any(name + ";" in line for name in CORE))
             + "\n"
-            + "\n".join(host_compiler_lines)
+            + "\n".join(host_declarations)
             + '\nC_OBJECT(AXB_ComponentInfo; $0)\nC_OBJECT(AXB_CoreWindows)\n'
         )
-        shutil.copytree(plugin, source / "Plugins/AccessibilityBridge.bundle")
-
-        compile_result = run_utility(executable, driver,
-            '$options:=New object("targets"; New collection("arm64_macOS_lib"; "x86_64_generic"); "typeInference"; "none"; "generateTypingMethods"; "keep"; "generateSymbols"; False)\n'
-            f'$result:=Compile project(File({literal(project)}; fk platform path); $options)', args.timeout)
-        if not compile_result.get("success"):
-            REPORT.write_text(json.dumps({"passed": False, "compile": compile_result}, indent=2) + "\n")
+        shutil.copytree(plugin, matrix / "Plugins/AccessibilityBridge.bundle")
+        driver = stage / "driver"
+        project_at(driver, "Driver")
+        compiled = run_utility(executable, driver,
+            '$options:=New object("targets"; New collection("arm64_macOS_lib"; "x86_64_generic"); "typeInference"; "none")\n'
+            f'$options.plugins:=Folder({literal(matrix / "Plugins")})\n'
+            f'$result:=Compile project(File({literal(project)}); $options)', args.timeout)
+        if compiled.get("success") is not True or compiled.get("errors"):
+            REPORT.write_text(json.dumps({"passed": False, "compiler": compiled}, indent=2) + "\n")
             raise RuntimeError("Component compilation failed; inspect component-build-report.json")
-
-        shutil.copytree(source / "Project", output / "Project")
-        shutil.copytree(source / "Libraries", output / "Libraries")
-        shutil.copytree(source / "Resources", output / "Resources")
+        output = stage / "AccessibilityBridge.4dbase"
+        output.mkdir()
+        shutil.copytree(matrix / "Project", output / "Project")
+        shutil.rmtree(output / "Project/Sources/Methods")
+        shutil.copytree(matrix / "Libraries", output / "Libraries")
+        (output / "Resources").mkdir(exist_ok=True)
         (output / "Resources/watcher-capabilities.json").write_text(json.dumps({
             "schema": 1,
             "version": version,
             "watcherMethod": "AXB_WatcherTick",
             "consolidated": True,
         }, indent=2) + "\n")
-        shutil.rmtree(output / "Project/Sources/Methods")
-        for path in list((output / "Project/DerivedData/CompiledCode").glob("*.json")):
-            if path.name != "map.json":
-                path.unlink()
-        zip_result = run_utility(executable, driver,
-            f'$result:=ZIP Create archive(Folder({literal(output / "Project")}; fk platform path); File({literal(output / "AccessibilityBridge.4DZ")}; fk platform path); New object("compression"; ZIP Compression standard; "level"; 6))',
-            args.timeout)
-        if not zip_result.get("success"):
-            REPORT.write_text(json.dumps({"passed": False, "compile": compile_result, "zip": zip_result}, indent=2) + "\n")
+        archive = output / "AccessibilityBridge.4DZ"
+        archived = run_utility(executable, driver,
+            f'$options:=New object("files"; New collection(Folder({literal(output / "Project")})); "encryption"; ZIP Encryption none)\n'
+            f'$result:=ZIP Create archive($options; File({literal(archive)}))', args.timeout)
+        if archived.get("success") is not True:
+            REPORT.write_text(json.dumps({"passed": False, "archive": archived}, indent=2) + "\n")
             raise RuntimeError("Component packaging failed; inspect component-build-report.json")
         shutil.rmtree(output / "Project")
         verification = verify_package(output)
+        if hashes != {str(p.relative_to(ROOT)): sha(p) for p in inputs}:
+            raise RuntimeError("Source changed during compilation")
         if PACKAGE.exists():
-            shutil.rmtree(PACKAGE)
+            PACKAGE.rename(BUILD / ("AccessibilityBridge-previous-" + uuid.uuid4().hex + ".4dbase"))
         shutil.copytree(output, PACKAGE)
-        native_binary = plugin / "Contents/MacOS/AccessibilityBridge"
-        REPORT.write_text(json.dumps({
-            "passed": True,
-            "version": version,
-            "compiler": str(app),
-            "nativeSHA256": sha(native_binary),
-            "sources": source_hashes,
-            "publicMethods": list(PUBLIC),
-            "compile": compile_result,
-            "verification": verification,
-            "archiveSHA256": sha(PACKAGE / "AccessibilityBridge.4DZ"),
-            "arm64LibrarySHA256": sha(PACKAGE / "Libraries/lib4d-arm64.dylib"),
-        }, indent=2) + "\n")
-        print(f"Built component: {PACKAGE}")
+    report = {
+        "passed": True, "state": "built", "version": version, "serverVersion": info.get("CFBundleShortVersionString"),
+        "typeInference": "none", "publicMethods": list(PUBLIC), "sources_sha256": hashes,
+        "native_sha256": sha(plugin / "Contents/MacOS/AccessibilityBridge"),
+        "package_sha256": {str(p.relative_to(PACKAGE)): sha(p) for p in PACKAGE.rglob("*") if p.is_file()},
+        "compiler": compiled, "archive": archived, "verification": verification,
+        "scope": "Compiled package only; validate both host execution modes separately",
+    }
+    REPORT.write_text(json.dumps(report, indent=2) + "\n")
+    print(f"PASS: compiled component packaged for ARM and Intel: {PACKAGE}")
     if args.area_list:
-        alp_plugin = args.alp_plugin or (ROOT / "fixture/Plugins/ALP.bundle")
-        build_alp_component(executable, app, alp_plugin, version, args.timeout)
+        alp_plugin = (args.alp_plugin or (ROOT / "fixture/Plugins/ALP.bundle")).resolve()
+        build_alp_component(executable, info, alp_plugin, version, args.timeout)
     if args.prepare_fixture:
         prepare_fixture()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (RuntimeError, subprocess.TimeoutExpired, OSError, ValueError, zipfile.BadZipFile) as error:
+        raise SystemExit(f"FAIL: {error}")

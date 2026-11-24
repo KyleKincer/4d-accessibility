@@ -64,7 +64,9 @@ $keys:=Null
 $selection:=Null
 $control:=Null
 If ($array)
- $keys:=$binding.keyPointer
+ If (Value type($binding.keyPointer)=Is pointer)
+  $keys:=$binding.keyPointer
+ End if
  $selection:=$binding.selectionPointer
  $control:=$binding.controlPointer
 End if
@@ -101,7 +103,7 @@ If ($options.columns#Null)
   End if
  End for each
 End if
-If ($array && (Find in array($parts; $options.keyColumn)<1))
+If ($array && Not($binding.positionalKeys=True) && (Find in array($parts; $options.keyColumn)<1))
  return
 End if
 $columns:=New collection

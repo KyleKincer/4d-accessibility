@@ -232,6 +232,9 @@ For ($i; 1; Size of array($names))
    // Icon and invisible buttons often already have a localized help tip.
    // Prefer a real caption; explicit accessibility metadata still wins below.
    $label:=OBJECT Get help tip(*; $name)
+   If ((Position(":/tips.json"; $label)=1) | (Position(":xliff:"; $label)=1))
+    $label:=""
+   End if
    If (Length($label)>512)
     $end:=512
     If (AXB_TextIndex($label; $end; False)<0)

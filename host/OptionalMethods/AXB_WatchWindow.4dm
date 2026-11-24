@@ -4,7 +4,7 @@
 var $previousError; $formName; $label : Text
 var $table : Pointer
 var $tableNum : Integer
-var $context; $meta; $options; $storedOptions; $result : Object
+var $context; $meta; $options; $storedOptions; $result; $registry : Object
 var $configured : Variant
 ARRAY TEXT($objects; 0)
 ARRAY TEXT($methods; 0)
@@ -14,9 +14,18 @@ End if
 $previousError:=Method called on error(ek local)
 ON ERR CALL("AXB_WatchError"; ek local)
 $table:=Current form table
-$tableNum:=Choose(Is nil pointer($table); 0; Table($table))
+$tableNum:=0
+If (Not(Is nil pointer($table)))
+ $tableNum:=Table($table)
+End if
 $formName:=Current form name
 $context:=AXB_FormContext
+If (($context=Null) && (AXB_FormRoots#Null) && (AXB_FormRoots[String($window)]#Null))
+ $registry:=AXB_FormRoots[String($window)]
+ If (($registry.context#Null) && ($registry.context.watched=True))
+  $context:=$registry.context
+ End if
+End if
 If (($context#Null) && ($context.active=True))
  If ($context.watched=True)
   If (($context.watchWindow=$window) & ($context.watchTable=$tableNum) & ($context.watchForm=$formName) & (New collection($context.watchFormObj).indexOf(Form)=0))

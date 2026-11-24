@@ -1,6 +1,5 @@
 // Worker entrypoint invoked by the native plugin watcher when accessibility is active.
 // Scans open 4D windows and attaches sessions via CALL FORM without requiring %AXB Area.
-#DECLARE($reason : Text)
 var $status; $winState : Object
 var $raw : Text
 var $index; $win : Integer
@@ -34,7 +33,7 @@ For ($index; 1; Size of array($windows))
      return
     End if
     If ($winState.hasSession#True)
-     CALL FORM($win; Formula(AXB_WatchWindow($1)); $win)
+     CALL FORM($win; "AXB_WatchWindow"; $win)
     End if
    End if
   End if

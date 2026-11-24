@@ -6,31 +6,33 @@
 #include "4DPluginAPI.h"
 #include <dlfcn.h>
 #include <mach-o/dyld.h>
+#include <mutex>
 #include <vector>
 
 namespace {
 
 constexpr int kMaxUnattachedProbes = 6;
+constexpr PA_long32 kWatcherStackSize = 256 * 1024;
 
 static NSObject *WatcherLock = nil;
-static dispatch_queue_t WatcherQueue = nil;
 static NSString *WatcherStructurePath = nil;
 static BOOL WatcherEnabled = NO;
 static BOOL WatcherConfirmed = NO;
 static BOOL WatcherStopped = NO;
-static BOOL WatcherInFlight = NO;
-static BOOL WatcherPending = NO;
-static NSString *WatcherPendingReason = nil;
+static BOOL WatcherThreadStarted = NO;
 static NSMutableArray<id> *WatcherObservers = nil;
 static dispatch_source_t WatcherRetryTimer = nil;
 static dispatch_source_t WatcherFallbackTimer = nil;
 static NSMapTable<NSWindow *, NSNumber *> *WindowProbeCounts = nil;
 
+static std::mutex SignalMutex;
+static bool SignalPending = false;
+static bool SignalStop = false;
+
 static void EnsureWatcherState(void) {
     static dispatch_once_t once;
     dispatch_once(&once, ^{
         WatcherLock = [NSObject new];
-        WatcherQueue = dispatch_queue_create("io.github.kylekincer.axb.watcher", DISPATCH_QUEUE_SERIAL);
         WatcherObservers = [NSMutableArray new];
         WindowProbeCounts = [NSMapTable weakToStrongObjectsMapTable];
     });
@@ -123,101 +125,60 @@ static std::vector<PA_Unichar> ToUnichars(NSString *str) {
     return out;
 }
 
-static void ScheduleWatcherPoke(NSString *reason);
+static void PokeWatcherWorker(void) {
+    std::lock_guard<std::mutex> lock(SignalMutex);
+    if (SignalStop) return;
+    SignalPending = true;
+}
 
-static void WatcherBootstrapEntry(void) {
+static void WatcherRelayProcess(void) {
     @autoreleasepool {
-        NSString *reason = nil;
-        BOOL shouldRun = NO;
-        @synchronized(WatcherLock) {
-            shouldRun = !WatcherStopped && WatcherEnabled && !AXBIsStopped();
-            reason = WatcherPendingReason ?: @"poke";
-            WatcherPendingReason = nil;
-        }
-        if (shouldRun && AXBActivationIsActive()) {
-            auto cmdName = ToUnichars(@"CALL WORKER");
-            PA_long32 callWorkerID = PA_GetCommandID(cmdName.data());
-            if (callWorkerID > 0) {
+        auto cmdName = ToUnichars(@"CALL WORKER");
+        PA_long32 callWorkerID = PA_GetCommandID(cmdName.data());
+        PA_long32 myPID = PA_GetCurrentProcessNumber();
+        while (!PA_IsProcessDying()) {
+            bool hasWork = false;
+            bool enabled = false;
+            {
+                std::lock_guard<std::mutex> lock(SignalMutex);
+                if (SignalStop) break;
+                if (SignalPending) {
+                    SignalPending = false;
+                    hasWork = true;
+                }
+            }
+            @synchronized(WatcherLock) {
+                enabled = WatcherEnabled && !WatcherStopped;
+            }
+            if (PA_IsProcessDying() || AXBIsStopped()) break;
+            if (enabled && hasWork && callWorkerID > 0 && AXBActivationIsActive()) {
                 auto workerName = ToUnichars(@"AXB_Watcher");
                 auto methodName = ToUnichars(@"AXB_WatcherTick");
-                auto reasonChars = ToUnichars(reason);
                 PA_Unistring uWorker = PA_CreateUnistring(workerName.data());
                 PA_Unistring uMethod = PA_CreateUnistring(methodName.data());
-                PA_Unistring uReason = PA_CreateUnistring(reasonChars.data());
-                PA_Variable params[3] = {};
+                PA_Variable params[2] = {};
                 PA_SetStringVariable(&params[0], &uWorker);
                 PA_SetStringVariable(&params[1], &uMethod);
-                PA_SetStringVariable(&params[2], &uReason);
-                (void)PA_ExecuteCommandByID(callWorkerID, params, 3);
+                (void)PA_ExecuteCommandByID(callWorkerID, params, 2);
                 PA_DisposeUnistring(&uWorker);
                 PA_DisposeUnistring(&uMethod);
-                PA_DisposeUnistring(&uReason);
             }
-        }
-        BOOL runAgain = NO;
-        NSString *nextReason = nil;
-        @synchronized(WatcherLock) {
-            WatcherInFlight = NO;
-            if (WatcherPending && !WatcherStopped && WatcherEnabled) {
-                WatcherPending = NO;
-                runAgain = YES;
-                nextReason = WatcherPendingReason ?: @"coalesced";
-                WatcherPendingReason = nil;
-            }
-        }
-        if (runAgain) {
-            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 120 * NSEC_PER_MSEC), WatcherQueue, ^{
-                ScheduleWatcherPoke(nextReason);
-            });
+            // Cooperative 4D sleep: 30 ticks (~500ms) while dormant, 10 ticks (~167ms) while active.
+            PA_PutProcessToSleep(myPID, enabled ? 10 : 30);
         }
     }
 }
 
-static void SpawnWatcherBootstrap(void *context) {
-    (void)context;
-    @autoreleasepool {
-        BOOL stopped = NO;
-        @synchronized(WatcherLock) { stopped = WatcherStopped || !WatcherEnabled; }
-        if (stopped) {
-            @synchronized(WatcherLock) { WatcherInFlight = NO; }
-            return;
-        }
-        auto procName = ToUnichars(@"$AXB_WatchBoot");
-        PA_long32 pid = PA_NewProcess(reinterpret_cast<void *>(&WatcherBootstrapEntry), 0, procName.data());
-        if (pid <= 0) {
-            @synchronized(WatcherLock) { WatcherInFlight = NO; }
-        }
-    }
-}
-
-static void ScheduleWatcherPoke(NSString *reason) {
-    EnsureWatcherState();
-    BOOL launch = NO;
+static void StartRelayProcessInPluginInit(void) {
     @synchronized(WatcherLock) {
-        if (WatcherStopped || !WatcherEnabled || AXBIsStopped()) return;
-        if (WatcherInFlight) {
-            WatcherPending = YES;
-            WatcherPendingReason = [reason copy];
-            return;
-        }
-        WatcherInFlight = YES;
-        WatcherPending = NO;
-        WatcherPendingReason = [reason copy];
-        launch = YES;
+        if (WatcherStopped || WatcherThreadStarted) return;
+        WatcherThreadStarted = YES;
     }
-    if (!launch) return;
-    dispatch_async(WatcherQueue, ^{
-        BOOL stopped = NO;
-        @synchronized(WatcherLock) { stopped = WatcherStopped || !WatcherEnabled; }
-        if (stopped) {
-            @synchronized(WatcherLock) { WatcherInFlight = NO; }
-            return;
-        }
-        PA_RunInMainProcess(SpawnWatcherBootstrap, nullptr);
-        if (PA_GetLastError() != eER_NoErr) {
-            @synchronized(WatcherLock) { WatcherInFlight = NO; }
-        }
-    });
+    auto procName = ToUnichars(@"$AXB_WatchRelay");
+    PA_long32 pid = PA_NewProcess(reinterpret_cast<void *>(&WatcherRelayProcess), kWatcherStackSize, procName.data());
+    if (pid <= 0) {
+        @synchronized(WatcherLock) { WatcherThreadStarted = NO; }
+    }
 }
 
 static BOOL IsCandidateWindow(NSWindow *window) {
@@ -229,7 +190,7 @@ static BOOL IsCandidateWindow(NSWindow *window) {
     return YES;
 }
 
-static void NoteWindowEvent(NSWindow *window, NSString *reason, BOOL resetCount) {
+static void NoteWindowEvent(NSWindow *window, BOOL resetCount) {
     if (!IsCandidateWindow(window)) return;
     if (AXBWindowHasSession((__bridge void *)window)) return;
     BOOL shouldPoke = NO;
@@ -237,15 +198,12 @@ static void NoteWindowEvent(NSWindow *window, NSString *reason, BOOL resetCount)
         if (WatcherStopped || !WatcherEnabled) return;
         NSNumber *existing = [WindowProbeCounts objectForKey:window];
         int count = resetCount ? 0 : (existing ? existing.intValue : -1);
-        if (count < 0) {
-            [WindowProbeCounts setObject:@(1) forKey:window];
-            shouldPoke = YES;
-        } else if (resetCount) {
+        if (count < 0 || resetCount) {
             [WindowProbeCounts setObject:@(1) forKey:window];
             shouldPoke = YES;
         }
     }
-    if (shouldPoke) ScheduleWatcherPoke(reason);
+    if (shouldPoke) PokeWatcherWorker();
 }
 
 static void ScanUnattachedWindowsOnMain(void) {
@@ -265,7 +223,7 @@ static void ScanUnattachedWindowsOnMain(void) {
             }
         }
     }
-    if (needsPoke) ScheduleWatcherPoke(@"retry");
+    if (needsPoke) PokeWatcherWorker();
 }
 
 static void InstallObservers(void) {
@@ -278,12 +236,12 @@ static void InstallObservers(void) {
     ];
     for (NSNotificationName name in activateNames) {
         id obs = [center addObserverForName:name object:nil queue:nil usingBlock:^(NSNotification *note) {
-            NoteWindowEvent(note.object, @"window", YES);
+            NoteWindowEvent(note.object, YES);
         }];
         [WatcherObservers addObject:obs];
     }
     id updateObs = [center addObserverForName:NSWindowDidUpdateNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        NoteWindowEvent(note.object, @"update", NO);
+        NoteWindowEvent(note.object, NO);
     }];
     [WatcherObservers addObject:updateObs];
     id closeObs = [center addObserverForName:NSWindowWillCloseNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
@@ -319,15 +277,21 @@ static void InstallObservers(void) {
 
 void AXBWatcherInitialize(NSString *structurePath) {
     EnsureWatcherState();
+    {
+        std::lock_guard<std::mutex> lock(SignalMutex);
+        SignalStop = false;
+        SignalPending = false;
+    }
     @synchronized(WatcherLock) {
         WatcherStructurePath = [structurePath copy];
         WatcherEnabled = NO;
         WatcherConfirmed = NO;
         WatcherStopped = NO;
-        WatcherInFlight = NO;
-        WatcherPending = NO;
-        WatcherPendingReason = nil;
+        WatcherThreadStarted = NO;
         [WindowProbeCounts removeAllObjects];
+    }
+    if (HasWatcherComponent(structurePath)) {
+        StartRelayProcessInPluginInit();
     }
 }
 
@@ -349,7 +313,7 @@ void AXBWatcherActivate(void) {
         WatcherEnabled = YES;
         InstallObservers();
     }
-    ScheduleWatcherPoke(@"start");
+    PokeWatcherWorker();
 
     // Safety fallback: if the component never confirms activation (for example, it failed
     // to load), release suppression so GenericForms still provides baseline coverage.
@@ -370,15 +334,15 @@ void AXBWatcherActivate(void) {
             }
         }
         if (fallback) {
-            CFRunLoopRef main = CFRunLoopGetMain();
-            CFArrayRef modes = CFRunLoopCopyAllModes(main);
-            if (modes) {
-                CFRunLoopPerformBlock(main, modes, ^{
+            CFRunLoopRef mainLoop = CFRunLoopGetMain();
+            CFArrayRef allModes = CFRunLoopCopyAllModes(mainLoop);
+            if (allModes) {
+                CFRunLoopPerformBlock(mainLoop, allModes, ^{
                     AXBGenericFormsSetSuppressed(NO);
                     AXBGenericFormsInitialize(fallbackStructure);
                 });
-                CFRelease(modes);
-                CFRunLoopWakeUp(main);
+                CFRelease(allModes);
+                CFRunLoopWakeUp(mainLoop);
             }
         }
     });
@@ -387,6 +351,11 @@ void AXBWatcherActivate(void) {
 
 void AXBWatcherShutdown(void) {
     EnsureWatcherState();
+    {
+        std::lock_guard<std::mutex> lock(SignalMutex);
+        SignalStop = true;
+        SignalPending = false;
+    }
     NSArray *observers = nil;
     dispatch_source_t retry = nil;
     dispatch_source_t fallback = nil;
@@ -394,8 +363,7 @@ void AXBWatcherShutdown(void) {
         WatcherStopped = YES;
         WatcherEnabled = NO;
         WatcherConfirmed = NO;
-        WatcherPending = NO;
-        WatcherPendingReason = nil;
+        WatcherThreadStarted = NO;
         observers = [WatcherObservers copy];
         [WatcherObservers removeAllObjects];
         retry = WatcherRetryTimer;

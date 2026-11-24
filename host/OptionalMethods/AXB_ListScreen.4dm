@@ -12,44 +12,48 @@ var $frames; $headers; $rowFrames : Object
 ARRAY TEXT($objects; 0)
 If ($operation="readGrid")
  $result:=New object("ok"; True; "pages"; New collection)
- If (($view.listScreenCols#Null) && ($request#Null) && (Value type($request.requests)=Is collection))
+ If (($view.listScreenCols#Null) && ($view.listScreenColOrder#Null) && ($request#Null) && (Value type($request.requests)=Is collection))
   $table:=Current form table
   If (Not(Is nil pointer($table)))
-   var $req; $pageObj; $rowEntry; $cellObj; $dc; $ent : Object
+   var $query; $pageObj; $es; $ent : Object
    var $pageRows; $cells : Collection
-   var $rKey; $cId; $cellVal : Text
-   var $rNum; $recNo : Integer
-   ARRAY LONGINT($selRecs; 0)
-   LONGINT ARRAY FROM SELECTION($table->; $selRecs)
-   $dc:=Null
-   If (OB Keys(ds).indexOf(Table name(Table($table)))>=0)
-    $dc:=ds[Table name(Table($table))]
-   End if
-   For each ($req; $request.requests)
-    $pageRows:=New collection
-    If ((Value type($req.rows)=Is collection) && (Value type($req.columns)=Is collection))
-     For each ($rKey; $req.rows)
-      $rNum:=Num($rKey)
-      $cells:=New collection
-      $ent:=Null
-      If (($dc#Null) & ($rNum>=1) & ($rNum<=Size of array($selRecs)))
-       $recNo:=$selRecs{$rNum}
-       // Look up entity by record number only if primary key / datastore available; otherwise return empty text safely.
-      End if
-      For each ($cId; $req.columns)
-       $cellVal:=""
-       $col:=$view.listScreenCols[$cId]
-       If (($col#Null) & ($col.field>0) & ($rNum>=1) & ($rNum<=Size of array($selRecs)))
-        If ($rNum=Selected record number($table->))
-         $cellVal:=AXB_ControlValue(Field($col.table; $col.field)->; "")
-        End if
-       End if
-       $cells.push(New object("column"; $cId; "value"; $cellVal; "editable"; False; "enabled"; True))
-      End for each
-      $pageRows.push(New object("row"; $rKey; "cells"; $cells))
-     End for each
+   var $rKey; $cId; $cellVal; $fieldName : Text
+   var $start; $end; $first; $last; $r; $c : Integer
+   $es:=Create entity selection($table->)
+   For each ($query; $request.requests)
+    If (($query.generation#$view.instance) | ($query.order#1))
+     continue
     End if
-    $pageObj:=New object("generation"; $view.instance; "rows"; $pageRows)
+    $start:=$query.row
+    $end:=$start+$query.rowCount
+    $first:=$query.column
+    $last:=$first+$query.columnCount
+    If (($start<0) | ($query.rowCount<1) | ($query.rowCount>16) | ($first<0) | ($last>$view.listScreenColOrder.length) | ($query.columnCount<1) | ($query.columnCount>8))
+     continue
+    End if
+    $pageRows:=New collection
+    For ($r; $start; $end-1)
+     $rKey:=String($r+1)
+     $cells:=New collection
+     $ent:=Null
+     If (($es#Null) && ($r<$es.length))
+      $ent:=$es[$r]
+     End if
+     For ($c; $first; $last-1)
+      $cId:=$view.listScreenColOrder[$c]
+      $cellVal:=""
+      $col:=$view.listScreenCols[$cId]
+      If (($col#Null) & ($col.field>0) & ($ent#Null))
+       $fieldName:=Field name($col.table; $col.field)
+       If ($fieldName#"")
+        $cellVal:=AXB_ControlValue($ent[$fieldName]; "")
+       End if
+      End if
+      $cells.push(New object("column"; $cId; "value"; $cellVal; "editable"; False; "enabled"; True))
+     End for
+     $pageRows.push(New object("id"; $rKey; "cells"; $cells))
+    End for
+    $pageObj:=New object("node"; $query.node; "generation"; $view.instance; "order"; 1; "row"; $start; "column"; $first; "rows"; $pageRows)
     $result.pages.push($pageObj)
    End for each
   End if
@@ -76,7 +80,10 @@ If ($operation="apply")
  return
 End if
 $result:=New object("ok"; True; "nodes"; New collection; "subforms"; New collection; "unsupported"; New collection)
-$meta:=AXB_FormStored("meta")
+If (Not(OB Is defined($view; "listScreenMeta")))
+ $view.listScreenMeta:=AXB_FormStored("meta")
+End if
+$meta:=$view.listScreenMeta
 $header:=0
 $body:=0
 If (($meta#Null) && (Value type($meta)=Is object))
@@ -88,7 +95,10 @@ If (($meta#Null) && (Value type($meta)=Is object))
  End if
 End if
 // Publish interactive header controls positioned above the body band.
-$discovered:=AXB_Discover($view.options; New object; New collection(0; 0); Null; Null; Null; Null)
+If ($view.listScreenStatic=Null)
+ $view.listScreenStatic:=New object("form"; Current form name; "types"; New object; "menus"; New object)
+End if
+$discovered:=AXB_Discover($view.options; New object; New collection(0; 0); Null; Null; Null; $view.listScreenStatic)
 If (($discovered#Null) && ($discovered.ok=True))
  For each ($node; $discovered.nodes)
   If (($header<=0) | (($node.frame#Null) && ($node.frame.length>=4) && (($node.frame[1]+$node.frame[3])<=($header+4))))
@@ -136,9 +146,11 @@ $limit:=New collection($totalRecords; 100).min()
 $columns:=New collection
 $headers:=New object
 $view.listScreenCols:=New object
+$view.listScreenColOrder:=New collection
 For each ($col; $bodyCols)
  $columns.push(New object("id"; $col.id; "label"; $col.label; "enabled"; True; "editable"; False))
  $view.listScreenCols[$col.id]:=$col
+ $view.listScreenColOrder.push($col.id)
  If ($header>0)
   $headers[$col.id]:=New collection($col.left; 0; $col.width; $header)
  End if

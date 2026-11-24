@@ -4,7 +4,13 @@
 var $work; $ch; $prev; $out : Text
 var $pos; $i; $code; $prevCode : Integer
 $label:=""
-$work:=AXB_Trim($raw)
+$work:=$raw
+While ((Length($work)>0) & (Position(Substring($work; 1; 1); " \t\r\n")>0))
+ $work:=Substring($work; 2)
+End while
+While ((Length($work)>0) & (Position(Substring($work; Length($work); 1); " \t\r\n")>0))
+ $work:=Substring($work; 1; Length($work)-1)
+End while
 If ($work="")
  return
 End if
@@ -78,7 +84,12 @@ For ($i; 1; Length($work))
  $out:=$out+$ch
  $prev:=$ch
 End for
-$out:=AXB_Trim($out)
+While ((Length($out)>0) & (Position(Substring($out; 1; 1); " \t\r\n")>0))
+ $out:=Substring($out; 2)
+End while
+While ((Length($out)>0) & (Position(Substring($out; Length($out); 1); " \t\r\n")>0))
+ $out:=Substring($out; 1; Length($out)-1)
+End while
 While (Position("  "; $out)>0)
  $out:=Replace string($out; "  "; " ")
 End while

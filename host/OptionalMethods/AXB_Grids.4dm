@@ -1,7 +1,7 @@
 // Compose reusable grid providers with the automatic ordinary-control tree.
 // Provider selection uses fixed internal methods, never an AX-supplied name.
 #DECLARE($view : Object; $request : Object) -> $result : Object
-var $name; $id; $property; $issueKey; $column; $detectedKind; $autoLabel; $lbNamedSel; $prevErr : Text
+var $name; $id; $property; $issueKey; $column; $detectedKind; $autoLabel; $lbNamedSel; $prevErr; $metaKey : Text
 var $columns : Collection
 var $options; $state; $reply; $action; $configured; $hints; $hint; $probe; $merged; $alpHelpers : Object
 var $table : Pointer
@@ -25,7 +25,11 @@ End if
 If ($view.grids=Null)
  $view.grids:=New object
 End if
-$hints:=AXB_FormStored("hints")
+If (Not(OB Is defined($view; "gridHintsLoaded")))
+ $view.gridHints:=AXB_FormStored("hints")
+ $view.gridHintsLoaded:=True
+End if
+$hints:=$view.gridHints
 // Detect AreaList Pro provider once per view (host method, local method, or sibling component).
 If ($view.areaListProvider=Null)
  METHOD GET NAMES($methods; "AXB_ALPGrid"; *)
@@ -129,7 +133,12 @@ For ($position; 1; Size of array($objects))
     End case
    End if
    If ($detectedKind#"")
-    $merged:=Choose($wasConfigured; OB Copy($configured[$name]); New object)
+    $merged:=New object
+    If ($wasConfigured)
+     For each ($metaKey; $configured[$name])
+      $merged[$metaKey]:=$configured[$name][$metaKey]
+     End for each
+    End if
     $merged.kind:=$detectedKind
     $merged.auto:=True
     If ((($detectedKind="array") & Not(OB Is defined($merged; "keyColumn"))) | ((New collection("collection"; "entity"; "selection").indexOf($detectedKind)>=0) & Not(OB Is defined($merged; "keyProperty"))))

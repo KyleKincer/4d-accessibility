@@ -13,7 +13,10 @@ If ($formName="")
  return
 End if
 $table:=Current form table
-$tableNum:=Choose(Is nil pointer($table); 0; Table($table))
+$tableNum:=0
+If (Not(Is nil pointer($table)))
+ $tableNum:=Table($table)
+End if
 $reply:=AXB_Host("formMetadata"; New object("table"; $tableNum; "form"; $formName))
 If (($reply#Null) && (Value type($reply)=Is object) && ($reply.ok=True) && ($reply.found=True))
  If ($section="meta")
