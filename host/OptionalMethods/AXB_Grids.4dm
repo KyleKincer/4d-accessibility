@@ -192,13 +192,23 @@ For ($position; 1; Size of array($objects))
   $wasConfigured:=OB Is defined($configured; $name)
   If ($wasConfigured)
    If (($configured[$name].kind="areaList") | Not(OB Is defined($configured[$name]; "kind")))
-    $merged:=OB Copy($configured[$name])
+    $merged:=New object
+    For each ($metaKey; $configured[$name])
+     $merged[$metaKey]:=$configured[$name][$metaKey]
+    End for each
     If (Not(OB Is defined($merged; "kind")))
      $merged.kind:="areaList"
      $merged.auto:=True
     End if
     If (Not(OB Is defined($merged; "keys")))
      $merged.positionalKeys:=True
+    End if
+    If (Not(OB Is defined($merged; "label")))
+     If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && (Value type($view.options.controls[$name].label)=Is text) && ($view.options.controls[$name].label#""))
+      $merged.label:=$view.options.controls[$name].label
+     Else
+      $merged.label:=$name
+     End if
     End if
     $configured[$name]:=$merged
    End if
