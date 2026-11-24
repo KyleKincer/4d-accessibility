@@ -1,17 +1,19 @@
 // Compose reusable grid providers with the automatic ordinary-control tree.
 // Provider selection uses fixed internal methods, never an AX-supplied name.
 #DECLARE($view : Object; $request : Object) -> $result : Object
-var $name; $id; $property; $issueKey; $column : Text
+var $name; $id; $property; $issueKey; $column; $detectedKind; $autoLabel; $lbNamedSel; $prevErr : Text
 var $columns : Collection
-var $options; $state; $reply; $action; $configured : Object
+var $options; $state; $reply; $action; $configured; $hints; $hint; $probe; $merged; $alpHelpers : Object
 var $table : Pointer
 var $detail; $list : Text
-var $position; $type : Integer
+var $position; $type; $lbTable; $lbRows : Integer
 var $formKey; $issues : Text
-var $ready : Boolean
+var $ready; $hierarchical; $wasConfigured : Boolean
+var $lbVal : Variant
 ARRAY TEXT($objects; 0)
 ARRAY TEXT($methods; 0)
 ARRAY POINTER($variables; 0)
+ARRAY POINTER($hierarchy; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; True; "nodes"; New collection; "unsupported"; New collection; "pages"; New collection; "status"; "rejected"; "message"; "Grid is unavailable")
 $configured:=New object
@@ -23,6 +25,29 @@ End if
 If ($view.grids=Null)
  $view.grids:=New object
 End if
+$hints:=AXB_FormStored("hints")
+// Detect AreaList Pro provider once per view (host method, local method, or sibling component).
+If ($view.areaListProvider=Null)
+ METHOD GET NAMES($methods; "AXB_ALPGrid"; *)
+ If (Find in array($methods; "AXB_ALPGrid")<=0)
+  METHOD GET NAMES($methods; "AXB_ALPGrid")
+ End if
+ If (Find in array($methods; "AXB_ALPGrid")>0)
+  $view.areaListProvider:=True
+ Else
+  $prevErr:=Method called on error(ek local)
+  ON ERR CALL("AXB_WatchError"; ek local)
+  $probe:=Null
+  EXECUTE METHOD("AXB_ALPGrid"; $probe; "ping"; New object; New object; New object)
+  ON ERR CALL($prevErr; ek local)
+  $view.areaListProvider:=($probe#Null) && (Value type($probe)=Is object) && ($probe.ok=True)
+ End if
+End if
+$alpHelpers:=New object(\
+"controlFocus"; Formula(AXB_ControlFocus($1)); \
+"keyIndex"; Formula(AXB_KeyIndex($1; $2)); \
+"textAction"; Formula(AXB_TextAction($1; $2; $3)); \
+"textIndex"; Formula(AXB_TextIndex($1; $2; $3)))
 FORM GET OBJECTS($objects; $variables; $pages; Form current page+Form inherited)
 // An object's type is fixed by its form: read it once per form.
 $formKey:=Current form name
@@ -41,19 +66,143 @@ For ($position; 1; Size of array($objects))
   $type:=OBJECT Get type(*; $name)
   $view.objectTypes.types[$name]:=$type
  End if
- If (($type=Object type subform) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
+ If (Not(OBJECT Get visible(*; $name)))
+  continue
+ End if
+ If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && ($view.options.controls[$name].decorative=True))
+  continue
+ End if
+ If (($type=Object type subform) && Not(OB Is defined($configured; $name)))
   OBJECT GET SUBFORM(*; $name; $table; $detail; $list)
   If (Not(Is nil pointer($table)) & ($list#""))
    $configured[$name]:=New object("kind"; "listSubform"; "label"; $name)
   End if
+  continue
  End if
- If (($type=Object type hierarchical list) && OBJECT Get visible(*; $name) && Not(OB Is defined($configured; $name)))
+ If (($type=Object type hierarchical list) && Not(OB Is defined($configured; $name)))
   // A hierarchical list needs no configuration; a configured label still wins.
   $configured[$name]:=New object("kind"; "hierarchicalList")
   If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && (Value type($view.options.controls[$name].label)=Is text) && ($view.options.controls[$name].label#""))
    $configured[$name].label:=$view.options.controls[$name].label
   Else
    $configured[$name].label:=Choose(OBJECT Get help tip(*; $name)#""; OBJECT Get help tip(*; $name); $name)
+  End if
+  continue
+ End if
+ If ($type=Object type listbox)
+  $wasConfigured:=OB Is defined($configured; $name)
+  If ($wasConfigured && OB Is defined($configured[$name]; "kind"))
+   If (($configured[$name].kind="array") && Not(OB Is defined($configured[$name]; "keyColumn")))
+    $merged:=OB Copy($configured[$name])
+    $merged.positionalKeys:=True
+    $configured[$name]:=$merged
+   End if
+   If (($configured[$name].kind="collection") && Not(OB Is defined($configured[$name]; "keyProperty")))
+    $merged:=OB Copy($configured[$name])
+    $merged.positionalKeys:=True
+    $configured[$name]:=$merged
+   End if
+  Else
+   // Auto-discover listbox data source type when visible.
+   $lbRows:=LISTBOX Get number of rows(*; $name)
+   If (Not($wasConfigured) & ($lbRows>2000))
+    continue
+   End if
+   $detectedKind:=""
+   $lbTable:=0
+   $lbNamedSel:=""
+   LISTBOX GET TABLE SOURCE(*; $name; $lbTable; $lbNamedSel)
+   If ($lbTable>0)
+    $detectedKind:="selection"
+   Else
+    $lbVal:=OBJECT Get value($name)
+    Case of
+     : (Value type($lbVal)=Is collection)
+      $detectedKind:="collection"
+     : ((Value type($lbVal)=Is object) && ($lbVal#Null) && OB Instance of($lbVal; 4D.EntitySelection))
+      $detectedKind:="entity"
+     Else
+      LISTBOX GET HIERARCHY(*; $name; $hierarchical; $hierarchy)
+      If (Not($hierarchical))
+       $detectedKind:="array"
+      End if
+    End case
+   End if
+   If ($detectedKind#"")
+    $merged:=Choose($wasConfigured; OB Copy($configured[$name]); New object)
+    $merged.kind:=$detectedKind
+    $merged.auto:=True
+    If ((($detectedKind="array") & Not(OB Is defined($merged; "keyColumn"))) | ((New collection("collection"; "entity"; "selection").indexOf($detectedKind)>=0) & Not(OB Is defined($merged; "keyProperty"))))
+     $merged.positionalKeys:=True
+    End if
+    If (Not(OB Is defined($merged; "label")))
+     $autoLabel:=""
+     If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && (Value type($view.options.controls[$name].label)=Is text) && ($view.options.controls[$name].label#""))
+      $autoLabel:=$view.options.controls[$name].label
+     End if
+     If ($autoLabel="")
+      $autoLabel:=OBJECT Get help tip(*; $name)
+     End if
+     If (($autoLabel="") && ($hints#Null) && ($hints[$name]#Null) && (Value type($hints[$name].tooltip)=Is text))
+      $autoLabel:=$hints[$name].tooltip
+     End if
+     If ($autoLabel="")
+      $autoLabel:=$name
+     End if
+     $merged.label:=$autoLabel
+    End if
+    $configured[$name]:=$merged
+   End if
+  End if
+  // Auto-wire Form.* selection hints when no explicit selection Formula is configured.
+  If (OB Is defined($configured; $name) && (New collection("collection"; "entity").indexOf($configured[$name].kind)>=0) && Not(OB Is defined($configured[$name]; "selection")))
+   If (($hints#Null) && ($hints[$name]#Null))
+    $hint:=$hints[$name]
+    If ((Value type($hint.selectedItemsSource)=Is text) && (Position("Form."; $hint.selectedItemsSource)=1) && Not(OB Is defined($configured[$name]; "selectedSource")))
+     $merged:=OB Copy($configured[$name])
+     $merged.selectedSource:=Substring($hint.selectedItemsSource; 6)
+     $configured[$name]:=$merged
+    Else
+     If ((Value type($hint.currentItemSource)=Is text) && (Position("Form."; $hint.currentItemSource)=1) && Not(OB Is defined($configured[$name]; "currentSource")))
+      $merged:=OB Copy($configured[$name])
+      $merged.currentSource:=Substring($hint.currentItemSource; 6)
+      $configured[$name]:=$merged
+     End if
+    End if
+   End if
+  End if
+  continue
+ End if
+ If (($type=Object type plugin area) & ($view.areaListProvider=True) & (Position("__AXB_Bridge"; $name)#1))
+  $wasConfigured:=OB Is defined($configured; $name)
+  If ($wasConfigured)
+   If (($configured[$name].kind="areaList") | Not(OB Is defined($configured[$name]; "kind")))
+    $merged:=OB Copy($configured[$name])
+    If (Not(OB Is defined($merged; "kind")))
+     $merged.kind:="areaList"
+     $merged.auto:=True
+    End if
+    If (Not(OB Is defined($merged; "keys")))
+     $merged.positionalKeys:=True
+    End if
+    $configured[$name]:=$merged
+   End if
+  Else
+   $probe:=Null
+   EXECUTE METHOD("AXB_ALPGrid"; $probe; "probe"; New object("objectName"; $name); New object; New object)
+   If (($probe#Null) && (Value type($probe)=Is object) && ($probe.isAreaList=True) && (Num($probe.rows)<=2000))
+    $autoLabel:=""
+    If (($view.options.controls#Null) && ($view.options.controls[$name]#Null) && (Value type($view.options.controls[$name].label)=Is text) && ($view.options.controls[$name].label#""))
+     $autoLabel:=$view.options.controls[$name].label
+    End if
+    If (($autoLabel="") && ($hints#Null) && ($hints[$name]#Null) && (Value type($hints[$name].tooltip)=Is text))
+     $autoLabel:=$hints[$name].tooltip
+    End if
+    If ($autoLabel="")
+     $autoLabel:=$name
+    End if
+    $configured[$name]:=New object("kind"; "areaList"; "auto"; True; "positionalKeys"; True; "label"; $autoLabel)
+   End if
   End if
  End if
 End for
@@ -163,20 +312,23 @@ For each ($name; $configured)
    continue
   End if
   If ($options.kind="areaList")
-   If ($view.areaListProvider=Null)
-    METHOD GET NAMES($methods; "AXB_ALPGrid")
-    $view.areaListProvider:=Find in array($methods; "AXB_ALPGrid")>0
-   End if
    If (Not($view.areaListProvider=True))
     return New object("ok"; False; "error"; "areaListProviderUnavailable")
    End if
+   $state.helpers:=$alpHelpers
    If (($request.operation="describe") | ($request.node=$id))
     EXECUTE METHOD("AXB_ALPGrid"; $reply; $request.operation; $options; $state; $request)
     If ($request.operation#"describe")
      return $reply
     End if
     If (Not($reply.ok=True))
+     If ($options.auto=True)
+      continue
+     End if
      return $reply
+    End if
+    If (($options.auto=True) && ($reply.nodes.length>0) && ($reply.nodes[0].grid=Null) && ($state.suspended#True))
+     continue
     End if
     $result.nodes:=$result.nodes.concat($reply.nodes)
    End if
@@ -186,7 +338,13 @@ For each ($name; $configured)
    If ($request.operation="describe")
     $reply:=AXB_GridListbox("describe"; $options; $state; $request)
     If (Not($reply.ok=True))
+     If ($options.auto=True)
+      continue
+     End if
      return $reply
+    End if
+    If (($options.auto=True) && ($reply.nodes.length>0) && ($reply.nodes[0].grid=Null) && ($state.suspended#True))
+     continue
     End if
     $result.nodes:=$result.nodes.concat($reply.nodes)
     If ($options.kind="outline")

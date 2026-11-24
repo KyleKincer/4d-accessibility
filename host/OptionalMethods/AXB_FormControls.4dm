@@ -65,10 +65,9 @@ If ($stored#Null)
  For each ($name; $stored)
   $explicit:=$grids[$name]
   If ($explicit=Null)
-   // A stored grid stands alone only when it is complete without formulas or
-   // pointers: an AreaList grid needs its keys, so it only completes one the
-   // application configures.
-   If ((OB Is defined($stored[$name]; "kind")) && ($stored[$name].kind#"areaList"))
+   // A stored grid can carry a full kind (including positional areaList) or column metadata
+   // that merges into an auto-discovered listbox or AreaList Pro grid.
+   If (OB Is defined($stored[$name]; "kind") | OB Is defined($stored[$name]; "columns") | OB Is defined($stored[$name]; "label"))
     $grids[$name]:=$stored[$name]
    End if
   Else

@@ -3,6 +3,7 @@
 #DECLARE($grids : Object) -> $valid : Boolean
 var $name; $property; $column : Text
 var $options; $metadata : Object
+var $positional : Boolean
 $valid:=False
 If (($grids=Null) | (Value type($grids)#Is object))
  return
@@ -20,17 +21,35 @@ For each ($name; $grids)
    return
   End if
  End if
+ If (OB Is defined($options; "positionalKeys") && (Value type($options.positionalKeys)#Is Boolean))
+  return
+ End if
+ If (OB Is defined($options; "auto") && (Value type($options.auto)#Is Boolean))
+  return
+ End if
+ For each ($property; New collection("selectedSource"; "currentSource"))
+  If (OB Is defined($options; $property))
+   If ((Value type($options[$property])#Is text) || ($options[$property]="") || (Length($options[$property])>256))
+    return
+   End if
+  End if
+ End for each
+ $positional:=($options.positionalKeys=True) | ($options.auto=True)
  If (New collection("array"; "outline"; "areaList"; "collection"; "entity"; "selection"; "listSubform"; "hierarchicalList").indexOf($options.kind)<0)
   return
  End if
  If (New collection("array"; "outline").indexOf($options.kind)>=0)
-  If ((Value type($options.keyColumn)#Is text) || ($options.keyColumn=""))
-   return
+  If (($options.kind="outline") | Not($positional) | OB Is defined($options; "keyColumn"))
+   If ((Value type($options.keyColumn)#Is text) || ($options.keyColumn=""))
+    return
+   End if
   End if
  Else
   If ($options.kind="areaList")
-   If (Value type($options.keys)#Is pointer)
-    return
+   If (Not($positional) | OB Is defined($options; "keys"))
+    If (Value type($options.keys)#Is pointer)
+     return
+    End if
    End if
    If (OB Is defined($options; "keyColumn"))
     If ((Value type($options.keyColumn)#Is real) || ($options.keyColumn<1) || (Int($options.keyColumn)#$options.keyColumn))
@@ -38,7 +57,7 @@ For each ($name; $grids)
     End if
    End if
   Else
-   If (($options.kind="collection") | OB Is defined($options; "keyProperty"))
+   If ((($options.kind="collection") & Not($positional)) | OB Is defined($options; "keyProperty"))
     If ((Value type($options.keyProperty)#Is text) || ($options.keyProperty=""))
      return
     End if

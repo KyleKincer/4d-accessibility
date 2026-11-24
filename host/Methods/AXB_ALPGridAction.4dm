@@ -112,8 +112,8 @@ If (New collection("gridReveal"; "gridEdit"; "gridPress"; "gridSetValue"; "gridS
    End if
    // A non-focusable checkbox toggles immediately through this vendor call.
    // A focusable checkbox only opens its editor. Never change the host's mode.
-   If (Not($value.active) | Not(AXB_ControlFocus($options.objectName)))
-    If (Not(AXB_ControlFocus($options.objectName)))
+   If (Not($value.active) | Not($state.helpers.controlFocus.call(Null; $options.objectName)))
+    If (Not($state.helpers.controlFocus.call(Null; $options.objectName)))
      GOTO OBJECT(*; $options.objectName)
     End if
     AL_SetAreaTextProperty($area; ALP_Area_EntryGotoCell; String($position)+","+String($column.gridCell))
@@ -166,7 +166,7 @@ If (New collection("gridReveal"; "gridEdit"; "gridPress"; "gridSetValue"; "gridS
     $data.resumeAfterExit:=True
     return New object("status"; "pending"; "confirm"; Formula(AXB_ALPGridConfirm($1)); "data"; $data)
    End if
-   If (Not(AXB_ControlFocus($options.objectName)))
+   If (Not($state.helpers.controlFocus.call(Null; $options.objectName)))
     GOTO OBJECT(*; $options.objectName)
    End if
    AL_SetAreaTextProperty($area; ALP_Area_EntryGotoCell; String($position)+","+String($column.gridCell))
@@ -185,7 +185,7 @@ If (($action.value.length=0) & (AL_GetAreaLongProperty($area; ALP_Area_SelNone)=
 End if
 $requested:=New collection
 For each ($key; $action.value)
- If (Not(OB Is defined($state.positions; $key)) | (AXB_KeyIndex($requested; $key)>=0))
+ If (Not(OB Is defined($state.positions; $key)) | ($state.helpers.keyIndex.call(Null; $requested; $key)>=0))
   return
  End if
  $requested.push($key)
@@ -207,7 +207,7 @@ If ($actual.length#$requested.length)
  return
 End if
 For each ($key; $requested)
- If (AXB_KeyIndex($actual; $key)<0)
+ If ($state.helpers.keyIndex.call(Null; $actual; $key)<0)
   return
  End if
 End for each
