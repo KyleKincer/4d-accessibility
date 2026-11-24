@@ -6,8 +6,9 @@ var $native; $component : Boolean
 ARRAY LONGINT($numbers; 0)
 ARRAY TEXT($names; 0)
 ARRAY TEXT($components; 0)
+ARRAY TEXT($localMethods; 0)
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
-If (New collection("info"; "start"; "stop"; "node"; "exchange"; "changes"; "focus"; "layout").indexOf($operation)<0)
+If (New collection("info"; "start"; "stop"; "node"; "exchange"; "changes"; "focus"; "layout"; "formMetadata"; "watcher").indexOf($operation)<0)
  return
 End if
 If ((Value type($request)#Is object) | ($request=Null))
@@ -26,6 +27,10 @@ PLUGIN LIST($numbers; $names)
 COMPONENT LIST($components)
 $native:=Find in array($numbers; 31071)>0
 $component:=Find in array($components; "AccessibilityBridge")>0
+If (Not($component))
+ METHOD GET NAMES($localMethods; "AXB_Dispatch")
+ $component:=Find in array($localMethods; "AXB_Dispatch")>0
+End if
 If (Not($native & $component))
  $result:=New object("ok"; False; "error"; "dependencyUnavailable"; "native"; $native; "component"; $component)
  return

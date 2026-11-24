@@ -5,6 +5,8 @@
 #include "Limits.h"
 #import "NativeLayout.h"
 #import "GenericForms.h"
+#import "FormCatalog.h"
+#import "Watcher.h"
 #import "Activation.h"
 #import "MessageDialogs.h"
 #include <vector>
@@ -57,12 +59,16 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 AXBMessagesSetCompiled(PA_IsCompiled(1) != 0);
                 AXBInitialize();
                 NSString *structure = StructurePath();
-                AXBWhenActive(^{ AXBGenericFormsInitialize(structure); });
+                AXBFormCatalogInitialize(structure);
+                AXBWatcherInitialize(structure);
+                AXBWhenActive(^{ AXBWatcherActivate(); });
                 break;
             }
             case kServerInitPlugin: AXBHooksConfigure(PA_Get4DVersion()); AXBInitialize(); break;
             case kDeinitPlugin:
-            case kServerDeinitPlugin: AXBAreaShutdown();
+            case kServerDeinitPlugin: AXBWatcherShutdown();
+                AXBFormCatalogShutdown();
+                AXBAreaShutdown();
                 AXBShutdown(); break;
             case 1: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
@@ -76,7 +82,7 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
                 break;
             }
             case 2: AXBDetach(TextParameter(parameters, 1, 128), PA_GetCurrentProcessNumber()); break;
-            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; activation 1; refreshOnChange 1; changedObjects 2; macOS; %@; %@", AXB_VERSION, AXBHooksDescription(), AXBActivationDescription()]); break;
+            case 3: ReturnText(parameters, [NSString stringWithFormat:@"Accessibility Bridge %s; protocol 1; controls 1; focus 1; grids 1; rowStates 1; gridControls 1; cellFocus 1; gridHeaders 1; input 2; semantics 1; combos 1; checkboxes 1; adjustables 2; sessions 2; scrolling 1; areaLifecycle 1; buttonInput 1; tabs 1; stableIdentifiers 1; listSubforms 1; nativeWebComposition 1; nativeOutlines 1; nativeOutlineDisclosure 1; activation 1; refreshOnChange 1; changedObjects 2; formMetadata 1; autoWatch 1; macOS; %@; %@", AXB_VERSION, AXBHooksDescription(), AXBActivationDescription()]); break;
             case 4:
             case 7: {
                 PA_long32 windowID = PA_GetLongParameter(parameters, 1);
@@ -113,6 +119,8 @@ extern "C" void PluginMain(PA_long32 selector, PA_PluginParameters parameters) {
             case 8: PA_ReturnLong(parameters, AXBActivationIsActive() ? 1 : 0); break;
             case 9: PA_ReturnLong(parameters, AXBRefreshDue(TextParameter(parameters, 1, 128)) ? 1 : 0); break;
             case 10: ReturnText(parameters, AXBTakeChanges(TextParameter(parameters, 1, 128))); break;
+            case 11: ReturnText(parameters, AXBFormCatalogMetadataJSON(PA_GetLongParameter(parameters, 1), TextParameter(parameters, 2, 512))); break;
+            case 12: ReturnText(parameters, AXBWatcherHandleCommand(TextParameter(parameters, 1, 64), PA_GetLongParameter(parameters, 2))); break;
             default: break;
         }
       } @catch (NSException *exception) {

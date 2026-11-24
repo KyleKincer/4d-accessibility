@@ -8,7 +8,7 @@ ARRAY TEXT($objects; 0)
 ARRAY POINTER($variables; 0)
 ARRAY LONGINT($pages; 0)
 $result:=New object("ok"; False; "error"; "unsupportedOperation")
-If (New collection("info"; "start"; "stop"; "node"; "exchange"; "changes"; "focus"; "layout").indexOf($operation)<0)
+If (New collection("info"; "start"; "stop"; "node"; "exchange"; "changes"; "focus"; "layout"; "formMetadata"; "watcher").indexOf($operation)<0)
  return
 End if
 If ((Value type($request)#Is object) | ($request=Null))
@@ -22,6 +22,36 @@ If ((Position("Accessibility Bridge "; $status)#1) | (Position("; protocol 1;"; 
 End if
 If ($operation="info")
  $result:=New object("ok"; True; "hostAPI"; 1; "nativeStatus"; $status)
+ return
+End if
+If ($operation="formMetadata")
+ If (Position("; formMetadata 1;"; $status)=0)
+  $result.error:="formMetadataUnavailable"
+  return
+ End if
+ If (Value type($request.form)#Is text)
+  $result.error:="invalidFormMetadataRequest"
+  return
+ End if
+ $result:=JSON Parse(AXB Form metadata(Num($request.table); $request.form))
+ If (($result=Null) || (Value type($result)#Is object))
+  $result:=New object("ok"; False; "error"; "invalidFormMetadataReply")
+ End if
+ return
+End if
+If ($operation="watcher")
+ If (Position("; autoWatch 1;"; $status)=0)
+  $result.error:="autoWatchUnavailable"
+  return
+ End if
+ If (Value type($request.op)#Is text)
+  $result.error:="invalidWatcherRequest"
+  return
+ End if
+ $result:=JSON Parse(AXB Watcher($request.op; Num($request.window)))
+ If (($result=Null) || (Value type($result)#Is object))
+  $result:=New object("ok"; False; "error"; "invalidWatcherReply")
+ End if
  return
 End if
 If ($operation="stop")

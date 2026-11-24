@@ -120,7 +120,10 @@ If ($label="")
  $label:="Application form"
 End if
 $options:=New object("label"; $label)
-METHOD GET NAMES($methods; "AXB_Configure")
+METHOD GET NAMES($methods; "AXB_Configure"; *)
+If (Find in array($methods; "AXB_Configure")<=0)
+ METHOD GET NAMES($methods; "AXB_Configure")
+End if
 If (Find in array($methods; "AXB_Configure")>0)
  EXECUTE METHOD("AXB_Configure"; $options; $configuration)
  $record.configured:=True

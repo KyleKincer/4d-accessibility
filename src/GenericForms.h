@@ -12,6 +12,8 @@
 // The project's folder or file, as a POSIX or 4D's HFS path.
 void AXBGenericFormsInitialize(NSString *projectFile);
 void AXBGenericFormsShutdown(void);
+void AXBGenericFormsSetSuppressed(BOOL suppressed);
+BOOL AXBGenericFormsIsSuppressed(void);
 // The entry that describes a list box drawn in this layer as a table of its drawn rows, for an
 // overlay: the bridge uses it for a list box no grid adapter describes. info holds the list box's
 // width and height and its columns ([{header, width, hidden}]), headerHeight and showHeaders, as

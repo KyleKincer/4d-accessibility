@@ -20,6 +20,7 @@ static NSMapTable<NSWindow *, AXBInternalFormOverlay *> *Overlays;
 static NSMapTable<NSWindow *, NSDictionary *> *Matches;
 static dispatch_source_t RefreshTimer;
 static id KeyObserver, CloseObserver;
+static BOOL GenericFormsSuppressed = NO;
 
 static NSDictionary *ReadDefinition(NSURL *url) {
     NSData *data = [NSData dataWithContentsOfURL:url];
@@ -833,6 +834,7 @@ static void RemoveOverlay(NSWindow *window, AXBInternalFormOverlay *overlay) {
 BOOL AXBGenericFormsRefreshWindow(NSWindow *window) {
     if (!window || !Overlays || !Forms) return NO;
     AXBInternalFormOverlay *overlay = [Overlays objectForKey:window];
+    if (GenericFormsSuppressed) { RemoveOverlay(window, overlay); return NO; }
     NSView *view = window.isVisible ? AXBInternalFormView(window) : nil;
     CALayer *form = view ? AXBInternalFormContext(view) : nil;
     if (!form) { RemoveOverlay(window, overlay); return NO; }
@@ -966,7 +968,28 @@ void AXBGenericFormsInitialize(NSString *projectFile) {
     StartRefreshing();
 }
 
+void AXBGenericFormsSetSuppressed(BOOL suppressed) {
+    GenericFormsSuppressed = suppressed;
+    if (suppressed && Overlays) {
+        CFRunLoopRef main = CFRunLoopGetMain();
+        CFArrayRef modes = CFRunLoopCopyAllModes(main);
+        if (modes) {
+            CFRunLoopPerformBlock(main, modes, ^{
+                if (!Overlays) return;
+                for (NSWindow *window in Overlays.keyEnumerator.allObjects) RemoveOverlay(window, [Overlays objectForKey:window]);
+            });
+            CFRelease(modes);
+            CFRunLoopWakeUp(main);
+        }
+    }
+}
+
+BOOL AXBGenericFormsIsSuppressed(void) {
+    return GenericFormsSuppressed;
+}
+
 void AXBGenericFormsShutdown(void) {
+    GenericFormsSuppressed = NO;
     if (!Overlays) return;
     if (RefreshTimer) dispatch_source_cancel(RefreshTimer);
     RefreshTimer = nil;
