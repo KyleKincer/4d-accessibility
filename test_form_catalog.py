@@ -50,7 +50,9 @@ static void VerifyDerived(NSDictionary *meta, const char *mode) {
     Check([meta[@"hints"][@"RefTipBtn"][@"tooltip"] isEqual:@"Find matching records"],
           "$ref tips.json tooltip resolved");
     Check([meta[@"hints"][@"LinesLB"][@"selectedItemsSource"] isEqual:@"Form.selectedLines"],
-          "listbox selectedItemsSource hint extracted");
+          "listbox selectedItemsSource hint extracted and detokenized");
+    Check([meta[@"hints"][@"TokFld"][@"dataSource"] isEqual:@"[Invoices]InvoiceDate"],
+          "tokenized dataSource stripped of table/field token numbers");
 }
 
 int main(void) {
@@ -119,10 +121,11 @@ def populate_forms(base_dir):
             "FindBtn": {"type": "button", "display": False, "tooltip": ":/tips.json#/SearchTip", "axb": {"automationKey": "find_btn", "label": "Find"}},
             "RefTipBtn": {"type": "button", "tooltip": {"$ref": "/SOURCES/tips.json#/SearchTip"}},
             "LinesLB": {
-                "type": "listbox", "listboxType": "collection", "selectedItemsSource": "Form.selectedLines",
+                "type": "listbox", "listboxType": "collection", "selectedItemsSource": "Form:C1466.selectedLines",
                 "axb": {"automationKey": "lines_list", "grid": {"kind": "collection", "label": "Lines"}},
                 "columns": [{"name": "ColQty", "axb": {"label": "Quantity", "automationKey": "qty"}}],
             },
+            "TokFld": {"type": "input", "dataSource": "[Invoices:4]InvoiceDate:2"},
         }}],
     }
     (sources / "TableForms/4/BaseInvoice/form.4DForm").write_text(json.dumps(base_form))

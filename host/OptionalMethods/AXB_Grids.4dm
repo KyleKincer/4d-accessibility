@@ -168,12 +168,18 @@ For ($position; 1; Size of array($objects))
    If (($hints#Null) && ($hints[$name]#Null))
     $hint:=$hints[$name]
     If ((Value type($hint.selectedItemsSource)=Is text) && (Position("Form."; $hint.selectedItemsSource)=1) && Not(OB Is defined($configured[$name]; "selectedSource")))
-     $merged:=OB Copy($configured[$name])
+     $merged:=New object
+     For each ($metaKey; $configured[$name])
+      $merged[$metaKey]:=$configured[$name][$metaKey]
+     End for each
      $merged.selectedSource:=Substring($hint.selectedItemsSource; 6)
      $configured[$name]:=$merged
     Else
      If ((Value type($hint.currentItemSource)=Is text) && (Position("Form."; $hint.currentItemSource)=1) && Not(OB Is defined($configured[$name]; "currentSource")))
-      $merged:=OB Copy($configured[$name])
+      $merged:=New object
+      For each ($metaKey; $configured[$name])
+       $merged[$metaKey]:=$configured[$name][$metaKey]
+      End for each
       $merged.currentSource:=Substring($hint.currentItemSource; 6)
       $configured[$name]:=$merged
      End if

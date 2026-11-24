@@ -400,6 +400,17 @@ static void SanitizeControlMetadata(id raw, NSDictionary **controlOut, NSDiction
     if (control.count) *controlOut = control;
 }
 
+static NSString *Strip4DTokens(NSString *value) {
+    if (!value.length || [value rangeOfString:@":"].location == NSNotFound) return value;
+    static NSRegularExpression *re = nil;
+    static dispatch_once_t once;
+    dispatch_once(&once, ^{
+        re = [NSRegularExpression regularExpressionWithPattern:@":(?:C[0-9]+|K[0-9]+:[0-9]+|[0-9]+)" options:0 error:nil];
+    });
+    if (!re) return value;
+    return [re stringByReplacingMatchesInString:value options:0 range:NSMakeRange(0, value.length) withTemplate:@""];
+}
+
 static NSDictionary *ExtractObjectHint(NSDictionary *obj) {
     NSMutableDictionary *hint = [NSMutableDictionary new];
     if ([obj[@"type"] isKindOfClass:NSString.class]) hint[@"type"] = obj[@"type"];
@@ -412,13 +423,13 @@ static NSDictionary *ExtractObjectHint(NSDictionary *obj) {
     }
     NSString *icon = TrimmedString(obj[@"icon"]) ?: TrimmedString(obj[@"picture"]);
     if (icon) hint[@"icon"] = icon.length > 256 ? [icon substringToIndex:256] : icon;
-    NSString *dataSource = TrimmedString(obj[@"dataSource"]);
+    NSString *dataSource = Strip4DTokens(TrimmedString(obj[@"dataSource"]));
     if (dataSource && dataSource.length <= 256) hint[@"dataSource"] = dataSource;
     if ([obj[@"type"] isEqualToString:@"listbox"]) {
         if ([obj[@"listboxType"] isKindOfClass:NSString.class]) hint[@"listboxType"] = obj[@"listboxType"];
-        NSString *currentItem = TrimmedString(obj[@"currentItemSource"]);
+        NSString *currentItem = Strip4DTokens(TrimmedString(obj[@"currentItemSource"]));
         if (currentItem && currentItem.length <= 256) hint[@"currentItemSource"] = currentItem;
-        NSString *selectedItems = TrimmedString(obj[@"selectedItemsSource"]);
+        NSString *selectedItems = Strip4DTokens(TrimmedString(obj[@"selectedItemsSource"]));
         if (selectedItems && selectedItems.length <= 256) hint[@"selectedItemsSource"] = selectedItems;
         if (IsBoolNumber(obj[@"singleClickEdit"]) && [obj[@"singleClickEdit"] boolValue]) hint[@"singleClickEdit"] = @YES;
     }

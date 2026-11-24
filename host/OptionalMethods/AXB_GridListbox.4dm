@@ -192,6 +192,9 @@ For ($i; 1; Size of array($parts); 3)
       End if
      End if
     Else
+     If (Position("This:C1470."; $expression)=1)
+      $expression:="This."+Substring($expression; 12)
+     End if
      If (Not(Match regex("^This([.][[:alpha:]_][[:alnum:]_]*)+$"; $expression)))
       If (($options.auto=True) | ($options.positionalKeys=True))
        $fallbackEmpty:=True
