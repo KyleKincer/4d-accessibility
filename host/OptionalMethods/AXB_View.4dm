@@ -316,7 +316,11 @@ If ($view.automatic=True)
   End if
  End if
 Else
- $description:=$view.describe.call()
+ If ($view.options.listScreen=True)
+  $description:=AXB_ListScreen("describe"; $view; $request)
+ Else
+  $description:=$view.describe.call()
+ End if
 End if
 If (($description=Null) | (Value type($description)#Is object))
  return
@@ -408,19 +412,26 @@ If (($request.operation="apply") | ($request.operation="confirm") | ($request.op
  End if
  If ($allowed)
   If ($reading)
+   If ($view.options.listScreen=True)
+    return AXB_ListScreen("readGrid"; $view; $request)
+   End if
    return AXB_Grids($view; New object("operation"; "readGrid"; "node"; $request.action.node; "requests"; $request.requests))
   End if
   If ($request.operation="confirm")
    $result:=$request.confirm.call(Null; $request.data)
   Else
-   If (($view.automatic=True) & ($view.apply=Null))
-    If (Position("grid."; $request.action.node)=1)
-     $result:=AXB_Grids($view; New object("operation"; "apply"; "node"; $request.action.node; "action"; $request.action))
-    Else
-     $result:=AXB_ControlAction($request.action; $view.options; $view.tabs; $request.paintOffset; $discovered)
-    End if
+   If ($view.options.listScreen=True)
+    $result:=AXB_ListScreen("apply"; $view; $request)
    Else
-    $result:=$view.apply.call(Null; $request.action)
+    If (($view.automatic=True) & ($view.apply=Null))
+     If (Position("grid."; $request.action.node)=1)
+      $result:=AXB_Grids($view; New object("operation"; "apply"; "node"; $request.action.node; "action"; $request.action))
+     Else
+      $result:=AXB_ControlAction($request.action; $view.options; $view.tabs; $request.paintOffset; $discovered)
+     End if
+    Else
+     $result:=$view.apply.call(Null; $request.action)
+    End if
    End if
   End if
   If (($result=Null) | (Value type($result)#Is object))
