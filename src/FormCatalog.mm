@@ -597,8 +597,8 @@ static void ConfigureProject(NSString *structurePath) {
     NSFileManager *files = NSFileManager.defaultManager;
     BOOL isDir = NO;
     BOOL exists = [files fileExistsAtPath:resolved isDirectory:&isDir];
-    NSURL *archive = (!isDir && [resolved.pathExtension.lowercaseString isEqualToString:@"4dz"]) ? [NSURL fileURLWithPath:resolved] : nil;
-    if (isDir && ![files fileExistsAtPath:[resolved stringByAppendingPathComponent:@"Sources"]]) {
+    NSURL *archive = (exists && !isDir && [resolved.pathExtension.lowercaseString isEqualToString:@"4dz"]) ? [NSURL fileURLWithPath:resolved] : nil;
+    if (!archive && isDir && ![files fileExistsAtPath:[resolved stringByAppendingPathComponent:@"Sources"]]) {
         for (NSString *entry in [[files contentsOfDirectoryAtPath:resolved error:nil] sortedArrayUsingSelector:@selector(compare:)]) {
             if ([entry.pathExtension.lowercaseString isEqualToString:@"4dz"]) {
                 archive = [NSURL fileURLWithPath:[resolved stringByAppendingPathComponent:entry]];
@@ -624,6 +624,19 @@ static void ConfigureProject(NSString *structurePath) {
         NSURL *projectSources = [[candidate URLByAppendingPathComponent:@"Project"] URLByAppendingPathComponent:@"Sources"];
         if ([files fileExistsAtPath:projectSources.path isDirectory:&sourcesDir] && sourcesDir) {
             State.sourcesURL = projectSources;
+        } else if (candidate) {
+            for (NSString *entry in [[files contentsOfDirectoryAtPath:candidate.path error:nil] sortedArrayUsingSelector:@selector(compare:)]) {
+                if ([entry.pathExtension.lowercaseString isEqualToString:@"4dz"]) {
+                    NSURL *fallbackArchive = [candidate URLByAppendingPathComponent:entry];
+                    NSData *data = [NSData dataWithContentsOfURL:fallbackArchive options:NSDataReadingMappedIfSafe error:nil];
+                    if (data) {
+                        State.isArchive = YES;
+                        State.archiveData = data;
+                        IndexArchive(data);
+                    }
+                    break;
+                }
+            }
         }
     }
 }
