@@ -1,7 +1,7 @@
 // Attach an accessibility session to the current form window without %AXB Area.
 // Invoked via CALL FORM from AXB_WatcherTick, and re-invoked on in-place form switches.
 #DECLARE($window : Integer)
-var $previousError; $formName; $label : Text
+var $previousError; $formName; $label; $cfgKey : Text
 var $table : Pointer
 var $tableNum : Integer
 var $context; $meta; $options; $storedOptions; $result; $registry : Object
@@ -75,7 +75,10 @@ End if
 If (Find in array($methods; "AXB_Configure")>0)
  EXECUTE METHOD("AXB_Configure"; $configured; $formName)
  If (($configured#Null) && (Value type($configured)=Is object))
-  $options:=OB Copy($configured)
+  $options:=New object
+  For each ($cfgKey; $configured)
+   $options[$cfgKey]:=$configured[$cfgKey]
+  End for each
   If (Not(OB Is defined($options; "label")))
    $options.label:=$label
   End if

@@ -1,5 +1,6 @@
 // Explicit parameter types for 4D 20's legacy no-inference compiler mode.
 C_TEXT(AXB_Poll; $1)
+C_LONGINT(AXB_Poll; $2)
 C_OBJECT(AXB_Pulse; $1)
 C_OBJECT(AXB_Start; $0; $1)
 C_LONGINT(AXB_Stop; $1)

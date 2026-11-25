@@ -97,12 +97,18 @@ For ($position; 1; Size of array($objects))
   $wasConfigured:=OB Is defined($configured; $name)
   If ($wasConfigured && OB Is defined($configured[$name]; "kind"))
    If (($configured[$name].kind="array") && Not(OB Is defined($configured[$name]; "keyColumn")))
-    $merged:=OB Copy($configured[$name])
+    $merged:=New object
+    For each ($metaKey; $configured[$name])
+     $merged[$metaKey]:=$configured[$name][$metaKey]
+    End for each
     $merged.positionalKeys:=True
     $configured[$name]:=$merged
    End if
    If (($configured[$name].kind="collection") && Not(OB Is defined($configured[$name]; "keyProperty")))
-    $merged:=OB Copy($configured[$name])
+    $merged:=New object
+    For each ($metaKey; $configured[$name])
+     $merged[$metaKey]:=$configured[$name][$metaKey]
+    End for each
     $merged.positionalKeys:=True
     $configured[$name]:=$merged
    End if
@@ -239,6 +245,9 @@ For each ($name; $configured)
   For each ($property; $configured[$name])
    $options[$property]:=$configured[$name][$property]
   End for each
+  If (Not(OB Is defined($options; "kind")))
+   continue
+  End if
   If (Not(AXB_GridOptions(New object($name; $options))))
    return New object("ok"; False; "error"; "invalidGrids")
   End if

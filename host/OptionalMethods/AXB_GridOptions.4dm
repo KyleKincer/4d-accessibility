@@ -3,7 +3,7 @@
 #DECLARE($grids : Object) -> $valid : Boolean
 var $name; $property; $column : Text
 var $options; $metadata : Object
-var $positional : Boolean
+var $positional; $hasKind; $hasOverride : Boolean
 $valid:=False
 If (($grids=Null) | (Value type($grids)#Is object))
  return
@@ -35,30 +35,64 @@ For each ($name; $grids)
   End if
  End for each
  $positional:=($options.positionalKeys=True) | ($options.auto=True)
- If (New collection("array"; "outline"; "areaList"; "collection"; "entity"; "selection"; "listSubform"; "hierarchicalList").indexOf($options.kind)<0)
-  return
- End if
- If (New collection("array"; "outline").indexOf($options.kind)>=0)
-  If (($options.kind="outline") | Not($positional) | OB Is defined($options; "keyColumn"))
-   If ((Value type($options.keyColumn)#Is text) || ($options.keyColumn=""))
-    return
-   End if
+ $hasKind:=OB Is defined($options; "kind")
+ If ($hasKind)
+  If (New collection("array"; "outline"; "areaList"; "collection"; "entity"; "selection"; "listSubform"; "hierarchicalList").indexOf($options.kind)<0)
+   return
   End if
- Else
-  If ($options.kind="areaList")
-   If (Not($positional) | OB Is defined($options; "keys"))
-    If (Value type($options.keys)#Is pointer)
-     return
-    End if
-   End if
-   If (OB Is defined($options; "keyColumn"))
-    If ((Value type($options.keyColumn)#Is real) || ($options.keyColumn<1) || (Int($options.keyColumn)#$options.keyColumn))
+  If (New collection("array"; "outline").indexOf($options.kind)>=0)
+   If (($options.kind="outline") | Not($positional) | OB Is defined($options; "keyColumn"))
+    If ((Value type($options.keyColumn)#Is text) || ($options.keyColumn=""))
      return
     End if
    End if
   Else
-   If ((($options.kind="collection") & Not($positional)) | OB Is defined($options; "keyProperty"))
-    If ((Value type($options.keyProperty)#Is text) || ($options.keyProperty=""))
+   If ($options.kind="areaList")
+    If (Not($positional) | OB Is defined($options; "keys"))
+     If (Value type($options.keys)#Is pointer)
+      return
+     End if
+    End if
+    If (OB Is defined($options; "keyColumn"))
+     If ((Value type($options.keyColumn)#Is real) || ($options.keyColumn<1) || (Int($options.keyColumn)#$options.keyColumn))
+      return
+     End if
+    End if
+   Else
+    If ((($options.kind="collection") & Not($positional)) | OB Is defined($options; "keyProperty"))
+     If ((Value type($options.keyProperty)#Is text) || ($options.keyProperty=""))
+      return
+     End if
+    End if
+   End if
+  End if
+ Else
+  $hasOverride:=False
+  For each ($property; New collection("label"; "columns"; "ready"; "onSelection"; "selection"; "meta"; "positionalKeys"; "auto"; "keyColumn"; "keyProperty"; "keys"; "selectedSource"; "currentSource"))
+   If (OB Is defined($options; $property))
+    $hasOverride:=True
+   End if
+  End for each
+  If (Not($hasOverride))
+   return
+  End if
+  If (OB Is defined($options; "keys"))
+   If (Value type($options.keys)#Is pointer)
+    return
+   End if
+  End if
+  If (OB Is defined($options; "keyProperty"))
+   If ((Value type($options.keyProperty)#Is text) || ($options.keyProperty=""))
+    return
+   End if
+  End if
+  If (OB Is defined($options; "keyColumn"))
+   If (Value type($options.keyColumn)=Is text)
+    If ($options.keyColumn="")
+     return
+    End if
+   Else
+    If ((Value type($options.keyColumn)#Is real) || ($options.keyColumn<1) || (Int($options.keyColumn)#$options.keyColumn))
      return
     End if
    End if
@@ -103,7 +137,7 @@ For each ($name; $grids)
    End if
   End for each
  End if
- If (OB Is defined($options; "meta") & (New collection("collection"; "entity").indexOf($options.kind)<0))
+ If ($hasKind & OB Is defined($options; "meta") & (New collection("collection"; "entity").indexOf($options.kind)<0))
   return
  End if
  // A list subform owns its native current selection and selection events.

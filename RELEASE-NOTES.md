@@ -1,3 +1,12 @@
+# 0.42.0, zero-touch drop-in accessibility
+
+- **Native form metadata reader (`AXB Form metadata`).** Reads `.4DForm` definitions, `catalog.4DCatalog` table mappings, inherited forms, and `tips.json` directly from `Project/Sources/` (with live mtime invalidation) or a compiled `.4DZ` archive via zlib, removing any requirement for a generated `AXB.FormMetadata.json` build step. Handles interpreted and compiled client/server project paths and tokenized 4D expressions (`Form:C1466.*`, `This:C1470.*`, `[Table:N]Field:M`).
+- **Compiled universal component + zero-touch window watcher (`AXB Watcher`).** `AccessibilityBridge.4dbase` ships the entire runtime compiled for Apple Silicon and Intel, suppresses `GenericForms` when present, and attaches sessions to open 4D windows automatically without `%AXB Area` widgets or generated host `AXB_*.4dm` methods. Includes dropped-`CALL FORM` recovery so in-place Browse/Modify form switches on the same window reference re-attach cleanly.
+- **Auto-discovered grids with positional row keys.** List boxes (`array`, `collection`, `entity`, `selection`) and AreaList Pro areas (via optional `AccessibilityBridge_ALP.4dbase` built with `--area-list --alp-plugin`) discover automatically using 1-based visible positional row keys (skipping hidden rows, capping unconfigured auto-discovery at 2,000 rows), accept partial `axb.grid` / column overrides without explicit `kind`, and preserve custom `AXB_Configure` formulas.
+- **Multi-signal labels & viewport-safe list screens.** Discovers labels from overlapping static text on invisible buttons, left/stacked captions, `tips.json` / placeholder / `dataSource` hints, and trailing `*` wildcards in `AXB_Configure`, plus viewport-safe `DISPLAY SELECTION` list screens.
+
+Upgrade the plugin and compiled component together.
+
 # 0.41.0, form options and grids stored in the form definition
 
 - **A form's own options can live in its definition.** Put `"axb": {"label": "Customers", "automationKey": "customers.main", "omitOutsideWindow": true}` at the top level of the form. It takes `label`, `automationKey`, `omitOutsideWindow`, `idleRefresh` and `enabled`; a derived form does not inherit it. A form whose `AXB_Configure` returns no label uses the stored one ahead of its window title. [Static metadata](skills/4d-accessibility/references/INTEGRATION.md#keep-static-control-metadata-on-the-forms-objects).

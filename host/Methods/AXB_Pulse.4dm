@@ -1,8 +1,9 @@
 // One cooperative sleeping process per registered form; one queued callback maximum.
 // A blocked/modal form cannot accumulate callbacks. No 4D form timer is used.
 #DECLARE($token : Object)
-var $send; $dormant; $due : Boolean
-var $delay; $started : Real
+var $send; $dormant; $due; $modalBlocked : Boolean
+var $delay; $started; $sentAt; $elapsed : Real
+var $seq; $front : Integer
 $delay:=6
 While ($token.active)
  // While a staged editor operation is pending, yield between real UI events
@@ -26,6 +27,8 @@ While ($token.active)
    Else
     If (Not($token.pending) & $due)
      $token.pending:=True
+     $token.seq:=Num($token.seq)+1
+     $seq:=$token.seq
      $send:=True
     End if
    End if
@@ -40,7 +43,8 @@ While ($token.active)
  End case
  If ($send)
   $started:=Tickcount
-  CALL FORM($token.window; "AXB_Poll"; $token.session)
+  $sentAt:=Milliseconds
+  CALL FORM($token.window; "AXB_Poll"; $token.session; $seq)
   // Start the next interval after this callback finishes. An expensive form
   // must leave time for AppKit/VoiceOver instead of polling continuously.
   While ($token.active & $token.pending)
@@ -49,6 +53,31 @@ While ($token.active)
     Use ($token)
      $token.active:=False
     End use
+   Else
+    // 4D silently discards CALL FORM if it arrives in the gap between forms on
+    // the same window (e.g. Browse -> MODIFY RECORD -> Browse). Retry once the
+    // callback has gone unanswered and no child modal in this process is blocking.
+    $elapsed:=Abs(Milliseconds-$sentAt)
+    If (($elapsed>=750) & (AXB Active=1))
+     $front:=Frontmost window
+     $modalBlocked:=($front#0) & ($front#$token.window) & (Window process($front)=$token.owner)
+     If (Not($modalBlocked))
+      Use ($token)
+       If ($token.active & $token.pending)
+        $token.seq:=Num($token.seq)+1
+        $seq:=$token.seq
+       Else
+        $seq:=0
+       End if
+      End use
+      If ($seq#0)
+       $sentAt:=Milliseconds
+       CALL FORM($token.window; "AXB_Poll"; $token.session; $seq)
+      End if
+     Else
+      $sentAt:=Milliseconds
+     End if
+    End if
    End if
   End while
   // Reserve time for input/assistive clients in proportion to the last

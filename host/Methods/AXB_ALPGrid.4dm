@@ -79,7 +79,6 @@ End if
 $columnCount:=AL_GetAreaLongProperty($area; ALP_Area_Columns)
 $count:=AL_GetAreaLongProperty($area; ALP_Area_Rows)
 $positional:=($options.positionalKeys=True) & Not(OB Is defined($options; "keys"))
-$keys:=Nil
 If (Not($positional))
  If (Value type($options.keys)#Is pointer)
   return
@@ -142,8 +141,11 @@ End if
 // pointers already returned by the vendor, retaining them only in the host.
 $rebound:=False
 If ($state.binding#Null)
- $previous:=$state.keyPointer
- $rebound:=($state.area#$area) | ($state.binding.length#$columnCount) | ($state.positionalKeys#$positional) | (Not($positional) & ($previous#$keys))
+ $rebound:=($state.area#$area) | ($state.binding.length#$columnCount) | ($state.positionalKeys#$positional)
+ If (Not($positional) & Not($rebound))
+  $previous:=$state.keyPointer
+  $rebound:=($previous#$keys)
+ End if
 End if
 $bindings:=New collection
 For ($i; 1; $columnCount)
@@ -157,7 +159,11 @@ If ($rebound)
  $state.generation:=Generate UUID
 End if
 $state.binding:=$bindings
-$state.keyPointer:=$keys
+If ($positional)
+ OB REMOVE($state; "keyPointer")
+Else
+ $state.keyPointer:=$keys
+End if
 $state.positionalKeys:=$positional
 $state.area:=$area
 $originX:=0

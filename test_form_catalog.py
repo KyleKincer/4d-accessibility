@@ -69,6 +69,12 @@ int main(void) {
         Check([missing[@"ok"] boolValue] && ![missing[@"found"] boolValue], ".4DZ reports found:false for missing form");
         AXBFormCatalogShutdown();
 
+        // 1b. Missing .4DZ beside Project/Sources (interpreted client/server fallback)
+        NSString *missingArchive = [[@(loose) stringByDeletingLastPathComponent] stringByAppendingPathComponent:@"MissingCompiled.4DZ"];
+        AXBFormCatalogSetProjectForTesting(missingArchive);
+        VerifyDerived(Parse(AXBFormCatalogMetadataJSON(4, @"DerivedInvoice")), "Missing .4DZ falls back to loose Project/Sources");
+        AXBFormCatalogShutdown();
+
         // 2. Loose Project/Sources mode + live mtime reload
         AXBFormCatalogSetProjectForTesting(@(loose));
         VerifyDerived(Parse(AXBFormCatalogMetadataJSON(4, @"DerivedInvoice")), "FormCatalog reads table form from loose Project/Sources");
