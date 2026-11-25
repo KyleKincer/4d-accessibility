@@ -44,8 +44,8 @@ If (Not($column.typed) | (New collection(1; 3; 5).indexOf($mode)<0))
 End if
 $text:=AL_GetAreaTextProperty($area; ALP_Area_EntryText)
 If ($operation="select")
- $start:=AXB_TextIndex($text; $selection[0]-1; False)
- $end:=AXB_TextIndex($text; $selection[1]-1; False)
+ $start:=$cell.state.helpers.textIndex.call(Null; $text; $selection[0]-1; False)
+ $end:=$cell.state.helpers.textIndex.call(Null; $text; $selection[1]-1; False)
  If (($start<0) | ($end<$start))
   return
  End if
@@ -54,8 +54,8 @@ If ($operation="select")
   return
  End if
 End if
-$start:=AXB_TextIndex($text; AL_GetAreaLongProperty($area; ALP_Area_EntryHighlightS)-1; True)
-$end:=AXB_TextIndex($text; AL_GetAreaLongProperty($area; ALP_Area_EntryHighlightE)-1; True)
+$start:=$cell.state.helpers.textIndex.call(Null; $text; AL_GetAreaLongProperty($area; ALP_Area_EntryHighlightS)-1; True)
+$end:=$cell.state.helpers.textIndex.call(Null; $text; AL_GetAreaLongProperty($area; ALP_Area_EntryHighlightE)-1; True)
 If (($start<0) | ($end<$start))
  return
 End if

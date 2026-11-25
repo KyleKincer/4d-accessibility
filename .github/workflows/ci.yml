@@ -64,6 +64,7 @@ jobs:
       - name: Build native plugin and AppKit tests
         run: |
           python3 build.py
+          python3 test_form_catalog.py
           python3 test_native.py
           python3 test_native_outlines.py
           python3 test_native_interop.py

@@ -12,6 +12,7 @@
 #import "OrderByEditor.h"
 #import "FormulaEditor.h"
 #import "GenericForms.h"
+#import "FormCatalog.h"
 #import "Activation.h"
 #import <QuartzCore/QuartzCore.h>
 #import <objc/runtime.h>
@@ -2728,6 +2729,38 @@ int main(void) {
         [tip close]; [other close]; Pump();
         AXBShutdown();
         [reopenedWindow close]; Pump();
+        // Native FormCatalog tests: .4DZ archive + inheritance + catalog.4DCatalog + tips.json + axb split + GenericForms suppression.
+        const char *catalogEnv = getenv("AXB_TEST_CATALOG_ARCHIVE");
+        if (catalogEnv && catalogEnv[0]) {
+            AXBFormCatalogSetProjectForTesting(@(catalogEnv));
+            NSString *raw = AXBFormCatalogMetadataJSON(4, @"DerivedInvoice");
+            NSDictionary *meta = [NSJSONSerialization JSONObjectWithData:[raw dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+            Check([meta[@"ok"] boolValue] && [meta[@"found"] boolValue], "FormCatalog reads table form from .4DZ archive");
+            Check([meta[@"options"][@"automationKey"] isEqual:@"invoices.derived"] && [meta[@"options"][@"label"] isEqual:@"Derived Invoice"],
+                  "FormCatalog keeps derived form root options without inheriting base root options");
+            Check([meta[@"controls"][@"BaseBtn"][@"label"] isEqual:@"Base action"], "FormCatalog inherits base control metadata via catalog table name");
+            Check([meta[@"controls"][@"SubCont"][@"automationKey"] isEqual:@"sold_to"], "FormCatalog preserves subform container automationKey");
+            Check([meta[@"controls"][@"LinesLB"][@"automationKey"] isEqual:@"lines_list"] && !meta[@"controls"][@"LinesLB"][@"grid"],
+                  "FormCatalog splits axb.grid into grids while keeping automationKey in controls");
+            Check([meta[@"grids"][@"LinesLB"][@"columns"][@"ColQty"][@"label"] isEqual:@"Quantity"] &&
+                  [meta[@"grids"][@"LinesLB"][@"columns"][@"ColQty"][@"automationKey"] isEqual:@"qty"],
+                  "FormCatalog merges column-level axb metadata into grids[name].columns");
+            Check([meta[@"lists"][@"ListSub"][@"selection"] isEqual:@"single"] && [meta[@"lists"][@"ListSub"][@"enterable"] isEqual:@YES],
+                  "FormCatalog extracts inherited list subform metadata");
+            Check([meta[@"header"] isEqual:@24] && [meta[@"body"] isEqual:@48], "FormCatalog inherits markerHeader and markerBody");
+            Check([meta[@"hints"][@"FindBtn"][@"tooltip"] isEqual:@"Find matching records"] && [meta[@"hints"][@"FindBtn"][@"display"] isEqual:@NO],
+                  "FormCatalog resolves :/tips.json#/ tooltip references and invisible display flag");
+            Check([meta[@"hints"][@"LinesLB"][@"selectedItemsSource"] isEqual:@"Form.selectedLines"],
+                  "FormCatalog extracts listbox selectedItemsSource hint");
+            NSString *missingRaw = AXBFormCatalogMetadataJSON(4, @"NoSuchForm");
+            NSDictionary *missing = [NSJSONSerialization JSONObjectWithData:[missingRaw dataUsingEncoding:NSUTF8StringEncoding] options:0 error:nil];
+            Check([missing[@"ok"] boolValue] && ![missing[@"found"] boolValue], "FormCatalog reports found:false for missing form");
+            AXBFormCatalogShutdown();
+        }
+        AXBGenericFormsSetSuppressed(YES);
+        Check(AXBGenericFormsIsSuppressed(), "GenericForms suppression toggles on");
+        AXBGenericFormsSetSuppressed(NO);
+        Check(!AXBGenericFormsIsSuppressed(), "GenericForms suppression toggles off");
         puts("PASS: native provider lifecycle tests");
     }
 }

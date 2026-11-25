@@ -1467,6 +1467,22 @@ BOOL AXBWindowHasSession(void *nativeWindow) {
     return NO;
 }
 
+BOOL AXBWindowIDHasSession(NSInteger windowID) {
+    Init();
+    if (windowID <= 0) return NO;
+    @synchronized(registryLock) {
+        for (AXBSession *session in sessions.allValues) if (session.windowID == windowID) return YES;
+    }
+    return NO;
+}
+
+BOOL AXBIsStopped(void) {
+    Init();
+    @synchronized(registryLock) {
+        return stopped;
+    }
+}
+
 NSString *AXBOpen(NSInteger windowID, NSInteger processID, void *nativeWindow) {
     Init();
     if (windowID <= 0 || processID <= 0 || !nativeWindow)

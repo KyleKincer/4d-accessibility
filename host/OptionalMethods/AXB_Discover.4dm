@@ -6,20 +6,20 @@
 // $static keeps, for one form, what its objects cannot change: their types, and the
 // pop-up menu setting of buttons that have not changed since it was read.
 #DECLARE($options : Object; $tabState : Object; $paintOffset : Collection; $only : Object; $knownLabels : Collection; $knownEntry : Object; $static : Object) -> $result : Object
-var $name; $role; $label; $font : Text
+var $name; $role; $label; $font; $pattern; $prefix; $candidate; $inferred : Text
 var $detailForm; $listForm : Text
 var $subformTable : Pointer
 var $indicator : Integer
-var $minimum; $maximum : Real
+var $minimum; $maximum; $ovX; $ovY; $ovArea; $minArea; $ratio; $bestRatio; $nodeCY; $otherCY; $tol; $vGap : Real
 var $minimumDate; $maximumDate : Date
 var $description : Variant
-var $parts; $labels : Collection
+var $parts; $labels; $keptNodes : Collection
 var $valueType : Integer
-var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end : Integer
+var $type; $i; $j; $left; $top; $right; $bottom; $distance; $best; $start; $end; $bestPrefixLen : Integer
 var $windowLeft; $windowTop; $windowRight; $windowBottom : Integer
-var $node; $other; $metadata; $popup; $styledText; $tabs; $cells; $choices : Object
+var $node; $other; $metadata; $popup; $styledText; $tabs; $cells; $choices; $hints; $hint : Object
 var $value : Variant
-var $protected : Boolean
+var $protected; $isInvisibleBtn : Boolean
 var $menu : Text
 var $picture : Picture
 ARRAY TEXT($names; 0)
@@ -65,8 +65,21 @@ For ($i; 1; Size of array($names))
   $protected:=False
   $metadata:=Null
   $styledText:=Null
+  $isInvisibleBtn:=False
   If (($options#Null) && ($options.controls#Null))
    $metadata:=$options.controls[$name]
+   If ($metadata=Null)
+    $bestPrefixLen:=0
+    For each ($pattern; $options.controls)
+     If ((Length($pattern)>1) && (Substring($pattern; Length($pattern); 1)="*"))
+      $prefix:=Substring($pattern; 1; Length($pattern)-1)
+      If ((Position($prefix; $name)=1) & (Length($prefix)>$bestPrefixLen))
+       $bestPrefixLen:=Length($prefix)
+       $metadata:=$options.controls[$pattern]
+      End if
+     End if
+    End for each
+   End if
   End if
   Case of
    : (New collection(Object type push button; Object type 3D button; Object type picture button; Object type highlight button; Object type invisible button).indexOf($type)>=0)
@@ -219,6 +232,9 @@ For ($i; 1; Size of array($names))
    // Icon and invisible buttons often already have a localized help tip.
    // Prefer a real caption; explicit accessibility metadata still wins below.
    $label:=OBJECT Get help tip(*; $name)
+   If ((Position(":/tips.json"; $label)=1) | (Position(":xliff:"; $label)=1))
+    $label:=""
+   End if
    If (Length($label)>512)
     $end:=512
     If (AXB_TextIndex($label; $end; False)<0)
@@ -227,15 +243,19 @@ For ($i; 1; Size of array($names))
     $label:=Substring($label; 1; $end)
    End if
   End if
-  // An invisible button that nothing labels is a keyboard shortcut or a click area over
-  // something drawn: a user finds nothing there, so it is not published.
+  // An invisible button with no explicit caption/tip may still sit over a visible
+  // static text label or have a tips.json tooltip; defer dropping it until after
+  // label inference (without ever suppressing underlying text/picture objects).
   If (($type=Object type invisible button) & ($label="") & Not(($metadata#Null) && (Value type($metadata.label)=Is text) && ($metadata.label#"")))
-   $role:=""
+   $isInvisibleBtn:=True
   End if
   If ($role#"")
    OBJECT GET COORDINATES(*; $name; $left; $top; $right; $bottom)
    If (($right>$left) & ($bottom>$top))
     $node:=New object("id"; "control."+Substring(Generate digest($name; SHA256 digest); 1; 32); "objectName"; $name; "role"; $role; "label"; $label; "value"; $value; "enabled"; OBJECT Get enabled(*; $name); "visible"; True; "frame"; New collection($left; $top; $right-$left; $bottom-$top))
+    If ($isInvisibleBtn)
+     $node.invisibleButton:=True
+    End if
     // The root resolves focus after collecting every instance. 4D reports the
     // same global editor name inside all repeated child execution contexts.
     $node.focused:=False
@@ -439,19 +459,106 @@ For each ($node; $result.nodes)
   $labels.push($node)
  End if
 End for each
+// Cache FormCatalog static hints once per form for multi-signal label fallback.
+$hints:=Null
+If ($static#Null)
+ If (Not(OB Is defined($static; "hintsLoaded")))
+  $static.hints:=AXB_FormStored("hints")
+  $static.hintsLoaded:=True
+ End if
+ $hints:=$static.hints
+Else
+ $hints:=AXB_FormStored("hints")
+End if
+$keptNodes:=New collection
 For each ($node; $result.nodes)
  If ($node.label="")
-  $best:=101
+  $hint:=Null
+  If (($hints#Null) && OB Is defined($hints; $node.objectName))
+   $hint:=$hints[$node.objectName]
+  End if
+  // Signal 1: For invisible buttons, adopt an overlapping static text label while
+  // leaving the underlying text/picture object published (never auto-decorative).
+  If ($node.invisibleButton=True)
+   $bestRatio:=0
+   For each ($other; $labels)
+    $ovX:=New collection($node.frame[0]+$node.frame[2]; $other.frame[0]+$other.frame[2]).min()-New collection($node.frame[0]; $other.frame[0]).max()
+    $ovY:=New collection($node.frame[1]+$node.frame[3]; $other.frame[1]+$other.frame[3]).min()-New collection($node.frame[1]; $other.frame[1]).max()
+    If (($ovX>0) & ($ovY>0))
+     $ovArea:=$ovX*$ovY
+     $minArea:=New collection($node.frame[2]*$node.frame[3]; $other.frame[2]*$other.frame[3]).min()
+     If ($minArea>0)
+      $ratio:=$ovArea/$minArea
+      If (($ratio>=0.5) & ($ratio>$bestRatio))
+       $bestRatio:=$ratio
+       $node.label:=$other.label
+       $node.labelledBy:=$other.id
+      End if
+     End if
+    End if
+   End for each
+   If (($node.label="") && ($hint#Null) && (Value type($hint.tooltip)=Is text) && ($hint.tooltip#""))
+    $node.label:=$hint.tooltip
+   End if
+   If ($node.label="")
+    // Unlabeled keyboard shortcut / click region: do not publish.
+    continue
+   End if
+   OB REMOVE($node; "invisibleButton")
+   $keptNodes.push($node)
+   continue
+  End if
+  // Signal 2: Close static text to the left with vertical-center alignment.
+  $best:=121
+  $nodeCY:=$node.frame[1]+($node.frame[3]/2)
   For each ($other; $labels)
-   If (Abs($other.frame[1]-$node.frame[1])<=4)
+   $otherCY:=$other.frame[1]+($other.frame[3]/2)
+   $tol:=New collection(6; (Abs($node.frame[3]-$other.frame[3])/2)+4).max()
+   If (Abs($otherCY-$nodeCY)<=$tol)
     $distance:=$node.frame[0]-($other.frame[0]+$other.frame[2])
-    If (($distance>=0) & ($distance<$best))
+    If (($distance>=(-2)) & ($distance<$best))
      $best:=$distance
      $node.label:=$other.label
      $node.labelledBy:=$other.id
     End if
    End if
   End for each
+  // Signal 3: Close static text directly above (stacked/columnar form fields).
+  If ($node.label="")
+   $best:=25
+   For each ($other; $labels)
+    $vGap:=$node.frame[1]-($other.frame[1]+$other.frame[3])
+    If (($vGap>=(-2)) & ($vGap<$best))
+     $ovX:=New collection($node.frame[0]+$node.frame[2]; $other.frame[0]+$other.frame[2]).min()-New collection($node.frame[0]; $other.frame[0]).max()
+     If ((Abs($other.frame[0]-$node.frame[0])<=24) | (($ovX>0) & ($ovX>=(New collection($node.frame[2]; $other.frame[2]).min()*0.5))))
+      $best:=Int($vGap)
+      $node.label:=$other.label
+      $node.labelledBy:=$other.id
+     End if
+    End if
+   End for each
+  End if
+  // Signal 4: Static hints from FormCatalog (tips.json tooltip, placeholder, icon stem, dataSource).
+  If (($node.label="") && ($hint#Null))
+   If ((Value type($hint.tooltip)=Is text) && ($hint.tooltip#""))
+    $node.label:=$hint.tooltip
+   End if
+   If (($node.label="") && (Value type($hint.placeholder)=Is text) && ($hint.placeholder#""))
+    $node.label:=$hint.placeholder
+   End if
+   If (($node.label="") && (New collection("button"; "image").indexOf($node.role)>=0) && (Value type($hint.icon)=Is text) && ($hint.icon#""))
+    $inferred:=AXB_HumanizeName($hint.icon; "icon")
+    If ($inferred#"")
+     $node.label:=$inferred
+    End if
+   End if
+   If (($node.label="") && (New collection("textfield"; "popup"; "checkbox"; "radio"; "slider"; "date"; "time").indexOf($node.role)>=0) && (Value type($hint.dataSource)=Is text) && ($hint.dataSource#""))
+    $inferred:=AXB_HumanizeName($hint.dataSource; "dataSource")
+    If ($inferred#"")
+     $node.label:=$inferred
+    End if
+   End if
+  End if
   If (($node.label="") && ($node.role="image") && ($node.value#"") && ($node.pictureActions=Null))
    $node.label:=$node.value
    $node.value:=""
@@ -461,4 +568,9 @@ For each ($node; $result.nodes)
    $node.missingLabel:=True
   End if
  End if
+ If ($node.invisibleButton=True)
+  OB REMOVE($node; "invisibleButton")
+ End if
+ $keptNodes.push($node)
 End for each
+$result.nodes:=$keptNodes

@@ -6,7 +6,7 @@ var $rows; $columns; $selected; $disabled; $unselectable; $uneditable; $visible;
 var $keys; $selection; $control; $pointer; $previous; $headerPointer : Pointer
 var $name; $key; $columnID; $columnName; $orderState; $text; $expression; $property; $variableName : Text
 var $count; $row; $i; $c; $first; $scrollColumn; $flags; $left; $top; $right; $bottom; $bodyTop; $lockedRight; $locked; $headerHeight; $sortValue; $tableNumber; $fieldNumber; $position; $frameCount; $coordinateOffset : Integer
-var $hierarchical; $enabled; $rebound; $singleClick; $sortable; $headerClick; $array; $grouped : Boolean
+var $hierarchical; $enabled; $rebound; $singleClick; $sortable; $headerClick; $array; $grouped; $fallbackEmpty; $styledColumn : Boolean
 var $selectionMode : Integer
 $result:=New object("ok"; False; "error"; "unsupportedLogicalListbox"; "status"; "rejected"; "message"; "Grid is unavailable"; "nodes"; New collection; "pages"; New collection)
 $name:=$options.objectName
@@ -51,7 +51,12 @@ If ($options.meta#Null)
 End if
 $binding:=AXB_GridBinding($options; $state)
 If (Not($binding.ok))
- $node.label:=$options.label+": "+$binding.message
+ If ($binding.loading=True)
+  $state.suspended:=True
+  $node.label:=$options.label+": loading"
+ Else
+  $node.label:=$options.label+": "+$binding.message
+ End if
  return
 End if
 $count:=$binding.count
@@ -59,7 +64,9 @@ $keys:=Null
 $selection:=Null
 $control:=Null
 If ($array)
- $keys:=$binding.keyPointer
+ If (Value type($binding.keyPointer)=Is pointer)
+  $keys:=$binding.keyPointer
+ End if
  $selection:=$binding.selectionPointer
  $control:=$binding.controlPointer
 End if
@@ -96,7 +103,7 @@ If ($options.columns#Null)
   End if
  End for each
 End if
-If ($array && (Find in array($parts; $options.keyColumn)<1))
+If ($array && Not($binding.positionalKeys=True) && (Find in array($parts; $options.keyColumn)<1))
  return
 End if
 $columns:=New collection
@@ -119,6 +126,8 @@ For ($i; 1; Size of array($parts); 3)
   $pointer:=Null
   $property:=""
   $expression:=""
+  $fallbackEmpty:=False
+  $styledColumn:=False
   $enabled:=OBJECT Get enterable(*; $columnName) & (OBJECT Get font(*; $columnName)#"%password")
   If ($array)
    $pointer:=OBJECT Get pointer(Object named; $columnName)
@@ -127,22 +136,39 @@ For ($i; 1; Size of array($parts); 3)
     $pointer:=$binding.hierarchy[$binding.hierarchy.length-1]
    End if
    If (Is nil pointer($pointer))
-    $node.label:=$options.label+": "+$columnName+" has no array binding"
-    return
-   End if
-   If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array).indexOf(Type($pointer->))<0)
-    If ($metadata.value=Null)
-     $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+    If (($options.auto=True) | ($options.positionalKeys=True))
+     $fallbackEmpty:=True
+     $enabled:=False
+    Else
+     $node.label:=$options.label+": "+$columnName+" has no array binding"
      return
     End if
-    If (New collection(Picture array; Object array).indexOf(Type($pointer->))<0)
-     $node.label:=$options.label+": "+$columnName+" has an unsupported array binding"
+   Else
+    If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array).indexOf(Type($pointer->))<0)
+     If ($metadata.value=Null)
+      If ((($options.auto=True) | ($options.positionalKeys=True)) & (New collection(Picture array; Object array; Pointer array).indexOf(Type($pointer->))>=0))
+       $fallbackEmpty:=True
+       $enabled:=False
+      Else
+       $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+       return
+      End if
+     Else
+      If (New collection(Picture array; Object array).indexOf(Type($pointer->))<0)
+       $node.label:=$options.label+": "+$columnName+" has an unsupported array binding"
+       return
+      End if
+     End if
+    End if
+    If (Not($fallbackEmpty) & (Size of array($pointer->)#$count))
+     If (($options.auto=True) | ($options.positionalKeys=True))
+      $state.suspended:=True
+      $node.label:=$options.label+": loading"
+      return
+     End if
+     $node.label:=$options.label+": "+$columnName+" has a different row count"
      return
     End if
-   End if
-   If (Size of array($pointer->)#$count)
-    $node.label:=$options.label+": "+$columnName+" has a different row count"
-    return
    End if
   Else
    $expression:=LISTBOX Get column formula(*; $columnName)
@@ -157,31 +183,64 @@ For ($i; 1; Size of array($parts); 3)
       End if
      End if
      If ($property="")
-      $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
-      return
+      If (($options.auto=True) | ($options.positionalKeys=True))
+       $fallbackEmpty:=True
+       $enabled:=False
+      Else
+       $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+       return
+      End if
      End if
     Else
-     If (Not(Match regex("^This[.][[:alpha:]_][[:alnum:]_]*$"; $expression)))
-      $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
-      return
+     If (Position("This:C1470."; $expression)=1)
+      $expression:="This."+Substring($expression; 12)
      End if
-     $property:=Substring($expression; 6)
+     If (Not(Match regex("^This([.][[:alpha:]_][[:alnum:]_]*)+$"; $expression)))
+      If (($options.auto=True) | ($options.positionalKeys=True))
+       $fallbackEmpty:=True
+       $enabled:=False
+      Else
+       $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+       return
+      End if
+     Else
+      $property:=Substring($expression; 6)
+     End if
     End if
-    If (($options.kind="entity") | ($options.kind="selection"))
-     $attribute:=$binding.dataClass[$property]
-     If (($attribute=Null) || ($attribute.kind#"storage") || (New collection("string"; "number"; "date"; "bool").indexOf($attribute.type)<0))
-      $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
-      return
+    If (Not($fallbackEmpty) & (($options.kind="entity") | ($options.kind="selection")))
+     If ($binding.dataClass#Null)
+      If (Position("."; $property)>0)
+       $enabled:=False
+      Else
+       $attribute:=$binding.dataClass[$property]
+       If (($attribute=Null) || ($attribute.kind#"storage") || (New collection("string"; "number"; "date"; "bool").indexOf($attribute.type)<0))
+        If (($options.auto=True) | ($options.positionalKeys=True))
+         $fallbackEmpty:=True
+         $enabled:=False
+        Else
+         $node.label:=$options.label+": "+$columnName+" needs a displayed-value description"
+         return
+        End if
+       Else
+        $enabled:=$enabled & Not($attribute.readOnly=True)
+       End if
+      End if
+     Else
+      $enabled:=False
      End if
-     $enabled:=$enabled & Not($attribute.readOnly=True)
     End if
    End if
   End if
   If ((LISTBOX Get property(*; $columnName; lk multi style)=1) & ($metadata.value=Null))
-   $node.label:=$options.label+": "+$columnName+" needs a styled-value description"
-   return
+   If (($options.auto=True) | ($options.positionalKeys=True))
+    $styledColumn:=True
+    $enabled:=False
+   Else
+    $node.label:=$options.label+": "+$columnName+" needs a styled-value description"
+    return
+   End if
   End if
-  $enabled:=$enabled & ($metadata.value=Null) & Not($grouped)
+  $enabled:=$enabled & ($metadata.value=Null) & Not($grouped) & Not($fallbackEmpty) & Not($styledColumn) & (Position("."; $property)=0)
   $columnID:=$columnName
   $text:=OBJECT Get title(*; $parts{$i+1})
   If ($text="")
@@ -219,7 +278,9 @@ For ($i; 1; Size of array($parts); 3)
   $column.value:=$metadata.value
   $column.expression:=$expression
   $column.editable:=$enabled
-  If ($array)
+  $column.fallbackEmpty:=$fallbackEmpty
+  $column.styled:=$styledColumn
+  If ($array & Not($fallbackEmpty))
    $column.pointer:=$pointer
   End if
   $columnsByID[$columnID]:=$column

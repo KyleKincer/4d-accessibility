@@ -37,7 +37,7 @@ Else
     return New object("status"; "completed"; "message"; "AreaList checkbox state confirmed")
    End if
   Else
-   If (Not($value.enabled & $value.editable & $value.active & $value.focusable) | (Current form window#Frontmost window) | Not(AXB_ControlFocus($data.options.objectName)))
+   If (Not($value.enabled & $value.editable & $value.active & $value.focusable) | (Current form window#Frontmost window) | Not($data.state.helpers.controlFocus.call(Null; $data.options.objectName)))
     return
    End if
    If (($value.checked#$data.widget.checked) | ($value.value#$data.widget.value))
@@ -76,7 +76,7 @@ Else
   If ($action.operation="gridReplaceSelection")
    $textAction.operation:="replaceSelection"
   End if
-  return AXB_TextAction($textAction; $node; New object)
+  return $data.state.helpers.textAction.call(Null; $textAction; $node; New object)
  End if
 End if
 If (Milliseconds<$data.deadline)

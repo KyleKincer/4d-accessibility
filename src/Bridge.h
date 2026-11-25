@@ -13,5 +13,7 @@ BOOL AXBRefreshDue(NSString *sessionID);
 NSString *AXBTakeChanges(NSString *sessionID);
 // Whether a bridge session is open for this native window, before or after its view attaches.
 BOOL AXBWindowHasSession(void *nativeWindow);
+BOOL AXBWindowIDHasSession(NSInteger windowID);
+BOOL AXBIsStopped(void);
 void AXBInitialize(void);
 void AXBShutdown(void);

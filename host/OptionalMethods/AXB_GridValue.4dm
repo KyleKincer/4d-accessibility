@@ -2,11 +2,12 @@
 #DECLARE($state : Object; $column : Object; $row : Integer) -> $result : Object
 var $pointer : Pointer
 var $item; $request : Object
-var $value : Variant
-var $issue : Text
+var $value; $cursor : Variant
+var $issue; $part : Text
+var $parts : Collection
 var $type; $checked : Integer
 $result:=New object("ok"; True; "value"; ""; "editable"; False; "enabled"; True)
-If (($column.protected=True) | ($column.blank=True))
+If (($column.protected=True) | ($column.blank=True) | ($column.fallbackEmpty=True))
  return
 End if
 If ($column.controlRole="button")
@@ -19,12 +20,19 @@ If ($state.valueIssues=Null)
 End if
 If ($column.value#Null)
  $request:=New object("row"; $row; "column"; $column.name)
- If (Value type($column.pointer)=Is pointer)
-  $pointer:=$state.binding.keyPointer
-  $request.key:=$pointer->{$row}
+ If ($state.binding.positionalKeys=True)
+  $request.key:=$state.binding.keys[$row-1]
+  If ($state.binding.source#Null)
+   $request.item:=$state.binding.source[$row-1]
+  End if
  Else
-  $request.item:=$state.binding.source[$row-1]
-  $request.key:=$request.item[$state.binding.keyProperty]
+  If (Value type($column.pointer)=Is pointer)
+   $pointer:=$state.binding.keyPointer
+   $request.key:=$pointer->{$row}
+  Else
+   $request.item:=$state.binding.source[$row-1]
+   $request.key:=$request.item[$state.binding.keyProperty]
+  End if
  End if
  // Match the collection/entity renderer's This without evaluating its source.
  // Array callbacks keep a null receiver and use the current source row.
@@ -50,11 +58,24 @@ Else
   $result.value:="Row is unavailable"
   return
  End if
- $value:=$item[$column.property]
+ If (Position("."; $column.property)>0)
+  $parts:=Split string($column.property; ".")
+  $cursor:=$item
+  For each ($part; $parts)
+   If (($cursor=Null) || (Value type($cursor)#Is object))
+    $cursor:=Null
+    break
+   End if
+   $cursor:=$cursor[$part]
+  End for each
+  $value:=$cursor
+ Else
+  $value:=$item[$column.property]
+ End if
  // List fields retain their native type even when objects store dates as
  // strings or times as numbers. ORDA always expresses time in seconds;
  // native snapshots follow the application's object compatibility setting.
- If (($column.fieldType#Null) & ($value#Null))
+ If (($column.fieldType#Null) & ($value#Null) & (Position("."; $column.property)=0))
   If ($column.fieldType=Is time)
    If (Value type($state.binding.source)=Is collection)
     $value:=OB Get($item; $column.property; Is time)
@@ -73,12 +94,15 @@ Else
   End if
  End if
 End if
+If (($column.styled=True) & (Value type($value)=Is text))
+ $value:=ST Get plain text($value)
+End if
 If (($value=Null) || (New collection(Is text; Is real; Is integer; Is longint; Is date; Is time; Is Boolean).indexOf(Value type($value))>=0))
  OB REMOVE($state.valueIssues; $issue)
  $type:=Value type($value)
  $result.value:=AXB_ControlValue($value; $column.format)
  // Null collection/entity expressions cannot enter a native cell editor.
- $result.editable:=$value#Null
+ $result.editable:=($value#Null) & ($column.styled#True) & (Position("."; $column.property)=0)
  If (($column.controlRole="checkbox") & ($type#Is Boolean))
   If ((New collection(Is real; Is integer; Is longint).indexOf($type)<0) || ($value=Null) || ($column.threeStates & (New collection(0; 1; 2).indexOf($value)<0)))
    $result.ok:=False

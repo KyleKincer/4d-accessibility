@@ -13,7 +13,11 @@ If ($mode=-1)
  $mode:=AL_GetColumnLongProperty($area; $column.number; ALP_Column_Enterable)
 End if
 $result:=New object("ok"; True; "value"; ""; "enabled"; Not($hidden); "editable"; ($column.typed | $column.checkbox) & Not($hidden | $protected) & ((AL_GetAreaLongProperty($area; ALP_Area_ReadOnly)%2)=0) & (New collection(1; 3; 5).indexOf($mode)>=0); "active"; False)
-If ($hidden | $protected)
+If ($hidden | $protected | ($column.fallbackEmpty=True))
+ return
+End if
+If ($column.calculated=True)
+ $result.value:=AL_GetCellTextProperty($area; $row; $column.number; ALP_Cell_FormattedValue)
  return
 End if
 If ($column.value#Null)

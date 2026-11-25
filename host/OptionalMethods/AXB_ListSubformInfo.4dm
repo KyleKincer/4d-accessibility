@@ -3,10 +3,10 @@
 #DECLARE($options : Object; $state : Object) -> $result : Object
 var $table; $parent : Pointer
 var $detail; $list : Text
-var $definition; $fields; $metadata; $listMetadata : Object
+var $definition; $fields; $metadata; $listMetadata; $parentMeta : Object
 var $file : 4D.File
 var $packet : Object
-var $mode : Text
+var $mode; $resourcesPath : Text
 var $parentMetadataMissing : Boolean
 var $header; $body; $savedOK; $parentX; $parentY; $parentTable; $left; $top; $right; $bottom; $first : Integer
 ARRAY LONGINT($records; 0)
@@ -26,25 +26,10 @@ If (Not($state.nativeListSupport=True))
  $result.error:="nativeListSubformUnavailable"
  return
 End if
-$metadata:=$state.formMetadata
-If ($metadata=Null)
- $file:=File("/RESOURCES/AXB.FormMetadata.json")
- If ($file.exists)
-  $savedOK:=OK
-  $metadata:=JSON Parse($file.getText())
-  OK:=$savedOK
-  If (($metadata#Null) && ($metadata.schema=1))
-   $state.formMetadata:=$metadata
-  End if
- End if
-End if
 $definition:=Null
-If (($metadata#Null) && ($metadata.schema=1) && ($metadata.forms#Null) && ($metadata.forms[String(Table($table))]#Null))
- $definition:=$metadata.forms[String(Table($table))][$list]
-End if
-If ($definition=Null)
- $result.error:="listSubformDefinitionRequired"
- return
+$packet:=AXB_Host("formMetadata"; New object("table"; Table($table); "form"; $list))
+If (($packet#Null) && (Value type($packet)=Is object) && ($packet.ok=True) && ($packet.found=True))
+ $definition:=$packet
 End if
 $parent:=Current form table
 $parentTable:=0
@@ -54,10 +39,43 @@ End if
 $mode:="none"
 $parentMetadataMissing:=True
 $listMetadata:=New object("enterable"; False)
-If (($metadata.forms[String($parentTable)]#Null) && ($metadata.forms[String($parentTable)][Current form name]#Null) && ($metadata.forms[String($parentTable)][Current form name].lists#Null) && ($metadata.forms[String($parentTable)][Current form name].lists[$options.objectName]#Null))
- $listMetadata:=$metadata.forms[String($parentTable)][Current form name].lists[$options.objectName]
+$parentMeta:=AXB_FormStored("meta")
+If (($parentMeta#Null) && (Value type($parentMeta)=Is object) && (Value type($parentMeta.lists)=Is object) && ($parentMeta.lists#Null) && ($parentMeta.lists[$options.objectName]#Null))
+ $listMetadata:=$parentMeta.lists[$options.objectName]
  $mode:=$listMetadata.selection
  $parentMetadataMissing:=False
+End if
+If ($definition=Null)
+ $metadata:=$state.formMetadata
+ If ($metadata=Null)
+  $resourcesPath:=Get 4D folder(Current resources folder; *)
+  If ($resourcesPath#"")
+   $file:=Folder($resourcesPath; fk platform path).file("AXB.FormMetadata.json")
+  End if
+  If (($file=Null) || Not($file.exists))
+   $file:=File("/RESOURCES/AXB.FormMetadata.json")
+  End if
+  If ($file.exists)
+   $savedOK:=OK
+   $metadata:=JSON Parse($file.getText())
+   OK:=$savedOK
+   If (($metadata#Null) && ($metadata.schema=1))
+    $state.formMetadata:=$metadata
+   End if
+  End if
+ End if
+ If (($metadata#Null) && ($metadata.schema=1) && ($metadata.forms#Null) && ($metadata.forms[String(Table($table))]#Null))
+  $definition:=$metadata.forms[String(Table($table))][$list]
+ End if
+ If ($parentMetadataMissing && ($metadata#Null) && ($metadata.forms#Null) && ($metadata.forms[String($parentTable)]#Null) && ($metadata.forms[String($parentTable)][Current form name]#Null) && ($metadata.forms[String($parentTable)][Current form name].lists#Null) && ($metadata.forms[String($parentTable)][Current form name].lists[$options.objectName]#Null))
+  $listMetadata:=$metadata.forms[String($parentTable)][Current form name].lists[$options.objectName]
+  $mode:=$listMetadata.selection
+  $parentMetadataMissing:=False
+ End if
+End if
+If ($definition=Null)
+ $result.error:="listSubformDefinitionRequired"
+ return
 End if
 $header:=Num($definition.header)
 $body:=Num($definition.body)

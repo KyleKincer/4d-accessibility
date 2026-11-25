@@ -51,6 +51,16 @@
       "theme": "Accessibility Bridge",
       "syntax": "AXB Changes(&T):T",
       "threadSafe": false
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Form metadata(&L;&T):T",
+      "threadSafe": true
+    },
+    {
+      "theme": "Accessibility Bridge",
+      "syntax": "AXB Watcher(&T;&L):T",
+      "threadSafe": false
     }
   ]
 }

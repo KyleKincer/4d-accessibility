@@ -4,15 +4,46 @@
 var $node; $columnsByID; $column; $known; $positions; $frames; $headers; $rowFrames; $descriptor; $item; $cell; $editor; $metadata : Object
 var $rows; $columns; $selected; $visible; $rowLayout; $columnLayout; $bindings; $allKeys : Collection
 var $handle; $keys; $previous : Pointer
-var $area; $error; $count; $columnCount; $row; $i; $number; $originX; $originY; $locked; $keyColumn; $entryRow; $entryColumn; $display; $entry; $kind : Integer
+var $area; $error; $count; $columnCount; $row; $i; $number; $originX; $originY; $locked; $keyColumn; $entryRow; $entryColumn; $display; $entry; $kind; $visibleIndex : Integer
 var $left; $top; $width; $height; $scrollTop; $scrollLeft; $offset; $columnLeft; $columnWidth; $rowTop; $rowHeight; $headerHeight; $lockedRight; $x; $y; $right; $bottom : Real
 var $name; $key; $id; $label; $orderState : Text
-var $rebound; $typed; $editable; $checkbox; $focusable : Boolean
+var $rebound; $typed; $editable; $checkbox; $focusable; $positional; $calculated; $fallbackEmpty : Boolean
 ARRAY LONGINT($grid; 0)
 ARRAY LONGINT($selection; 0)
 ARRAY LONGINT($levels; 0)
 ARRAY LONGINT($expanded; 0)
 ARRAY POINTER($sources; 0)
+If ($operation="ping")
+ return New object("ok"; True; "provider"; "areaList")
+End if
+If ($operation="probe")
+ $result:=New object("ok"; True; "isAreaList"; False; "rows"; 0)
+ If (($options=Null) || (Value type($options.objectName)#Is text))
+  return
+ End if
+ $name:=$options.objectName
+ If (OBJECT Get type(*; $name)#Object type plugin area)
+  return
+ End if
+ $handle:=OBJECT Get pointer(Object named; $name)
+ If (Is nil pointer($handle) || (New collection(Is real; Is integer; Is longint).indexOf(Value type($handle->))<0))
+  return
+ End if
+ $area:=$handle->
+ If (($area=0) || (AL_GetAreaLongProperty($area; ALP_Area_IsArea)#1))
+  return
+ End if
+ If ((AL_GetAreaLongProperty($area; ALP_Area_Transposed)#0) | (AL_GetAreaLongProperty($area; ALP_Area_SelType)#0) | (AL_GetAreaLongProperty($area; ALP_Area_RowsInGrid)#1) | (AL_GetAreaLongProperty($area; ALP_Area_DontSortArrays)#0))
+  return
+ End if
+ $error:=AL_GetObjects2($area; ALP_Object_Hierarchy; $levels; $expanded)
+ If (($error#0) | (Size of array($levels)>0) | (AL_GetAreaLongProperty($area; ALP_Area_AutoHierarchy)#0))
+  return
+ End if
+ $result.isAreaList:=True
+ $result.rows:=AL_GetAreaLongProperty($area; ALP_Area_Rows)
+ return
+End if
 $result:=New object("ok"; True; "nodes"; New collection; "pages"; New collection; "status"; "rejected"; "message"; "AreaList is unavailable")
 If ($operation#"describe")
  return AXB_ALPGridAction($operation; $options; $state; $request)
@@ -47,50 +78,56 @@ If (($error#0) | (Size of array($levels)>0) | (AL_GetAreaLongProperty($area; ALP
 End if
 $columnCount:=AL_GetAreaLongProperty($area; ALP_Area_Columns)
 $count:=AL_GetAreaLongProperty($area; ALP_Area_Rows)
-If (Value type($options.keys)#Is pointer)
- return
-End if
-$keys:=$options.keys
-If (Is nil pointer($keys))
- return
-End if
-If (New collection(Text array; Integer array; LongInt array).indexOf(Type($keys->))<0)
- $node.label:=$options.label+": keys require a Text, Integer or LongInt array"
- return
-End if
-If (Size of array($keys->)#$count)
- return
+$positional:=($options.positionalKeys=True) & Not(OB Is defined($options; "keys"))
+$keys:=Nil
+If (Not($positional))
+ If (Value type($options.keys)#Is pointer)
+  return
+ End if
+ $keys:=$options.keys
+ If (Is nil pointer($keys))
+  return
+ End if
+ If (New collection(Text array; Integer array; LongInt array).indexOf(Type($keys->))<0)
+  $node.label:=$options.label+": keys require a Text, Integer or LongInt array"
+  return
+ End if
+ If (Size of array($keys->)#$count)
+  return
+ End if
 End if
 $error:=AL_GetObjects($area; ALP_Object_Columns; $sources)
 If (($error#0) | (Size of array($sources)#$columnCount))
  return
 End if
 $keyColumn:=0
-If (OB Is defined($options; "keyColumn"))
- $keyColumn:=$options.keyColumn
- If (($keyColumn<1) | ($keyColumn>$columnCount))
-  $node.label:=$options.label+": key column binding changed"
-  return
- End if
- If ($sources{$keyColumn}#$keys)
-  $node.label:=$options.label+": key column binding changed"
-  return
- End if
-Else
- // Legacy vendor setup can omit blank columns and shift physical numbers.
- // Resolve the caller's key array against the actual live column bindings.
- For ($i; 1; $columnCount)
-  If ($sources{$i}=$keys)
-   If ($keyColumn#0)
-    $node.label:=$options.label+": key array has more than one column binding"
-    return
-   End if
-   $keyColumn:=$i
+If (Not($positional))
+ If (OB Is defined($options; "keyColumn"))
+  $keyColumn:=$options.keyColumn
+  If (($keyColumn<1) | ($keyColumn>$columnCount))
+   $node.label:=$options.label+": key column binding changed"
+   return
   End if
- End for
- If ($keyColumn=0)
-  $node.label:=$options.label+": key array is not bound to the area"
-  return
+  If ($sources{$keyColumn}#$keys)
+   $node.label:=$options.label+": key column binding changed"
+   return
+  End if
+ Else
+  // Legacy vendor setup can omit blank columns and shift physical numbers.
+  // Resolve the caller's key array against the actual live column bindings.
+  For ($i; 1; $columnCount)
+   If ($sources{$i}=$keys)
+    If ($keyColumn#0)
+     $node.label:=$options.label+": key array has more than one column binding"
+     return
+    End if
+    $keyColumn:=$i
+   End if
+  End for
+  If ($keyColumn=0)
+   $node.label:=$options.label+": key array is not bound to the area"
+   return
+  End if
  End if
 End if
 $error:=AL_GetObjects($area; ALP_Object_Grid; $grid)
@@ -106,7 +143,7 @@ End if
 $rebound:=False
 If ($state.binding#Null)
  $previous:=$state.keyPointer
- $rebound:=($state.area#$area) | ($state.binding.length#$columnCount) | ($previous#$keys)
+ $rebound:=($state.area#$area) | ($state.binding.length#$columnCount) | ($state.positionalKeys#$positional) | (Not($positional) & ($previous#$keys))
 End if
 $bindings:=New collection
 For ($i; 1; $columnCount)
@@ -121,6 +158,7 @@ If ($rebound)
 End if
 $state.binding:=$bindings
 $state.keyPointer:=$keys
+$state.positionalKeys:=$positional
 $state.area:=$area
 $originX:=0
 $originY:=0
@@ -177,27 +215,29 @@ For ($i; 1; Size of array($grid))
   If ($metadata.decorative=True)
    continue
   End if
+  $calculated:=False
+  $fallbackEmpty:=False
   If (Is nil pointer($sources{$number}))
-   return
-  End if
-  If ($metadata.value=Null)
-   // The vendor cannot read an uncached calculated cell by logical row.
-   // Reuse the application's display function through a value Formula.
-   If (AL_GetColumnLongProperty($area; $number; ALP_Column_Calculated)#0)
-    $node.label:=$options.label+": calculated column "+String($number)+" needs a text description"
-    return
-   End if
-   If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array).indexOf(Type($sources{$number}->))<0)
-    $node.label:=$options.label+": column "+String($number)+" needs a text description"
-    return
+   If ($metadata.value=Null)
+    $fallbackEmpty:=True
    End if
   Else
-   If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array; Picture array).indexOf(Type($sources{$number}->))<0)
+   If ($metadata.value=Null)
+    If (AL_GetColumnLongProperty($area; $number; ALP_Column_Calculated)#0)
+     $calculated:=True
+    Else
+     If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array).indexOf(Type($sources{$number}->))<0)
+      $fallbackEmpty:=True
+     End if
+    End if
+   Else
+    If (New collection(Text array; Real array; Integer array; LongInt array; Boolean array; Date array; Time array; Picture array).indexOf(Type($sources{$number}->))<0)
+     return
+    End if
+   End if
+   If (Not($fallbackEmpty) & Not($calculated) & (Size of array($sources{$number}->)#$count))
     return
    End if
-  End if
-  If (Size of array($sources{$number}->)#$count)
-   return
   End if
   $label:=AL_GetColumnTextProperty($area; $number; ALP_Column_HeaderText)
   If ($metadata.label#Null)
@@ -206,12 +246,15 @@ For ($i; 1; Size of array($grid))
   If ($label="")
    $label:="Column "+String($columns.length+1)
   End if
-  $kind:=Type($sources{$number}->)
+  $kind:=-1
+  If (Not(Is nil pointer($sources{$number})))
+   $kind:=Type($sources{$number}->)
+  End if
   $display:=AL_GetColumnLongProperty($area; $number; ALP_Column_DisplayControl)
   $entry:=AL_GetColumnLongProperty($area; $number; ALP_Column_EntryControl)
-  $checkbox:=(New collection(Boolean array; Integer array; LongInt array).indexOf($kind)>=0) & (New collection(0; 1; 2; 4).indexOf($display)>=0) & (New collection(0; 1).indexOf($entry)>=0) & ($metadata.value=Null)
+  $checkbox:=Not($fallbackEmpty) & Not($calculated) & (New collection(Boolean array; Integer array; LongInt array).indexOf($kind)>=0) & (New collection(0; 1; 2; 4).indexOf($display)>=0) & (New collection(0; 1).indexOf($entry)>=0) & ($metadata.value=Null)
   $focusable:=$checkbox & (New collection(0; 1; 2).indexOf($display)>=0) & (AL_GetColumnLongProperty($area; $number; ALP_Column_FocusableCheckbox)=1)
-  $typed:=New collection(Text array; Real array; Integer array; LongInt array; Date array; Time array).indexOf($kind)>=0
+  $typed:=Not($fallbackEmpty) & Not($calculated) & (New collection(Text array; Real array; Integer array; LongInt array; Date array; Time array).indexOf($kind)>=0)
   $typed:=$typed & Not($checkbox)
   $typed:=$typed & (AL_GetColumnLongProperty($area; $number; ALP_Column_Attributed)=0) & ($metadata.value=Null)
   $columns.push(New object("id"; $id; "label"; $label; "enabled"; True; "editable"; ($typed | $checkbox) & $editable))
@@ -219,7 +262,7 @@ For ($i; 1; Size of array($grid))
    $columns[$columns.length-1].automationKey:=$metadata.automationKey
   End if
   $columnLayout.push(New collection($columnLeft; $columnWidth))
-  $column:=New object("number"; $number; "gridCell"; $i; "left"; $columnLeft; "width"; $columnWidth; "locked"; $i<=$locked; "typed"; $typed)
+  $column:=New object("number"; $number; "gridCell"; $i; "left"; $columnLeft; "width"; $columnWidth; "locked"; $i<=$locked; "typed"; $typed; "calculated"; $calculated; "fallbackEmpty"; $fallbackEmpty)
   $column.value:=$metadata.value
   $column.checkbox:=$checkbox
   $column.focusable:=$focusable
@@ -243,21 +286,44 @@ $frames:=New object
 $positions:=New object
 $known:=New object
 $allKeys:=New collection
-ARRAY TO COLLECTION($allKeys; $keys->)
+If (Not($positional))
+ ARRAY TO COLLECTION($allKeys; $keys->)
+Else
+ For ($row; 1; $count)
+  $allKeys.push("")
+ End for
+End if
+$visibleIndex:=0
 For ($row; 1; $count)
- If (Type($keys->)=Text array)
-  $key:=$allKeys[$row-1]
+ If ($positional)
+  If (AL_GetRowLongProperty($area; $row; ALP_Row_Hide)=0)
+   $rowHeight:=AL_GetRowRealProperty($area; $row; ALP_Row_Height)
+   If ($rowHeight<=0)
+    $allKeys[$row-1]:="_axb_hidden_"+String($row)
+    continue
+   End if
+   $visibleIndex:=$visibleIndex+1
+   $key:=String($visibleIndex)
+   $allKeys[$row-1]:=$key
+  Else
+   $allKeys[$row-1]:="_axb_hidden_"+String($row)
+   continue
+  End if
  Else
-  // Integer identity is normalized only in the descriptor. Keep the original
-  // bound array and vendor sort/insert/delete behavior unchanged.
-  $key:=String($allKeys[$row-1])
+  If (Type($keys->)=Text array)
+   $key:=$allKeys[$row-1]
+  Else
+   // Integer identity is normalized only in the descriptor. Keep the original
+   // bound array and vendor sort/insert/delete behavior unchanged.
+   $key:=String($allKeys[$row-1])
+  End if
+  $allKeys[$row-1]:=$key
+  If (($key="") | (Length($key)>256) | OB Is defined($known; $key))
+   $node.label:=$options.label+": row keys must be unique nonempty text"
+   return
+  End if
+  $known[$key]:=True
  End if
- $allKeys[$row-1]:=$key
- If (($key="") | (Length($key)>256) | OB Is defined($known; $key))
-  $node.label:=$options.label+": row keys must be unique nonempty text"
-  return
- End if
- $known[$key]:=True
  If (AL_GetRowLongProperty($area; $row; ALP_Row_Hide)=0)
   $rowHeight:=AL_GetRowRealProperty($area; $row; ALP_Row_Height)
   If ($rowHeight<=0)
